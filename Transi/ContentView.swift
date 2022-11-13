@@ -8,14 +8,20 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @ObservedObject var dataProvider = DataProvider()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        List(dataProvider.tabs) { tab in
+            let departureTime = tab.departureTime - Int(NSDate().timeIntervalSince1970)
+            let departureTimeText = departureTime > 60 ? "\(departureTime/60) min" : departureTime > 0 ? "<1 min" : "now"
+            HStack {
+                Text(tab.line).font(.headline).frame(width: 40)
+                Text(tab.headsign).font(.subheadline)
+                Spacer()
+                Text(departureTimeText).font(.headline)
+            }
         }
-        .padding()
     }
 }
 

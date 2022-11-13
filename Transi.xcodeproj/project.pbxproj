@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DA78E4CB292041AF0060FC69 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA78E4CA292041AF0060FC69 /* SocketIO */; };
+		DA8E71162921A379009EADFA /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8E71152921A379009EADFA /* DataProvider.swift */; };
+		DA8E71192921A477009EADFA /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8E71182921A477009EADFA /* Table.swift */; };
 		DAAB06262916C38000A09041 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB06252916C38000A09041 /* TransiApp.swift */; };
 		DAAB06282916C38000A09041 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB06272916C38000A09041 /* ContentView.swift */; };
 		DAAB062A2916C38200A09041 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAAB06292916C38200A09041 /* Assets.xcassets */; };
@@ -34,6 +37,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		DA78E4C229203E3B0060FC69 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		DA8E71152921A379009EADFA /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
+		DA8E71182921A477009EADFA /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
 		DAAB06222916C38000A09041 /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAAB06252916C38000A09041 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
 		DAAB06272916C38000A09041 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -52,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA78E4CB292041AF0060FC69 /* SocketIO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,6 +79,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DA8E71172921A3E8009EADFA /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				DA8E71182921A477009EADFA /* Table.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		DAAB06192916C38000A09041 = {
 			isa = PBXGroup;
 			children = (
@@ -95,11 +110,14 @@
 		DAAB06242916C38000A09041 /* Transi */ = {
 			isa = PBXGroup;
 			children = (
+				DA78E4C229203E3B0060FC69 /* Info.plist */,
 				DAAB06252916C38000A09041 /* TransiApp.swift */,
 				DAAB06272916C38000A09041 /* ContentView.swift */,
+				DA8E71172921A3E8009EADFA /* Models */,
 				DAAB06292916C38200A09041 /* Assets.xcassets */,
 				DAAB062E2916C38200A09041 /* Transi.entitlements */,
 				DAAB062B2916C38200A09041 /* Preview Content */,
+				DA8E71152921A379009EADFA /* DataProvider.swift */,
 			);
 			path = Transi;
 			sourceTree = "<group>";
@@ -145,6 +163,9 @@
 			dependencies = (
 			);
 			name = Transi;
+			packageProductDependencies = (
+				DA78E4CA292041AF0060FC69 /* SocketIO */,
+			);
 			productName = Transi;
 			productReference = DAAB06222916C38000A09041 /* Transi.app */;
 			productType = "com.apple.product-type.application";
@@ -217,6 +238,9 @@
 				Base,
 			);
 			mainGroup = DAAB06192916C38000A09041;
+			packageReferences = (
+				DA78E4C9292041AF0060FC69 /* XCRemoteSwiftPackageReference "socket" */,
+			);
 			productRefGroup = DAAB06232916C38000A09041 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -259,7 +283,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA8E71162921A379009EADFA /* DataProvider.swift in Sources */,
 				DAAB06282916C38000A09041 /* ContentView.swift in Sources */,
+				DA8E71192921A477009EADFA /* Table.swift in Sources */,
 				DAAB06262916C38000A09041 /* TransiApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -422,12 +448,14 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Transi/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -447,12 +475,14 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Transi/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -568,6 +598,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DA78E4C9292041AF0060FC69 /* XCRemoteSwiftPackageReference "socket" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DA78E4CA292041AF0060FC69 /* SocketIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA78E4C9292041AF0060FC69 /* XCRemoteSwiftPackageReference "socket" */;
+			productName = SocketIO;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DAAB061A2916C38000A09041 /* Project object */;
 }
