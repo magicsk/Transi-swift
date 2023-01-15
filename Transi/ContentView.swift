@@ -20,7 +20,7 @@ struct ContentView: View {
                 Text(tab.headsign).font(.subheadline)
                 Spacer()
                 Text(departureTimeText).font(.headline)
-            }
+            }.padding(2.5)
         }
     }
 }

@@ -7,69 +7,70 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DA78E4CB292041AF0060FC69 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA78E4CA292041AF0060FC69 /* SocketIO */; };
-		DA8E71162921A379009EADFA /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8E71152921A379009EADFA /* DataProvider.swift */; };
-		DA8E71192921A477009EADFA /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8E71182921A477009EADFA /* Table.swift */; };
-		DAAB06262916C38000A09041 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB06252916C38000A09041 /* TransiApp.swift */; };
-		DAAB06282916C38000A09041 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB06272916C38000A09041 /* ContentView.swift */; };
-		DAAB062A2916C38200A09041 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAAB06292916C38200A09041 /* Assets.xcassets */; };
-		DAAB062D2916C38200A09041 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAAB062C2916C38200A09041 /* Preview Assets.xcassets */; };
-		DAAB06382916C38200A09041 /* TransiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB06372916C38200A09041 /* TransiTests.swift */; };
-		DAAB06422916C38200A09041 /* TransiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB06412916C38200A09041 /* TransiUITests.swift */; };
-		DAAB06442916C38200A09041 /* TransiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAB06432916C38200A09041 /* TransiUITestsLaunchTests.swift */; };
+		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
+		DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C92974387B00E2FBB7 /* ContentView.swift */; };
+		DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
+		DAA817D02974387C00E2FBB7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CF2974387C00E2FBB7 /* Preview Assets.xcassets */; };
+		DAA817DA2974387D00E2FBB7 /* TransiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817D92974387D00E2FBB7 /* TransiTests.swift */; };
+		DAA817E42974387D00E2FBB7 /* TransiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E32974387D00E2FBB7 /* TransiUITests.swift */; };
+		DAA817E62974387D00E2FBB7 /* TransiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */; };
+		DAA817F529743A9C00E2FBB7 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAA817F429743A9C00E2FBB7 /* SocketIO */; };
+		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
+		DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		DAAB06342916C38200A09041 /* PBXContainerItemProxy */ = {
+		DAA817D62974387D00E2FBB7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = DAAB061A2916C38000A09041 /* Project object */;
+			containerPortal = DAA817BC2974387B00E2FBB7 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = DAAB06212916C38000A09041;
+			remoteGlobalIDString = DAA817C32974387B00E2FBB7;
 			remoteInfo = Transi;
 		};
-		DAAB063E2916C38200A09041 /* PBXContainerItemProxy */ = {
+		DAA817E02974387D00E2FBB7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = DAAB061A2916C38000A09041 /* Project object */;
+			containerPortal = DAA817BC2974387B00E2FBB7 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = DAAB06212916C38000A09041;
+			remoteGlobalIDString = DAA817C32974387B00E2FBB7;
 			remoteInfo = Transi;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		DA78E4C229203E3B0060FC69 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		DA8E71152921A379009EADFA /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
-		DA8E71182921A477009EADFA /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
-		DAAB06222916C38000A09041 /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DAAB06252916C38000A09041 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
-		DAAB06272916C38000A09041 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		DAAB06292916C38200A09041 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		DAAB062C2916C38200A09041 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		DAAB062E2916C38200A09041 /* Transi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Transi.entitlements; sourceTree = "<group>"; };
-		DAAB06332916C38200A09041 /* TransiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DAAB06372916C38200A09041 /* TransiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiTests.swift; sourceTree = "<group>"; };
-		DAAB063D2916C38200A09041 /* TransiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DAAB06412916C38200A09041 /* TransiUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiUITests.swift; sourceTree = "<group>"; };
-		DAAB06432916C38200A09041 /* TransiUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		DAA817C42974387B00E2FBB7 /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
+		DAA817C92974387B00E2FBB7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DAA817CB2974387C00E2FBB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DAA817CD2974387C00E2FBB7 /* Transi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Transi.entitlements; sourceTree = "<group>"; };
+		DAA817CF2974387C00E2FBB7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		DAA817D52974387D00E2FBB7 /* TransiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAA817D92974387D00E2FBB7 /* TransiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiTests.swift; sourceTree = "<group>"; };
+		DAA817DF2974387D00E2FBB7 /* TransiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAA817E32974387D00E2FBB7 /* TransiUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiUITests.swift; sourceTree = "<group>"; };
+		DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		DAA817F22974393300E2FBB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		DAA817F729743B4B00E2FBB7 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
+		DAA817F929743B6300E2FBB7 /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		DAAB061F2916C38000A09041 /* Frameworks */ = {
+		DAA817C12974387B00E2FBB7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA78E4CB292041AF0060FC69 /* SocketIO in Frameworks */,
+				DAA817F529743A9C00E2FBB7 /* SocketIO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DAAB06302916C38200A09041 /* Frameworks */ = {
+		DAA817D22974387D00E2FBB7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DAAB063A2916C38200A09041 /* Frameworks */ = {
+		DAA817DC2974387D00E2FBB7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -79,84 +80,85 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		DA8E71172921A3E8009EADFA /* Models */ = {
+		DAA817BB2974387B00E2FBB7 = {
 			isa = PBXGroup;
 			children = (
-				DA8E71182921A477009EADFA /* Table.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		DAAB06192916C38000A09041 = {
-			isa = PBXGroup;
-			children = (
-				DAAB06242916C38000A09041 /* Transi */,
-				DAAB06362916C38200A09041 /* TransiTests */,
-				DAAB06402916C38200A09041 /* TransiUITests */,
-				DAAB06232916C38000A09041 /* Products */,
+				DA80284C2B24E39D0011390B /* Release.xcconfig */,
+				DAA817C62974387B00E2FBB7 /* Transi */,
+				DAA817D82974387D00E2FBB7 /* TransiTests */,
+				DAA817E22974387D00E2FBB7 /* TransiUITests */,
+				DAA817C52974387B00E2FBB7 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		DAAB06232916C38000A09041 /* Products */ = {
+		DAA817C52974387B00E2FBB7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DAAB06222916C38000A09041 /* Transi.app */,
-				DAAB06332916C38200A09041 /* TransiTests.xctest */,
-				DAAB063D2916C38200A09041 /* TransiUITests.xctest */,
+				DAA817C42974387B00E2FBB7 /* Transi.app */,
+				DAA817D52974387D00E2FBB7 /* TransiTests.xctest */,
+				DAA817DF2974387D00E2FBB7 /* TransiUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		DAAB06242916C38000A09041 /* Transi */ = {
+		DAA817C62974387B00E2FBB7 /* Transi */ = {
 			isa = PBXGroup;
 			children = (
-				DA78E4C229203E3B0060FC69 /* Info.plist */,
-				DAAB06252916C38000A09041 /* TransiApp.swift */,
-				DAAB06272916C38000A09041 /* ContentView.swift */,
-				DA8E71172921A3E8009EADFA /* Models */,
-				DAAB06292916C38200A09041 /* Assets.xcassets */,
-				DAAB062E2916C38200A09041 /* Transi.entitlements */,
-				DAAB062B2916C38200A09041 /* Preview Content */,
-				DA8E71152921A379009EADFA /* DataProvider.swift */,
+				DAA817F629743B2A00E2FBB7 /* Models */,
+				DAA817F22974393300E2FBB7 /* Info.plist */,
+				DAA817C72974387B00E2FBB7 /* TransiApp.swift */,
+				DAA817C92974387B00E2FBB7 /* ContentView.swift */,
+				DAA817CB2974387C00E2FBB7 /* Assets.xcassets */,
+				DAA817CD2974387C00E2FBB7 /* Transi.entitlements */,
+				DAA817CE2974387C00E2FBB7 /* Preview Content */,
+				DAA817F929743B6300E2FBB7 /* DataProvider.swift */,
 			);
 			path = Transi;
 			sourceTree = "<group>";
 		};
-		DAAB062B2916C38200A09041 /* Preview Content */ = {
+		DAA817CE2974387C00E2FBB7 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				DAAB062C2916C38200A09041 /* Preview Assets.xcassets */,
+				DAA817CF2974387C00E2FBB7 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		DAAB06362916C38200A09041 /* TransiTests */ = {
+		DAA817D82974387D00E2FBB7 /* TransiTests */ = {
 			isa = PBXGroup;
 			children = (
-				DAAB06372916C38200A09041 /* TransiTests.swift */,
+				DAA817D92974387D00E2FBB7 /* TransiTests.swift */,
 			);
 			path = TransiTests;
 			sourceTree = "<group>";
 		};
-		DAAB06402916C38200A09041 /* TransiUITests */ = {
+		DAA817E22974387D00E2FBB7 /* TransiUITests */ = {
 			isa = PBXGroup;
 			children = (
-				DAAB06412916C38200A09041 /* TransiUITests.swift */,
-				DAAB06432916C38200A09041 /* TransiUITestsLaunchTests.swift */,
+				DAA817E32974387D00E2FBB7 /* TransiUITests.swift */,
+				DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */,
 			);
 			path = TransiUITests;
+			sourceTree = "<group>";
+		};
+		DAA817F629743B2A00E2FBB7 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				DAA817F729743B4B00E2FBB7 /* Table.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		DAAB06212916C38000A09041 /* Transi */ = {
+		DAA817C32974387B00E2FBB7 /* Transi */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DAAB06472916C38200A09041 /* Build configuration list for PBXNativeTarget "Transi" */;
+			buildConfigurationList = DAA817E92974387D00E2FBB7 /* Build configuration list for PBXNativeTarget "Transi" */;
 			buildPhases = (
-				DAAB061E2916C38000A09041 /* Sources */,
-				DAAB061F2916C38000A09041 /* Frameworks */,
-				DAAB06202916C38000A09041 /* Resources */,
+				DAA817C02974387B00E2FBB7 /* Sources */,
+				DAA817C12974387B00E2FBB7 /* Frameworks */,
+				DAA817C22974387B00E2FBB7 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -164,72 +166,72 @@
 			);
 			name = Transi;
 			packageProductDependencies = (
-				DA78E4CA292041AF0060FC69 /* SocketIO */,
+				DAA817F429743A9C00E2FBB7 /* SocketIO */,
 			);
 			productName = Transi;
-			productReference = DAAB06222916C38000A09041 /* Transi.app */;
+			productReference = DAA817C42974387B00E2FBB7 /* Transi.app */;
 			productType = "com.apple.product-type.application";
 		};
-		DAAB06322916C38200A09041 /* TransiTests */ = {
+		DAA817D42974387D00E2FBB7 /* TransiTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DAAB064A2916C38200A09041 /* Build configuration list for PBXNativeTarget "TransiTests" */;
+			buildConfigurationList = DAA817EC2974387D00E2FBB7 /* Build configuration list for PBXNativeTarget "TransiTests" */;
 			buildPhases = (
-				DAAB062F2916C38200A09041 /* Sources */,
-				DAAB06302916C38200A09041 /* Frameworks */,
-				DAAB06312916C38200A09041 /* Resources */,
+				DAA817D12974387D00E2FBB7 /* Sources */,
+				DAA817D22974387D00E2FBB7 /* Frameworks */,
+				DAA817D32974387D00E2FBB7 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				DAAB06352916C38200A09041 /* PBXTargetDependency */,
+				DAA817D72974387D00E2FBB7 /* PBXTargetDependency */,
 			);
 			name = TransiTests;
 			productName = TransiTests;
-			productReference = DAAB06332916C38200A09041 /* TransiTests.xctest */;
+			productReference = DAA817D52974387D00E2FBB7 /* TransiTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		DAAB063C2916C38200A09041 /* TransiUITests */ = {
+		DAA817DE2974387D00E2FBB7 /* TransiUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DAAB064D2916C38200A09041 /* Build configuration list for PBXNativeTarget "TransiUITests" */;
+			buildConfigurationList = DAA817EF2974387D00E2FBB7 /* Build configuration list for PBXNativeTarget "TransiUITests" */;
 			buildPhases = (
-				DAAB06392916C38200A09041 /* Sources */,
-				DAAB063A2916C38200A09041 /* Frameworks */,
-				DAAB063B2916C38200A09041 /* Resources */,
+				DAA817DB2974387D00E2FBB7 /* Sources */,
+				DAA817DC2974387D00E2FBB7 /* Frameworks */,
+				DAA817DD2974387D00E2FBB7 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				DAAB063F2916C38200A09041 /* PBXTargetDependency */,
+				DAA817E12974387D00E2FBB7 /* PBXTargetDependency */,
 			);
 			name = TransiUITests;
 			productName = TransiUITests;
-			productReference = DAAB063D2916C38200A09041 /* TransiUITests.xctest */;
+			productReference = DAA817DF2974387D00E2FBB7 /* TransiUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		DAAB061A2916C38000A09041 /* Project object */ = {
+		DAA817BC2974387B00E2FBB7 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1410;
 				LastUpgradeCheck = 1410;
 				TargetAttributes = {
-					DAAB06212916C38000A09041 = {
+					DAA817C32974387B00E2FBB7 = {
 						CreatedOnToolsVersion = 14.1;
 					};
-					DAAB06322916C38200A09041 = {
+					DAA817D42974387D00E2FBB7 = {
 						CreatedOnToolsVersion = 14.1;
-						TestTargetID = DAAB06212916C38000A09041;
+						TestTargetID = DAA817C32974387B00E2FBB7;
 					};
-					DAAB063C2916C38200A09041 = {
+					DAA817DE2974387D00E2FBB7 = {
 						CreatedOnToolsVersion = 14.1;
-						TestTargetID = DAAB06212916C38000A09041;
+						TestTargetID = DAA817C32974387B00E2FBB7;
 					};
 				};
 			};
-			buildConfigurationList = DAAB061D2916C38000A09041 /* Build configuration list for PBXProject "Transi" */;
+			buildConfigurationList = DAA817BF2974387B00E2FBB7 /* Build configuration list for PBXProject "Transi" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -237,39 +239,39 @@
 				en,
 				Base,
 			);
-			mainGroup = DAAB06192916C38000A09041;
+			mainGroup = DAA817BB2974387B00E2FBB7;
 			packageReferences = (
-				DA78E4C9292041AF0060FC69 /* XCRemoteSwiftPackageReference "socket" */,
+				DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */,
 			);
-			productRefGroup = DAAB06232916C38000A09041 /* Products */;
+			productRefGroup = DAA817C52974387B00E2FBB7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				DAAB06212916C38000A09041 /* Transi */,
-				DAAB06322916C38200A09041 /* TransiTests */,
-				DAAB063C2916C38200A09041 /* TransiUITests */,
+				DAA817C32974387B00E2FBB7 /* Transi */,
+				DAA817D42974387D00E2FBB7 /* TransiTests */,
+				DAA817DE2974387D00E2FBB7 /* TransiUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		DAAB06202916C38000A09041 /* Resources */ = {
+		DAA817C22974387B00E2FBB7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAAB062D2916C38200A09041 /* Preview Assets.xcassets in Resources */,
-				DAAB062A2916C38200A09041 /* Assets.xcassets in Resources */,
+				DAA817D02974387C00E2FBB7 /* Preview Assets.xcassets in Resources */,
+				DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DAAB06312916C38200A09041 /* Resources */ = {
+		DAA817D32974387D00E2FBB7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DAAB063B2916C38200A09041 /* Resources */ = {
+		DAA817DD2974387D00E2FBB7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -279,51 +281,51 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		DAAB061E2916C38000A09041 /* Sources */ = {
+		DAA817C02974387B00E2FBB7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA8E71162921A379009EADFA /* DataProvider.swift in Sources */,
-				DAAB06282916C38000A09041 /* ContentView.swift in Sources */,
-				DA8E71192921A477009EADFA /* Table.swift in Sources */,
-				DAAB06262916C38000A09041 /* TransiApp.swift in Sources */,
+				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
+				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
+				DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */,
+				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DAAB062F2916C38200A09041 /* Sources */ = {
+		DAA817D12974387D00E2FBB7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAAB06382916C38200A09041 /* TransiTests.swift in Sources */,
+				DAA817DA2974387D00E2FBB7 /* TransiTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DAAB06392916C38200A09041 /* Sources */ = {
+		DAA817DB2974387D00E2FBB7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAAB06422916C38200A09041 /* TransiUITests.swift in Sources */,
-				DAAB06442916C38200A09041 /* TransiUITestsLaunchTests.swift in Sources */,
+				DAA817E42974387D00E2FBB7 /* TransiUITests.swift in Sources */,
+				DAA817E62974387D00E2FBB7 /* TransiUITestsLaunchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		DAAB06352916C38200A09041 /* PBXTargetDependency */ = {
+		DAA817D72974387D00E2FBB7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = DAAB06212916C38000A09041 /* Transi */;
-			targetProxy = DAAB06342916C38200A09041 /* PBXContainerItemProxy */;
+			target = DAA817C32974387B00E2FBB7 /* Transi */;
+			targetProxy = DAA817D62974387D00E2FBB7 /* PBXContainerItemProxy */;
 		};
-		DAAB063F2916C38200A09041 /* PBXTargetDependency */ = {
+		DAA817E12974387D00E2FBB7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = DAAB06212916C38000A09041 /* Transi */;
-			targetProxy = DAAB063E2916C38200A09041 /* PBXContainerItemProxy */;
+			target = DAA817C32974387B00E2FBB7 /* Transi */;
+			targetProxy = DAA817E02974387D00E2FBB7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		DAAB06452916C38200A09041 /* Debug */ = {
+		DAA817E72974387D00E2FBB7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -373,17 +375,15 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		DAAB06462916C38200A09041 /* Release */ = {
+		DAA817E82974387D00E2FBB7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -427,133 +427,183 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
 		};
-		DAAB06482916C38200A09041 /* Debug */ = {
+		DAA817EA2974387D00E2FBB7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Transi/Transi.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Transi/Info.plist;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MARKETING_VERSION = 0.0.1;
+				INFOPLIST_KEY_CFBundleDisplayName = Transi;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		DAAB06492916C38200A09041 /* Release */ = {
+		DAA817EB2974387D00E2FBB7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Transi/Transi.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Transi/Info.plist;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MARKETING_VERSION = 0.0.1;
+				INFOPLIST_KEY_CFBundleDisplayName = Transi;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
-		DAAB064B2916C38200A09041 /* Debug */ = {
+		DAA817ED2974387D00E2FBB7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Transi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Transi";
 			};
 			name = Debug;
 		};
-		DAAB064C2916C38200A09041 /* Release */ = {
+		DAA817EE2974387D00E2FBB7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Transi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Transi";
 			};
 			name = Release;
 		};
-		DAAB064E2916C38200A09041 /* Debug */ = {
+		DAA817F02974387D00E2FBB7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Transi;
 			};
 			name = Debug;
 		};
-		DAAB064F2916C38200A09041 /* Release */ = {
+		DAA817F12974387D00E2FBB7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Transi;
 			};
 			name = Release;
@@ -561,38 +611,38 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		DAAB061D2916C38000A09041 /* Build configuration list for PBXProject "Transi" */ = {
+		DAA817BF2974387B00E2FBB7 /* Build configuration list for PBXProject "Transi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				DAAB06452916C38200A09041 /* Debug */,
-				DAAB06462916C38200A09041 /* Release */,
+				DAA817E72974387D00E2FBB7 /* Debug */,
+				DAA817E82974387D00E2FBB7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DAAB06472916C38200A09041 /* Build configuration list for PBXNativeTarget "Transi" */ = {
+		DAA817E92974387D00E2FBB7 /* Build configuration list for PBXNativeTarget "Transi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				DAAB06482916C38200A09041 /* Debug */,
-				DAAB06492916C38200A09041 /* Release */,
+				DAA817EA2974387D00E2FBB7 /* Debug */,
+				DAA817EB2974387D00E2FBB7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DAAB064A2916C38200A09041 /* Build configuration list for PBXNativeTarget "TransiTests" */ = {
+		DAA817EC2974387D00E2FBB7 /* Build configuration list for PBXNativeTarget "TransiTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				DAAB064B2916C38200A09041 /* Debug */,
-				DAAB064C2916C38200A09041 /* Release */,
+				DAA817ED2974387D00E2FBB7 /* Debug */,
+				DAA817EE2974387D00E2FBB7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DAAB064D2916C38200A09041 /* Build configuration list for PBXNativeTarget "TransiUITests" */ = {
+		DAA817EF2974387D00E2FBB7 /* Build configuration list for PBXNativeTarget "TransiUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				DAAB064E2916C38200A09041 /* Debug */,
-				DAAB064F2916C38200A09041 /* Release */,
+				DAA817F02974387D00E2FBB7 /* Debug */,
+				DAA817F12974387D00E2FBB7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -600,7 +650,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		DA78E4C9292041AF0060FC69 /* XCRemoteSwiftPackageReference "socket" */ = {
+		DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
 			requirement = {
@@ -611,12 +661,12 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		DA78E4CA292041AF0060FC69 /* SocketIO */ = {
+		DAA817F429743A9C00E2FBB7 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = DA78E4C9292041AF0060FC69 /* XCRemoteSwiftPackageReference "socket" */;
+			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;
 			productName = SocketIO;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = DAAB061A2916C38000A09041 /* Project object */;
+	rootObject = DAA817BC2974387B00E2FBB7 /* Project object */;
 }

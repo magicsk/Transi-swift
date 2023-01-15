@@ -9,7 +9,15 @@ import Foundation
 import SocketIO
 
 final class DataProvider: ObservableObject {
-    let manager = SocketManager(socketURL: URL(string: "https://imhd.sk/")!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
+    private let magicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
+    private let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
+    private let bApiBaseUrl = (Bundle.main.infoDictionary?["B_API_URL"] as? String)!
+    private let rApiBaseUrl = (Bundle.main.infoDictionary?["R_API_URL"] as? String)!
+    private let xApiKey = (Bundle.main.infoDictionary?["X_API_KEY"] as? String)!
+    private let xSession = (Bundle.main.infoDictionary?["X_SESSION"] as? String)!
+
+
+    let manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
     
     @Published var tabs = [Tab]()
     init() {
