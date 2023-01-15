@@ -18,45 +18,95 @@ final class DataProvider: ObservableObject {
 
 
     let manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
+    var socket: SocketIOClient
+    var stopId = 94
     
     @Published var tabs = [Tab]()
-    init() {
-        let socket = manager.defaultSocket
-        let tabArgs = [94, "*"] as [Any]
-        
+    @Published var stops = [Stop]()
 
-        socket.on(clientEvent: .connect) {data, ack in
+    init() {
+        self.socket = manager.defaultSocket
+        startListeners()
+        connect()
+        getStops() { (stops) in
+            self.stops = stops
+        }
+    }
+
+    func connect() {
+        socket.connect()
+    }
+
+    func disconnect() {
+        socket.disconnect()
+    }
+
+    func startListeners() {
+        socket.on(clientEvent: .connect) { data, ack in
             print("socket connected")
-            socket.emit("tabStart", tabArgs)
-            socket.emit("infoStart")
         }
 
-        socket.on("tabs") {data, ack in
+        socket.on(clientEvent: .disconnect) { data, ack in
+            print("socket disconnected")
+        }
+
+        socket.on("cack") { data, ack in
+            print(self.stopId)
+            self.socket.emit("tabStart", [self.stopId, "*"] as [Any])
+//            self.socket.emit("infoStart")
+        }
+
+        socket.on("tabs") { data, ack in
             print("tabs")
-            var tabsCopy = [Tab]()
-            tabsCopy.append(contentsOf: self.tabs)
+            var newTabs = [Tab]()
+            newTabs.append(contentsOf: self.tabs)
             if let platforms = data[0] as? [String: Any] {
                 for (_, value) in platforms {
                     if let json = value as? [String: Any],
-                       let platform = json["nastupiste"] as? Int,
-                       let tabsJson = json["tab"] as? [Any] {
+                        let platform = json["nastupiste"] as? Int,
+                        let tabsJson = json["tab"] as? [Any] {
                         var tabs = [Tab]()
                         for object in tabsJson {
-                            if let tabJson = object as? [String : Any] {
+                            if let tabJson = object as? [String: Any] {
                                 if let tab = Tab(json: tabJson, platform: platform) {
-                                        tabs.append(tab)
+                                    tabs.append(tab)
                                 }
                             }
                         }
-                        tabsCopy.removeAll(where: { $0.platform == platform })
-                        tabsCopy.append(contentsOf: tabs)
+                        newTabs.removeAll(where: { $0.platform == platform })
+                        newTabs.append(contentsOf: tabs)
                     }
                 }
             }
             DispatchQueue.main.async {
-                self.tabs = tabsCopy.sorted(by: { $0.departureTime < $1.departureTime })
+                self.tabs = newTabs.sorted(by: { $0.departureTime < $1.departureTime })
             }
         }
-        socket.connect()
+    }
+
+    func stopListeners() {
+        socket.removeAllHandlers()
+    }
+
+    func changeStop(stopId: Int) {
+        disconnect()
+        self.tabs = [Tab]()
+        self.stopId = stopId
+        connect()
+    }
+
+
+    func getStops(completion: @escaping ([Stop]) -> ()) {
+        guard let url = URL(string: "\(magicApiBaseUrl)/stops") else { return }
+
+        URLSession.shared.dataTask(with: url) { (data, _, _) in
+            let stops = try! JSONDecoder().decode([Stop].self, from: data!)
+            print(stops)
+
+            DispatchQueue.main.async {
+                completion(stops)
+            }
+        }
+            .resume()
     }
 }

@@ -17,6 +17,8 @@
 		DAA817F529743A9C00E2FBB7 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAA817F429743A9C00E2FBB7 /* SocketIO */; };
 		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
+		DAEF77B129744893008D66DE /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
+		DAEF77B32974680B008D66DE /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +54,8 @@
 		DAA817F22974393300E2FBB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DAA817F729743B4B00E2FBB7 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
 		DAA817F929743B6300E2FBB7 /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
+		DAEF77B029744893008D66DE /* Stops.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stops.swift; sourceTree = "<group>"; };
+		DAEF77B22974680B008D66DE /* StopListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +116,7 @@
 				DAA817CD2974387C00E2FBB7 /* Transi.entitlements */,
 				DAA817CE2974387C00E2FBB7 /* Preview Content */,
 				DAA817F929743B6300E2FBB7 /* DataProvider.swift */,
+				DAEF77B22974680B008D66DE /* StopListView.swift */,
 			);
 			path = Transi;
 			sourceTree = "<group>";
@@ -145,6 +150,7 @@
 			isa = PBXGroup;
 			children = (
 				DAA817F729743B4B00E2FBB7 /* Table.swift */,
+				DAEF77B029744893008D66DE /* Stops.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -287,8 +293,10 @@
 			files = (
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
+				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
 				DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
+				DAEF77B129744893008D66DE /* Stops.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
