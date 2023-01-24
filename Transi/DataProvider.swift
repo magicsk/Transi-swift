@@ -19,7 +19,7 @@ final class DataProvider: ObservableObject {
 
     let manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
     var socket: SocketIOClient
-    var stopId = 94
+    var stopId = 20
     
     @Published var tabs = [Tab]()
     @Published var stops = [Stop]()
@@ -101,7 +101,6 @@ final class DataProvider: ObservableObject {
 
         URLSession.shared.dataTask(with: url) { (data, _, _) in
             let stops = try! JSONDecoder().decode([Stop].self, from: data!)
-            print(stops)
 
             DispatchQueue.main.async {
                 completion(stops)

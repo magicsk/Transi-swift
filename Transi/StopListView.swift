@@ -12,12 +12,12 @@ struct StopListView: View {
     @State private var stopList = [Stop]()
     @Binding var isPresented: Bool
     @Binding var stopId: Int
-    var stopsList: DataProvider
+    var dataProvider: DataProvider
 
-    init(stopId: Binding<Int>, stopList: DataProvider, isPresented: Binding<Bool>) {
+    init(stopId: Binding<Int>, dataProviderProp: DataProvider, isPresented: Binding<Bool>) {
         _isPresented = isPresented
         _stopId = stopId
-        stopsList = stopList
+        dataProvider = dataProviderProp
     }
 
 
@@ -25,25 +25,27 @@ struct StopListView: View {
         NavigationStack {
             List(searchResults) { stop in
                 Label {
-                    Text(stop.name ?? "Error").font(.headline).onTapGesture {
-                        self.stopId = stop.id ?? 1
-                        stopsList.changeStop(stopId: stop.id ?? 1)
-                        self.isPresented = false
-                    }
+                    Text(stop.name ?? "Error").font(.headline)
+                    Spacer()
                 }
                 icon: {
-                    Text(stop.type ?? "bus").font(.headline).frame(width: 40)
+                    Image(systemName: "bus.fill").foregroundColor(.blue)
                 }
-
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    self.stopId = stop.id ?? 1
+                    dataProvider.changeStop(stopId: stop.id ?? 1)
+                    self.isPresented = false
+                }
             }
         }
             .searchable(text: $searchText)
     }
     var searchResults: [Stop] {
         if searchText.isEmpty {
-            return stopsList.stops
+            return dataProvider.stops
         } else {
-            return stopsList.stops.filter { $0.name?.contains(searchText) ?? false }
+            return dataProvider.stops.filter { $0.name?.contains(searchText) ?? false }
         }
     }
 

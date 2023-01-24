@@ -16,7 +16,12 @@ struct ContentView: View {
         NavigationView {
             List(dataProvider.tabs) { tab in
                 let departureTime = tab.departureTime - Int(NSDate().timeIntervalSince1970)
-                let departureTimeText = departureTime > 60 ? "\(departureTime / 60) min" : departureTime > 0 ? "<1 min" : "now"
+                let timeInMins = departureTime / 60
+                let departureTimeText = departureTime > 59 ?
+                    timeInMins > 59 ?
+                (Date(timeIntervalSince1970: TimeInterval(departureTime)).formatted(date: .omitted, time: .shortened)) :
+                        "\(timeInMins) min" :
+                    departureTime > 0 ? "<1 min" : "now"
                 Label {
                     Text(tab.headsign).font(.subheadline)
                     Spacer()
@@ -31,7 +36,7 @@ struct ContentView: View {
                 .toolbar { Button("Change") {
                     self.showStopList = true
                 }.sheet(isPresented: $showStopList) {
-                    StopListView(stopId: self.$stopId, stopList: dataProvider, isPresented: self.$showStopList)
+                    StopListView(stopId: self.$stopId, dataProviderProp: dataProvider, isPresented: self.$showStopList)
                 }
             }
         }
