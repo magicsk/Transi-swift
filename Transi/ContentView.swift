@@ -18,19 +18,34 @@ struct ContentView: View {
                 let departureTime = tab.departureTime - Int(NSDate().timeIntervalSince1970)
                 let timeInMins = departureTime / 60
                 let departureTimeText = departureTime > 59 ?
-                    timeInMins > 59 ?
+                timeInMins > 59 ?
                 (Date(timeIntervalSince1970: TimeInterval(departureTime)).formatted(date: .omitted, time: .shortened)) :
-                        "\(timeInMins) min" :
-                    departureTime > 0 ? "<1 min" : "now"
+                "\(timeInMins) min" :
+                departureTime > 0 ? "<1 min" : "now"
+                let isDelay = tab.delay > 0
+                let isInAdvance = tab.delay < 0
+                let delay = isDelay ? "+\(tab.delay)" : isInAdvance ? "-\(tab.delay)" : ""
                 Label {
-                    Text(tab.headsign).font(.subheadline)
-                    Spacer()
-                    Text(departureTimeText).font(.headline)
+                    HStack(alignment: .center){
+                        VStack{
+                            HStack {
+                                Text(tab.headsign).font(.subheadline)
+                                Spacer()
+                            }
+                            HStack {
+                                Text(tab.lastStopName).font(.system(size: 10, weight: .light, design: .default))
+                                Spacer()
+                            }
+                        }
+                        Spacer()
+                        Text(delay).font(.subheadline).foregroundColor(isDelay ? .red : .purple)
+                        Text(departureTimeText).font(.headline)
+                    }
                 }
                 icon: {
-                    Text(tab.line).font(.headline).frame(width: 40)
+                    Text(tab.line).font(.headline).frame(width: 40).offset(y: 5)
                 }
-            }
+                }
                 .navigationBarTitle(Text(dataProvider.stops.first(where: { $0.id == dataProvider.stopId })?.name ?? "Hronská"))
 
                 .toolbar { Button("Change") {
