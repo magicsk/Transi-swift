@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 struct Stop: Codable, Identifiable, Hashable {
     var id, stationID: Int?
@@ -14,6 +15,13 @@ struct Stop: Codable, Identifiable, Hashable {
     var tripsCount: Int?
     var lat, lng: Double?
     var platformLabels: [PlatformLabel]?
+    var location: CLLocation {
+        return CLLocation(latitude: self.lat ?? 0, longitude: self.lng ?? 0)
+    }
+
+    func distance(to location: CLLocation) -> CLLocationDistance {
+        return location.distance(from: self.location)
+    }
 }
 
 

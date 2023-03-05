@@ -15,6 +15,7 @@ struct Tab: Codable, Identifiable, Hashable {
     var headsign: String
     var departureTime: Int
     var delay: Int
+    var delayText: String?
     var type: String
     var currentStopId: Int
     var lastStopId: Int
@@ -47,8 +48,22 @@ extension Tab {
         self.type = type
         self.currentStopId = currentStopId
         self.lastStopId = lastStopId
-        self.lastStopName = lastStopName
+        self.lastStopName = lastStopName.replacingOccurrences(of: "Bratislava, ", with: "")
         self.stuck = stuck
         self.expanded = false
+        self.delayText = getDelayText(delay: self.delay)
+    }
+    
+    
+    func getDelayText(delay: Int) -> String? {
+        let isDelay = delay > 0
+        let isInAdvance = delay < 0
+        if (isDelay) {
+            return "\(delay)min delay"
+        } else if (isInAdvance) {
+            return "\(delay)min in advance"
+        } else {
+            return nil
+        }
     }
 }

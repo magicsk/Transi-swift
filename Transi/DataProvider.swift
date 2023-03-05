@@ -7,6 +7,7 @@
 
 import Foundation
 import SocketIO
+import CoreLocation
 
 final class DataProvider: ObservableObject {
     private let magicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
@@ -20,6 +21,7 @@ final class DataProvider: ObservableObject {
     let manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
     var socket: SocketIOClient
     var stopId = 20
+    var connected = false
     
     @Published var tabs = [Tab]()
     @Published var stops = [Stop]()
@@ -27,13 +29,25 @@ final class DataProvider: ObservableObject {
     init() {
         self.socket = manager.defaultSocket
         startListeners()
-        connect()
+    }
+    
+    func fetchStops() {
         getStops() { (stops) in
             self.stops = stops
         }
     }
+    
+    func sortStops(lastLocation: CLLocation?) -> Int {
+        if (lastLocation != nil) {
+            let actualLocation = lastLocation!
+            self.stops.sort(by: { $0.distance(to: actualLocation) < $1.distance(to: actualLocation) })
+            // return self.stops[0]?.id ?? 94
+        }
+        return 94
+    }
 
     func connect() {
+        if (connected) {disconnect()}
         socket.connect()
     }
 
@@ -44,10 +58,12 @@ final class DataProvider: ObservableObject {
     func startListeners() {
         socket.on(clientEvent: .connect) { data, ack in
             print("socket connected")
+            self.connected = true
         }
 
         socket.on(clientEvent: .disconnect) { data, ack in
             print("socket disconnected")
+            self.connected = false
         }
 
         socket.on("cack") { data, ack in
