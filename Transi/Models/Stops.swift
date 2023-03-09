@@ -29,3 +29,7 @@ struct PlatformLabel: Codable, Identifiable, Hashable {
     let id: String
     let label: String
 }
+
+struct StopsVersion: Codable, Hashable {
+    let version: String
+}

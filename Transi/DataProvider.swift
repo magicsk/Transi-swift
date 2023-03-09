@@ -9,6 +9,11 @@ import Foundation
 import SocketIO
 import CoreLocation
 
+struct Stored {
+    static let stops = "stops"
+    static let stopsVerison = "stopsVersion"
+}
+
 final class DataProvider: ObservableObject {
     private let magicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
     private let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
@@ -19,7 +24,9 @@ final class DataProvider: ObservableObject {
 
 
     let manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
+    let userDefaults = UserDefaults.standard
     var socket: SocketIOClient
+    var stopsVersion: String
     var stopId = 20
     var connected = false
     
@@ -28,13 +35,29 @@ final class DataProvider: ObservableObject {
 
     init() {
         self.socket = manager.defaultSocket
+        self.stopsVersion = userDefaults.string(forKey: Stored.stopsVerison) ?? ""
         startListeners()
+        connect()
+        fetchStops()
     }
     
     func fetchStops() {
-        getStops() { (stops) in
-            self.stops = stops
+        getStopsVersion() { (stopsVersion) in
+            let cachedStops = self.userDefaults.retrieve(object: [Stop].self, forKey: Stored.stops)
+            print(stopsVersion.version)
+            if (self.stopsVersion == stopsVersion.version && cachedStops != nil) {
+                print("useing cached")
+                self.stops = cachedStops!
+            } else {
+                print("getting ")
+                self.getStops() { (stops) in
+                    self.stops = stops
+                    self.userDefaults.save(customObject: stops, forKey: Stored.stops)
+                }
+            }
+            self.userDefaults.set(stopsVersion.version, forKey: Stored.stopsVerison)
         }
+        
     }
     
     func sortStops(lastLocation: CLLocation?) -> Int {
@@ -113,10 +136,23 @@ final class DataProvider: ObservableObject {
 
 
     func getStops(completion: @escaping ([Stop]) -> ()) {
-        guard let url = URL(string: "\(magicApiBaseUrl)/stops") else { return }
+        let url = URL(string: "\(magicApiBaseUrl)/stops")
 
-        URLSession.shared.dataTask(with: url) { (data, _, _) in
+        URLSession.shared.dataTask(with: url!) { (data, _, _) in
             let stops = try! JSONDecoder().decode([Stop].self, from: data!)
+
+            DispatchQueue.main.async {
+                completion(stops)
+            }
+        }
+            .resume()
+    }
+
+    func getStopsVersion(completion: @escaping (StopsVersion) -> ()) {
+        let url = URL(string: "\(magicApiBaseUrl)/stops?v")
+
+        URLSession.shared.dataTask(with: url!) { (data, _, _) in
+            let stops = try! JSONDecoder().decode(StopsVersion.self, from: data!)
 
             DispatchQueue.main.async {
                 completion(stops)

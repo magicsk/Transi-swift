@@ -15,11 +15,6 @@ struct ContentView: View {
     @State private var showStopList = false
     @State private var stopId = 94  
     @State private var actualName = "Loading..."
-    
-    init() {
-        dataProvider.connect()
-        dataProvider.fetchStops()
-    }
      
     var body: some View {
         NavigationView {
