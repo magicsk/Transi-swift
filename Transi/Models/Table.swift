@@ -59,9 +59,10 @@ extension Tab {
         let isDelay = delay > 0
         let isInAdvance = delay < 0
         if (isDelay) {
-            return "\(delay)min delay"
+            return "\(delay) min delay"
         } else if (isInAdvance) {
-            return "\(delay)min in advance"
+            let advance = delay * -1
+            return "\(advance) min in advance"
         } else {
             return nil
         }

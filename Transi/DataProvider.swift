@@ -23,7 +23,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let xSession = (Bundle.main.infoDictionary?["X_SESSION"] as? String)!
 
     private let locationManager = CLLocationManager()
-    private let manager = SocketManager(socketURL: URL(string: "https://imhd.sk/")!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
+    private let manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
     private let userDefaults = UserDefaults.standard
     private var socket: SocketIOClient
     private var connected = false

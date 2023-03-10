@@ -25,6 +25,8 @@ struct TableView: View {
             "\(timeInMins) min" :
             departureTime > 0 ? "<1 min" : "now"
             let isDelay = tab.delay > 0
+            let isInAdvance = tab.delay < 0
+            let delayColor = isDelay ? Color.red : isInAdvance ? Color.purple : nil
 
             
             Label {
@@ -36,7 +38,7 @@ struct TableView: View {
                     Spacer()
                     VStack(alignment: .trailing){
                         Text(departureTimeText).font(.headline)
-                        Text(tab.delayText ?? departureTimeFull).font(.system(size: 10, weight: .light, design: .default)).foregroundColor(isDelay ? .red : .none)
+                        Text(tab.delayText ?? departureTimeFull).font(.system(size: 10, weight: .light, design: .default)).foregroundColor(delayColor ?? .none)
                     }
                 }
             }

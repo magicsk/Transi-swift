@@ -22,7 +22,7 @@ struct StopListView: View {
 
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List(searchResults) { stop in
                 Label {
                     Text(stop.name ?? "Error").font(.headline)
