@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		DA269E10298960EF00F42107 /* MHDTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* MHDTable.swift */; };
-		DA269E13299126A600F42107 /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E12299126A600F42107 /* LocationProvider.swift */; };
 		DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
 		DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C92974387B00E2FBB7 /* ContentView.swift */; };
@@ -44,7 +43,6 @@
 /* Begin PBXFileReference section */
 		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		DA269E0F298960EF00F42107 /* MHDTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MHDTable.swift; sourceTree = "<group>"; };
-		DA269E12299126A600F42107 /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
 		DA89EDE529BA981700C32F24 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		DAA817C42974387B00E2FBB7 /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
@@ -133,7 +131,6 @@
 				DAA817CE2974387C00E2FBB7 /* Preview Content */,
 				DAA817F929743B6300E2FBB7 /* DataProvider.swift */,
 				DAEF77B22974680B008D66DE /* StopListView.swift */,
-				DA269E12299126A600F42107 /* LocationProvider.swift */,
 			);
 			path = Transi;
 			sourceTree = "<group>";
@@ -314,7 +311,6 @@
 				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
 				DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */,
 				DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */,
-				DA269E13299126A600F42107 /* LocationProvider.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
 				DAEF77B129744893008D66DE /* Stops.swift in Sources */,
 			);
@@ -479,7 +475,7 @@
 				INFOPLIST_FILE = Transi/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Transi;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = gime;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location will be used for showing nearby stops. Everything stays on your device.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -523,7 +519,7 @@
 				INFOPLIST_FILE = Transi/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Transi;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = giveme;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location will be used for showing nearby stops. Everything stays on your device.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

@@ -14,7 +14,7 @@ struct Stored {
     static let stopsVerison = "stopsVersion"
 }
 
-final class DataProvider: ObservableObject {
+open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let magicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
     private let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
     private let bApiBaseUrl = (Bundle.main.infoDictionary?["B_API_URL"] as? String)!
@@ -22,51 +22,79 @@ final class DataProvider: ObservableObject {
     private let xApiKey = (Bundle.main.infoDictionary?["X_API_KEY"] as? String)!
     private let xSession = (Bundle.main.infoDictionary?["X_SESSION"] as? String)!
 
-
-    let manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
-    let userDefaults = UserDefaults.standard
-    var socket: SocketIOClient
-    var stopsVersion: String
+    private let locationManager = CLLocationManager()
+    private let manager = SocketManager(socketURL: URL(string: "https://imhd.sk/")!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
+    private let userDefaults = UserDefaults.standard
+    private var socket: SocketIOClient
+    private var connected = false
     var stopId = 20
-    var connected = false
+    var stopsVersion: String
     
+    var changeLocation = true
+    let actualLocationStop = Stop(
+        id: -1, stationID: -1, name: "Actual location", type: "location")
+   
     @Published var tabs = [Tab]()
     @Published var stops = [Stop]()
+    var originalStops = [Stop]()
 
-    init() {
+    override init() {
         self.socket = manager.defaultSocket
         self.stopsVersion = userDefaults.string(forKey: Stored.stopsVerison) ?? ""
+        super.init()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        locationManager.requestWhenInUseAuthorization()
         startListeners()
         connect()
         fetchStops()
     }
     
     func fetchStops() {
-        getStopsVersion() { (stopsVersion) in
+        fetchData(url: "\(magicApiBaseUrl)/stops?v", type: StopsVersion.self) { (stopsVersion) in
             let cachedStops = self.userDefaults.retrieve(object: [Stop].self, forKey: Stored.stops)
             print(stopsVersion.version)
             if (self.stopsVersion == stopsVersion.version && cachedStops != nil) {
                 print("useing cached stops json")
                 self.stops = cachedStops!
+                self.originalStops = cachedStops!
             } else {
                 print("getting new stops json")
-                self.getStops() { (stops) in
+                self.fetchData(url: "\(self.magicApiBaseUrl)/stops", type: [Stop].self) { (stops) in
                     self.stops = stops
+                    self.originalStops = stops
                     self.userDefaults.save(customObject: stops, forKey: Stored.stops)
                 }
             }
             self.userDefaults.set(stopsVersion.version, forKey: Stored.stopsVerison)
+            self.locationManager.startUpdatingLocation()
         }
         
     }
     
-    func sortStops(lastLocation: CLLocation?) -> Int {
-        if (lastLocation != nil) {
+    func addUtilsToStopList() {
+        self.stops.insert(actualLocationStop, at: 0)
+    }
+    
+    func sortStops(lastLocation: CLLocation?) {
+        if (lastLocation != nil && self.stops.count > 0) {
             let actualLocation = lastLocation!
-            self.stops.sort(by: { $0.distance(to: actualLocation) < $1.distance(to: actualLocation) })
-            // return self.stops[0]?.id ?? 94
+            self.stops = self.originalStops.sorted(by: { $0.distance(to: actualLocation) < $1.distance(to: actualLocation)})
+            addUtilsToStopList()
+            if (self.changeLocation) {
+                changeStop(stopId: getNearestStopId())
+            }
         }
-        return 94
+    }
+    
+    func getNearestStopId() -> Int {
+        return self.stops.first(where: {$0.id ?? 0 > 0})?.id ?? self.stopId
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+        print("got new location")
+        sortStops(lastLocation: location)
     }
 
     func connect() {
@@ -126,33 +154,37 @@ final class DataProvider: ObservableObject {
     func stopListeners() {
         socket.removeAllHandlers()
     }
-
-    func changeStop(stopId: Int) {
-        disconnect()
-        self.tabs = [Tab]()
-        self.stopId = stopId
-        connect()
-    }
-
-
-    func getStops(completion: @escaping ([Stop]) -> ()) {
-        let url = URL(string: "\(magicApiBaseUrl)/stops")
-
-        URLSession.shared.dataTask(with: url!) { (data, _, _) in
-            let stops = try! JSONDecoder().decode([Stop].self, from: data!)
-
-            DispatchQueue.main.async {
-                completion(stops)
-            }
+    
+    func switchLocationChanging(_ value: Bool) {
+        if (value) {
+            changeLocation = true
+            changeStop(stopId: getNearestStopId())
+        } else {
+            changeLocation = false
         }
-            .resume()
     }
-
-    func getStopsVersion(completion: @escaping (StopsVersion) -> ()) {
-        let url = URL(string: "\(magicApiBaseUrl)/stops?v")
+    
+    func changeStop(stopId: Int) {
+        switch (stopId) {
+            case -1:
+                switchLocationChanging(true)
+            default:
+                if (self.stopId != stopId) {
+                    switchLocationChanging(false)
+                    disconnect()
+                    self.tabs = [Tab]()
+                    self.stopId = stopId
+                    connect()
+                }
+            }
+        
+    }
+    
+    func fetchData<T: Decodable>(url: String, type: T.Type, completion: @escaping (T) -> ()) {
+        let url = URL(string: url)
 
         URLSession.shared.dataTask(with: url!) { (data, _, _) in
-            let stops = try! JSONDecoder().decode(StopsVersion.self, from: data!)
+            let stops = try! JSONDecoder().decode(type, from: data!)
 
             DispatchQueue.main.async {
                 completion(stops)

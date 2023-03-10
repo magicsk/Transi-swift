@@ -45,7 +45,7 @@ struct StopListView: View {
         if searchText.isEmpty {
             return dataProvider.stops
         } else {
-            return dataProvider.stops.filter { $0.name?.lowercased().folding(options: .diacriticInsensitive, locale: .current).contains(searchText.folding(options: .diacriticInsensitive, locale: .current).lowercased()) ?? false }
+            return dataProvider.stops.filter { $0.name?.lowercased().folding(options: .diacriticInsensitive, locale: .current).contains(searchText.folding(options: .diacriticInsensitive, locale: .current).lowercased()) ?? false || $0.id ?? 0 < 0 }
         }
     }
 
