@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		DA269E10298960EF00F42107 /* MHDTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* MHDTable.swift */; };
 		DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
+		DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
 		DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C92974387B00E2FBB7 /* ContentView.swift */; };
 		DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
@@ -44,6 +45,7 @@
 		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		DA269E0F298960EF00F42107 /* MHDTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MHDTable.swift; sourceTree = "<group>"; };
 		DA89EDE529BA981700C32F24 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
+		DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListIcon.swift; sourceTree = "<group>"; };
 		DAA817C42974387B00E2FBB7 /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
 		DAA817C92974387B00E2FBB7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 				DAA817CE2974387C00E2FBB7 /* Preview Content */,
 				DAA817F929743B6300E2FBB7 /* DataProvider.swift */,
 				DAEF77B22974680B008D66DE /* StopListView.swift */,
+				DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */,
 			);
 			path = Transi;
 			sourceTree = "<group>";
@@ -308,6 +311,7 @@
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
 				DA269E10298960EF00F42107 /* MHDTable.swift in Sources */,
+				DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */,
 				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
 				DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */,
 				DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */,

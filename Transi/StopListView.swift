@@ -29,7 +29,7 @@ struct StopListView: View {
                     Spacer()
                 }
                 icon: {
-                    Image(systemName: "bus.fill").foregroundColor(.blue)
+                    StopListIcon(stop.type)
                 }
                 .contentShape(Rectangle())
                 .onTapGesture {
