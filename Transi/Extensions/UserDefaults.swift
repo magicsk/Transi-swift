@@ -22,11 +22,11 @@ extension UserDefaults {
            if let object = try? decoder.decode(type, from: data) {
                return object
            }else {
-               print("Couldnt decode object")
+               print("UserDefaults: Couldnt decode object \(key)")
                return nil
            }
        }else {
-           print("Couldnt find key")
+           print("Couldnt find key: \(key)")
            return nil
        }
    }

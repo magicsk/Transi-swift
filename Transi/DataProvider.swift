@@ -46,10 +46,10 @@ final class DataProvider: ObservableObject {
             let cachedStops = self.userDefaults.retrieve(object: [Stop].self, forKey: Stored.stops)
             print(stopsVersion.version)
             if (self.stopsVersion == stopsVersion.version && cachedStops != nil) {
-                print("useing cached")
+                print("useing cached stops json")
                 self.stops = cachedStops!
             } else {
-                print("getting ")
+                print("getting new stops json")
                 self.getStops() { (stops) in
                     self.stops = stops
                     self.userDefaults.save(customObject: stops, forKey: Stored.stops)
