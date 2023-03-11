@@ -10,6 +10,7 @@
 		DA269E10298960EF00F42107 /* MHDTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* MHDTable.swift */; };
 		DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
+		DA89EDED29BB97BA00C32F24 /* FuzzyFind in Frameworks */ = {isa = PBXBuildFile; productRef = DA89EDEC29BB97BA00C32F24 /* FuzzyFind */; };
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
 		DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C92974387B00E2FBB7 /* ContentView.swift */; };
 		DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
@@ -69,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA89EDED29BB97BA00C32F24 /* FuzzyFind in Frameworks */,
 				DAA817F529743A9C00E2FBB7 /* SocketIO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -190,6 +192,7 @@
 			name = Transi;
 			packageProductDependencies = (
 				DAA817F429743A9C00E2FBB7 /* SocketIO */,
+				DA89EDEC29BB97BA00C32F24 /* FuzzyFind */,
 			);
 			productName = Transi;
 			productReference = DAA817C42974387B00E2FBB7 /* Transi.app */;
@@ -265,6 +268,7 @@
 			mainGroup = DAA817BB2974387B00E2FBB7;
 			packageReferences = (
 				DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */,
+				DA89EDEB29BB97BA00C32F24 /* XCRemoteSwiftPackageReference "FuzzyFind" */,
 			);
 			productRefGroup = DAA817C52974387B00E2FBB7 /* Products */;
 			projectDirPath = "";
@@ -682,6 +686,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		DA89EDEB29BB97BA00C32F24 /* XCRemoteSwiftPackageReference "FuzzyFind" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/truizlop/FuzzyFind";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 		DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
@@ -693,6 +705,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		DA89EDEC29BB97BA00C32F24 /* FuzzyFind */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA89EDEB29BB97BA00C32F24 /* XCRemoteSwiftPackageReference "FuzzyFind" */;
+			productName = FuzzyFind;
+		};
 		DAA817F429743A9C00E2FBB7 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;

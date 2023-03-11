@@ -6,21 +6,24 @@
 //
 
 import SwiftUI
+import FuzzyFind
 
 struct StopListView: View {
     @State private var searchText = ""
     @State private var stopList = [Stop]()
     @Binding var isPresented: Bool
     @Binding var stopId: Int
+    @State private var searchResults: [Stop]
+    @State private var searchBar: UISearchBar?
     var dataProvider: DataProvider
-
+    
     init(stopId: Binding<Int>, dataProviderProp: DataProvider, isPresented: Binding<Bool>) {
         _isPresented = isPresented
         _stopId = stopId
         dataProvider = dataProviderProp
+        searchResults = dataProvider.stops
     }
-
-
+    
     var body: some View {
         NavigationView {
             List(searchResults) { stop in
@@ -28,31 +31,30 @@ struct StopListView: View {
                     Text(stop.name ?? "Error").font(.headline)
                     Spacer()
                 }
-                icon: {
-                    StopListIcon(stop.type)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    self.stopId = stop.id ?? 1
-                    dataProvider.changeStop(stopId: stop.id ?? 1)
-                    self.isPresented = false
+            icon: {
+                StopListIcon(stop.type)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                dataProvider.changeStop(stopId: stop.id ?? 0)
+                self.isPresented = false
+            }
+            }
+        }
+        .searchable(text: $searchText)
+        .disableAutocorrection(true)
+        .onChange(of: searchText) { searchText in
+            
+            if searchText.isEmpty {
+                searchResults = dataProvider.stops
+            } else {
+                DispatchQueue.global(qos: .userInteractive).async {
+                    self.searchResults = dataProvider.stops.filter {
+                        $0.id ?? 0 < 0 || bestMatch(query: searchText.folding(options: .diacriticInsensitive, locale: .current).lowercased(), input: $0.name?.lowercased().folding(options: .diacriticInsensitive, locale: .current) ?? "") != nil
+                    }
                 }
             }
         }
-            .searchable(text: $searchText)
+        
     }
-    var searchResults: [Stop] {
-        if searchText.isEmpty {
-            return dataProvider.stops
-        } else {
-            return dataProvider.stops.filter { $0.name?.lowercased().folding(options: .diacriticInsensitive, locale: .current).contains(searchText.folding(options: .diacriticInsensitive, locale: .current).lowercased()) ?? false || $0.id ?? 0 < 0 }
-        }
-    }
-
 }
-
-//struct StopListView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        StopListView()
-//    }
-//}
