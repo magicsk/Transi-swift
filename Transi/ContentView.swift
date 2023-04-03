@@ -17,7 +17,7 @@ struct ContentView: View {
      
     var body: some View {
             NavigationView {
-                TableView(dataProviderProp: dataProvider)
+                TableView(dataProvider.tabs)
                     #if !os(macOS)
                     .navigationBarTitle(Text(dataProvider.stops.first(where: { $0.id == dataProvider.stopId })?.name ?? "Loading..."))
                     #endif

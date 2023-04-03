@@ -13,7 +13,7 @@ struct Tab: Codable, Identifiable, Hashable {
     var platform: Int
     var busID: String
     var headsign: String
-    var departureTime: Int
+    var departureTime: TimeInterval
     var delay: Int
     var delayText: String?
     var type: String
@@ -30,7 +30,7 @@ extension Tab {
         let line = json["linka"] as? String ?? "Error"
         let busID = json["issi"] as? String ?? "Offline"
         let headsign = json["cielStr"] as? String ?? json["konecnaZstr"] as? String ?? "Error"
-        let departureTime = (json["cas"] as? Int ?? 0) / 1000
+        let departureTime = (json["cas"] as? Double ?? 0) / 1000.0
         let delay = json["casDelta"] as? Int ?? 0
         let type = json["typ"] as? String ?? "cp"
         let currentStopId = json["tuZidx"] as? Int ?? -1

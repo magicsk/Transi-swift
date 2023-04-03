@@ -8,15 +8,15 @@
 import SwiftUI
 
 struct TableView: View {
-    @ObservedObject var dataProvider: DataProvider
+    var tabs: [Tab]
     
-    init(dataProviderProp: DataProvider) {
-        dataProvider = dataProviderProp
+    init(_ _tabs: [Tab]) {
+        tabs = _tabs
     }
     
     var body: some View {
-        List(dataProvider.tabs) { tab in
-            let departureTime = tab.departureTime - Int(NSDate().timeIntervalSince1970)
+        List(tabs) { tab in
+            let departureTime = Int(tab.departureTime - Date().timeIntervalSince1970)
             let timeInMins = departureTime / 60
             let departureTimeFull = Date(timeIntervalSince1970: TimeInterval(tab.departureTime)).formatted(date: .omitted, time: .shortened)
             let departureTimeText = departureTime > 59 ?

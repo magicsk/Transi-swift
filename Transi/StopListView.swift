@@ -14,7 +14,6 @@ struct StopListView: View {
     @Binding var isPresented: Bool
     @Binding var stopId: Int
     @State private var searchResults: [Stop]
-    @State private var searchBar: UISearchBar?
     var dataProvider: DataProvider
     
     init(stopId: Binding<Int>, dataProviderProp: DataProvider, isPresented: Binding<Bool>) {

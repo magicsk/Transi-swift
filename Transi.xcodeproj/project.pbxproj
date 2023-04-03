@@ -21,6 +21,20 @@
 		DAA817F529743A9C00E2FBB7 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAA817F429743A9C00E2FBB7 /* SocketIO */; };
 		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
+		DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */; };
+		DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */; };
+		DAD0CEA229CB97D700A43CC6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAD0CEA129CB97D700A43CC6 /* Preview Assets.xcassets */; };
+		DAD0CEA529CB97D700A43CC6 /* Transi.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DAD0CE9829CB97D500A43CC6 /* Transi.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DAD0CEAB29CB9D4E00A43CC6 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
+		DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
+		DAD0CEAD29CB9D5700A43CC6 /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
+		DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
+		DAD0CEAF29CB9DDA00A43CC6 /* MHDTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* MHDTable.swift */; };
+		DAD0CEB029CB9DE200A43CC6 /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
+		DAD0CEB129CB9DE500A43CC6 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
+		DAD0CEB429CB9E1D00A43CC6 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAD0CEB329CB9E1D00A43CC6 /* SocketIO */; };
+		DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
+		DAD0CEB729CB9E4B00A43CC6 /* FuzzyFind in Frameworks */ = {isa = PBXBuildFile; productRef = DAD0CEB629CB9E4B00A43CC6 /* FuzzyFind */; };
 		DAEF77B129744893008D66DE /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
 		DAEF77B32974680B008D66DE /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
 /* End PBXBuildFile section */
@@ -40,7 +54,28 @@
 			remoteGlobalIDString = DAA817C32974387B00E2FBB7;
 			remoteInfo = Transi;
 		};
+		DAD0CEA329CB97D700A43CC6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DAA817BC2974387B00E2FBB7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DAD0CE9729CB97D500A43CC6;
+			remoteInfo = "TransiWatch Watch App";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DAD0CEA929CB97D700A43CC6 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				DAD0CEA529CB97D700A43CC6 /* Transi.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
@@ -61,6 +96,10 @@
 		DAA817F22974393300E2FBB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DAA817F729743B4B00E2FBB7 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
 		DAA817F929743B6300E2FBB7 /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
+		DAD0CE9829CB97D500A43CC6 /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiWatchApp.swift; sourceTree = "<group>"; };
+		DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DAD0CEA129CB97D700A43CC6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		DAEF77B029744893008D66DE /* Stops.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stops.swift; sourceTree = "<group>"; };
 		DAEF77B22974680B008D66DE /* StopListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,6 +128,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DAD0CE9529CB97D500A43CC6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DAD0CEB729CB9E4B00A43CC6 /* FuzzyFind in Frameworks */,
+				DAD0CEB429CB9E1D00A43CC6 /* SocketIO in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -104,10 +152,13 @@
 			isa = PBXGroup;
 			children = (
 				DA80284C2B24E39D0011390B /* Release.xcconfig */,
+				DAD0CEAA29CB9B9800A43CC6 /* Shared */,
 				DAA817C62974387B00E2FBB7 /* Transi */,
+				DAD0CE9929CB97D500A43CC6 /* Transi Watch App */,
 				DAA817D82974387D00E2FBB7 /* TransiTests */,
 				DAA817E22974387D00E2FBB7 /* TransiUITests */,
 				DAA817C52974387B00E2FBB7 /* Products */,
+				DAD0CEB229CB9E1D00A43CC6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -117,6 +168,7 @@
 				DAA817C42974387B00E2FBB7 /* Transi.app */,
 				DAA817D52974387D00E2FBB7 /* TransiTests.xctest */,
 				DAA817DF2974387D00E2FBB7 /* TransiUITests.xctest */,
+				DAD0CE9829CB97D500A43CC6 /* Transi.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -124,16 +176,12 @@
 		DAA817C62974387B00E2FBB7 /* Transi */ = {
 			isa = PBXGroup;
 			children = (
-				DA89EDE429BA980400C32F24 /* Extensions */,
 				DA269E0F298960EF00F42107 /* MHDTable.swift */,
-				DAA817F629743B2A00E2FBB7 /* Models */,
 				DAA817F22974393300E2FBB7 /* Info.plist */,
 				DAA817C72974387B00E2FBB7 /* TransiApp.swift */,
 				DAA817C92974387B00E2FBB7 /* ContentView.swift */,
-				DAA817CB2974387C00E2FBB7 /* Assets.xcassets */,
 				DAA817CD2974387C00E2FBB7 /* Transi.entitlements */,
 				DAA817CE2974387C00E2FBB7 /* Preview Content */,
-				DAA817F929743B6300E2FBB7 /* DataProvider.swift */,
 				DAEF77B22974680B008D66DE /* StopListView.swift */,
 				DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */,
 			);
@@ -174,6 +222,42 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		DAD0CE9929CB97D500A43CC6 /* Transi Watch App */ = {
+			isa = PBXGroup;
+			children = (
+				DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */,
+				DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */,
+				DAD0CEA029CB97D700A43CC6 /* Preview Content */,
+			);
+			path = "Transi Watch App";
+			sourceTree = "<group>";
+		};
+		DAD0CEA029CB97D700A43CC6 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				DAD0CEA129CB97D700A43CC6 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		DAD0CEAA29CB9B9800A43CC6 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				DAA817CB2974387C00E2FBB7 /* Assets.xcassets */,
+				DA89EDE429BA980400C32F24 /* Extensions */,
+				DAA817F629743B2A00E2FBB7 /* Models */,
+				DAA817F929743B6300E2FBB7 /* DataProvider.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		DAD0CEB229CB9E1D00A43CC6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -184,10 +268,12 @@
 				DAA817C02974387B00E2FBB7 /* Sources */,
 				DAA817C12974387B00E2FBB7 /* Frameworks */,
 				DAA817C22974387B00E2FBB7 /* Resources */,
+				DAD0CEA929CB97D700A43CC6 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				DAD0CEA429CB97D700A43CC6 /* PBXTargetDependency */,
 			);
 			name = Transi;
 			packageProductDependencies = (
@@ -234,6 +320,27 @@
 			productReference = DAA817DF2974387D00E2FBB7 /* TransiUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		DAD0CE9729CB97D500A43CC6 /* Transi Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DAD0CEA629CB97D700A43CC6 /* Build configuration list for PBXNativeTarget "Transi Watch App" */;
+			buildPhases = (
+				DAD0CE9429CB97D500A43CC6 /* Sources */,
+				DAD0CE9529CB97D500A43CC6 /* Frameworks */,
+				DAD0CE9629CB97D500A43CC6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Transi Watch App";
+			packageProductDependencies = (
+				DAD0CEB329CB9E1D00A43CC6 /* SocketIO */,
+				DAD0CEB629CB9E4B00A43CC6 /* FuzzyFind */,
+			);
+			productName = "TransiWatch Watch App";
+			productReference = DAD0CE9829CB97D500A43CC6 /* Transi.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -241,7 +348,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1410;
+				LastSwiftUpdateCheck = 1400;
 				LastUpgradeCheck = 1410;
 				TargetAttributes = {
 					DAA817C32974387B00E2FBB7 = {
@@ -254,6 +361,9 @@
 					DAA817DE2974387D00E2FBB7 = {
 						CreatedOnToolsVersion = 14.1;
 						TestTargetID = DAA817C32974387B00E2FBB7;
+					};
+					DAD0CE9729CB97D500A43CC6 = {
+						CreatedOnToolsVersion = 14.0.1;
 					};
 				};
 			};
@@ -277,6 +387,7 @@
 				DAA817C32974387B00E2FBB7 /* Transi */,
 				DAA817D42974387D00E2FBB7 /* TransiTests */,
 				DAA817DE2974387D00E2FBB7 /* TransiUITests */,
+				DAD0CE9729CB97D500A43CC6 /* Transi Watch App */,
 			);
 		};
 /* End PBXProject section */
@@ -302,6 +413,15 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DAD0CE9629CB97D500A43CC6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */,
+				DAD0CEA229CB97D700A43CC6 /* Preview Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,6 +461,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DAD0CE9429CB97D500A43CC6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DAD0CEAB29CB9D4E00A43CC6 /* DataProvider.swift in Sources */,
+				DAD0CEAF29CB9DDA00A43CC6 /* MHDTable.swift in Sources */,
+				DAD0CEB029CB9DE200A43CC6 /* StopListView.swift in Sources */,
+				DAD0CEB129CB9DE500A43CC6 /* StopListIcon.swift in Sources */,
+				DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */,
+				DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */,
+				DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */,
+				DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */,
+				DAD0CEAD29CB9D5700A43CC6 /* Stops.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -353,6 +489,11 @@
 			isa = PBXTargetDependency;
 			target = DAA817C32974387B00E2FBB7 /* Transi */;
 			targetProxy = DAA817E02974387D00E2FBB7 /* PBXContainerItemProxy */;
+		};
+		DAD0CEA429CB97D700A43CC6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DAD0CE9729CB97D500A43CC6 /* Transi Watch App */;
+			targetProxy = DAD0CEA329CB97D700A43CC6 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -407,6 +548,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -459,6 +602,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -469,6 +614,7 @@
 		DAA817EA2974387D00E2FBB7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Transi/Transi.entitlements;
@@ -484,22 +630,26 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Transi;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location will be used for showing nearby stops. Everything stays on your device.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
-				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
+				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = auto;
@@ -513,6 +663,7 @@
 		DAA817EB2974387D00E2FBB7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Transi/Transi.entitlements;
@@ -528,22 +679,26 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Transi;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location will be used for showing nearby stops. Everything stays on your device.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
-				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
+				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = auto;
@@ -644,6 +799,79 @@
 			};
 			name = Release;
 		};
+		DAD0CEA729CB97D700A43CC6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Transi Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Transi-Watch-App-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location will be used for showing nearby stops. Everything stays on your device.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = eu.magicsk.transi;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.transi.watch;
+				PRODUCT_NAME = Transi;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 8.6;
+			};
+			name = Debug;
+		};
+		DAD0CEA829CB97D700A43CC6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Transi Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Transi-Watch-App-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location will be used for showing nearby stops. Everything stays on your device.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = eu.magicsk.transi;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.transi.watch;
+				PRODUCT_NAME = Transi;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 8.6;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -683,6 +911,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		DAD0CEA629CB97D700A43CC6 /* Build configuration list for PBXNativeTarget "Transi Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DAD0CEA729CB97D700A43CC6 /* Debug */,
+				DAD0CEA829CB97D700A43CC6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -714,6 +951,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;
 			productName = SocketIO;
+		};
+		DAD0CEB329CB9E1D00A43CC6 /* SocketIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;
+			productName = SocketIO;
+		};
+		DAD0CEB629CB9E4B00A43CC6 /* FuzzyFind */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA89EDEB29BB97BA00C32F24 /* XCRemoteSwiftPackageReference "FuzzyFind" */;
+			productName = FuzzyFind;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

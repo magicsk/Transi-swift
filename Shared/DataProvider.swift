@@ -23,9 +23,9 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let xSession = (Bundle.main.infoDictionary?["X_SESSION"] as? String)!
 
     private let locationManager = CLLocationManager()
-    private let manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true)])
-    private let userDefaults = UserDefaults.standard
+    private let manager: SocketManager
     private var socket: SocketIOClient
+    private let userDefaults = UserDefaults.standard
     private var connected = false
     var stopId = 20
     var stopsVersion: String
@@ -39,8 +39,9 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     var originalStops = [Stop]()
 
     override init() {
-        self.socket = manager.defaultSocket
-        self.stopsVersion = userDefaults.string(forKey: Stored.stopsVerison) ?? ""
+        manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true), .log(false)])
+        socket = manager.defaultSocket
+        stopsVersion = userDefaults.string(forKey: Stored.stopsVerison) ?? ""
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
@@ -91,14 +92,22 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         return self.stops.first(where: {$0.id ?? 0 > 0})?.id ?? self.stopId
     }
     
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        print("got new location")
+        // print("got new location")
         sortStops(lastLocation: location)
     }
 
     func connect() {
-        if (connected) {disconnect()}
+        print("atempting to connect...")
+        if (connected) {
+            print("already connected, disconnecting...")
+            disconnect()
+        }
+        // print(manager.engine?.connected)
+        if (manager.engine?.connected != true) {
+            manager.engine?.connect()
+        }
         socket.connect()
     }
 
@@ -125,28 +134,28 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         socket.on("tabs") { data, ack in
             print("tabs")
-            var newTabs = [Tab]()
-            newTabs.append(contentsOf: self.tabs)
-            if let platforms = data[0] as? [String: Any] {
-                for (_, value) in platforms {
-                    if let json = value as? [String: Any],
-                        let platform = json["nastupiste"] as? Int,
-                        let tabsJson = json["tab"] as? [Any] {
-                        var tabs = [Tab]()
-                        for object in tabsJson {
-                            if let tabJson = object as? [String: Any] {
-                                if let tab = Tab(json: tabJson, platform: platform) {
-                                    tabs.append(tab)
+            DispatchQueue.main.async {
+                var newTabs = [Tab]()
+                newTabs.append(contentsOf: self.tabs)
+                if let platforms = data[0] as? [String: Any] {
+                    for (_, value) in platforms {
+                        if let json = value as? [String: Any],
+                            let platform = json["nastupiste"] as? Int,
+                            let tabsJson = json["tab"] as? [Any] {
+                            var tabs = [Tab]()
+                            for object in tabsJson {
+                                if let tabJson = object as? [String: Any] {
+                                    if let tab = Tab(json: tabJson, platform: platform) {
+                                        tabs.append(tab)
+                                    }
                                 }
                             }
+                            newTabs.removeAll(where: { $0.platform == platform })
+                            newTabs.append(contentsOf: tabs)
                         }
-                        newTabs.removeAll(where: { $0.platform == platform })
-                        newTabs.append(contentsOf: tabs)
                     }
                 }
-            }
-            DispatchQueue.main.async {
-                self.tabs = newTabs.sorted(by: { $0.departureTime < $1.departureTime })
+                self.tabs = newTabs.sorted(by: { Int($0.departureTime) < Int($1.departureTime) })
             }
         }
     }
