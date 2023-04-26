@@ -399,7 +399,6 @@
 			mainGroup = DAA817BB2974387B00E2FBB7;
 			packageReferences = (
 				DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */,
-				DA89EDEB29BB97BA00C32F24 /* XCRemoteSwiftPackageReference "FuzzyFind" */,
 				DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */,
 			);
 			productRefGroup = DAA817C52974387B00E2FBB7 /* Products */;
@@ -958,14 +957,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		DA89EDEB29BB97BA00C32F24 /* XCRemoteSwiftPackageReference "FuzzyFind" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/truizlop/FuzzyFind";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.0;
-			};
-		};
 		DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
