@@ -7,10 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DA269E10298960EF00F42107 /* MHDTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* MHDTable.swift */; };
+		DA269E10298960EF00F42107 /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* List.swift */; };
+		DA32836129E19C920070FCA0 /* Detail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836029E19C920070FCA0 /* Detail.swift */; };
+		DA32836429E33F650070FCA0 /* ListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836329E33F650070FCA0 /* ListItem.swift */; };
+		DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */; };
+		DA63553129E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */; };
+		DA63553329E4957A00AAD7C0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
+		DA63553429E4957A00AAD7C0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
 		DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
-		DA89EDED29BB97BA00C32F24 /* FuzzyFind in Frameworks */ = {isa = PBXBuildFile; productRef = DA89EDEC29BB97BA00C32F24 /* FuzzyFind */; };
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
 		DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C92974387B00E2FBB7 /* ContentView.swift */; };
 		DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
@@ -21,6 +26,8 @@
 		DAA817F529743A9C00E2FBB7 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAA817F429743A9C00E2FBB7 /* SocketIO */; };
 		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
+		DAAB2C0829F8727900D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0729F8727900D79A70 /* Fuse */; };
+		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
 		DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */; };
 		DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */; };
 		DAD0CEA229CB97D700A43CC6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAD0CEA129CB97D700A43CC6 /* Preview Assets.xcassets */; };
@@ -29,12 +36,10 @@
 		DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAD0CEAD29CB9D5700A43CC6 /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
 		DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
-		DAD0CEAF29CB9DDA00A43CC6 /* MHDTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* MHDTable.swift */; };
 		DAD0CEB029CB9DE200A43CC6 /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
 		DAD0CEB129CB9DE500A43CC6 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
 		DAD0CEB429CB9E1D00A43CC6 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAD0CEB329CB9E1D00A43CC6 /* SocketIO */; };
 		DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
-		DAD0CEB729CB9E4B00A43CC6 /* FuzzyFind in Frameworks */ = {isa = PBXBuildFile; productRef = DAD0CEB629CB9E4B00A43CC6 /* FuzzyFind */; };
 		DAEF77B129744893008D66DE /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
 		DAEF77B32974680B008D66DE /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
 /* End PBXBuildFile section */
@@ -79,7 +84,11 @@
 
 /* Begin PBXFileReference section */
 		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
-		DA269E0F298960EF00F42107 /* MHDTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MHDTable.swift; sourceTree = "<group>"; };
+		DA269E0F298960EF00F42107 /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = List.swift; sourceTree = "<group>"; };
+		DA32836029E19C920070FCA0 /* Detail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Detail.swift; sourceTree = "<group>"; };
+		DA32836329E33F650070FCA0 /* ListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItem.swift; sourceTree = "<group>"; };
+		DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleInfo.swift; sourceTree = "<group>"; };
+		DA63553229E4957A00AAD7C0 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		DA89EDE529BA981700C32F24 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListIcon.swift; sourceTree = "<group>"; };
 		DAA817C42974387B00E2FBB7 /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,7 +118,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA89EDED29BB97BA00C32F24 /* FuzzyFind in Frameworks */,
+				DAAB2C0829F8727900D79A70 /* Fuse in Frameworks */,
 				DAA817F529743A9C00E2FBB7 /* SocketIO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -132,7 +141,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAD0CEB729CB9E4B00A43CC6 /* FuzzyFind in Frameworks */,
+				DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */,
 				DAD0CEB429CB9E1D00A43CC6 /* SocketIO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -140,10 +149,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DA32835F29E19C670070FCA0 /* VirtualTable */ = {
+			isa = PBXGroup;
+			children = (
+				DA269E0F298960EF00F42107 /* List.swift */,
+				DA32836029E19C920070FCA0 /* Detail.swift */,
+				DA32836329E33F650070FCA0 /* ListItem.swift */,
+			);
+			path = VirtualTable;
+			sourceTree = "<group>";
+		};
 		DA89EDE429BA980400C32F24 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
 				DA89EDE529BA981700C32F24 /* UserDefaults.swift */,
+				DA63553229E4957A00AAD7C0 /* String.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -176,7 +196,7 @@
 		DAA817C62974387B00E2FBB7 /* Transi */ = {
 			isa = PBXGroup;
 			children = (
-				DA269E0F298960EF00F42107 /* MHDTable.swift */,
+				DA32835F29E19C670070FCA0 /* VirtualTable */,
 				DAA817F22974393300E2FBB7 /* Info.plist */,
 				DAA817C72974387B00E2FBB7 /* TransiApp.swift */,
 				DAA817C92974387B00E2FBB7 /* ContentView.swift */,
@@ -218,6 +238,7 @@
 			children = (
 				DAA817F729743B4B00E2FBB7 /* Table.swift */,
 				DAEF77B029744893008D66DE /* Stops.swift */,
+				DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -278,7 +299,7 @@
 			name = Transi;
 			packageProductDependencies = (
 				DAA817F429743A9C00E2FBB7 /* SocketIO */,
-				DA89EDEC29BB97BA00C32F24 /* FuzzyFind */,
+				DAAB2C0729F8727900D79A70 /* Fuse */,
 			);
 			productName = Transi;
 			productReference = DAA817C42974387B00E2FBB7 /* Transi.app */;
@@ -335,7 +356,7 @@
 			name = "Transi Watch App";
 			packageProductDependencies = (
 				DAD0CEB329CB9E1D00A43CC6 /* SocketIO */,
-				DAD0CEB629CB9E4B00A43CC6 /* FuzzyFind */,
+				DAAB2C0929F8751F00D79A70 /* Fuse */,
 			);
 			productName = "TransiWatch Watch App";
 			productReference = DAD0CE9829CB97D500A43CC6 /* Transi.app */;
@@ -349,7 +370,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1400;
-				LastUpgradeCheck = 1410;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					DAA817C32974387B00E2FBB7 = {
 						CreatedOnToolsVersion = 14.1;
@@ -379,6 +400,7 @@
 			packageReferences = (
 				DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */,
 				DA89EDEB29BB97BA00C32F24 /* XCRemoteSwiftPackageReference "FuzzyFind" */,
+				DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */,
 			);
 			productRefGroup = DAA817C52974387B00E2FBB7 /* Products */;
 			projectDirPath = "";
@@ -432,12 +454,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
+				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
-				DA269E10298960EF00F42107 /* MHDTable.swift in Sources */,
+				DA269E10298960EF00F42107 /* List.swift in Sources */,
 				DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */,
+				DA32836429E33F650070FCA0 /* ListItem.swift in Sources */,
 				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
 				DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */,
+				DA32836129E19C920070FCA0 /* Detail.swift in Sources */,
 				DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
 				DAEF77B129744893008D66DE /* Stops.swift in Sources */,
@@ -466,9 +492,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAD0CEAB29CB9D4E00A43CC6 /* DataProvider.swift in Sources */,
-				DAD0CEAF29CB9DDA00A43CC6 /* MHDTable.swift in Sources */,
 				DAD0CEB029CB9DE200A43CC6 /* StopListView.swift in Sources */,
+				DA63553429E4957A00AAD7C0 /* String.swift in Sources */,
 				DAD0CEB129CB9DE500A43CC6 /* StopListIcon.swift in Sources */,
+				DA63553129E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
 				DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */,
 				DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */,
 				DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */,
@@ -531,6 +558,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -591,6 +619,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -621,6 +650,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -670,6 +700,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -716,6 +747,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
@@ -739,6 +771,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
@@ -761,6 +794,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
@@ -783,6 +817,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
@@ -939,28 +974,36 @@
 				kind = branch;
 			};
 		};
+		DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/krisk/fuse-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		DA89EDEC29BB97BA00C32F24 /* FuzzyFind */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DA89EDEB29BB97BA00C32F24 /* XCRemoteSwiftPackageReference "FuzzyFind" */;
-			productName = FuzzyFind;
-		};
 		DAA817F429743A9C00E2FBB7 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;
 			productName = SocketIO;
 		};
+		DAAB2C0729F8727900D79A70 /* Fuse */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */;
+			productName = Fuse;
+		};
+		DAAB2C0929F8751F00D79A70 /* Fuse */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */;
+			productName = Fuse;
+		};
 		DAD0CEB329CB9E1D00A43CC6 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;
 			productName = SocketIO;
-		};
-		DAD0CEB629CB9E4B00A43CC6 /* FuzzyFind */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DA89EDEB29BB97BA00C32F24 /* XCRemoteSwiftPackageReference "FuzzyFind" */;
-			productName = FuzzyFind;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

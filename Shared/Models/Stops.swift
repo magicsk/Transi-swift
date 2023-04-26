@@ -15,6 +15,7 @@ struct Stop: Codable, Identifiable, Hashable {
     var tripsCount: Int?
     var lat, lng: Double?
     var platformLabels: [PlatformLabel]?
+    var score: Double?
     var location: CLLocation {
         return CLLocation(latitude: self.lat ?? 0, longitude: self.lng ?? 0)
     }

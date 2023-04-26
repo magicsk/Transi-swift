@@ -35,6 +35,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         id: -1, stationID: -1, name: "Actual location", type: "location")
    
     @Published var tabs = [Tab]()
+    @Published var vehicleInfo = [VehicleInfo]()
     @Published var stops = [Stop]()
     var originalStops = [Stop]()
 
@@ -52,23 +53,25 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func fetchStops() {
-        fetchData(url: "\(magicApiBaseUrl)/stops?v", type: StopsVersion.self) { (stopsVersion) in
-            let cachedStops = self.userDefaults.retrieve(object: [Stop].self, forKey: Stored.stops)
-            print(stopsVersion.version)
-            if (self.stopsVersion == stopsVersion.version && cachedStops != nil) {
-                print("useing cached stops json")
-                self.stops = cachedStops!
-                self.originalStops = cachedStops!
-            } else {
-                print("getting new stops json")
-                self.fetchData(url: "\(self.magicApiBaseUrl)/stops", type: [Stop].self) { (stops) in
-                    self.stops = stops
-                    self.originalStops = stops
-                    self.userDefaults.save(customObject: stops, forKey: Stored.stops)
+        DispatchQueue.main.async {
+            self.fetchData(url: "\(self.magicApiBaseUrl)/stops?v", type: StopsVersion.self) { (stopsVersion) in
+                let cachedStops = self.userDefaults.retrieve(object: [Stop].self, forKey: Stored.stops)
+                print(stopsVersion.version)
+                if (self.stopsVersion == stopsVersion.version && cachedStops != nil) {
+                    print("useing cached stops json")
+                    self.stops = cachedStops!
+                    self.originalStops = cachedStops!
+                } else {
+                    print("getting new stops json")
+                    self.fetchData(url: "\(self.magicApiBaseUrl)/stops", type: [Stop].self) { (stops) in
+                        self.stops = stops
+                        self.originalStops = stops
+                        self.userDefaults.save(customObject: stops, forKey: Stored.stops)
+                    }
                 }
+                self.userDefaults.set(stopsVersion.version, forKey: Stored.stopsVerison)
+                self.locationManager.startUpdatingLocation()
             }
-            self.userDefaults.set(stopsVersion.version, forKey: Stored.stopsVerison)
-            self.locationManager.startUpdatingLocation()
         }
         
     }
@@ -78,12 +81,14 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func sortStops(lastLocation: CLLocation?) {
-        if (lastLocation != nil && self.stops.count > 0) {
-            let actualLocation = lastLocation!
-            self.stops = self.originalStops.sorted(by: { $0.distance(to: actualLocation) < $1.distance(to: actualLocation)})
-            addUtilsToStopList()
-            if (self.changeLocation) {
-                changeStop(stopId: getNearestStopId())
+        DispatchQueue.main.async {
+            if (lastLocation != nil && self.stops.count > 0) {
+                let actualLocation = lastLocation!
+                self.stops = self.originalStops.sorted(by: { $0.distance(to: actualLocation) < $1.distance(to: actualLocation)})
+                self.addUtilsToStopList()
+                if (self.changeLocation) {
+                    self.changeStop(stopId: self.getNearestStopId())
+                }
             }
         }
     }
@@ -113,6 +118,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     func disconnect() {
         socket.disconnect()
+        self.vehicleInfo = [VehicleInfo]()
     }
 
     func startListeners() {
@@ -129,7 +135,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         socket.on("cack") { data, ack in
             print(self.stopId)
             self.socket.emit("tabStart", [self.stopId, "*"] as [Any])
-//            self.socket.emit("infoStart")
+            self.socket.emit("infoStart")
         }
 
         socket.on("tabs") { data, ack in
@@ -155,7 +161,20 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                         }
                     }
                 }
-                self.tabs = newTabs.sorted(by: { Int($0.departureTime) < Int($1.departureTime) })
+                self.tabs = newTabs.sorted(by: { Int($0.departureTimeRaw) < Int($1.departureTimeRaw) })
+            }
+            
+        }
+        socket.on("vInfo") { data, ack in
+            print("vInfo")
+            DispatchQueue.main.async {
+                // print(data)
+                if let vehicleInfoJson = data[0] as? [String: Any] {
+                    if let newVehicleInfo = VehicleInfo(json: vehicleInfoJson) {
+                        self.vehicleInfo.append(newVehicleInfo)
+                        // print(self.vehicleInfo)
+                    }
+                }
             }
         }
     }
@@ -174,19 +193,20 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func changeStop(stopId: Int) {
-        switch (stopId) {
+        DispatchQueue.main.async {
+            switch (stopId) {
             case -1:
-                switchLocationChanging(true)
+                self.switchLocationChanging(true)
             default:
                 if (self.stopId != stopId) {
-                    switchLocationChanging(false)
-                    disconnect()
+                    self.switchLocationChanging(false)
+                    self.disconnect()
                     self.tabs = [Tab]()
                     self.stopId = stopId
-                    connect()
+                    self.connect()
                 }
             }
-        
+        }
     }
     
     func fetchData<T: Decodable>(url: String, type: T.Type, completion: @escaping (T) -> ()) {
