@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DA10FA3C2A093807005D7E49 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3B2A093807005D7E49 /* View.swift */; };
+		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
+		DA10FA422A093A5E005D7E49 /* TimetablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA412A0939CA005D7E49 /* TimetablesView.swift */; };
 		DA269E10298960EF00F42107 /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* List.swift */; };
 		DA32836129E19C920070FCA0 /* Detail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836029E19C920070FCA0 /* Detail.swift */; };
 		DA32836429E33F650070FCA0 /* ListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836329E33F650070FCA0 /* ListItem.swift */; };
@@ -84,6 +87,9 @@
 
 /* Begin PBXFileReference section */
 		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		DA10FA3B2A093807005D7E49 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
+		DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerView.swift; sourceTree = "<group>"; };
+		DA10FA412A0939CA005D7E49 /* TimetablesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetablesView.swift; sourceTree = "<group>"; };
 		DA269E0F298960EF00F42107 /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = List.swift; sourceTree = "<group>"; };
 		DA32836029E19C920070FCA0 /* Detail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Detail.swift; sourceTree = "<group>"; };
 		DA32836329E33F650070FCA0 /* ListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItem.swift; sourceTree = "<group>"; };
@@ -149,14 +155,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		DA32835F29E19C670070FCA0 /* VirtualTable */ = {
+		DA10FA3D2A09397E005D7E49 /* Trip Planner */ = {
+			isa = PBXGroup;
+			children = (
+				DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */,
+			);
+			path = "Trip Planner";
+			sourceTree = "<group>";
+		};
+		DA10FA3E2A093985005D7E49 /* Timetables */ = {
+			isa = PBXGroup;
+			children = (
+				DA10FA412A0939CA005D7E49 /* TimetablesView.swift */,
+			);
+			path = Timetables;
+			sourceTree = "<group>";
+		};
+		DA32835F29E19C670070FCA0 /* Virtual Table */ = {
 			isa = PBXGroup;
 			children = (
 				DA269E0F298960EF00F42107 /* List.swift */,
 				DA32836029E19C920070FCA0 /* Detail.swift */,
 				DA32836329E33F650070FCA0 /* ListItem.swift */,
+				DA10FA3B2A093807005D7E49 /* View.swift */,
 			);
-			path = VirtualTable;
+			path = "Virtual Table";
 			sourceTree = "<group>";
 		};
 		DA89EDE429BA980400C32F24 /* Extensions */ = {
@@ -196,7 +219,9 @@
 		DAA817C62974387B00E2FBB7 /* Transi */ = {
 			isa = PBXGroup;
 			children = (
-				DA32835F29E19C670070FCA0 /* VirtualTable */,
+				DA10FA3E2A093985005D7E49 /* Timetables */,
+				DA10FA3D2A09397E005D7E49 /* Trip Planner */,
+				DA32835F29E19C670070FCA0 /* Virtual Table */,
 				DAA817F22974393300E2FBB7 /* Info.plist */,
 				DAA817C72974387B00E2FBB7 /* TransiApp.swift */,
 				DAA817C92974387B00E2FBB7 /* ContentView.swift */,
@@ -457,6 +482,7 @@
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
+				DA10FA422A093A5E005D7E49 /* TimetablesView.swift in Sources */,
 				DA269E10298960EF00F42107 /* List.swift in Sources */,
 				DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */,
 				DA32836429E33F650070FCA0 /* ListItem.swift in Sources */,
@@ -465,7 +491,9 @@
 				DA32836129E19C920070FCA0 /* Detail.swift in Sources */,
 				DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
+				DA10FA3C2A093807005D7E49 /* View.swift in Sources */,
 				DAEF77B129744893008D66DE /* Stops.swift in Sources */,
+				DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
