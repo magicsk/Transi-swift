@@ -1,5 +1,5 @@
 //
-//  List.swift
+//  VirtualTableList.swift
 //  Transi
 //
 //  Created by magic_sk on 31/01/2023.
@@ -10,8 +10,8 @@ import SwiftUI
 struct VirtualTableList: View {
     @ObservedObject var dataProvider: DataProvider
     
-    init(_ _dataProvider: DataProvider) {
-        dataProvider = _dataProvider
+    init(_ dataProvider: DataProvider) {
+        self.dataProvider = dataProvider
     }
     
     var body: some View {

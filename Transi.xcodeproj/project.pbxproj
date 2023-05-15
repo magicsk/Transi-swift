@@ -7,16 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DA10FA3C2A093807005D7E49 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3B2A093807005D7E49 /* View.swift */; };
+		DA10FA3C2A093807005D7E49 /* VirtualTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */; };
 		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
 		DA10FA422A093A5E005D7E49 /* TimetablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA412A0939CA005D7E49 /* TimetablesView.swift */; };
-		DA269E10298960EF00F42107 /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* List.swift */; };
-		DA32836129E19C920070FCA0 /* Detail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836029E19C920070FCA0 /* Detail.swift */; };
-		DA32836429E33F650070FCA0 /* ListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836329E33F650070FCA0 /* ListItem.swift */; };
+		DA269E10298960EF00F42107 /* VirtualTableList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* VirtualTableList.swift */; };
+		DA32836129E19C920070FCA0 /* VirtualTableDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */; };
+		DA32836429E33F650070FCA0 /* VirtualTableListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */; };
+		DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */; };
+		DA500BF62A1140E600630226 /* TripPlannerWalkListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */; };
+		DA500BF82A11461300630226 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF72A11461300630226 /* Date.swift */; };
+		DA500BFF2A12B23900630226 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BFE2A12B23900630226 /* Color.swift */; };
+		DA500C022A12B81E00630226 /* ListStackModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500C012A12B81E00630226 /* ListStackModifier.swift */; };
 		DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */; };
 		DA63553129E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */; };
 		DA63553329E4957A00AAD7C0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
 		DA63553429E4957A00AAD7C0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
+		DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */; };
+		DA7A7D3F2A112FCB0002D7D7 /* DateTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */; };
 		DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
@@ -31,11 +38,17 @@
 		DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
 		DAAB2C0829F8727900D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0729F8727900D79A70 /* Fuse */; };
 		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
+		DABD03202A09A3C900FD2C4B /* TripReq.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD031F2A09A15600FD2C4B /* TripReq.swift */; };
+		DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03212A0AF3BF00FD2C4B /* Binding.swift */; };
+		DABD03232A0AF3BF00FD2C4B /* Binding.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03212A0AF3BF00FD2C4B /* Binding.swift */; };
+		DABD03252A0AF76E00FD2C4B /* StopGps.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03242A0AF76E00FD2C4B /* StopGps.swift */; };
+		DABD03262A0AF76E00FD2C4B /* StopGps.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03242A0AF76E00FD2C4B /* StopGps.swift */; };
+		DABD03282A0AF7B800FD2C4B /* Trip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03272A0AF7B800FD2C4B /* Trip.swift */; };
+		DABD03292A0AF7B800FD2C4B /* Trip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03272A0AF7B800FD2C4B /* Trip.swift */; };
+		DABD032C2A0BE61F00FD2C4B /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DABD032B2A0BE61F00FD2C4B /* SwiftUIX */; };
 		DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */; };
 		DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */; };
 		DAD0CEA229CB97D700A43CC6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAD0CEA129CB97D700A43CC6 /* Preview Assets.xcassets */; };
-		DAD0CEA529CB97D700A43CC6 /* Transi.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = DAD0CE9829CB97D500A43CC6 /* Transi.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		DAD0CEAB29CB9D4E00A43CC6 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
 		DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAD0CEAD29CB9D5700A43CC6 /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
 		DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
@@ -78,7 +91,6 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				DAD0CEA529CB97D700A43CC6 /* Transi.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -87,31 +99,42 @@
 
 /* Begin PBXFileReference section */
 		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
-		DA10FA3B2A093807005D7E49 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
+		DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableView.swift; sourceTree = "<group>"; };
 		DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerView.swift; sourceTree = "<group>"; };
 		DA10FA412A0939CA005D7E49 /* TimetablesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetablesView.swift; sourceTree = "<group>"; };
-		DA269E0F298960EF00F42107 /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = List.swift; sourceTree = "<group>"; };
-		DA32836029E19C920070FCA0 /* Detail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Detail.swift; sourceTree = "<group>"; };
-		DA32836329E33F650070FCA0 /* ListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItem.swift; sourceTree = "<group>"; };
+		DA269E0F298960EF00F42107 /* VirtualTableList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableList.swift; sourceTree = "<group>"; };
+		DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableDetail.swift; sourceTree = "<group>"; };
+		DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableListItem.swift; sourceTree = "<group>"; };
+		DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerTransitListItem.swift; sourceTree = "<group>"; };
+		DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerWalkListItem.swift; sourceTree = "<group>"; };
+		DA500BF72A11461300630226 /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
+		DA500BFE2A12B23900630226 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
+		DA500C012A12B81E00630226 /* ListStackModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListStackModifier.swift; sourceTree = "<group>"; };
 		DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleInfo.swift; sourceTree = "<group>"; };
 		DA63553229E4957A00AAD7C0 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
+		DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerList.swift; sourceTree = "<group>"; };
+		DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTime.swift; sourceTree = "<group>"; };
 		DA89EDE529BA981700C32F24 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListIcon.swift; sourceTree = "<group>"; };
-		DAA817C42974387B00E2FBB7 /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
 		DAA817C92974387B00E2FBB7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DAA817CB2974387C00E2FBB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DAA817CD2974387C00E2FBB7 /* Transi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Transi.entitlements; sourceTree = "<group>"; };
 		DAA817CF2974387C00E2FBB7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		DAA817D52974387D00E2FBB7 /* TransiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAA817D92974387D00E2FBB7 /* TransiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiTests.swift; sourceTree = "<group>"; };
-		DAA817DF2974387D00E2FBB7 /* TransiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAA817E32974387D00E2FBB7 /* TransiUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiUITests.swift; sourceTree = "<group>"; };
 		DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		DAA817F22974393300E2FBB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DAA817F729743B4B00E2FBB7 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
 		DAA817F929743B6300E2FBB7 /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
-		DAD0CE9829CB97D500A43CC6 /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DABD031B2A097ABE00FD2C4B /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DABD031C2A097ABE00FD2C4B /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DABD031D2A097ABE00FD2C4B /* TransiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DABD031E2A097ABE00FD2C4B /* TransiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DABD031F2A09A15600FD2C4B /* TripReq.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripReq.swift; sourceTree = "<group>"; };
+		DABD03212A0AF3BF00FD2C4B /* Binding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Binding.swift; sourceTree = "<group>"; };
+		DABD03242A0AF76E00FD2C4B /* StopGps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopGps.swift; sourceTree = "<group>"; };
+		DABD03272A0AF7B800FD2C4B /* Trip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trip.swift; sourceTree = "<group>"; };
 		DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiWatchApp.swift; sourceTree = "<group>"; };
 		DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DAD0CEA129CB97D700A43CC6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -124,6 +147,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DABD032C2A0BE61F00FD2C4B /* SwiftUIX in Frameworks */,
 				DAAB2C0829F8727900D79A70 /* Fuse in Frameworks */,
 				DAA817F529743A9C00E2FBB7 /* SocketIO in Frameworks */,
 			);
@@ -159,6 +183,9 @@
 			isa = PBXGroup;
 			children = (
 				DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */,
+				DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */,
+				DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */,
+				DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */,
 			);
 			path = "Trip Planner";
 			sourceTree = "<group>";
@@ -174,12 +201,37 @@
 		DA32835F29E19C670070FCA0 /* Virtual Table */ = {
 			isa = PBXGroup;
 			children = (
-				DA269E0F298960EF00F42107 /* List.swift */,
-				DA32836029E19C920070FCA0 /* Detail.swift */,
-				DA32836329E33F650070FCA0 /* ListItem.swift */,
-				DA10FA3B2A093807005D7E49 /* View.swift */,
+				DA269E0F298960EF00F42107 /* VirtualTableList.swift */,
+				DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */,
+				DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */,
+				DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */,
 			);
 			path = "Virtual Table";
+			sourceTree = "<group>";
+		};
+		DA500C002A12B7FC00630226 /* Modifiers */ = {
+			isa = PBXGroup;
+			children = (
+				DA500C012A12B81E00630226 /* ListStackModifier.swift */,
+			);
+			path = Modifiers;
+			sourceTree = "<group>";
+		};
+		DA500C032A12F11600630226 /* Stop List */ = {
+			isa = PBXGroup;
+			children = (
+				DAEF77B22974680B008D66DE /* StopListView.swift */,
+				DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */,
+			);
+			path = "Stop List";
+			sourceTree = "<group>";
+		};
+		DA7A7D3D2A1127010002D7D7 /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */,
+			);
+			path = Util;
 			sourceTree = "<group>";
 		};
 		DA89EDE429BA980400C32F24 /* Extensions */ = {
@@ -187,6 +239,9 @@
 			children = (
 				DA89EDE529BA981700C32F24 /* UserDefaults.swift */,
 				DA63553229E4957A00AAD7C0 /* String.swift */,
+				DABD03212A0AF3BF00FD2C4B /* Binding.swift */,
+				DA500BF72A11461300630226 /* Date.swift */,
+				DA500BFE2A12B23900630226 /* Color.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -200,25 +255,18 @@
 				DAD0CE9929CB97D500A43CC6 /* Transi Watch App */,
 				DAA817D82974387D00E2FBB7 /* TransiTests */,
 				DAA817E22974387D00E2FBB7 /* TransiUITests */,
-				DAA817C52974387B00E2FBB7 /* Products */,
 				DAD0CEB229CB9E1D00A43CC6 /* Frameworks */,
+				DABD031B2A097ABE00FD2C4B /* Transi.app */,
+				DABD031C2A097ABE00FD2C4B /* Transi.app */,
+				DABD031D2A097ABE00FD2C4B /* TransiTests.xctest */,
+				DABD031E2A097ABE00FD2C4B /* TransiUITests.xctest */,
 			);
-			sourceTree = "<group>";
-		};
-		DAA817C52974387B00E2FBB7 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				DAA817C42974387B00E2FBB7 /* Transi.app */,
-				DAA817D52974387D00E2FBB7 /* TransiTests.xctest */,
-				DAA817DF2974387D00E2FBB7 /* TransiUITests.xctest */,
-				DAD0CE9829CB97D500A43CC6 /* Transi.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		DAA817C62974387B00E2FBB7 /* Transi */ = {
 			isa = PBXGroup;
 			children = (
+				DA500C032A12F11600630226 /* Stop List */,
 				DA10FA3E2A093985005D7E49 /* Timetables */,
 				DA10FA3D2A09397E005D7E49 /* Trip Planner */,
 				DA32835F29E19C670070FCA0 /* Virtual Table */,
@@ -227,8 +275,6 @@
 				DAA817C92974387B00E2FBB7 /* ContentView.swift */,
 				DAA817CD2974387C00E2FBB7 /* Transi.entitlements */,
 				DAA817CE2974387C00E2FBB7 /* Preview Content */,
-				DAEF77B22974680B008D66DE /* StopListView.swift */,
-				DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */,
 			);
 			path = Transi;
 			sourceTree = "<group>";
@@ -261,9 +307,12 @@
 		DAA817F629743B2A00E2FBB7 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				DABD031F2A09A15600FD2C4B /* TripReq.swift */,
 				DAA817F729743B4B00E2FBB7 /* Table.swift */,
 				DAEF77B029744893008D66DE /* Stops.swift */,
 				DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */,
+				DABD03242A0AF76E00FD2C4B /* StopGps.swift */,
+				DABD03272A0AF7B800FD2C4B /* Trip.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -289,6 +338,8 @@
 		DAD0CEAA29CB9B9800A43CC6 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				DA500C002A12B7FC00630226 /* Modifiers */,
+				DA7A7D3D2A1127010002D7D7 /* Util */,
 				DAA817CB2974387C00E2FBB7 /* Assets.xcassets */,
 				DA89EDE429BA980400C32F24 /* Extensions */,
 				DAA817F629743B2A00E2FBB7 /* Models */,
@@ -325,9 +376,10 @@
 			packageProductDependencies = (
 				DAA817F429743A9C00E2FBB7 /* SocketIO */,
 				DAAB2C0729F8727900D79A70 /* Fuse */,
+				DABD032B2A0BE61F00FD2C4B /* SwiftUIX */,
 			);
 			productName = Transi;
-			productReference = DAA817C42974387B00E2FBB7 /* Transi.app */;
+			productReference = DABD031B2A097ABE00FD2C4B /* Transi.app */;
 			productType = "com.apple.product-type.application";
 		};
 		DAA817D42974387D00E2FBB7 /* TransiTests */ = {
@@ -345,7 +397,7 @@
 			);
 			name = TransiTests;
 			productName = TransiTests;
-			productReference = DAA817D52974387D00E2FBB7 /* TransiTests.xctest */;
+			productReference = DABD031D2A097ABE00FD2C4B /* TransiTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		DAA817DE2974387D00E2FBB7 /* TransiUITests */ = {
@@ -363,7 +415,7 @@
 			);
 			name = TransiUITests;
 			productName = TransiUITests;
-			productReference = DAA817DF2974387D00E2FBB7 /* TransiUITests.xctest */;
+			productReference = DABD031E2A097ABE00FD2C4B /* TransiUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		DAD0CE9729CB97D500A43CC6 /* Transi Watch App */ = {
@@ -384,7 +436,7 @@
 				DAAB2C0929F8751F00D79A70 /* Fuse */,
 			);
 			productName = "TransiWatch Watch App";
-			productReference = DAD0CE9829CB97D500A43CC6 /* Transi.app */;
+			productReference = DABD031C2A097ABE00FD2C4B /* Transi.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -425,8 +477,9 @@
 			packageReferences = (
 				DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */,
 				DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */,
+				DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */,
 			);
-			productRefGroup = DAA817C52974387B00E2FBB7 /* Products */;
+			productRefGroup = DAA817BB2974387B00E2FBB7;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -479,19 +532,30 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
+				DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */,
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
+				DABD03282A0AF7B800FD2C4B /* Trip.swift in Sources */,
+				DA500BF82A11461300630226 /* Date.swift in Sources */,
+				DABD03252A0AF76E00FD2C4B /* StopGps.swift in Sources */,
 				DA10FA422A093A5E005D7E49 /* TimetablesView.swift in Sources */,
-				DA269E10298960EF00F42107 /* List.swift in Sources */,
+				DA269E10298960EF00F42107 /* VirtualTableList.swift in Sources */,
 				DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */,
-				DA32836429E33F650070FCA0 /* ListItem.swift in Sources */,
+				DA7A7D3F2A112FCB0002D7D7 /* DateTime.swift in Sources */,
+				DA32836429E33F650070FCA0 /* VirtualTableListItem.swift in Sources */,
+				DABD03202A09A3C900FD2C4B /* TripReq.swift in Sources */,
 				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
 				DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */,
-				DA32836129E19C920070FCA0 /* Detail.swift in Sources */,
+				DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */,
+				DA500BFF2A12B23900630226 /* Color.swift in Sources */,
+				DA32836129E19C920070FCA0 /* VirtualTableDetail.swift in Sources */,
+				DA500C022A12B81E00630226 /* ListStackModifier.swift in Sources */,
+				DA500BF62A1140E600630226 /* TripPlannerWalkListItem.swift in Sources */,
 				DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */,
+				DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
-				DA10FA3C2A093807005D7E49 /* View.swift in Sources */,
+				DA10FA3C2A093807005D7E49 /* VirtualTableView.swift in Sources */,
 				DAEF77B129744893008D66DE /* Stops.swift in Sources */,
 				DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */,
 			);
@@ -518,9 +582,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAD0CEAB29CB9D4E00A43CC6 /* DataProvider.swift in Sources */,
+				DABD03292A0AF7B800FD2C4B /* Trip.swift in Sources */,
 				DAD0CEB029CB9DE200A43CC6 /* StopListView.swift in Sources */,
 				DA63553429E4957A00AAD7C0 /* String.swift in Sources */,
+				DABD03262A0AF76E00FD2C4B /* StopGps.swift in Sources */,
 				DAD0CEB129CB9DE500A43CC6 /* StopListIcon.swift in Sources */,
 				DA63553129E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
 				DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */,
@@ -528,6 +593,7 @@
 				DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */,
 				DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */,
 				DAD0CEAD29CB9D5700A43CC6 /* Stops.swift in Sources */,
+				DABD03232A0AF3BF00FD2C4B /* Binding.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1001,6 +1067,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftUIX/SwiftUIX";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1018,6 +1092,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */;
 			productName = Fuse;
+		};
+		DABD032B2A0BE61F00FD2C4B /* SwiftUIX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */;
+			productName = SwiftUIX;
 		};
 		DAD0CEB329CB9E1D00A43CC6 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -1,5 +1,5 @@
 //
-//  Detail.swift
+//  VirtualTableDetail.swift
 //  Transi
 //
 //  Created by magic_sk on 08/04/2023.

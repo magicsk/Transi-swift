@@ -11,19 +11,18 @@ import SwiftUI
 
 struct StopListView: View {
     @State private var searchText = ""
-    @State private var stopList = [Stop]()
     @Binding var isPresented: Bool
-    @Binding var stopId: Int
+    @Binding var stop: Stop
     @State private var searchResults: [Stop]
     let fuse = Fuse()
-    var dataProvider: DataProvider
+    var stopList: [Stop]
     let searchTextPublisher = PassthroughSubject<String, Never>()
 
-    init(stopId: Binding<Int>, dataProviderProp: DataProvider, isPresented: Binding<Bool>) {
+    init(stop: Binding<Stop>, stopList: [Stop], isPresented: Binding<Bool>) {
         _isPresented = isPresented
-        _stopId = stopId
-        dataProvider = dataProviderProp
-        searchResults = dataProvider.stops
+        _stop = stop
+        self.stopList = stopList
+        searchResults = stopList
     }
 
     var body: some View {
@@ -38,13 +37,14 @@ struct StopListView: View {
                 }
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    dataProvider.changeStop(stopId: stop.id ?? 0)
+                    self.stop = stop
                     self.isPresented = false
                 }
             }
         }
-        .searchable(text: $searchText)
+        .searchable(text: $searchText, placement: .navigationBarDrawer)
         .disableAutocorrection(true)
+        .textInputAutocapitalization(.never)
         .onChange(of: searchText) { searchText in
             searchTextPublisher.send(searchText)
         }
@@ -53,11 +53,11 @@ struct StopListView: View {
                 .debounce(for: .milliseconds(250), scheduler: DispatchQueue.main)
         ) { _ in
             if searchText.isEmpty {
-                searchResults = dataProvider.stops
+                searchResults = stopList
             } else {
                 DispatchQueue.global(qos: .userInteractive).async {
                     let pattern = fuse.createPattern(from: searchText.simplify())
-                    let scoredStops = dataProvider.stops
+                    let scoredStops = stopList
                         .map { stop -> (Stop) in
                             var newStop: Stop = stop
                             let score = (stop.id ?? 0 < 0) ? -2 : fuse.search(pattern, in: stop.name?.simplify() ?? "")?.score

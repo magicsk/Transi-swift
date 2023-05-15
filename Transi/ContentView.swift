@@ -8,14 +8,16 @@
 import SwiftUI
 
 struct ContentView: View {
+    @ObservedObject private var dataProvider = DataProvider()
+    
     var body: some View {
         TabView {
-            TripPlannerView()
+            TripPlannerView(dataProvider)
                 .tabItem {
                     Image(systemName: "tram")
                     Text("Trip planner")
                 }
-            VirtualTableView()
+            VirtualTableView(dataProvider)
                 .tabItem {
                     Image(systemName: "clock.arrow.2.circlepath")
                     Text("Virtual Table")

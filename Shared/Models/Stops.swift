@@ -9,7 +9,7 @@ import Foundation
 import CoreLocation
 
 struct Stop: Codable, Identifiable, Hashable {
-    var id, stationID: Int?
+    var id, stationId: Int?
     var name, city: String?
     var type: String?
     var tripsCount: Int?
@@ -19,6 +19,7 @@ struct Stop: Codable, Identifiable, Hashable {
     var location: CLLocation {
         return CLLocation(latitude: self.lat ?? 0, longitude: self.lng ?? 0)
     }
+    static let example = Stop(id: 94)
 
     func distance(to location: CLLocation) -> CLLocationDistance {
         return location.distance(from: self.location)

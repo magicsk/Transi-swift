@@ -23,7 +23,7 @@ struct Tab: Codable, Identifiable, Hashable {
     var lastStopId: Int
     var lastStopName: String
     var stuck: Bool
-    static var example = Tab(id: 1, line: "72", platform: 099, busID: "1:2552", headsign: "Čiližská", departureTime: "22:30", departureTimeRaw: TimeInterval(1680959460000), departureTimeRemaining: "1 min", delay: 23, delayText: "with 23 minutes delay", type: "online", currentStopId: 12, lastStopId: 12, lastStopName: "Cintorín Vrakuňa", stuck: true)
+    static let example = Tab(id: 1, line: "72", platform: 099, busID: "1:2552", headsign: "Čiližská", departureTime: "22:30", departureTimeRaw: TimeInterval(1680959460000), departureTimeRemaining: "1 min", delay: 23, delayText: "with 23 minutes delay", type: "online", currentStopId: 12, lastStopId: 12, lastStopName: "Cintorín Vrakuňa", stuck: true)
 }
 
 
@@ -44,11 +44,15 @@ extension Tab {
         let departureTime = Date(timeIntervalSince1970: TimeInterval(departureTimeRaw)).formatted(date: .omitted, time: .shortened)
         let departureTimeRemainingRaw = Int(departureTimeRaw - Date().timeIntervalSince1970)
         let timeInMins = departureTimeRemainingRaw / 60
-        let departureTimeRemaining = departureTimeRemainingRaw > 59 ?
+        var departureTimeRemaining = departureTimeRemainingRaw > 59 ?
         timeInMins > 59 ?
         departureTime :
         "\(timeInMins) min" :
         departureTimeRemainingRaw > 0 ? "<1 min" : "now"
+        
+        if (type != "online") {
+            departureTimeRemaining = "~\(departureTimeRemaining)"
+        }
 
         self.id = id
         self.line = line

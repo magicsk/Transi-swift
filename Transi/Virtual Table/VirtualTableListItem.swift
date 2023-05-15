@@ -1,5 +1,5 @@
 //
-//  ListItem.swift
+//  VirtualTableListItem.swift
 //  Transi
 //
 //  Created by magic_sk on 09/04/2023.
