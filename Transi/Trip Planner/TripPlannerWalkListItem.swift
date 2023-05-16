@@ -15,12 +15,15 @@ struct TripPlannerWalkListItem: View {
     }
 
     var body: some View {
-        let sameStop = part.startStopID == part.endStopID
+        let sameStop = part.startStopName == part.endStopName
         HStack {
             Image(systemName: "figure.walk")
                 .font(.system(size: 25.0))
                 .foregroundColor(.accentColor)
                 .frame(minWidth: 36.0)
+                .onPress {
+                    print(part)
+                }
             Text("\(timeDiffFromUtc(part.startDeparture, part.endArrival)) min to \(sameStop ? "platform \(part.endStopCode ?? "X")" : part.endStopName ?? "Error")")
         }
     }
