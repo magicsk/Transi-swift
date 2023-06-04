@@ -29,7 +29,6 @@
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
 		DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C92974387B00E2FBB7 /* ContentView.swift */; };
 		DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
-		DAA817D02974387C00E2FBB7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CF2974387C00E2FBB7 /* Preview Assets.xcassets */; };
 		DAA817DA2974387D00E2FBB7 /* TransiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817D92974387D00E2FBB7 /* TransiTests.swift */; };
 		DAA817E42974387D00E2FBB7 /* TransiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E32974387D00E2FBB7 /* TransiUITests.swift */; };
 		DAA817E62974387D00E2FBB7 /* TransiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */; };
@@ -48,12 +47,9 @@
 		DABD032C2A0BE61F00FD2C4B /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DABD032B2A0BE61F00FD2C4B /* SwiftUIX */; };
 		DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */; };
 		DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */; };
-		DAD0CEA229CB97D700A43CC6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAD0CEA129CB97D700A43CC6 /* Preview Assets.xcassets */; };
 		DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAD0CEAD29CB9D5700A43CC6 /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
 		DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
-		DAD0CEB029CB9DE200A43CC6 /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
-		DAD0CEB129CB9DE500A43CC6 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
 		DAD0CEB429CB9E1D00A43CC6 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAD0CEB329CB9E1D00A43CC6 /* SocketIO */; };
 		DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
 		DAEF77B129744893008D66DE /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
@@ -74,13 +70,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = DAA817C32974387B00E2FBB7;
 			remoteInfo = Transi;
-		};
-		DAD0CEA329CB97D700A43CC6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = DAA817BC2974387B00E2FBB7 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = DAD0CE9729CB97D500A43CC6;
-			remoteInfo = "TransiWatch Watch App";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -137,7 +126,6 @@
 		DABD03272A0AF7B800FD2C4B /* Trip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trip.swift; sourceTree = "<group>"; };
 		DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiWatchApp.swift; sourceTree = "<group>"; };
 		DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		DAD0CEA129CB97D700A43CC6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		DAEF77B029744893008D66DE /* Stops.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stops.swift; sourceTree = "<group>"; };
 		DAEF77B22974680B008D66DE /* StopListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -322,17 +310,8 @@
 			children = (
 				DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */,
 				DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */,
-				DAD0CEA029CB97D700A43CC6 /* Preview Content */,
 			);
 			path = "Transi Watch App";
-			sourceTree = "<group>";
-		};
-		DAD0CEA029CB97D700A43CC6 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				DAD0CEA129CB97D700A43CC6 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		DAD0CEAA29CB9B9800A43CC6 /* Shared */ = {
@@ -370,7 +349,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				DAD0CEA429CB97D700A43CC6 /* PBXTargetDependency */,
 			);
 			name = Transi;
 			packageProductDependencies = (
@@ -496,7 +474,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAA817D02974387C00E2FBB7 /* Preview Assets.xcassets in Resources */,
 				DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -520,7 +497,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */,
-				DAD0CEA229CB97D700A43CC6 /* Preview Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -583,10 +559,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				DABD03292A0AF7B800FD2C4B /* Trip.swift in Sources */,
-				DAD0CEB029CB9DE200A43CC6 /* StopListView.swift in Sources */,
 				DA63553429E4957A00AAD7C0 /* String.swift in Sources */,
 				DABD03262A0AF76E00FD2C4B /* StopGps.swift in Sources */,
-				DAD0CEB129CB9DE500A43CC6 /* StopListIcon.swift in Sources */,
 				DA63553129E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
 				DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */,
 				DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */,
@@ -609,11 +583,6 @@
 			isa = PBXTargetDependency;
 			target = DAA817C32974387B00E2FBB7 /* Transi */;
 			targetProxy = DAA817E02974387D00E2FBB7 /* PBXContainerItemProxy */;
-		};
-		DAD0CEA429CB97D700A43CC6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = DAD0CE9729CB97D500A43CC6 /* Transi Watch App */;
-			targetProxy = DAD0CEA329CB97D700A43CC6 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -772,7 +741,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.transi;
+				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = auto;
@@ -822,7 +791,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.transi;
+				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = auto;
