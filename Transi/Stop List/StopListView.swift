@@ -42,7 +42,7 @@ struct StopListView: View {
                 }
             }
         }
-        .searchable(text: $searchText, placement: .navigationBarDrawer)
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
         .disableAutocorrection(true)
         .textInputAutocapitalization(.never)
         .onChange(of: searchText) { searchText in

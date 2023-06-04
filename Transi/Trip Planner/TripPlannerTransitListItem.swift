@@ -33,6 +33,19 @@ struct TripPlannerTransitListItem: View {
         icon: {
             Text(part.routeShortName ?? "0").frame(minWidth: 50.0).foregroundColor(.accentColor)
         }
+//        .gesture(DragGesture(minimumDistance: 10, coordinateSpace: .global)
+//            .onChanged { value in
+//                print(value)
+//                let draggedOffset = value.translation.height
+//                if draggedOffset > 0 {
+//                    offset = draggedOffset
+//                } else {
+//                    offset = 0
+//                }
+//            }
+//            .onEnded { value in
+//
+//            })
     }
 }
 
