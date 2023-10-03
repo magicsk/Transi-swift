@@ -36,7 +36,9 @@ struct VirtualTableListItem: View {
         icon: {
             HStack {
                 LineText(tab.line, 20.0).offset(y: 6.0)
-            }.width(500.0)
+            }
+            .padding(.trailing, 5.0)
+            .width(500.0)
         }
         .overlay {
             NavigationLink(destination: VirtualTableDetail(tab, vehicleInfo: vehicleInfo),

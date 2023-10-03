@@ -10,20 +10,23 @@ import SwiftUI
 struct LineText: View {
     var lineNum: String
     var size: CGFloat
+    var isDirectionSign: Bool
 
     init(_ lineNum: String, _ size: CGFloat = 28.0) {
         self.lineNum = lineNum
         self.size = size
+        isDirectionSign = lineNum == "►"
     }
 
     var body: some View {
         Text(lineNum)
             .font(.system(size: size, weight: .bold))
             .foregroundStyle(textColorFromLineNum(lineNum)!)
+            .offset(x: isDirectionSign ? 1.0 : 0.0, y: isDirectionSign ? -2.5 : 0.0)
             .lineLimit(1)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.vertical, size * 0.14)
-            .padding(.horizontal, size * 0.21)
+            .padding(.vertical,  size * 0.14)
+            .padding(.horizontal,isDirectionSign ? size * 0.55 : size * 0.21)
             .width(Int(lineNum) ?? 99 < 10 ? size*1.57 : .infinity)
             .background(
                 RoundedRectangle(cornerRadius: isRounded(lineNum) ? 100.0 : 4.0, style: .circular)
@@ -45,7 +48,7 @@ struct LineText: View {
             LineText("99")
         }
         HStack {
-            LineText("X4")
+            LineText("►")
             LineText("X70")
             LineText("N72")
         }
