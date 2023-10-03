@@ -17,7 +17,7 @@ struct VirtualTableList: View {
     var body: some View {
         List(dataProvider.tabs) { tab in
             let vehicleInfo = dataProvider.vehicleInfo.first(where: { $0.issi == tab.busID })
-            VirtualTableListItem(tab, _vehicleInfo: vehicleInfo )
+            VirtualTableListItem(tab, vehicleInfo: vehicleInfo )
         }
     }
 }

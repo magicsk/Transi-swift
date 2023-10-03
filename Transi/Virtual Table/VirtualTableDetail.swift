@@ -8,16 +8,15 @@
 import SwiftUI
 
 struct VirtualTableDetail: View {
-
     var tab: Tab
     var vehicleInfo: VehicleInfo?
     var delayColor: Color = .gray
 
     private let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
 
-    init(_ _tab: Tab, _vehicleInfo: VehicleInfo?) {
-        tab = _tab
-        vehicleInfo = _vehicleInfo
+    init(_ tab: Tab, vehicleInfo: VehicleInfo?) {
+        self.tab = tab
+        self.vehicleInfo = vehicleInfo
         switch tab.delay {
             case 0...1:
                 delayColor = Color.green
@@ -75,7 +74,13 @@ struct VirtualTableDetail: View {
             #if !os(macOS)
                 .navigationBarItems(
                     leading: HStack {
-                        Text(tab.line).font(.largeTitle.bold())
+                        Text(tab.line)
+                            .font(.system(size: 28.0, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(4.0)
+                            .background(
+                                RoundedRectangle(cornerRadius: 5.0, style: .circular)
+                                    .fill(Color(hexadecimal: "8c9f23")))
                         Text(tab.headsign).font(.largeTitle.bold())
                     },
                     trailing: Image(tab.stuck ? "exclamationmark.triangle.fill" : "")
@@ -89,6 +94,6 @@ struct VirtualTableDetail: View {
 
 struct VirtualTableDetailPreview: PreviewProvider {
     static var previews: some View {
-        VirtualTableDetail(Tab.example, _vehicleInfo: VehicleInfo.example)
+        VirtualTableDetail(Tab.example, vehicleInfo: VehicleInfo.example)
     }
 }

@@ -11,9 +11,9 @@ struct VirtualTableListItem: View {
     var tab: Tab
     var vehicleInfo: VehicleInfo?
 
-    init(_ _tab: Tab, _vehicleInfo: VehicleInfo?) {
-        tab = _tab
-        vehicleInfo = _vehicleInfo
+    init(_ tab: Tab, vehicleInfo: VehicleInfo?) {
+        self.tab = tab
+        self.vehicleInfo = vehicleInfo
     }
 
     var body: some View {
@@ -37,7 +37,7 @@ struct VirtualTableListItem: View {
             Text(tab.line).font(.custom("SF Pro", size: 15)).frame(width: 48.0).offset(y: 6)
         }
         .overlay {
-            NavigationLink(destination: VirtualTableDetail(tab, _vehicleInfo: vehicleInfo),
+            NavigationLink(destination: VirtualTableDetail(tab, vehicleInfo: vehicleInfo),
                            label: { EmptyView() })
                 .opacity(0)
         }
@@ -46,6 +46,6 @@ struct VirtualTableListItem: View {
 
 struct VirtualTableListItem_Previews: PreviewProvider {
     static var previews: some View {
-        VirtualTableListItem(Tab.example, _vehicleInfo: VehicleInfo.example)
+        VirtualTableListItem(Tab.example, vehicleInfo: VehicleInfo.example)
     }
 }
