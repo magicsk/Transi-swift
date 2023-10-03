@@ -29,8 +29,8 @@ struct TripPlannerWalkListItem: View {
     }
 }
 
-// struct TripPlannerWalkListItem_Previews: PreviewProvider {
-//    static var previews: some View {
-//        TripPlannerWalkListItem()
-//    }
-// }
+ struct TripPlannerWalkListItem_Previews: PreviewProvider {
+    static var previews: some View {
+        TripPlannerWalkListItem(Part.example)
+    }
+ }

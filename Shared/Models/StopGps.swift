@@ -9,4 +9,5 @@ import Foundation
 
 struct StopGps: Codable, Hashable {
     let lon, lat: Double
+    static let example = StopGps(lon: 17.208740234375, lat: 48.1357383728027)
 }

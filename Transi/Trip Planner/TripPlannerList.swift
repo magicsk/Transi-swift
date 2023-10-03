@@ -45,8 +45,8 @@ func getHeaderText(_ parts: [Part], _ zones: [Int]?) -> String {
     return "\(startTime) | \(duration) min | \(numOfZones) zones"
 }
 
-// struct TripPlannerList_Previews: PreviewProvider {
-//    static var previews: some View {
-//        TripPlannerList()
-//    }
-// }
+ struct TripPlannerList_Previews: PreviewProvider {
+    static var previews: some View {
+        TripPlannerList([Journey.example])
+    }
+ }
