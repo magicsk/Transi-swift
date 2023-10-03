@@ -74,13 +74,7 @@ struct VirtualTableDetail: View {
             #if !os(macOS)
                 .navigationBarItems(
                     leading: HStack {
-                        Text(tab.line)
-                            .font(.system(size: 28.0, weight: .bold))
-                            .foregroundStyle(.white)
-                            .padding(4.0)
-                            .background(
-                                RoundedRectangle(cornerRadius: 5.0, style: .circular)
-                                    .fill(Color(hexadecimal: "8c9f23")))
+                        LineText(tab.line)
                         Text(tab.headsign).font(.largeTitle.bold())
                     },
                     trailing: Image(tab.stuck ? "exclamationmark.triangle.fill" : "")

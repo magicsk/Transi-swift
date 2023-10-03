@@ -34,7 +34,9 @@ struct VirtualTableListItem: View {
             }
         }
         icon: {
-            Text(tab.line).font(.custom("SF Pro", size: 15)).frame(width: 48.0).offset(y: 6)
+            HStack {
+                LineText(tab.line, 20.0).offset(y: 6.0)
+            }.width(500.0)
         }
         .overlay {
             NavigationLink(destination: VirtualTableDetail(tab, vehicleInfo: vehicleInfo),

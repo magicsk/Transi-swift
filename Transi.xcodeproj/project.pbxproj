@@ -37,6 +37,8 @@
 		DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
 		DAAB2C0829F8727900D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0729F8727900D79A70 /* Fuse */; };
 		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
+		DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE4082ACC23DA00D66159 /* LineText.swift */; };
+		DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE40A2ACC2E5200D66159 /* Line.swift */; };
 		DABD03202A09A3C900FD2C4B /* TripReq.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD031F2A09A15600FD2C4B /* TripReq.swift */; };
 		DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03212A0AF3BF00FD2C4B /* Binding.swift */; };
 		DABD03232A0AF3BF00FD2C4B /* Binding.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03212A0AF3BF00FD2C4B /* Binding.swift */; };
@@ -116,6 +118,8 @@
 		DAA817F22974393300E2FBB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DAA817F729743B4B00E2FBB7 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
 		DAA817F929743B6300E2FBB7 /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
+		DABAE4082ACC23DA00D66159 /* LineText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineText.swift; sourceTree = "<group>"; };
+		DABAE40A2ACC2E5200D66159 /* Line.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Line.swift; sourceTree = "<group>"; };
 		DABD031B2A097ABE00FD2C4B /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DABD031C2A097ABE00FD2C4B /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DABD031D2A097ABE00FD2C4B /* TransiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -218,6 +222,7 @@
 			isa = PBXGroup;
 			children = (
 				DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */,
+				DABAE40A2ACC2E5200D66159 /* Line.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -305,6 +310,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		DABAE4072ACC23B800D66159 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				DABAE4082ACC23DA00D66159 /* LineText.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		DAD0CE9929CB97D500A43CC6 /* Transi Watch App */ = {
 			isa = PBXGroup;
 			children = (
@@ -317,6 +330,7 @@
 		DAD0CEAA29CB9B9800A43CC6 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				DABAE4072ACC23B800D66159 /* Views */,
 				DA500C002A12B7FC00630226 /* Modifiers */,
 				DA7A7D3D2A1127010002D7D7 /* Util */,
 				DAA817CB2974387C00E2FBB7 /* Assets.xcassets */,
@@ -507,8 +521,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */,
 				DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
 				DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */,
+				DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */,
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,

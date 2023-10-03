@@ -31,7 +31,7 @@ struct TripPlannerTransitListItem: View {
             }
         }
         icon: {
-            Text(part.routeShortName ?? "0").frame(minWidth: 50.0).foregroundColor(.accentColor)
+            LineText(part.routeShortName ?? "Error", 20.0).frame(minWidth: 50.0)
         }
 //        .gesture(DragGesture(minimumDistance: 10, coordinateSpace: .global)
 //            .onChanged { value in
@@ -49,8 +49,8 @@ struct TripPlannerTransitListItem: View {
     }
 }
 
-// struct TripPlannerTransitListItem_Previews: PreviewProvider {
-//    static var previews: some View {
-//        TripPlannerTransitListItem()
-//    }
-// }
+ struct TripPlannerTransitListItem_Previews: PreviewProvider {
+    static var previews: some View {
+        TripPlannerTransitListItem(Part.example)
+    }
+ }
