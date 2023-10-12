@@ -27,7 +27,7 @@ struct LineText: View {
             .fixedSize(horizontal: false, vertical: true)
             .padding(.vertical,  size * 0.14)
             .padding(.horizontal,isDirectionSign ? size * 0.55 : size * 0.21)
-            .width(Int(lineNum) ?? 99 < 10 ? size*1.57 : .infinity)
+            .width(Int(lineNum) ?? 99 < 10 ? size*1.57 : nil)
             .background(
                 RoundedRectangle(cornerRadius: isRounded(lineNum) ? 100.0 : 4.0, style: .circular)
                     .fill(colorFromLineNum(lineNum)!)

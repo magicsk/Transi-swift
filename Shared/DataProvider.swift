@@ -5,9 +5,10 @@
 //  Created by magic_sk on 13/11/2022.
 //
 
+import Combine
+import CoreLocation
 import Foundation
 import SocketIO
-import CoreLocation
 
 struct Stored {
     static let stops = "stops"
@@ -29,6 +30,9 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var socket: SocketIOClient
     private let userDefaults = UserDefaults.standard
     private var connected = false
+    private var updater: Timer.TimerPublisher?
+    private var updaterSubscription: AnyCancellable?
+    private var reconnect: Bool = false
     var stopId = 20
     var stopsVersion: String
 
@@ -61,22 +65,22 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func fetchTrip(from: Int, to: Int) {
-        DispatchQueue.main.async {
-            self.trip = Trip()
-            print("fetching trip")
-            let encoder = JSONEncoder()
-            let tripRequestBody = TripReq(org_id: 120, max_walk_duration: 5, search_from_hours: 2, search_to_hours: 2, max_transfers: 3, from_station_id: [from], to_station_id: [to])
-            let jsonBody = try! encoder.encode(tripRequestBody) // TODO: error handeling
-            var request = URLRequest(url: URL(string: "\(rApiBaseUrl)/mobile/v1/raptor/")!)
-            request.httpMethod = "POST"
-            request.setValue("\(String(describing: jsonBody.count))", forHTTPHeaderField: "Content-Length")
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-            request.setValue("gzip", forHTTPHeaderField: "Accept-Encoding")
-            request.setValue(xApiKey, forHTTPHeaderField: "x-api-key")
-            request.setValue(xSession, forHTTPHeaderField: "x-session")
-            request.httpBody = jsonBody
-            self.fetchData(request: request, type: Trip.self) { trip in
+        trip = Trip()
+        print("fetching trip")
+        let encoder = JSONEncoder()
+        let tripRequestBody = TripReq(org_id: 120, max_walk_duration: 5, search_from_hours: 2, search_to_hours: 2, max_transfers: 3, from_station_id: [from], to_station_id: [to])
+        let jsonBody = try! encoder.encode(tripRequestBody) // TODO: error handeling
+        var request = URLRequest(url: URL(string: "\(rApiBaseUrl)/mobile/v1/raptor/")!)
+        request.httpMethod = "POST"
+        request.setValue("\(String(describing: jsonBody.count))", forHTTPHeaderField: "Content-Length")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
+        request.setValue("gzip", forHTTPHeaderField: "Accept-Encoding")
+        request.setValue(xApiKey, forHTTPHeaderField: "x-api-key")
+        request.setValue(xSession, forHTTPHeaderField: "x-session")
+        request.httpBody = jsonBody
+        fetchData(request: request, type: Trip.self) { trip in
+            DispatchQueue.main.async {
                 print("fetched trip")
                 self.trip = trip
                 self.userDefaults.save(customObject: trip, forKey: Stored.trip)
@@ -84,11 +88,35 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
 
-    func fetchStops() {
+    private func startUpdater() {
+        updater = Timer.publish(every: 10, on: .current, in: .common)
+        updaterSubscription = updater?.autoconnect().sink(receiveValue: { [weak self] _ in
+            self?.updateTabs()
+        })
+    }
+
+    private func stopUpdater() { // TODO: also stop if inactive and time inforamation is not needed
+        updaterSubscription?.cancel()
+        updaterSubscription = nil
+        updater = nil
+    }
+
+    private func updateTabs() {
+        var updatedTabs = tabs
+        for index in updatedTabs.indices {
+            updatedTabs[index].departureTimeRemaining = getDepartureTimeRemainingText(updatedTabs[index].departureTime, updatedTabs[index].departureTimeRaw, updatedTabs[index].type)
+        }
         DispatchQueue.main.async {
-            self.fetchData(url: "\(self.magicApiBaseUrl)/stops?v", type: StopsVersion.self) { stopsVersion in
-                let cachedStops = self.userDefaults.retrieve(object: [Stop].self, forKey: Stored.stops)
-                print(stopsVersion.version)
+            self.tabs = updatedTabs
+        }
+    }
+
+    func fetchStops() {
+        print(Thread.isMainThread)
+        fetchData(url: "\(self.magicApiBaseUrl)/stops?v", type: StopsVersion.self) { stopsVersion in
+            let cachedStops = self.userDefaults.retrieve(object: [Stop].self, forKey: Stored.stops)
+            print(stopsVersion.version)
+            DispatchQueue.main.async {
                 if self.stopsVersion == stopsVersion.version && cachedStops != nil {
                     print("useing cached stops json")
                     self.stops = cachedStops!
@@ -112,13 +140,13 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func sortStops(lastLocation: CLLocation?) {
-        DispatchQueue.main.async {
-            if lastLocation != nil && self.stops.count > 0 {
-                let actualLocation = lastLocation!
+        if lastLocation != nil && stops.count > 0 {
+            let actualLocation = lastLocation!
+            DispatchQueue.main.async {
                 self.stops = self.originalStops.sorted(by: { $0.distance(to: actualLocation) < $1.distance(to: actualLocation) })
                 self.addUtilsToStopList()
                 if self.changeLocation {
-                    self.changeStop(stopId: self.getNearestStopId())
+                    self.changeStop(self.getNearestStopId(), true)
                 }
             }
         }
@@ -128,13 +156,13 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         return stops.first(where: { $0.id ?? 0 > 0 })?.id ?? stopId
     }
 
-    public func getNearestStationId() -> Int {
+    func getNearestStationId() -> Int {
         return stops.first(where: { $0.id ?? 0 > 0 })?.stationId ?? 0
     }
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        // print("got new location")
+//        print("got new location")
         lastLocation = location
         sortStops(lastLocation: location)
     }
@@ -152,20 +180,31 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         socket.connect()
     }
 
-    func disconnect() {
+    func disconnect(reconnect: Bool = false) {
+        self.reconnect = reconnect
         socket.disconnect()
-        vehicleInfo = [VehicleInfo]()
     }
 
     func startListeners() {
         socket.on(clientEvent: .connect) { _, _ in
             print("socket connected")
             self.connected = true
+            self.startUpdater()
         }
 
         socket.on(clientEvent: .disconnect) { _, _ in
             print("socket disconnected")
-            self.connected = false
+            DispatchQueue.main.async {
+                self.tabs = [Tab]()
+                self.vehicleInfo = [VehicleInfo]()
+                self.connected = false
+                if self.reconnect {
+                    self.reconnect = false
+                    self.connect()
+                } else {
+                    self.stopUpdater()
+                }
+            }
         }
 
         socket.on("cack") { _, _ in
@@ -176,40 +215,37 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         socket.on("tabs") { data, _ in
 //            print("tabs")
-            DispatchQueue.main.async {
-                var newTabs = [Tab]()
-                newTabs.append(contentsOf: self.tabs)
-                if let platforms = data[0] as? [String: Any] {
-                    for (_, value) in platforms {
-                        if let json = value as? [String: Any],
-                           let platform = json["nastupiste"] as? Int,
-                           let tabsJson = json["tab"] as? [Any]
-                        {
-                            var tabs = [Tab]()
-                            for object in tabsJson {
-                                if let tabJson = object as? [String: Any] {
-                                    if let tab = Tab(json: tabJson, platform: platform) {
-                                        tabs.append(tab)
-                                    }
+            var newTabs = [Tab]()
+            newTabs.append(contentsOf: self.tabs)
+            if let platforms = data[0] as? [String: Any] {
+                for (_, value) in platforms {
+                    if let json = value as? [String: Any],
+                       let _platform = json["nastupiste"] as? Int,
+                       let _stopId = json["zastavka"] as? Int,
+                       let tabsJson = json["tab"] as? [Any]
+                    {
+                        var tabs = [Tab]()
+                        for object in tabsJson {
+                            if let tabJson = object as? [String: Any] {
+                                if let tab = Tab(json: tabJson, platform: _platform, stopId: _stopId) {
+                                    tabs.append(tab)
                                 }
                             }
-                            newTabs.removeAll(where: { $0.platform == platform })
-                            newTabs.append(contentsOf: tabs)
                         }
+                        newTabs.removeAll(where: { $0.platform == _platform || $0.stopId != self.stopId })
+                        newTabs.append(contentsOf: tabs)
                     }
                 }
-                self.tabs = newTabs.sorted(by: { Int($0.departureTimeRaw) < Int($1.departureTimeRaw) })
+            }
+            let sortedTabs = newTabs.sorted(by: { Int($0.departureTimeRaw) < Int($1.departureTimeRaw) })
+            DispatchQueue.main.async {
+                self.tabs = sortedTabs
             }
         }
         socket.on("vInfo") { data, _ in
-//            print("vInfo")
-            DispatchQueue.main.async {
-                // print(data)
-                if let vehicleInfoJson = data[0] as? [String: Any] {
-                    if let newVehicleInfo = VehicleInfo(json: vehicleInfoJson) {
-                        self.vehicleInfo.append(newVehicleInfo)
-                        // print(self.vehicleInfo)
-                    }
+            if let vehicleInfoJson = data[0] as? [String: Any] {
+                if let newVehicleInfo = VehicleInfo(json: vehicleInfoJson) {
+                    self.vehicleInfo.append(newVehicleInfo)
                 }
             }
         }
@@ -222,25 +258,20 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     func switchLocationChanging(_ value: Bool) {
         if value {
             changeLocation = true
-            changeStop(stopId: getNearestStopId())
+            changeStop(getNearestStopId(), true)
         } else {
             changeLocation = false
         }
     }
 
-    func changeStop(stopId: Int) {
-        DispatchQueue.main.async {
-            switch stopId {
-            case -1:
-                self.switchLocationChanging(true)
-            default:
-                if self.stopId != stopId {
-                    self.switchLocationChanging(false)
-                    self.disconnect()
-                    self.tabs = [Tab]()
-                    self.stopId = stopId
-                    self.connect()
-                }
+    func changeStop(_ stopId: Int, _ switchOnly: Bool = false) { // FIXME: this function is called multiple times and one change of location stop location changeing
+        if stopId == -1 {
+            switchLocationChanging(true)
+        } else {
+            if self.stopId != stopId {
+                if !switchOnly { switchLocationChanging(false) }
+                self.stopId = stopId
+                disconnect(reconnect: true)
             }
         }
     }

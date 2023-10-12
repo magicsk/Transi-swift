@@ -11,6 +11,7 @@ struct Tab: Codable, Identifiable, Hashable {
     var id: Int
     var line: String
     var platform: Int
+    var stopId: Int
     var busID: String
     var headsign: String
     var departureTime: String
@@ -23,12 +24,11 @@ struct Tab: Codable, Identifiable, Hashable {
     var lastStopId: Int
     var lastStopName: String
     var stuck: Bool
-    static let example = Tab(id: 1, line: "72", platform: 099, busID: "1:2552", headsign: "Čiližská", departureTime: "22:30", departureTimeRaw: TimeInterval(1680959460000), departureTimeRemaining: "1 min", delay: 23, delayText: "with 23 minutes delay", type: "online", currentStopId: 12, lastStopId: 12, lastStopName: "Cintorín Vrakuňa", stuck: true)
+    static let example = Tab(id: 1, line: "72", platform: 099, stopId: 82, busID: "1:2552", headsign: "Čiližská", departureTime: "22:30", departureTimeRaw: TimeInterval(1680959460000), departureTimeRemaining: "1 min", delay: 23, delayText: "with 23 minutes delay", type: "online", currentStopId: 12, lastStopId: 12, lastStopName: "Cintorín Vrakuňa", stuck: true)
 }
 
-
 extension Tab {
-    init?(json: [String: Any], platform: Int) {
+    init?(json: [String: Any], platform: Int, stopId: Int) {
         let id = json["i"] as? Int ?? 0
         let line = json["linka"] as? String ?? "Error"
         let busID = json["issi"] as? String ?? "Offline"
@@ -40,28 +40,18 @@ extension Tab {
         let lastStopId = json["predoslaZidx"] as? Int ?? -1
         let lastStopName = json["predoslaZstr"] as? String ?? "none"
         let stuck = json["uviaznute"] as? Bool ?? false
-        
+
         let departureTime = Date(timeIntervalSince1970: TimeInterval(departureTimeRaw)).formatted(date: .omitted, time: .shortened)
-        let departureTimeRemainingRaw = Int(departureTimeRaw - Date().timeIntervalSince1970)
-        let timeInMins = departureTimeRemainingRaw / 60
-        var departureTimeRemaining = departureTimeRemainingRaw > 59 ?
-        timeInMins > 59 ?
-        departureTime :
-        "\(timeInMins) min" :
-        departureTimeRemainingRaw > 0 ? "<1 min" : "now"
-        
-        if (type != "online") {
-            departureTimeRemaining = "~\(departureTimeRemaining)"
-        }
 
         self.id = id
         self.line = line
         self.platform = platform
+        self.stopId = stopId
         self.busID = busID
         self.headsign = headsign
         self.departureTime = departureTime
         self.departureTimeRaw = departureTimeRaw
-        self.departureTimeRemaining = departureTimeRemaining
+        self.departureTimeRemaining = getDepartureTimeRemainingText(departureTime, departureTimeRaw, type)
         self.delay = delay
         self.type = type
         self.currentStopId = currentStopId
@@ -73,16 +63,30 @@ extension Tab {
 }
 
 func getDelayText(_ delay: Int) -> String {
-    
     let isDelay = delay > 0
     let isInAdvance = delay < 0
     let delayMinutes = (delay > 1 || delay < -1) ? "minutes" : "minute"
-    if (isDelay) {
+    if isDelay {
         return "with \(delay) \(delayMinutes) of delay"
-    } else if (isInAdvance) {
+    } else if isInAdvance {
         let advance = delay * -1
         return "\(advance) \(delayMinutes) in advance"
     } else {
         return "with no delay"
     }
+}
+
+func getDepartureTimeRemainingText(_ departureTime: String, _ departureTimeRaw: TimeInterval, _ type: String) -> String {
+    let departureTimeRemainingRaw = Int(departureTimeRaw - Date().timeIntervalSince1970)
+    let timeInMins = departureTimeRemainingRaw / 60
+    let departureTimeRemaining = departureTimeRemainingRaw > 59 ?
+        timeInMins > 59 ?
+        departureTime :
+        "\(timeInMins) min" :
+        departureTimeRemainingRaw > 0 ? "<1 min" : "now"
+
+    if type != "online" {
+        return "~\(departureTimeRemaining)"
+    }
+    return departureTimeRemaining
 }

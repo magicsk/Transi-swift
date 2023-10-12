@@ -32,7 +32,7 @@ struct VirtualTableView: View {
                     }
                 }
         }.onChange(of: stop) {stop in
-            dataProvider.changeStop(stopId: stop.id ?? 0)
+            dataProvider.changeStop(stop.id ?? 0)
         }
     }
 }
