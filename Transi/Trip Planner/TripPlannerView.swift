@@ -107,7 +107,7 @@ struct TripPlannerView: View {
         }
         .onChange(of: dataProvider.lastLocation) { lastLocation in
             if (lastLocation != nil && self.from.name == "") {
-                self.from = dataProvider.actualLocationStop
+                self.from = .actualLocation
             }
         }
     }

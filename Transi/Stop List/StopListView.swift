@@ -17,6 +17,7 @@ struct StopListView: View {
     let fuse = Fuse()
     var stopList: [Stop]
     let searchTextPublisher = PassthroughSubject<String, Never>()
+    @FocusState private var searchFocus: Bool
 
     init(stop: Binding<Stop>, stopList: [Stop], isPresented: Binding<Bool>) {
         _isPresented = isPresented
@@ -43,6 +44,9 @@ struct StopListView: View {
             }
         }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+        .onAppear {
+            searchFocus = true
+        }
         .disableAutocorrection(true)
         .textInputAutocapitalization(.never)
         .onChange(of: searchText) { searchText in

@@ -8,12 +8,9 @@
 import SwiftUI
 
 struct VirtualTableView: View {
-
     @ObservedObject var dataProvider: DataProvider
-    @State private var showStopList = false
-    @State private var stop: Stop = .example
-    @State private var actualName = "Loading..."
-    
+    @State var date = Date()
+
     init(_ dataProvider: DataProvider) {
         self.dataProvider = dataProvider
     }
@@ -22,23 +19,17 @@ struct VirtualTableView: View {
         NavigationView {
             VirtualTableList(dataProvider)
             #if !os(macOS)
-                .navigationTitle(Text(dataProvider.stops.first(where: { $0.id == dataProvider.stopId })?.name ?? "Loading..."))
+                .navigationTitle(Text(dataProvider.currentStop.name ?? "Loading..."))
+                .navigationBarItems(trailing: Text(clockStringFromDate(date)))
             #endif
-                .toolbar {
-                    Button("Change") {
-                        self.showStopList = true
-                    }.sheet(isPresented: $showStopList) {
-                        StopListView(stop: self.$stop, stopList: dataProvider.stops, isPresented: self.$showStopList)
-                    }
-                }
-        }.onChange(of: stop) {stop in
-            dataProvider.changeStop(stop.id ?? 0)
+        }.onReceive(Timer.publish(every: 1, on: .current, in: .common).autoconnect()) { _ in
+            self.date = Date()
         }
     }
 }
 
-//struct VirtualTableView_Previews: PreviewProvider {
+// struct VirtualTableView_Previews: PreviewProvider {
 //    static var previews: some View {
 //        VirtualTableView()
 //    }
-//}
+// }

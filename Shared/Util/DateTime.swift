@@ -8,7 +8,7 @@
 import Foundation
 
 func dateFromUtc(_ isoString: String?) -> Date? {
-    if (isoString == nil) {
+    if isoString == nil {
         return nil
     } else {
         let isoDateFormatter = ISO8601DateFormatter()
@@ -29,7 +29,7 @@ func dateFromUtc(_ isoString: String?) -> Date? {
 }
 
 func timeStringFromUtc(_ isoString: String?) -> String {
-    if (isoString == nil) {
+    if isoString == nil {
         return "Error"
     } else {
         if let date = dateFromUtc(isoString) {
@@ -41,13 +41,19 @@ func timeStringFromUtc(_ isoString: String?) -> String {
 }
 
 func timeDiffFromUtc(_ from: String?, _ to: String?) -> String {
-    if (from != nil && to != nil) {
+    if from != nil && to != nil {
         if let fromDate = dateFromUtc(from!) {
             if let toDate = dateFromUtc(to!) {
                 let diff = toDate - fromDate
-                return "\(Int(diff/60))"
+                return "\(Int(diff / 60))"
             }
         }
     }
     return "Error"
+}
+
+func clockStringFromDate(_ time: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm:ss"
+    return formatter.string(from: time)
 }

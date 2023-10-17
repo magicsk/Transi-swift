@@ -37,14 +37,13 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     var stopsVersion: String
 
     var changeLocation = true
-    let actualLocationStop = Stop(
-        id: -1, stationId: -1, name: "Actual location", type: "location")
 
     @Published var tabs = [Tab]()
     @Published var vehicleInfo = [VehicleInfo]()
     @Published var stops = [Stop]()
     @Published var trip = Trip()
     @Published var lastLocation: CLLocation? = nil
+    @Published var currentStop: Stop = .example
     var originalStops = [Stop]()
 
     override init() {
@@ -136,7 +135,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func addUtilsToStopList() {
-        stops.insert(actualLocationStop, at: 0)
+        stops.insert(Stop.actualLocation, at: 0)
     }
 
     func sortStops(lastLocation: CLLocation?) {
@@ -158,6 +157,10 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     func getNearestStationId() -> Int {
         return stops.first(where: { $0.id ?? 0 > 0 })?.stationId ?? 0
+    }
+    
+    func getStopById(_ id: Int) -> Stop? {
+        return stops.first(where: { $0.id == id })
     }
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -271,6 +274,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
             if self.stopId != stopId {
                 if !switchOnly { switchLocationChanging(false) }
                 self.stopId = stopId
+                if let currentStop = getStopById(stopId) { self.currentStop = currentStop }
                 disconnect(reconnect: true)
             }
         }
