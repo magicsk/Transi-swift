@@ -18,10 +18,8 @@ struct VirtualTableView: View {
     var body: some View {
         NavigationView {
             VirtualTableList(dataProvider)
-            #if !os(macOS)
-                .navigationTitle(Text(dataProvider.currentStop.name ?? "Loading..."))
-                .navigationBarItems(trailing: Text(clockStringFromDate(date)))
-            #endif
+            .navigationTitle(Text(dataProvider.currentStop.name ?? "Loading..."))
+            .navigationBarItems(trailing: Text(clockStringFromDate(date)))
         }.onReceive(Timer.publish(every: 1, on: .current, in: .common).autoconnect()) { _ in
             self.date = Date()
         }

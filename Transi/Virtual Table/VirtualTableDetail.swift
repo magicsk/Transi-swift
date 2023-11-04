@@ -71,17 +71,15 @@ struct VirtualTableDetail: View {
             }
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
             .padding(.horizontal, 18.0)
-            #if !os(macOS)
-                .navigationBarItems(
-                    leading: HStack {
-                        LineText(tab.line)
-                        Text(tab.headsign).font(.largeTitle.bold())
-                    },
-                    trailing: Image(tab.stuck ? "exclamationmark.triangle.fill" : "")
-                        .foregroundColor(.yellow)
-                        .font(.system(size: 28))
-                )
-            #endif
+            .navigationBarItems(
+                leading: HStack {
+                    LineText(tab.line)
+                    Text(tab.headsign).font(.largeTitle.bold())
+                },
+                trailing: Image(tab.stuck ? "exclamationmark.triangle.fill" : "")
+                    .foregroundColor(.yellow)
+                    .font(.system(size: 28))
+            )
         }
     }
 }
