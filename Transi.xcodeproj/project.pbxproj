@@ -24,6 +24,7 @@
 		DA63553429E4957A00AAD7C0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
 		DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */; };
 		DA7A7D3F2A112FCB0002D7D7 /* DateTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */; };
+		DA855B772AF68BED00372C31 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA855B762AF68BED00372C31 /* Util.swift */; };
 		DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
@@ -105,6 +106,7 @@
 		DA63553229E4957A00AAD7C0 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerList.swift; sourceTree = "<group>"; };
 		DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTime.swift; sourceTree = "<group>"; };
+		DA855B762AF68BED00372C31 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		DA89EDE529BA981700C32F24 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListIcon.swift; sourceTree = "<group>"; };
 		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
@@ -223,6 +225,7 @@
 			children = (
 				DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */,
 				DABAE40A2ACC2E5200D66159 /* Line.swift */,
+				DA855B762AF68BED00372C31 /* Util.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -528,6 +531,7 @@
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
+				DA855B772AF68BED00372C31 /* Util.swift in Sources */,
 				DABD03282A0AF7B800FD2C4B /* Trip.swift in Sources */,
 				DA500BF82A11461300630226 /* Date.swift in Sources */,
 				DABD03252A0AF76E00FD2C4B /* StopGps.swift in Sources */,

@@ -10,13 +10,15 @@ import SwiftUI
 struct VirtualTableDetail: View {
     var tab: Tab
     var vehicleInfo: VehicleInfo?
+    var platformLabels: [PlatformLabel]?
     var delayColor: Color = .gray
 
     private let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
 
-    init(_ tab: Tab, vehicleInfo: VehicleInfo?) {
+    init(_ tab: Tab, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?) {
         self.tab = tab
         self.vehicleInfo = vehicleInfo
+        self.platformLabels = platformLabels
         switch tab.delay {
             case 0...1:
                 delayColor = Color.green
@@ -37,23 +39,23 @@ struct VirtualTableDetail: View {
 
         NavigationView {
             VStack(alignment: .leading, spacing: 6.0) {
-                Text("\(tab.stuck ? "would" : "will") depart in \(tab.departureTimeRemaining) at \(tab.departureTime)")
-                    .font(.system(size: 24))
+                Text("\(tab.stuck ? "would" : "will") depart in \(tab.departureTimeRemaining) at \(tab.departureTime)\nfrom platform \(getPlatformLabel(platformLabels, tab.platform))")
+                    .font(.system(size: 24.0))
                 HStack(spacing: 4.0) {
-                    Text("\(tab.stuck ? "Stucked" : "Last seen") on \(tab.lastStopName)").font(.system(size: 12))
+                    Text("\(tab.stuck ? "Stucked" : "Last seen") on \(tab.lastStopName)").font(.system(size: 12.0))
                     Image("stop").resizable(resizingMode: .stretch).frame(width: 7.0, height: 10.0)
                     Text(tab.delayText).font(.system(size: 12))
                     Image(systemName: "circle.fill")
                         .foregroundColor(delayColor)
-                        .font(.system(size: 12))
+                        .font(.system(size: 12.0))
                 }
                 if vehicleInfo != nil {
                     HStack(spacing: 4.0) {
-                        Text("Vehicle is \(vehicleInfo!.ac ? "" : "not ")air conditioned").font(.system(size: 12))
+                        Text("Vehicle is \(vehicleInfo!.ac ? "" : "not ")air conditioned").font(.system(size: 12.0))
                         Image(systemName: vehicleInfo!.ac ? "snowflake" : "snowflake.slash")
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(vehicleInfo!.ac ? Color.accentColor : Color.red, Color.gray)
-                            .font(.system(size: 14))
+                            .font(.system(size: 14.0))
                     }
 
                     AsyncImage(url: URL(string: "\(iApiBaseUrl)/ba/media/\(vehicleInfo!.imgt)/\(String(vehicleInfo!.img).leftPadding(toLength: 8, withPad: "0"))/\(busID)")) { image in
@@ -63,14 +65,15 @@ struct VirtualTableDetail: View {
                     } placeholder: {
                         ProgressView()
                     }
-                    .frame(width: UIScreen.main.bounds.size.width - 36.0).padding(.top, 60.0)
+                    .frame(width: UIScreen.main.bounds.size.width - 44.0).padding(.top, 60.0)
                     Text("\(vehicleInfo!.type) #\(busID)")
                         .font(.system(size: 10.0, weight: .thin))
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
-            .padding(.horizontal, 18.0)
+            .padding(.top, 2.0)
+            .padding(.horizontal, 22.0)
             .navigationBarItems(
                 leading: HStack {
                     LineText(tab.line)
@@ -86,6 +89,6 @@ struct VirtualTableDetail: View {
 
 struct VirtualTableDetailPreview: PreviewProvider {
     static var previews: some View {
-        VirtualTableDetail(Tab.example, vehicleInfo: VehicleInfo.example)
+        VirtualTableDetail(Tab.example, [PlatformLabel.example] , VehicleInfo.example)
     }
 }

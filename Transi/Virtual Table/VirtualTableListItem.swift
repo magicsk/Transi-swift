@@ -9,10 +9,12 @@ import SwiftUI
 
 struct VirtualTableListItem: View {
     var tab: Tab
+    var platformLabels: [PlatformLabel]?
     var vehicleInfo: VehicleInfo?
 
-    init(_ tab: Tab, vehicleInfo: VehicleInfo?) {
+    init(_ tab: Tab, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?) {
         self.tab = tab
+        self.platformLabels = platformLabels
         self.vehicleInfo = vehicleInfo
     }
 
@@ -30,18 +32,22 @@ struct VirtualTableListItem: View {
                     }
                 }
                 Spacer()
-                Text(tab.departureTimeRemaining).font(.headline)
-            }
+                HStack(spacing: 6.0) {
+                    Text(tab.departureTimeRemaining).font(.headline)
+                    Text(getPlatformLabel(platformLabels, tab.platform)).font(.system(size: 16.0, weight: .light)).width(22.0)
+                }
+            }.padding(.trailing, -12.0)
         }
         icon: {
             HStack {
                 LineText(tab.line, 20.0).offset(y: 6.0)
             }
-            .padding(.trailing, 5.0)
-            .width(500.0)
+            .padding(.leading, 6.0)
+            .padding(.trailing, 12.0)
+            .width(1000.0)
         }
         .overlay {
-            NavigationLink(destination: VirtualTableDetail(tab, vehicleInfo: vehicleInfo),
+            NavigationLink(destination: VirtualTableDetail(tab, platformLabels, vehicleInfo),
                            label: { EmptyView() })
                 .opacity(0)
         }
@@ -50,6 +56,6 @@ struct VirtualTableListItem: View {
 
 struct VirtualTableListItem_Previews: PreviewProvider {
     static var previews: some View {
-        VirtualTableListItem(Tab.example, vehicleInfo: VehicleInfo.example)
+        VirtualTableListItem(Tab.example, [PlatformLabel.example], VehicleInfo.example)
     }
 }
