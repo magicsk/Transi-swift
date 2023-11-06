@@ -33,6 +33,9 @@ struct VirtualTableListItem: View {
                 }
                 Spacer()
                 HStack(spacing: 6.0) {
+                    if (tab.stuck) {
+                        Image("exclamationmark.triangle.fill").foregroundColor(.yellow)
+                    }
                     Text(tab.departureTimeRemaining).font(.headline)
                     Text(getPlatformLabel(platformLabels, tab.platform)).font(.system(size: 16.0, weight: .light)).width(22.0)
                 }
