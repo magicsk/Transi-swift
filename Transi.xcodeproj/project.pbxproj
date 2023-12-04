@@ -10,9 +10,13 @@
 		DA10FA3C2A093807005D7E49 /* VirtualTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */; };
 		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
 		DA10FA422A093A5E005D7E49 /* TimetablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA412A0939CA005D7E49 /* TimetablesView.swift */; };
+		DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7802B02951F00BC8428 /* SwiftUIX */; };
+		DA23A7862B02957700BC8428 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7852B02957700BC8428 /* SocketIO */; };
 		DA269E10298960EF00F42107 /* VirtualTableList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* VirtualTableList.swift */; };
 		DA32836129E19C920070FCA0 /* VirtualTableDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */; };
 		DA32836429E33F650070FCA0 /* VirtualTableListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */; };
+		DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DB2B1E7CB20006F41E /* Errors.swift */; };
+		DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */; };
 		DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */; };
 		DA500BF62A1140E600630226 /* TripPlannerWalkListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */; };
 		DA500BF82A11461300630226 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF72A11461300630226 /* Date.swift */; };
@@ -33,10 +37,8 @@
 		DAA817DA2974387D00E2FBB7 /* TransiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817D92974387D00E2FBB7 /* TransiTests.swift */; };
 		DAA817E42974387D00E2FBB7 /* TransiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E32974387D00E2FBB7 /* TransiUITests.swift */; };
 		DAA817E62974387D00E2FBB7 /* TransiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */; };
-		DAA817F529743A9C00E2FBB7 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAA817F429743A9C00E2FBB7 /* SocketIO */; };
 		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
-		DAAB2C0829F8727900D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0729F8727900D79A70 /* Fuse */; };
 		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
 		DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE4082ACC23DA00D66159 /* LineText.swift */; };
 		DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE40A2ACC2E5200D66159 /* Line.swift */; };
@@ -47,7 +49,10 @@
 		DABD03262A0AF76E00FD2C4B /* StopGps.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03242A0AF76E00FD2C4B /* StopGps.swift */; };
 		DABD03282A0AF7B800FD2C4B /* Trip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03272A0AF7B800FD2C4B /* Trip.swift */; };
 		DABD03292A0AF7B800FD2C4B /* Trip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03272A0AF7B800FD2C4B /* Trip.swift */; };
-		DABD032C2A0BE61F00FD2C4B /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DABD032B2A0BE61F00FD2C4B /* SwiftUIX */; };
+		DAC809FE2B02934C00CFC7B8 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = DAC809FD2B02934C00CFC7B8 /* SwiftUIIntrospect */; };
+		DAC80A002B0293AF00CFC7B8 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAC809FF2B0293AF00CFC7B8 /* Fuse */; };
+		DAC9C7082B096FFF00B1AC8C /* MapKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9C7072B096FFF00B1AC8C /* MapKitView.swift */; };
+		DAC9C7142B09761000B1AC8C /* UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9C7132B09761000B1AC8C /* UIKit.swift */; };
 		DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */; };
 		DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */; };
 		DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
@@ -55,6 +60,8 @@
 		DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DAD0CEB429CB9E1D00A43CC6 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAD0CEB329CB9E1D00A43CC6 /* SocketIO */; };
 		DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
+		DAD9BF1B2B0AAF59009F73AE /* MapBottomSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */; };
+		DAD9BF1D2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */; };
 		DAEF77B129744893008D66DE /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
 		DAEF77B32974680B008D66DE /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
 /* End PBXBuildFile section */
@@ -97,6 +104,8 @@
 		DA269E0F298960EF00F42107 /* VirtualTableList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableList.swift; sourceTree = "<group>"; };
 		DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableDetail.swift; sourceTree = "<group>"; };
 		DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableListItem.swift; sourceTree = "<group>"; };
+		DA3F83DB2B1E7CB20006F41E /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+		DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKMapView.swift; sourceTree = "<group>"; };
 		DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerTransitListItem.swift; sourceTree = "<group>"; };
 		DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerWalkListItem.swift; sourceTree = "<group>"; };
 		DA500BF72A11461300630226 /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
@@ -130,8 +139,12 @@
 		DABD03212A0AF3BF00FD2C4B /* Binding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Binding.swift; sourceTree = "<group>"; };
 		DABD03242A0AF76E00FD2C4B /* StopGps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopGps.swift; sourceTree = "<group>"; };
 		DABD03272A0AF7B800FD2C4B /* Trip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trip.swift; sourceTree = "<group>"; };
+		DAC9C7072B096FFF00B1AC8C /* MapKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapKitView.swift; sourceTree = "<group>"; };
+		DAC9C7132B09761000B1AC8C /* UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKit.swift; sourceTree = "<group>"; };
 		DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiWatchApp.swift; sourceTree = "<group>"; };
 		DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapBottomSheetView.swift; sourceTree = "<group>"; };
+		DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocationCoordinate2D.swift; sourceTree = "<group>"; };
 		DAEF77B029744893008D66DE /* Stops.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stops.swift; sourceTree = "<group>"; };
 		DAEF77B22974680B008D66DE /* StopListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -141,9 +154,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DABD032C2A0BE61F00FD2C4B /* SwiftUIX in Frameworks */,
-				DAAB2C0829F8727900D79A70 /* Fuse in Frameworks */,
-				DAA817F529743A9C00E2FBB7 /* SocketIO in Frameworks */,
+				DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */,
+				DAC809FE2B02934C00CFC7B8 /* SwiftUIIntrospect in Frameworks */,
+				DA23A7862B02957700BC8428 /* SocketIO in Frameworks */,
+				DAC80A002B0293AF00CFC7B8 /* Fuse in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +240,7 @@
 				DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */,
 				DABAE40A2ACC2E5200D66159 /* Line.swift */,
 				DA855B762AF68BED00372C31 /* Util.swift */,
+				DA3F83DB2B1E7CB20006F41E /* Errors.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -238,6 +253,9 @@
 				DABD03212A0AF3BF00FD2C4B /* Binding.swift */,
 				DA500BF72A11461300630226 /* Date.swift */,
 				DA500BFE2A12B23900630226 /* Color.swift */,
+				DAC9C7132B09761000B1AC8C /* UIKit.swift */,
+				DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */,
+				DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -262,6 +280,7 @@
 		DAA817C62974387B00E2FBB7 /* Transi */ = {
 			isa = PBXGroup;
 			children = (
+				DAB73A422B00FC8F009FCCC7 /* Map */,
 				DA500C032A12F11600630226 /* Stop List */,
 				DA10FA3E2A093985005D7E49 /* Timetables */,
 				DA10FA3D2A09397E005D7E49 /* Trip Planner */,
@@ -311,6 +330,15 @@
 				DABD03272A0AF7B800FD2C4B /* Trip.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		DAB73A422B00FC8F009FCCC7 /* Map */ = {
+			isa = PBXGroup;
+			children = (
+				DAC9C7072B096FFF00B1AC8C /* MapKitView.swift */,
+				DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */,
+			);
+			path = Map;
 			sourceTree = "<group>";
 		};
 		DABAE4072ACC23B800D66159 /* Views */ = {
@@ -369,9 +397,10 @@
 			);
 			name = Transi;
 			packageProductDependencies = (
-				DAA817F429743A9C00E2FBB7 /* SocketIO */,
-				DAAB2C0729F8727900D79A70 /* Fuse */,
-				DABD032B2A0BE61F00FD2C4B /* SwiftUIX */,
+				DAC809FD2B02934C00CFC7B8 /* SwiftUIIntrospect */,
+				DAC809FF2B0293AF00CFC7B8 /* Fuse */,
+				DA23A7802B02951F00BC8428 /* SwiftUIX */,
+				DA23A7852B02957700BC8428 /* SocketIO */,
 			);
 			productName = Transi;
 			productReference = DABD031B2A097ABE00FD2C4B /* Transi.app */;
@@ -473,6 +502,7 @@
 				DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */,
 				DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */,
 				DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */,
+				DAB73A3F2B00F2E5009FCCC7 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 			);
 			productRefGroup = DAA817BB2974387B00E2FBB7;
 			projectDirPath = "";
@@ -530,6 +560,7 @@
 				DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */,
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
+				DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */,
 				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
 				DA855B772AF68BED00372C31 /* Util.swift in Sources */,
 				DABD03282A0AF7B800FD2C4B /* Trip.swift in Sources */,
@@ -537,7 +568,10 @@
 				DABD03252A0AF76E00FD2C4B /* StopGps.swift in Sources */,
 				DA10FA422A093A5E005D7E49 /* TimetablesView.swift in Sources */,
 				DA269E10298960EF00F42107 /* VirtualTableList.swift in Sources */,
+				DAD9BF1B2B0AAF59009F73AE /* MapBottomSheetView.swift in Sources */,
+				DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */,
 				DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */,
+				DAD9BF1D2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift in Sources */,
 				DA7A7D3F2A112FCB0002D7D7 /* DateTime.swift in Sources */,
 				DA32836429E33F650070FCA0 /* VirtualTableListItem.swift in Sources */,
 				DABD03202A09A3C900FD2C4B /* TripReq.swift in Sources */,
@@ -547,6 +581,8 @@
 				DA500BFF2A12B23900630226 /* Color.swift in Sources */,
 				DA32836129E19C920070FCA0 /* VirtualTableDetail.swift in Sources */,
 				DA500C022A12B81E00630226 /* ListStackModifier.swift in Sources */,
+				DAC9C7142B09761000B1AC8C /* UIKit.swift in Sources */,
+				DAC9C7082B096FFF00B1AC8C /* MapKitView.swift in Sources */,
 				DA500BF62A1140E600630226 /* TripPlannerWalkListItem.swift in Sources */,
 				DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */,
 				DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */,
@@ -660,7 +696,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -717,7 +753,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -760,11 +796,11 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.2;
+				MARKETING_VERSION = 0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -811,11 +847,11 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.2;
+				MARKETING_VERSION = 0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -838,7 +874,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiTests;
@@ -862,7 +898,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiTests;
@@ -885,7 +921,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiUITests;
@@ -908,7 +944,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiUITests;
@@ -931,7 +967,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Transi Watch App/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -967,7 +1003,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Transi Watch App/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1050,8 +1086,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 16.0.0;
 			};
 		};
 		DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */ = {
@@ -1060,6 +1096,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.0.0;
+			};
+		};
+		DAB73A3F2B00F2E5009FCCC7 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/swiftui-introspect.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.1;
 			};
 		};
 		DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */ = {
@@ -1073,25 +1117,29 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		DAA817F429743A9C00E2FBB7 /* SocketIO */ = {
+		DA23A7802B02951F00BC8428 /* SwiftUIX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */;
+			productName = SwiftUIX;
+		};
+		DA23A7852B02957700BC8428 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;
 			productName = SocketIO;
-		};
-		DAAB2C0729F8727900D79A70 /* Fuse */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */;
-			productName = Fuse;
 		};
 		DAAB2C0929F8751F00D79A70 /* Fuse */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */;
 			productName = Fuse;
 		};
-		DABD032B2A0BE61F00FD2C4B /* SwiftUIX */ = {
+		DAC809FD2B02934C00CFC7B8 /* SwiftUIIntrospect */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */;
-			productName = SwiftUIX;
+			productName = SwiftUIIntrospect;
+		};
+		DAC809FF2B0293AF00CFC7B8 /* Fuse */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */;
+			productName = Fuse;
 		};
 		DAD0CEB329CB9E1D00A43CC6 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;

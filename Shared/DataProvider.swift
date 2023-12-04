@@ -13,7 +13,7 @@ import SocketIO
 struct Stored {
     static let stops = "stops"
     static let stopsVerison = "stopsVersion"
-    static let trip = ""
+    static let trip = "trip"
 }
 
 open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
@@ -26,17 +26,18 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     private let locationManager = CLLocationManager()
     private let jsonDecoder = JSONDecoder()
+    private let jsonEncoder = JSONEncoder()
+    private let userDefaults = UserDefaults.standard
     private let manager: SocketManager
     private var socket: SocketIOClient
-    private let userDefaults = UserDefaults.standard
     private var connected = false
     private var updater: Timer.TimerPublisher?
     private var updaterSubscription: AnyCancellable?
     private var reconnect: Bool = false
-    var stopId = 20
-    var stopsVersion: String
-
-    var changeLocation = true
+    private var stopId = 20
+    private var stopsVersion: String
+    private var changeLocation = true
+    private var originalStops = [Stop]()
 
     @Published var tabs = [Tab]()
     @Published var vehicleInfo = [VehicleInfo]()
@@ -44,45 +45,79 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var trip = Trip()
     @Published var lastLocation: CLLocation? = nil
     @Published var currentStop: Stop = .example
-    var originalStops = [Stop]()
+
+    @Published var tripLoading: Bool = false
+    @Published var tripError: TripError? = nil
+    @Published var tripFrom: Stop = .empty
+    @Published var tripTo: Stop = .empty
 
     override init() {
         manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true), .log(false)])
         socket = manager.defaultSocket
         stopsVersion = userDefaults.string(forKey: Stored.stopsVerison) ?? ""
+
         super.init()
+
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.requestWhenInUseAuthorization()
         jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+
         startListeners()
         connect()
         fetchStops()
+
         if let cachedTrip = userDefaults.retrieve(object: Trip.self, forKey: Stored.trip) {
             trip = cachedTrip
         }
     }
 
-    func fetchTrip(from: Int, to: Int) {
-        trip = Trip()
-        print("fetching trip")
-        let encoder = JSONEncoder()
-        let tripRequestBody = TripReq(org_id: 120, max_walk_duration: 5, search_from_hours: 2, search_to_hours: 2, max_transfers: 3, from_station_id: [from], to_station_id: [to])
-        let jsonBody = try! encoder.encode(tripRequestBody) // TODO: error handeling
-        var request = URLRequest(url: URL(string: "\(rApiBaseUrl)/mobile/v1/raptor/")!)
-        request.httpMethod = "POST"
-        request.setValue("\(String(describing: jsonBody.count))", forHTTPHeaderField: "Content-Length")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-        request.setValue("gzip", forHTTPHeaderField: "Accept-Encoding")
-        request.setValue(xApiKey, forHTTPHeaderField: "x-api-key")
-        request.setValue(xSession, forHTTPHeaderField: "x-session")
-        request.httpBody = jsonBody
-        fetchData(request: request, type: Trip.self) { trip in
+    func fetchTrip() {
+        DispatchQueue.global(qos: .userInitiated).async { [self] in
             DispatchQueue.main.async {
-                print("fetched trip")
-                self.trip = trip
-                self.userDefaults.save(customObject: trip, forKey: Stored.trip)
+                self.tripLoading = true
+            }
+            if var fromId = tripFrom.stationId, var toId = tripTo.stationId {
+                if fromId == -1 { fromId = getNearestStationId() }
+                if toId == -1 { toId = getNearestStationId() }
+                
+                print("fetching trip from \(fromId) to \(toId)")
+                
+                let tripRequestBody = TripReq(from_station_id: [fromId], to_station_id: [toId])
+                print(tripRequestBody)
+                do {
+                    let jsonBody = try jsonEncoder.encode(tripRequestBody)
+                    
+                    var request = URLRequest(url: URL(string: "\(rApiBaseUrl)/mobile/v1/raptor/")!)
+                    request.httpMethod = "POST"
+                    request.setValue("\(String(describing: jsonBody.count))", forHTTPHeaderField: "Content-Length")
+                    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                    request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
+                    request.setValue(xApiKey, forHTTPHeaderField: "x-api-key")
+                    request.setValue(xSession, forHTTPHeaderField: "x-session")
+                    request.httpBody = jsonBody
+                    
+                    fetchData(request: request, type: Trip.self) { trip in
+                        print("fetched trip \(trip.journey?.count ?? 0)")
+                        if trip.journey?.count ?? 0 < 1 {
+                            DispatchQueue.main.async {
+                                self.tripLoading = false
+                                self.tripError = .noJourneys
+                            }
+                        } else {
+                            self.userDefaults.save(customObject: trip, forKey: Stored.trip)
+                            DispatchQueue.main.async {
+                                self.tripLoading = false
+                                self.trip = trip
+                            }
+                        }
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        self.tripLoading = false
+                        self.tripError = .basic
+                    }
+                }
             }
         }
     }
@@ -111,7 +146,6 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func fetchStops() {
-        print(Thread.isMainThread)
         fetchData(url: "\(self.magicApiBaseUrl)/stops?v", type: StopsVersion.self) { stopsVersion in
             let cachedStops = self.userDefaults.retrieve(object: [Stop].self, forKey: Stored.stops)
             print(stopsVersion.version)
@@ -138,11 +172,10 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         stops.insert(Stop.actualLocation, at: 0)
     }
 
-    func sortStops(lastLocation: CLLocation?) {
-        if lastLocation != nil && stops.count > 0 {
-            let actualLocation = lastLocation!
+    func sortStops(coordinates: CLLocationCoordinate2D) {
+        if stops.count > 0 {
             DispatchQueue.main.async {
-                self.stops = self.originalStops.sorted(by: { $0.distance(to: actualLocation) < $1.distance(to: actualLocation) })
+                self.stops = self.originalStops.sorted(by: { $0.distance(to: coordinates) < $1.distance(to: coordinates) })
                 self.addUtilsToStopList()
                 if self.changeLocation {
                     self.changeStop(self.getNearestStopId(), true)
@@ -158,7 +191,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     func getNearestStationId() -> Int {
         return stops.first(where: { $0.id ?? 0 > 0 })?.stationId ?? 0
     }
-    
+
     func getStopById(_ id: Int) -> Stop? {
         return stops.first(where: { $0.id == id })
     }
@@ -167,7 +200,10 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard let location = locations.last else { return }
 //        print("got new location")
         lastLocation = location
-        sortStops(lastLocation: location)
+        sortStops(coordinates: location.coordinate)
+        DispatchQueue.main.async {
+            self.tripFrom = .actualLocation
+        }
     }
 
     func connect() {

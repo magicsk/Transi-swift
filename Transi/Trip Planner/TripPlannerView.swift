@@ -10,12 +10,9 @@ import SwiftUIX
 
 struct TripPlannerView: View {
     @ObservedObject var dataProvider: DataProvider
-    @State private var from = Stop(name: "")
-    @State private var to = Stop(name: "")
     @State private var showStopList = false
     @State private var stop: Stop = .example
     @State private var lastField = ""
-    @State private var loading = false
 
     init(_ dataProvider: DataProvider) {
         self.dataProvider = dataProvider
@@ -25,7 +22,7 @@ struct TripPlannerView: View {
         NavigationView {
             VStack(spacing: .zero) {
                 VStack {
-                    CocoaTextField(text: $from.name.toUnwrapped(defaultValue: "")) {
+                    CocoaTextField(text: $dataProvider.tripFrom.name.toUnwrapped(defaultValue: "")) {
                         Text("From").foregroundColor(.placeholderText)
                     }
                     .disabled(true)
@@ -38,7 +35,7 @@ struct TripPlannerView: View {
                         self.showStopList = true
                     }
                     Divider().padding(.bottom, 5.0)
-                    CocoaTextField(text: $to.name.toUnwrapped(defaultValue: "")) {
+                    CocoaTextField(text: $dataProvider.tripTo.name.toUnwrapped(defaultValue: "")) {
                         Text("To").foregroundColor(.placeholderText)
                     }
                     .disabled(true)
@@ -51,22 +48,10 @@ struct TripPlannerView: View {
                         self.showStopList = true
                     }
                 }.modifier(ListStackModifier())
-                if let journey = dataProvider.trip.journey {
-                    if journey.isEmpty {
-                        VStack {
-                            Text("Trip not found")
-                        }.frame(maxHeight: .infinity)
-                    } else {
-                        TripPlannerList(journey)
-                    }
-                } else {
+                ZStack {
                     VStack {
-                        if loading {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                                .padding(.bottom, 2.5)
-                            Text("Loading...")
-                                .foregroundColor(.secondaryLabel)
+                        if let journey = dataProvider.trip.journey {
+                            TripPlannerList(journey)
                         } else {
                             Image(systemName: "signpost.right.and.left").font(.system(size: 96.0, weight: .light)).foregroundColor(.tertiaryLabel)
                                 .padding(.bottom, 2.5)
@@ -75,6 +60,17 @@ struct TripPlannerView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .backgroundFill(.systemGroupedBackground)
+                    VStack {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .padding(.bottom, 2.5)
+                        Text("Loading...")
+                            .foregroundColor(.secondaryLabel)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(.ultraThinMaterial)
+                    .visible(dataProvider.tripLoading)
+                    .animation(.easeInOut(duration: 0.25), value: dataProvider.tripLoading)
                 }
             }
             .padding(.top, -20.0)
@@ -83,32 +79,19 @@ struct TripPlannerView: View {
         .sheet(isPresented: $showStopList) {
             StopListView(stop: self.$stop, stopList: dataProvider.stops, isPresented: self.$showStopList)
         }
+        .alert(isPresented: $dataProvider.tripError.isNotNil(), error: dataProvider.tripError) { _ in } message: { error in
+            if let message = error.errorMessage {
+                Text(message)
+            }
+        }
         .onChange(of: stop) { stop in
             print(stop)
             if lastField == "from" {
-                self.from = stop
+                self.dataProvider.tripFrom = stop
             } else {
-                self.to = stop
+                self.dataProvider.tripTo = stop
             }
-            print("from \(self.from.stationId ?? 0)")
-            print("to \(self.to.stationId ?? 0)")
-            if self.from.stationId != nil && self.to.stationId != nil {
-                self.loading = true
-                let fromId = from.stationId == -1 ? dataProvider.getNearestStationId() : from.stationId!
-                let toId = to.stationId == -1 ? dataProvider.getNearestStationId() : to.stationId!
-                print("both not null")
-                dataProvider.fetchTrip(from: fromId, to: toId)
-            }
-        }
-        .onChange(of: dataProvider.trip) { _ in
-            if (dataProvider.trip.journey != nil) {
-                self.loading = false
-            }
-        }
-        .onChange(of: dataProvider.lastLocation) { lastLocation in
-            if (lastLocation != nil && self.from.name == "") {
-                self.from = .actualLocation
-            }
+            dataProvider.fetchTrip()
         }
     }
 }

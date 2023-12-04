@@ -9,7 +9,10 @@ import Foundation
 import CoreLocation
 
 struct TripReq: Codable, Hashable {
-    var org_id, max_walk_duration, search_from_hours, search_to_hours, max_transfers: Int
+    var org_id = 120
+    var max_walk_duration = 15
+    var search_from_hours = 2
+    var search_to_hours = 2
+    var max_transfers = 3
     var from_station_id, to_station_id: [Int]
-    var search_from: String?
 }

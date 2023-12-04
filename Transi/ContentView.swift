@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftUIIntrospect
 import SwiftUIX
 
 struct ContentView: View {
@@ -13,6 +14,12 @@ struct ContentView: View {
     @State private var selection = 2
     @State private var showStopList = false
     @State private var stop: Stop = .example
+    @State private var tabView: UITabBarController? = nil
+    private let tabBarAppearance = UITabBarAppearance()
+
+    init() {
+        tabBarAppearance.configureWithTransparentBackground()
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -32,10 +39,22 @@ struct ContentView: View {
                         Image(systemName: "calendar")
                         Text("Timetables")
                     }.tag(3)
-            }.onAppear {
-                selection = 2
+                MapKitView(dataProvider, changeTab)
+                    .ignoresSafeArea()
+                    .tabItem {
+                        Image(systemName: "map")
+                        Text("Map")
+                    }.tag(4)
             }
-            
+            .onChange(of: selection) { _ in
+                updateTabBarApperance()
+            }
+            .introspect(.tabView, on: .iOS(.v15, .v16, .v17)) { tv in
+                DispatchQueue.main.async {
+                    tabView = tv
+                }
+            }
+
             if selection == 2 {
                 CocoaTextField("Search", text: $stop.name)
                     .disabled(true)
@@ -50,10 +69,25 @@ struct ContentView: View {
                     }
                     .sheet(isPresented: $showStopList) {
                         StopListView(stop: self.$stop, stopList: dataProvider.stops, isPresented: self.$showStopList)
-                    }.onChange(of: stop) {stop in
+                    }.onChange(of: stop) { stop in
                         dataProvider.changeStop(stop.id ?? 0)
                     }
             }
+        }
+    }
+
+    func changeTab(_ tag: Int) {
+        selection = tag
+    }
+    
+    func updateTabBarApperance() {
+        DispatchQueue.main.async {
+            if selection == 4 {
+                tabBarAppearance.backgroundEffect = UIBlurEffect(style: .systemMaterial)
+            } else {
+                tabBarAppearance.configureWithTransparentBackground()
+            }
+            tabView?.tabBar.scrollEdgeAppearance = tabBarAppearance
         }
     }
 }
