@@ -96,9 +96,9 @@ struct TripPlannerView: View {
     }
 }
 
-struct TripPlannerView_Previews: PreviewProvider {
-    static var previews: some View {
-        @ObservedObject var dataProvider = DataProvider()
-        TripPlannerView(dataProvider)
-    }
-}
+//struct TripPlannerView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        @ObservedObject var dataProvider = DataProvider()
+//        TripPlannerView(dataProvider)
+//    }
+//}

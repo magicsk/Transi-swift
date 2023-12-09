@@ -1,0 +1,86 @@
+name: Swift CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build and upload ipa
+    runs-on: macos-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Get latest tag
+      id: previous_tag
+      run: git fetch --tags && echo "tag=$(git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_OUTPUT
+
+    - name: Get app version
+      id: app_version
+      run: APP_VERSION=$(xcodebuild -target Transi -configuration Release -showBuildSettings | grep MARKETING_VERSION | tr -d 'MARKETING_VERSION =') &&
+            echo "version=$APP_VERSION" >> $GITHUB_OUTPUT &&
+            echo "tag=v$APP_VERSION" >> $GITHUB_OUTPUT
+
+    - name: Create Release.xcconfig
+      if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
+      run: echo -e "X_API_KEY=${{ secrets.X_API_KEY }}\nX_SESSION=${{ secrets.X_SESSION }}\nTHUNDERFOREST_API_KEY=${{ secrets.THUNDERFOREST_API_KEY }}\nTHUNDERFOREST_API_URL=${{ secrets.THUNDERFOREST_API_URL }}\nMAGIC_API_URL=${{ secrets.MAGIC_API_URL }}\nI_API_URL=${{ secrets.I_API_URL }}\nB_API_URL=${{ secrets.B_API_URL }}\nR_API_URL=${{ secrets.R_API_URL }}" > Release.xcconfig && sed -i '' 's/\/\//\/$( )\//g' Release.xcconfig
+
+    - name: Install dependencies
+      if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
+      run: brew install ldid
+
+    - name: Build Transi
+      if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
+      run: make build | xcpretty && exit ${PIPESTATUS[0]}
+
+    - name: Fakesign app
+      if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
+      run: make fakesign
+
+    - name: Convert to IPA
+      if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
+      run: make ipa
+    
+    - name: Create new tag
+      if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
+      run: git tag ${{ steps.app_version.outputs.tag }} && git push --tags && git fetch --tags
+
+    - name: Generate changelog
+      if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
+      id: changelog
+      uses: magicsk/tag-changelog-multiline@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        config_file: .github/tag-changelog-config.js
+
+    - name: Create Release
+      if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
+      id: create_release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.app_version.outputs.tag }}
+        release_name: Transi ${{ steps.app_version.outputs.tag }}
+        body: ${{ steps.changelog.outputs.changes }}
+
+    - name: Upload app
+      if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release
+        path: Transi.ipa
+
+    - name: Upload release asset
+      if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: Transi.ipa
+        asset_name: eu.magicsk.transi.${{ steps.app_version.outputs.version }}.ipa
+        asset_content_type: application/octet-stream

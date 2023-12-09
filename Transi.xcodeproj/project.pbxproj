@@ -97,7 +97,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableView.swift; sourceTree = "<group>"; };
 		DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerView.swift; sourceTree = "<group>"; };
 		DA10FA412A0939CA005D7E49 /* TimetablesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetablesView.swift; sourceTree = "<group>"; };
@@ -115,6 +114,7 @@
 		DA63553229E4957A00AAD7C0 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerList.swift; sourceTree = "<group>"; };
 		DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTime.swift; sourceTree = "<group>"; };
+		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		DA855B762AF68BED00372C31 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		DA89EDE529BA981700C32F24 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListIcon.swift; sourceTree = "<group>"; };
@@ -645,6 +645,7 @@
 /* Begin XCBuildConfiguration section */
 		DAA817E72974387D00E2FBB7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA80284C2B24E39D0011390B /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -708,6 +709,7 @@
 		};
 		DAA817E82974387D00E2FBB7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA80284C2B24E39D0011390B /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;

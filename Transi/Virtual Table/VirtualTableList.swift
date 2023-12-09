@@ -22,9 +22,9 @@ struct VirtualTableList: View {
     }
 }
 
-struct VirtualTableList_Previews: PreviewProvider {
-    static var previews: some View {
-        @ObservedObject var dataProvider = DataProvider()
-        VirtualTableList(dataProvider)
-    }
-}
+//struct VirtualTableList_Previews: PreviewProvider {
+//    static var previews: some View {
+//        @ObservedObject var dataProvider = DataProvider()
+//        VirtualTableList(dataProvider)
+//    }
+//}
