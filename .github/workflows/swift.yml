@@ -82,5 +82,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: Transi.ipa
-        asset_name: eu.magicsk.transi.${{ steps.app_version.outputs.version }}.ipa
+        asset_name: eu.magicsk.Transi.${{ steps.app_version.outputs.version }}.ipa
         asset_content_type: application/octet-stream
