@@ -22,7 +22,7 @@ struct MapBottomSheetView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.secondarySystemBackground.edgesIgnoringSafeArea(.all)
+                Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VStack(alignment: .leading, spacing: .zero) {
                     HStack(alignment: .center) {
                         Text(dataProvider.currentStop.name ?? "Loading...").font(.system(size: 32.0, weight: .bold))
@@ -39,7 +39,7 @@ struct MapBottomSheetView: View {
                             Image(systemName: "arrow.triangle.turn.up.right.circle.fill")
                                 .symbolRenderingMode(.palette)
                                 .font(.system(size: 32))
-                                .foregroundStyle(Color.secondaryLabel, .green, Color.systemBackground)
+                                .foregroundStyle(Color.secondaryLabel, .black, Color.tertiarySystemBackground)
                                 .cornerRadius(1000)
                         }
                         Button(action: {

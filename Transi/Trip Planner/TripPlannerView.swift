@@ -69,6 +69,7 @@ struct TripPlannerView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.ultraThinMaterial)
+                    .padding(.top, -10.0)
                     .visible(dataProvider.tripLoading)
                     .animation(.easeInOut(duration: 0.25), value: dataProvider.tripLoading)
                 }
