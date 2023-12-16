@@ -12,6 +12,6 @@ extension String {
         String(String(reversed()).padding(toLength: toLength, withPad: withPad, startingAt: 0).reversed())
     }
     func simplify() -> String {
-        String(folding(options: .diacriticInsensitive, locale: .current).lowercased())
+        String(folding(options: .diacriticInsensitive, locale: .current).lowercased().trimmingCharacters(in: .whitespaces))
     }
 }

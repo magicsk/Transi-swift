@@ -8,16 +8,17 @@
 import Combine
 import Fuse
 import SwiftUI
+import SwiftUIIntrospect
 
 struct StopListView: View {
+    @State private var searchResults: [Stop]
     @State private var searchText = ""
     @Binding var isPresented: Bool
     @Binding var stop: Stop
-    @State private var searchResults: [Stop]
+
     let fuse = Fuse()
-    var stopList: [Stop]
     let searchTextPublisher = PassthroughSubject<String, Never>()
-    @FocusState private var searchFocus: Bool
+    var stopList: [Stop]
 
     init(stop: Binding<Stop>, stopList: [Stop], isPresented: Binding<Bool>) {
         _isPresented = isPresented
@@ -27,7 +28,7 @@ struct StopListView: View {
     }
 
     var body: some View {
-        NavigationView {
+        AutoFocusedNavigationView($searchText) {
             List(searchResults) { stop in
                 Label {
                     Text(stop.name ?? "Error").font(.headline)
@@ -42,10 +43,9 @@ struct StopListView: View {
                     self.isPresented = false
                 }
             }
-        }
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
-        .onAppear {
-            searchFocus = true
+            .introspect(.list(style: .insetGrouped), on: .iOS(.v16, .v17)) { list in
+                list.contentInset.top = -30
+            }
         }
         .disableAutocorrection(true)
         .textInputAutocapitalization(.never)
@@ -54,26 +54,31 @@ struct StopListView: View {
         }
         .onReceive(
             searchTextPublisher
-                .debounce(for: .milliseconds(250), scheduler: DispatchQueue.main)
+                .debounce(for: .milliseconds(150), scheduler: DispatchQueue.main)
         ) { _ in
             if searchText.isEmpty {
                 searchResults = stopList
             } else {
-                DispatchQueue.global(qos: .userInteractive).async {
+                DispatchQueue.global(qos: .userInitiated).async {
                     let pattern = fuse.createPattern(from: searchText.simplify())
-                    let scoredStops = stopList
-                        .map { stop -> (Stop) in
-                            var newStop: Stop = stop
-                            let score = (stop.id ?? 0 < 0) ? -2 : fuse.search(pattern, in: stop.name?.simplify() ?? "")?.score
-                            newStop.score = score
-                            return newStop
-                        }
-                    self.searchResults = scoredStops.filter {
+                    let scoredStops = stopList.map { stop -> (Stop) in
+                        var newStop: Stop = stop
+                        let score = (stop.id ?? 0 < 0) ? -2 : fuse.search(pattern, in: stop.name?.simplify() ?? "")?.score
+                        newStop.score = score
+                        return newStop
+                    }
+
+                    let filteredStops = scoredStops.filter {
                         $0.id ?? 0 < 0 || $0.score != nil
                     }
-                    .sorted(by: {
+
+                    let sortedStops = filteredStops.sorted(by: {
                         $0.score ?? 0 < $1.score ?? 0
                     })
+
+                    DispatchQueue.main.async {
+                        self.searchResults = sortedStops
+                    }
                 }
             }
         }
