@@ -66,6 +66,10 @@
 		DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
 		DAD9BF1B2B0AAF59009F73AE /* MapBottomSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */; };
 		DAD9BF1D2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */; };
+		DAE714D92B2FA2E20059B8A1 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714D82B2FA2E20059B8A1 /* Session.swift */; };
+		DAE714DA2B2FA2E20059B8A1 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714D82B2FA2E20059B8A1 /* Session.swift */; };
+		DAE714DD2B2FAACF0059B8A1 /* swift.yml in Resources */ = {isa = PBXBuildFile; fileRef = DAE714DC2B2FAACF0059B8A1 /* swift.yml */; };
+		DAE714DE2B2FAACF0059B8A1 /* swift.yml in Resources */ = {isa = PBXBuildFile; fileRef = DAE714DC2B2FAACF0059B8A1 /* swift.yml */; };
 		DAEF77B129744893008D66DE /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
 		DAEF77B32974680B008D66DE /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
 /* End PBXBuildFile section */
@@ -153,6 +157,8 @@
 		DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapBottomSheetView.swift; sourceTree = "<group>"; };
 		DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocationCoordinate2D.swift; sourceTree = "<group>"; };
+		DAE714D82B2FA2E20059B8A1 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		DAE714DC2B2FAACF0059B8A1 /* swift.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; name = swift.yml; path = .github/workflows/swift.yml; sourceTree = "<group>"; };
 		DAEF77B029744893008D66DE /* Stops.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stops.swift; sourceTree = "<group>"; };
 		DAEF77B22974680B008D66DE /* StopListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -245,9 +251,9 @@
 		DA7A7D3D2A1127010002D7D7 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				DA855B762AF68BED00372C31 /* Util.swift */,
 				DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */,
 				DABAE40A2ACC2E5200D66159 /* Line.swift */,
-				DA855B762AF68BED00372C31 /* Util.swift */,
 				DA3F83DB2B1E7CB20006F41E /* Errors.swift */,
 				DAB0094F2B2E7383009DF2CD /* Stored.swift */,
 			);
@@ -273,6 +279,7 @@
 		DAA817BB2974387B00E2FBB7 = {
 			isa = PBXGroup;
 			children = (
+				DAE714DC2B2FAACF0059B8A1 /* swift.yml */,
 				DA80284C2B24E39D0011390B /* Release.xcconfig */,
 				DAD0CEAA29CB9B9800A43CC6 /* Shared */,
 				DAA817C62974387B00E2FBB7 /* Transi */,
@@ -339,6 +346,7 @@
 				DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */,
 				DABD03242A0AF76E00FD2C4B /* StopGps.swift */,
 				DABD03272A0AF7B800FD2C4B /* Trip.swift */,
+				DAE714D82B2FA2E20059B8A1 /* Session.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -534,6 +542,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */,
+				DAE714DD2B2FAACF0059B8A1 /* swift.yml in Resources */,
 				DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -556,6 +565,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAE714DE2B2FAACF0059B8A1 /* swift.yml in Resources */,
 				DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -587,6 +597,7 @@
 				DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */,
 				DAD9BF1D2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift in Sources */,
 				DA7A7D3F2A112FCB0002D7D7 /* DateTime.swift in Sources */,
+				DAE714D92B2FA2E20059B8A1 /* Session.swift in Sources */,
 				DA32836429E33F650070FCA0 /* VirtualTableListItem.swift in Sources */,
 				DABD03202A09A3C900FD2C4B /* TripReq.swift in Sources */,
 				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
@@ -637,6 +648,7 @@
 				DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */,
 				DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */,
 				DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */,
+				DAE714DA2B2FA2E20059B8A1 /* Session.swift in Sources */,
 				DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */,
 				DAD0CEAD29CB9D5700A43CC6 /* Stops.swift in Sources */,
 				DABD03232A0AF3BF00FD2C4B /* Binding.swift in Sources */,

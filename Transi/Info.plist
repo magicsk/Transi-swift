@@ -2,21 +2,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>X_API_KEY</key>
-	<string>$(X_API_KEY)</string>
-	<key>X_SESSION</key>
-	<string>$(X_SESSION)</string>
+	<key>B_API_KEY</key>
+	<string>$(B_API_KEY)</string>
+	<key>B_API_URL</key>
+	<string>$(B_API_URL)</string>
+	<key>I_API_URL</key>
+	<string>$(I_API_URL)</string>
+	<key>MAGIC_API_URL</key>
+	<string>$(MAGIC_API_URL)</string>
+	<key>R_API_KEY</key>
+	<string>$(R_API_KEY)</string>
+	<key>R_API_URL</key>
+	<string>$(R_API_URL)</string>
 	<key>THUNDERFOREST_API_KEY</key>
 	<string>$(THUNDERFOREST_API_KEY)</string>
 	<key>THUNDERFOREST_API_URL</key>
 	<string>$(THUNDERFOREST_API_URL)</string>
-	<key>MAGIC_API_URL</key>
-	<string>$(MAGIC_API_URL)</string>
-	<key>I_API_URL</key>
-	<string>$(I_API_URL)</string>
-	<key>B_API_URL</key>
-	<string>$(B_API_URL)</string>
-	<key>R_API_URL</key>
-	<string>$(R_API_URL)</string>
+	<key>X_SESSION</key>
+	<string>$(X_SESSION)</string>
 </dict>
 </plist>

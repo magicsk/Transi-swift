@@ -17,8 +17,8 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
     private let bApiBaseUrl = (Bundle.main.infoDictionary?["B_API_URL"] as? String)!
     private let rApiBaseUrl = (Bundle.main.infoDictionary?["R_API_URL"] as? String)!
-    private let xApiKey = (Bundle.main.infoDictionary?["X_API_KEY"] as? String)!
-    private let xSession = (Bundle.main.infoDictionary?["X_SESSION"] as? String)!
+    private let bApiKey = (Bundle.main.infoDictionary?["B_API_KEY"] as? String)!
+    private let rApiKey = (Bundle.main.infoDictionary?["R_API_KEY"] as? String)!
 
     private let locationManager = CLLocationManager()
     private let jsonDecoder = JSONDecoder()
@@ -34,6 +34,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var stopsVersion: String
     private var changeLocation = true
     private var originalStops = [Stop]()
+    private var sessionToken = ""
 
     @Published var tabs = [Tab]()
     @Published var vehicleInfo = [VehicleInfo]()
@@ -68,6 +69,25 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         connect()
         fetchStops()
         loadSavedTrip()
+        getSessionToken()
+    }
+    
+    func getSessionToken() {
+        var request = URLRequest(url: URL(string: "\(bApiBaseUrl)/mobile/v1/startup/")!)
+        let uuid = NSUUID().uuidString
+        let sessionRequestBody = SessionReq(installation: uuid)
+        let jsonBody = try! jsonEncoder.encode(sessionRequestBody)
+        request.httpMethod = "POST"
+        request.setValue("\(String(describing: jsonBody.count))", forHTTPHeaderField: "Content-Length")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
+        request.setValue(bApiKey, forHTTPHeaderField: "x-api-key")
+        request.httpBody = jsonBody
+        fetchData(request: request, type: Session.self) { response in
+            print(response.session)
+            self.sessionToken = response.session
+        }
+            
     }
 
     func fetchTrip() {
@@ -91,8 +111,8 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                     request.setValue("\(String(describing: jsonBody.count))", forHTTPHeaderField: "Content-Length")
                     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                     request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-                    request.setValue(xApiKey, forHTTPHeaderField: "x-api-key")
-                    request.setValue(xSession, forHTTPHeaderField: "x-session")
+                    request.setValue(rApiKey, forHTTPHeaderField: "x-api-key")
+                    request.setValue(sessionToken, forHTTPHeaderField: "x-session")
                     request.httpBody = jsonBody
                     
                     fetchData(request: request, type: Trip.self) { trip in
