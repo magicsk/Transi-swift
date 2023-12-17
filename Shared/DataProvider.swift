@@ -74,7 +74,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     func getSessionToken() {
         var request = URLRequest(url: URL(string: "\(bApiBaseUrl)/mobile/v1/startup/")!)
-        let uuid = NSUUID().uuidString
+        let uuid = UUID().uuidString
         let sessionRequestBody = SessionReq(installation: uuid)
         let jsonBody = try! jsonEncoder.encode(sessionRequestBody)
         request.httpMethod = "POST"
@@ -123,7 +123,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                                 self.tripError = .noJourneys
                             }
                         } else {
-                            let timestamp = NSDate().timeIntervalSince1970
+                            let timestamp = Date().timeIntervalSince1970
                             self.userDefaults.save(customObject: trip, forKey: Stored.trip)
                             self.userDefaults.setValue(timestamp, forKey: Stored.tripSeachTimestamp)
                             DispatchQueue.main.async {
