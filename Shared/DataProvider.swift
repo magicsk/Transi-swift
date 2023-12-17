@@ -10,11 +10,7 @@ import CoreLocation
 import Foundation
 import SocketIO
 
-struct Stored {
-    static let stops = "stops"
-    static let stopsVerison = "stopsVersion"
-    static let trip = "trip"
-}
+
 
 open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let magicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
@@ -45,16 +41,21 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var trip = Trip()
     @Published var lastLocation: CLLocation? = nil
     @Published var currentStop: Stop = .example
+    @Published var socketStatus = "unknown"
 
     @Published var tripLoading: Bool = false
     @Published var tripError: TripError? = nil
     @Published var tripFrom: Stop = .empty
     @Published var tripTo: Stop = .empty
+    @Published var tripSaveDuratiom: Int = -1
+    @Published var tripSeachTimestamp: TimeInterval
 
     override init() {
-        manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true), .log(false)])
+        manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true), .log(false), .reconnectAttempts(-1), .reconnectWaitMax(1)])
         socket = manager.defaultSocket
         stopsVersion = userDefaults.string(forKey: Stored.stopsVerison) ?? ""
+        tripSaveDuratiom = userDefaults.integer(forKey: Stored.tripSaveDuration)
+        tripSeachTimestamp = userDefaults.double(forKey: Stored.tripSeachTimestamp)
 
         super.init()
 
@@ -66,10 +67,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         startListeners()
         connect()
         fetchStops()
-
-        if let cachedTrip = userDefaults.retrieve(object: Trip.self, forKey: Stored.trip) {
-            trip = cachedTrip
-        }
+        loadSavedTrip()
     }
 
     func fetchTrip() {
@@ -105,7 +103,9 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                                 self.tripError = .noJourneys
                             }
                         } else {
+                            let timestamp = NSDate().timeIntervalSince1970
                             self.userDefaults.save(customObject: trip, forKey: Stored.trip)
+                            self.userDefaults.setValue(timestamp, forKey: Stored.tripSeachTimestamp)
                             DispatchQueue.main.async {
                                 self.tripLoading = false
                                 self.trip = trip
@@ -118,6 +118,16 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                         self.tripError = .basic
                     }
                 }
+            }
+        }
+    }
+    
+    private func loadSavedTrip() {
+        let dateOfLastTrip = Date(timeIntervalSince1970: tripSeachTimestamp)
+        let differenceInHours = Date.now.timeIntervalSince(dateOfLastTrip) / 3600
+        if tripSaveDuratiom == -1 || Int(differenceInHours) < tripSaveDuratiom {
+            if let cachedTrip = userDefaults.retrieve(object: Trip.self, forKey: Stored.trip) {
+                trip = cachedTrip
             }
         }
     }
@@ -225,14 +235,20 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func startListeners() {
+        socket.on(clientEvent: .statusChange) { _, _ in
+            let connectionStatus = self.socket.status.description
+            print(connectionStatus)
+            if connectionStatus != "connected" {
+                self.socketStatus = self.socket.status.description
+            }
+        }
+        
         socket.on(clientEvent: .connect) { _, _ in
-            print("socket connected")
             self.connected = true
             self.startUpdater()
         }
 
         socket.on(clientEvent: .disconnect) { _, _ in
-            print("socket disconnected")
             DispatchQueue.main.async {
                 self.tabs = [Tab]()
                 self.vehicleInfo = [VehicleInfo]()
@@ -248,6 +264,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         socket.on("cack") { _, _ in
             print(self.stopId)
+            self.socketStatus = "connected"
             self.socket.emit("tabStart", [self.stopId, "*"] as [Any])
             self.socket.emit("infoStart")
         }

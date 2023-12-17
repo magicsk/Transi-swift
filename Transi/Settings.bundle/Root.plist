@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>StringsTable</key>
+	<string>Root</string>
+	<key>PreferenceSpecifiers</key>
+	<array>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Table clock</string>
+			<key>Key</key>
+			<string>display_table_clock</string>
+			<key>DefaultValue</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Table connection status</string>
+			<key>Key</key>
+			<string>display_socket_status</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Title</key>
+			<string>Save searched trip</string>
+			<key>Key</key>
+			<string>trip_save_duration</string>
+			<key>DefaultValue</key>
+			<string>-1</string>
+			<key>Values</key>
+			<array>
+				<string>0</string>
+				<string>1</string>
+				<string>2</string>
+				<string>6</string>
+				<string>12</string>
+				<string>24</string>
+				<string>168</string>
+				<string>-1</string>
+			</array>
+			<key>Titles</key>
+			<array>
+				<string>Until app restart</string>
+				<string>For 1 hour</string>
+				<string>For 2 hours</string>
+				<string>For 6 hours</string>
+				<string>For 12 hours</string>
+				<string>For a day</string>
+				<string>For a week</string>
+				<string>Forever</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
