@@ -30,3 +30,12 @@ struct Part: Codable, Hashable {
     var tripDelay, ticketID: Int?
     static let example = Part(startStopID: 900, endStopID: 801, startStopName: "Hronská", startStopCode: "A", endStopName: "Pažítková", endStopCode: "A", startStationID: 1386, endStationID: 1341, startStopGps: StopGps(lon: 17.208740234375, lat: 48.1357383728027), endStopGps: StopGps(lon: 17.15305519104, lat: 48.1494674682617), startDeparture: "2023-10-03T14:41:00.000Z", endArrival: "2023-10-03T14:52:00.000Z", duration: 11, routeType: 50, tripID: 11799, tripRouteID: 47, tripHeadsign: "Hlavná stanica", tripShortName: "", routeShortName: "71", tripZones: [1955, 1953], tripDelay: nil, ticketID: 604)
 }
+
+struct TripReq: Codable, Hashable {
+    var org_id = 120
+    var max_walk_duration = 15
+    var search_from_hours = 2
+    var search_to_hours = 2
+    var max_transfers = 3
+    var from_station_id, to_station_id: [Int]
+}
