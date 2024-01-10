@@ -44,6 +44,15 @@
         "revision" : "1b8b443b61b8b37fafb06c1abad9b6be244c9de9",
         "version" : "0.1.4"
       }
+    },
+    {
+      "identity" : "wrappinghstack",
+      "kind" : "remoteSourceControl",
+      "location" : "git@github.com:dkk/WrappingHStack.git",
+      "state" : {
+        "revision" : "425d9488ba55f58f0b34498c64c054c77fc2a44b",
+        "version" : "2.2.11"
+      }
     }
   ],
   "version" : 2

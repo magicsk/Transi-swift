@@ -32,7 +32,7 @@ struct TripPlannerList: View {
             }
         }
         .listStyle(.insetGrouped)
-        .padding(.top, -10)
+        .padding(.top, -10.0)
     }
 }
 

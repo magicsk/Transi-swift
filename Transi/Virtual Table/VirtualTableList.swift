@@ -9,6 +9,7 @@ import SwiftUI
 
 struct VirtualTableList: View {
     @ObservedObject var dataProvider: DataProvider
+    @State var date = Date()
     
     init(_ dataProvider: DataProvider) {
         self.dataProvider = dataProvider

@@ -37,9 +37,8 @@ struct MapBottomSheetView: View {
                             dataProvider.fetchTrip()
                         }) {
                             Image(systemName: "arrow.triangle.turn.up.right.circle.fill")
-                                .symbolRenderingMode(.palette)
                                 .font(.system(size: 32))
-                                .foregroundStyle(Color.secondaryLabel, .black, Color.tertiarySystemBackground)
+                                .foregroundStyle(Color.secondaryLabel, Color.tertiarySystemBackground)
                                 .cornerRadius(1000)
                         }
                         Button(action: {

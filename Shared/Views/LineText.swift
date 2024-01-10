@@ -45,17 +45,17 @@ struct LineText: View {
 //        HStack {
 //            LineText("21")
 //            LineText("71")
-//            LineText("99")
+//            LineText("147", 18.0)
 //        }
 //        HStack {
 //            LineText("►")
-//            LineText("X70")
-//            LineText("N72")
+//            LineText("X70", 18.0)
+//            LineText("N72", 18.0)
 //        }
 //        HStack {
 //            LineText("AT1")
 //            LineText("S8")
-//            LineText("R60")
+//            LineText("R60", 18.0)
 //        }
 //    }
 //}

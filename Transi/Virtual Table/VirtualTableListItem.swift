@@ -11,6 +11,7 @@ struct VirtualTableListItem: View {
     var tab: Tab
     var platformLabels: [PlatformLabel]?
     var vehicleInfo: VehicleInfo?
+    @State var date = Date()
 
     init(_ tab: Tab, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?) {
         self.tab = tab

@@ -13,12 +13,12 @@ import SocketIO
 
 
 open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
-    private let magicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
-    private let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
-    private let bApiBaseUrl = (Bundle.main.infoDictionary?["B_API_URL"] as? String)!
-    private let rApiBaseUrl = (Bundle.main.infoDictionary?["R_API_URL"] as? String)!
-    private let bApiKey = (Bundle.main.infoDictionary?["B_API_KEY"] as? String)!
-    private let rApiKey = (Bundle.main.infoDictionary?["R_API_KEY"] as? String)!
+    public let magicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
+    public let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
+    public let bApiBaseUrl = (Bundle.main.infoDictionary?["B_API_URL"] as? String)!
+    public let rApiBaseUrl = (Bundle.main.infoDictionary?["R_API_URL"] as? String)!
+    public let bApiKey = (Bundle.main.infoDictionary?["B_API_KEY"] as? String)!
+    public let rApiKey = (Bundle.main.infoDictionary?["R_API_KEY"] as? String)!
 
     private let locationManager = CLLocationManager()
     private let jsonDecoder = JSONDecoder()
@@ -34,7 +34,6 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var stopsVersion: String
     private var changeLocation = true
     private var originalStops = [Stop]()
-    private var sessionToken = ""
 
     @Published var tabs = [Tab]()
     @Published var vehicleInfo = [VehicleInfo]()
@@ -43,6 +42,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var lastLocation: CLLocation? = nil
     @Published var currentStop: Stop = .example
     @Published var socketStatus = "unknown"
+    @Published var sessionToken = ""
 
     @Published var tripLoading: Bool = false
     @Published var tripError: TripError? = nil
@@ -50,6 +50,8 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var tripTo: Stop = .empty
     @Published var tripSaveDuratiom: Int = -1
     @Published var tripSeachTimestamp: TimeInterval
+    
+    @Published var timetableSelectedDate = Date()
 
     override init() {
         manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true), .log(false), .reconnectAttempts(-1), .reconnectWaitMax(1)])
@@ -83,7 +85,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
         request.setValue(bApiKey, forHTTPHeaderField: "x-api-key")
         request.httpBody = jsonBody
-        fetchData(request: request, type: Session.self) { response in
+        DataProvider.fetchData(request: request, type: Session.self) { response in
             print(response.session)
             self.sessionToken = response.session
         }
@@ -115,7 +117,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                     request.setValue(sessionToken, forHTTPHeaderField: "x-session")
                     request.httpBody = jsonBody
                     
-                    fetchData(request: request, type: Trip.self) { trip in
+                    DataProvider.fetchData(request: request, type: Trip.self) { trip in
                         print("fetched trip \(trip.journey?.count ?? 0)")
                         if trip.journey?.count ?? 0 < 1 {
                             DispatchQueue.main.async {
@@ -156,6 +158,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         updater = Timer.publish(every: 10, on: .current, in: .common)
         updaterSubscription = updater?.autoconnect().sink(receiveValue: { [weak self] _ in
             self?.updateTabs()
+            print("update")
         })
     }
 
@@ -176,7 +179,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func fetchStops() {
-        fetchData(url: "\(self.magicApiBaseUrl)/stops?v", type: StopsVersion.self) { stopsVersion in
+        DataProvider.fetchData(url: "\(self.magicApiBaseUrl)/stops?v", type: StopsVersion.self) { stopsVersion in
             let cachedStops = self.userDefaults.retrieve(object: [Stop].self, forKey: Stored.stops)
             print(stopsVersion.version)
             DispatchQueue.main.async {
@@ -186,7 +189,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                     self.originalStops = cachedStops!
                 } else {
                     print("getting new stops json")
-                    self.fetchData(url: "\(self.magicApiBaseUrl)/stops", type: [Stop].self) { stops in
+                    DataProvider.fetchData(url: "\(self.magicApiBaseUrl)/stops", type: [Stop].self) { stops in
                         self.stops = stops
                         self.originalStops = stops
                         self.userDefaults.save(customObject: stops, forKey: Stored.stops)
@@ -353,7 +356,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
 
-    func fetchData<T: Decodable>(request: URLRequest? = nil, url: String? = nil, type: T.Type, completion: @escaping (T) -> ()) {
+    static func fetchData<T: Decodable>(request: URLRequest? = nil, url: String? = nil, type: T.Type, completion: @escaping (T) -> ()) {
         var urlRequest: URLRequest?
         if request != nil {
             urlRequest = request!
@@ -365,7 +368,9 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
 
         URLSession.shared.dataTask(with: urlRequest!) { data, _, _ in
-            let stops = try! self.jsonDecoder.decode(type, from: data!)
+            let jsonDecoder = JSONDecoder()
+            jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+            let stops = try! jsonDecoder.decode(type, from: data!)
 
             DispatchQueue.main.async {
                 completion(stops)

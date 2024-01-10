@@ -10,6 +10,7 @@
 		DA10FA3C2A093807005D7E49 /* VirtualTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */; };
 		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
 		DA10FA422A093A5E005D7E49 /* TimetablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA412A0939CA005D7E49 /* TimetablesView.swift */; };
+		DA16CE492B33AFE100B27B1E /* TimetableDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */; };
 		DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7802B02951F00BC8428 /* SwiftUIX */; };
 		DA23A7862B02957700BC8428 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7852B02957700BC8428 /* SocketIO */; };
 		DA269E10298960EF00F42107 /* VirtualTableList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* VirtualTableList.swift */; };
@@ -44,6 +45,8 @@
 		DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = DAB0094B2B2E61A0009DF2CD /* Settings.bundle */; };
 		DAB0094E2B2E71BF009DF2CD /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094D2B2E71BF009DF2CD /* View.swift */; };
 		DAB009502B2E7383009DF2CD /* Stored.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094F2B2E7383009DF2CD /* Stored.swift */; };
+		DAB4CE1F2B30BD7200ECF6F4 /* TimetableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */; };
+		DAB67B992B363956001DC2E3 /* LoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */; };
 		DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE4082ACC23DA00D66159 /* LineText.swift */; };
 		DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE40A2ACC2E5200D66159 /* Line.swift */; };
 		DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03212A0AF3BF00FD2C4B /* Binding.swift */; };
@@ -69,6 +72,9 @@
 		DAE714DA2B2FA2E20059B8A1 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714D82B2FA2E20059B8A1 /* Session.swift */; };
 		DAE714DD2B2FAACF0059B8A1 /* swift.yml in Resources */ = {isa = PBXBuildFile; fileRef = DAE714DC2B2FAACF0059B8A1 /* swift.yml */; };
 		DAE714DE2B2FAACF0059B8A1 /* swift.yml in Resources */ = {isa = PBXBuildFile; fileRef = DAE714DC2B2FAACF0059B8A1 /* swift.yml */; };
+		DAE714E22B2FAF650059B8A1 /* Timetables.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714E12B2FAF650059B8A1 /* Timetables.swift */; };
+		DAE714E32B2FAF650059B8A1 /* Timetables.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714E12B2FAF650059B8A1 /* Timetables.swift */; };
+		DAE714E62B2FC0D50059B8A1 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = DAE714E52B2FC0D50059B8A1 /* WrappingHStack */; };
 		DAEF77B129744893008D66DE /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
 		DAEF77B32974680B008D66DE /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
 /* End PBXBuildFile section */
@@ -107,6 +113,7 @@
 		DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableView.swift; sourceTree = "<group>"; };
 		DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerView.swift; sourceTree = "<group>"; };
 		DA10FA412A0939CA005D7E49 /* TimetablesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetablesView.swift; sourceTree = "<group>"; };
+		DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDetailView.swift; sourceTree = "<group>"; };
 		DA269E0F298960EF00F42107 /* VirtualTableList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableList.swift; sourceTree = "<group>"; };
 		DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableDetail.swift; sourceTree = "<group>"; };
 		DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableListItem.swift; sourceTree = "<group>"; };
@@ -140,6 +147,8 @@
 		DAB0094B2B2E61A0009DF2CD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		DAB0094D2B2E71BF009DF2CD /* View.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		DAB0094F2B2E7383009DF2CD /* Stored.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stored.swift; sourceTree = "<group>"; };
+		DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableView.swift; sourceTree = "<group>"; };
+		DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingOverlay.swift; sourceTree = "<group>"; };
 		DABAE4082ACC23DA00D66159 /* LineText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineText.swift; sourceTree = "<group>"; };
 		DABAE40A2ACC2E5200D66159 /* Line.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Line.swift; sourceTree = "<group>"; };
 		DABD031B2A097ABE00FD2C4B /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -157,6 +166,7 @@
 		DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocationCoordinate2D.swift; sourceTree = "<group>"; };
 		DAE714D82B2FA2E20059B8A1 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		DAE714DC2B2FAACF0059B8A1 /* swift.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; name = swift.yml; path = .github/workflows/swift.yml; sourceTree = "<group>"; };
+		DAE714E12B2FAF650059B8A1 /* Timetables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timetables.swift; sourceTree = "<group>"; };
 		DAEF77B029744893008D66DE /* Stops.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stops.swift; sourceTree = "<group>"; };
 		DAEF77B22974680B008D66DE /* StopListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -170,6 +180,7 @@
 				DAC809FE2B02934C00CFC7B8 /* SwiftUIIntrospect in Frameworks */,
 				DA23A7862B02957700BC8428 /* SocketIO in Frameworks */,
 				DAC80A002B0293AF00CFC7B8 /* Fuse in Frameworks */,
+				DAE714E62B2FC0D50059B8A1 /* WrappingHStack in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -214,6 +225,8 @@
 			isa = PBXGroup;
 			children = (
 				DA10FA412A0939CA005D7E49 /* TimetablesView.swift */,
+				DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */,
+				DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */,
 			);
 			path = Timetables;
 			sourceTree = "<group>";
@@ -344,6 +357,7 @@
 				DABD03242A0AF76E00FD2C4B /* StopGps.swift */,
 				DABD03272A0AF7B800FD2C4B /* Trip.swift */,
 				DAE714D82B2FA2E20059B8A1 /* Session.swift */,
+				DAE714E12B2FAF650059B8A1 /* Timetables.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -362,6 +376,7 @@
 			children = (
 				DABAE4082ACC23DA00D66159 /* LineText.swift */,
 				DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */,
+				DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -418,6 +433,7 @@
 				DAC809FF2B0293AF00CFC7B8 /* Fuse */,
 				DA23A7802B02951F00BC8428 /* SwiftUIX */,
 				DA23A7852B02957700BC8428 /* SocketIO */,
+				DAE714E52B2FC0D50059B8A1 /* WrappingHStack */,
 			);
 			productName = Transi;
 			productReference = DABD031B2A097ABE00FD2C4B /* Transi.app */;
@@ -520,6 +536,7 @@
 				DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */,
 				DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */,
 				DAB73A3F2B00F2E5009FCCC7 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
+				DAE714E42B2FC0D50059B8A1 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
 			);
 			productRefGroup = DAA817BB2974387B00E2FBB7;
 			projectDirPath = "";
@@ -575,10 +592,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */,
+				DAB4CE1F2B30BD7200ECF6F4 /* TimetableView.swift in Sources */,
+				DA16CE492B33AFE100B27B1E /* TimetableDetailView.swift in Sources */,
 				DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
 				DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */,
 				DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */,
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
+				DAE714E22B2FAF650059B8A1 /* Timetables.swift in Sources */,
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAB0094E2B2E71BF009DF2CD /* View.swift in Sources */,
 				DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */,
@@ -608,6 +628,7 @@
 				DAC9C7082B096FFF00B1AC8C /* MapKitView.swift in Sources */,
 				DA500BF62A1140E600630226 /* TripPlannerWalkListItem.swift in Sources */,
 				DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */,
+				DAB67B992B363956001DC2E3 /* LoadingOverlay.swift in Sources */,
 				DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
 				DA10FA3C2A093807005D7E49 /* VirtualTableView.swift in Sources */,
@@ -646,6 +667,7 @@
 				DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */,
 				DAE714DA2B2FA2E20059B8A1 /* Session.swift in Sources */,
 				DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */,
+				DAE714E32B2FAF650059B8A1 /* Timetables.swift in Sources */,
 				DAD0CEAD29CB9D5700A43CC6 /* Stops.swift in Sources */,
 				DABD03232A0AF3BF00FD2C4B /* Binding.swift in Sources */,
 			);
@@ -828,7 +850,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.3;
+				MARKETING_VERSION = 0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -879,7 +901,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.3;
+				MARKETING_VERSION = 0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1142,6 +1164,14 @@
 				minimumVersion = 0.1.4;
 			};
 		};
+		DAE714E42B2FC0D50059B8A1 /* XCRemoteSwiftPackageReference "WrappingHStack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:dkk/WrappingHStack.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.11;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1173,6 +1203,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;
 			productName = SocketIO;
+		};
+		DAE714E52B2FC0D50059B8A1 /* WrappingHStack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DAE714E42B2FC0D50059B8A1 /* XCRemoteSwiftPackageReference "WrappingHStack" */;
+			productName = WrappingHStack;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

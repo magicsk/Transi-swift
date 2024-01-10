@@ -57,3 +57,9 @@ func clockStringFromDate(_ time: Date) -> String {
     formatter.dateFormat = "HH:mm:ss"
     return formatter.string(from: time)
 }
+
+func actualDateString() -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyyMMdd"
+    return formatter.string(from: Date.now)
+}
