@@ -26,7 +26,7 @@ jobs:
 
     - name: Create Release.xcconfig
       if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
-      run: echo -e "X_API_KEY=${{ secrets.X_API_KEY }}\nX_SESSION=${{ secrets.X_SESSION }}\nTHUNDERFOREST_API_KEY=${{ secrets.THUNDERFOREST_API_KEY }}\nTHUNDERFOREST_API_URL=${{ secrets.THUNDERFOREST_API_URL }}\nMAGIC_API_URL=${{ secrets.MAGIC_API_URL }}\nI_API_URL=${{ secrets.I_API_URL }}\nB_API_URL=${{ secrets.B_API_URL }}\nR_API_URL=${{ secrets.R_API_URL }}" > Release.xcconfig && sed -i '' 's/\/\//\/$( )\//g' Release.xcconfig
+      run: echo -e "B_API_KEY=${{ secrets.B_API_KEY }}\nR_API_KEY=${{ secrets.R_API_KEY }}\nTHUNDERFOREST_API_KEY=${{ secrets.THUNDERFOREST_API_KEY }}\nTHUNDERFOREST_API_URL=${{ secrets.THUNDERFOREST_API_URL }}\nMAGIC_API_URL=${{ secrets.MAGIC_API_URL }}\nI_API_URL=${{ secrets.I_API_URL }}\nB_API_URL=${{ secrets.B_API_URL }}\nR_API_URL=${{ secrets.R_API_URL }}" > Release.xcconfig && sed -i '' 's/\/\//\/$( )\//g' Release.xcconfig
 
     - name: Install dependencies
       if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
