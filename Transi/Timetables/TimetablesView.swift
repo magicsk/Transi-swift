@@ -10,7 +10,7 @@ import WrappingHStack
 
 struct TimetablesView: View {
     @EnvironmentObject private var dataProvider: DataProvider
-    
+
     @State var trams: [Route] = []
     @State var trolleybuses: [Route] = []
     @State var buses: [Route] = []
@@ -75,9 +75,9 @@ struct TimetablesView: View {
         .paddingTop(80.0)
         .overlayBackground(Color.systemBackground)
         .onAppear {
-            isLoading = true
-            DispatchQueue.global(qos: .userInitiated).async { [self] in
-                if regionalbuses.isEmpty {
+            if regionalbuses.isEmpty {
+                isLoading = true
+                DispatchQueue.global(qos: .userInitiated).async { [self] in
                     var request = URLRequest(url: URL(string: "\(dataProvider.bApiBaseUrl)/mobile/v1/route/12/")!)
                     request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
                     request.setValue(dataProvider.bApiKey, forHTTPHeaderField: "x-api-key")
@@ -88,24 +88,24 @@ struct TimetablesView: View {
                             switch route.routeType {
                             case 0:
                                 trams.append(route)
-                                
+
                             case 2:
                                 trains.append(route)
-                                
+
                             case 3:
                                 if route.shortName.starts(with: "N") {
                                     nightlines.append(route)
                                 } else {
                                     buses.append(route)
                                 }
-                                
+
                             case 50:
                                 if route.shortName.starts(with: "N") {
                                     nightlines.append(route)
                                 } else {
                                     trolleybuses.append(route)
                                 }
-                                
+
                             default:
                                 regionalbuses.append(route)
                             }
