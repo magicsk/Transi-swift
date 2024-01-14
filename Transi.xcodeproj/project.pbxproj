@@ -1166,7 +1166,7 @@
 		};
 		DAE714E42B2FC0D50059B8A1 /* XCRemoteSwiftPackageReference "WrappingHStack" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:dkk/WrappingHStack.git";
+			repositoryURL = "https://github.com/dkk/WrappingHStack";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.2.11;
