@@ -12,7 +12,7 @@ import SwiftUIX
 struct ContentView: View {
     @StateObject private var dataProvider = DataProvider()
     
-    @State private var selection = 3
+    @State private var selection = 2
     @State private var tabView: UITabBarController? = nil
     private let tabBarAppearance = UITabBarAppearance()
 

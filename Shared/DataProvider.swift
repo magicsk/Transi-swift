@@ -158,7 +158,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         updater = Timer.publish(every: 10, on: .current, in: .common)
         updaterSubscription = updater?.autoconnect().sink(receiveValue: { [weak self] _ in
             self?.updateTabs()
-            print("update")
+//            print("update")
         })
     }
 
