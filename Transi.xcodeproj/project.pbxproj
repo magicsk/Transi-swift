@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */; };
 		DA10FA3C2A093807005D7E49 /* VirtualTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */; };
 		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
 		DA10FA422A093A5E005D7E49 /* TimetablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA412A0939CA005D7E49 /* TimetablesView.swift */; };
@@ -110,6 +111,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDatePicker.swift; sourceTree = "<group>"; };
 		DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableView.swift; sourceTree = "<group>"; };
 		DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerView.swift; sourceTree = "<group>"; };
 		DA10FA412A0939CA005D7E49 /* TimetablesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetablesView.swift; sourceTree = "<group>"; };
@@ -217,6 +219,7 @@
 				DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */,
 				DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */,
 				DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */,
+				DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */,
 			);
 			path = "Trip Planner";
 			sourceTree = "<group>";
@@ -620,6 +623,7 @@
 				DAB009502B2E7383009DF2CD /* Stored.swift in Sources */,
 				DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */,
 				DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */,
+				DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */,
 				DA500BFF2A12B23900630226 /* Color.swift in Sources */,
 				DA32836129E19C920070FCA0 /* VirtualTableDetail.swift in Sources */,
 				DAB0094A2B2E33B8009DF2CD /* AutoFocusedNavigationView.swift in Sources */,
@@ -850,7 +854,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.4;
+				MARKETING_VERSION = 0.5;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -901,7 +905,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.4;
+				MARKETING_VERSION = 0.5;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

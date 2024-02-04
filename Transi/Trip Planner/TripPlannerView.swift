@@ -10,12 +10,17 @@ import SwiftUIX
 
 struct TripPlannerView: View {
     @ObservedObject var dataProvider: DataProvider
-    @State private var showStopList = false
+    @Environment(\.openURL) var openURL
     @State private var stop: Stop = .example
     @State private var lastField = ""
+    @State private var arrivalDepratureCustomDate = false
+    @State private var showStopList = false
+    @State private var dateDialog = false
+    private let formatter = DateFormatter()
 
     init(_ dataProvider: DataProvider) {
         self.dataProvider = dataProvider
+        formatter.dateFormat = "d MMM H:mm"
     }
 
     var body: some View {
@@ -47,6 +52,27 @@ struct TripPlannerView: View {
                         lastField = "to"
                         self.showStopList = true
                     }
+                    Divider().padding(.bottom, 5.0)
+                    HStack {
+                        Picker(selection: $dataProvider.tripArrivalDeprature) {
+                            Text("Departure").tag(ArrivalDeparture.departure)
+                            Text("Arrival").tag(ArrivalDeparture.arrival)
+                        }
+                        .pickerStyle(.segmented)
+                        .width(175.0)
+                        .onChange(of: dataProvider.tripArrivalDeprature) { _ in
+                            dataProvider.fetchTrip()
+                        }
+                        Spacer()
+                        Button(
+                            arrivalDepratureCustomDate ?
+                                formatter.string(from: dataProvider.tripArrivalDepratureDate) :
+                                "now"
+                        ) {
+                            dateDialog = true
+                        }
+                        .padding(.trailing, 20.0)
+                    }
                 }.modifier(ListStackModifier())
                 ZStack {
                     VStack {
@@ -76,6 +102,14 @@ struct TripPlannerView: View {
             }
             .padding(.top, -20.0)
             .navigationTitle(Text("Trip planner"))
+            .toolbar {
+                Button("Settings") {
+                    openURL(URL(string: UIApplication.openSettingsURLString)!)
+                }
+            }
+        }
+        .sheet(isPresented: $dateDialog) {
+            TripPlannerDatePicker(dataProvider, $dateDialog, $arrivalDepratureCustomDate)
         }
         .sheet(isPresented: $showStopList) {
             StopListView(stop: self.$stop, stopList: dataProvider.stops, isPresented: self.$showStopList)
@@ -97,9 +131,9 @@ struct TripPlannerView: View {
     }
 }
 
-//struct TripPlannerView_Previews: PreviewProvider {
+// struct TripPlannerView_Previews: PreviewProvider {
 //    static var previews: some View {
 //        @ObservedObject var dataProvider = DataProvider()
 //        TripPlannerView(dataProvider)
 //    }
-//}
+// }

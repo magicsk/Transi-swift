@@ -10,8 +10,6 @@ import CoreLocation
 import Foundation
 import SocketIO
 
-
-
 open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     public let magicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
     public let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
@@ -31,7 +29,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var updaterSubscription: AnyCancellable?
     private var reconnect: Bool = false
     private var stopId = 20
-    private var stopsVersion: String
+    private var stopsVersion = ""
     private var changeLocation = true
     private var originalStops = [Stop]()
 
@@ -48,20 +46,24 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var tripError: TripError? = nil
     @Published var tripFrom: Stop = .empty
     @Published var tripTo: Stop = .empty
-    @Published var tripSaveDuratiom: Int = -1
-    @Published var tripSeachTimestamp: TimeInterval
-    
+    @Published var tripArrivalDeprature: ArrivalDeparture = .departure
+    @Published var tripArrivalDepratureDate = Date()
+    @Published var tripSaveDuratiom = -1
+    @Published var tripSeachTimestamp: TimeInterval = 0.0
+
     @Published var timetableSelectedDate = Date()
 
     override init() {
         manager = SocketManager(socketURL: URL(string: iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true), .log(false), .reconnectAttempts(-1), .reconnectWaitMax(1)])
         socket = manager.defaultSocket
-        stopsVersion = userDefaults.string(forKey: Stored.stopsVerison) ?? ""
-        tripSaveDuratiom = userDefaults.integer(forKey: Stored.tripSaveDuration)
-        tripSeachTimestamp = userDefaults.double(forKey: Stored.tripSeachTimestamp)
 
         super.init()
 
+        registerUserDefaults()
+        stopsVersion = userDefaults.string(forKey: Stored.stopsVerison) ?? ""
+        tripSaveDuratiom = userDefaults.integer(forKey: Stored.tripSaveDuration)
+        tripSeachTimestamp = userDefaults.double(forKey: Stored.tripSeachTimestamp)
+        
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.requestWhenInUseAuthorization()
@@ -73,7 +75,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         loadSavedTrip()
         getSessionToken()
     }
-    
+
     func getSessionToken() {
         var request = URLRequest(url: URL(string: "\(bApiBaseUrl)/mobile/v1/startup/")!)
         let uuid = UUID().uuidString
@@ -89,25 +91,41 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
             print(response.session)
             self.sessionToken = response.session
         }
-            
     }
 
     func fetchTrip() {
         DispatchQueue.global(qos: .userInitiated).async { [self] in
-            DispatchQueue.main.async {
-                self.tripLoading = true
-            }
             if var fromId = tripFrom.stationId, var toId = tripTo.stationId {
+                DispatchQueue.main.async {
+                    self.tripLoading = true
+                }
                 if fromId == -1 { fromId = getNearestStationId() }
                 if toId == -1 { toId = getNearestStationId() }
-                
+
+                let tripMaxTransfers = userDefaults.integer(forKey: Stored.tripMaxTransfers)
+                let tripMaxWalkDuration = userDefaults.integer(forKey: Stored.tripMaxWalkDuration)
+
                 print("fetching trip from \(fromId) to \(toId)")
-                
-                let tripRequestBody = TripReq(from_station_id: [fromId], to_station_id: [toId])
-                print(tripRequestBody)
+
+                let tripRequestBody = TripReq(
+                    max_walk_duration: tripMaxWalkDuration,
+                    max_transfers: tripMaxTransfers,
+                    search_from_hours: tripArrivalDeprature == ArrivalDeparture.arrival ? 2 : nil,
+                    search_to_hours: tripArrivalDeprature == ArrivalDeparture.departure ? 2 : nil,
+                    search_from: tripArrivalDeprature == ArrivalDeparture.departure ?
+                        tripArrivalDepratureDate.formatted(.iso8601) :
+                        nil,
+                    search_to: tripArrivalDeprature == ArrivalDeparture.arrival ?
+                        tripArrivalDepratureDate.formatted(.iso8601) :
+                        nil,
+                    from_station_id: [fromId],
+                    to_station_id: [toId]
+                )
+
                 do {
                     let jsonBody = try jsonEncoder.encode(tripRequestBody)
-                    
+                    print(String(data: jsonBody, encoding: String.Encoding.utf8)! as String)
+
                     var request = URLRequest(url: URL(string: "\(rApiBaseUrl)/mobile/v1/raptor/")!)
                     request.httpMethod = "POST"
                     request.setValue("\(String(describing: jsonBody.count))", forHTTPHeaderField: "Content-Length")
@@ -116,7 +134,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                     request.setValue(rApiKey, forHTTPHeaderField: "x-api-key")
                     request.setValue(sessionToken, forHTTPHeaderField: "x-session")
                     request.httpBody = jsonBody
-                    
+
                     DataProvider.fetchData(request: request, type: Trip.self) { trip in
                         print("fetched trip \(trip.journey?.count ?? 0)")
                         if trip.journey?.count ?? 0 < 1 {
@@ -143,7 +161,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
         }
     }
-    
+
     private func loadSavedTrip() {
         let dateOfLastTrip = Date(timeIntervalSince1970: tripSeachTimestamp)
         let differenceInHours = Date.now.timeIntervalSince(dateOfLastTrip) / 3600
@@ -152,6 +170,10 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                 trip = cachedTrip
             }
         }
+    }
+
+    private func registerUserDefaults() {
+        userDefaults.register(defaults: [Stored.tripSaveDuration: -1, Stored.tripMaxTransfers: 3, Stored.tripMaxWalkDuration: 15])
     }
 
     private func startUpdater() {
@@ -179,7 +201,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func fetchStops() {
-        DataProvider.fetchData(url: "\(self.magicApiBaseUrl)/stops?v", type: StopsVersion.self) { stopsVersion in
+        DataProvider.fetchData(url: "\(magicApiBaseUrl)/stops?v", type: StopsVersion.self) { stopsVersion in
             let cachedStops = self.userDefaults.retrieve(object: [Stop].self, forKey: Stored.stops)
             print(stopsVersion.version)
             DispatchQueue.main.async {
@@ -235,7 +257,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         lastLocation = location
         sortStops(coordinates: location.coordinate)
         DispatchQueue.main.async {
-            self.tripFrom = .actualLocation
+            if self.tripFrom == .empty { self.tripFrom = .actualLocation }
         }
     }
 
@@ -265,7 +287,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                 self.socketStatus = self.socket.status.description
             }
         }
-        
+
         socket.on(clientEvent: .connect) { _, _ in
             self.connected = true
             self.startUpdater()
