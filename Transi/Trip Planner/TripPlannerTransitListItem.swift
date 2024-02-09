@@ -20,18 +20,23 @@ struct TripPlannerTransitListItem: View {
                 Text(part.tripHeadsign ?? "Error").font(.headline).lineLimit(1)
                 VStack(alignment: .leading) {
                     HStack {
-                        Text(timeStringFromUtc(part.startDeparture))
+                        Text(timeStringFromUtc(part.startDeparture)).frame(width: 47.5, alignment: .leading)
                         Text(part.startStopName ?? "Error")
                     }
                     HStack {
-                        Text(timeStringFromUtc(part.endArrival))
+                        Text(timeStringFromUtc(part.endArrival)).frame(width: 47.5, alignment: .leading)
                         Text(part.endStopName ?? "Error")
                     }
-                }
+                }.padding(.leading, 2.5)
             }
         }
         icon: {
-            LineText(part.routeShortName ?? "Error", 20.0).frame(minWidth: 50.0)
+            VStack(spacing: .zero) {
+                LineText(part.routeShortName ?? "Error", 20.0).frame(minWidth: 50.0)
+                Rectangle()
+                    .frame(width: 2.5, height: 40.0)
+                    .foregroundColor(colorFromLineNum(part.routeShortName ?? "Error")!)
+            }
         }
 //        .gesture(DragGesture(minimumDistance: 10, coordinateSpace: .global)
 //            .onChanged { value in

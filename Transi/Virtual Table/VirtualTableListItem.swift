@@ -37,7 +37,13 @@ struct VirtualTableListItem: View {
                     if (tab.stuck) {
                         Image("exclamationmark.triangle.fill").foregroundColor(.yellow)
                     }
-                    Text(tab.departureTimeRemaining).font(.headline)
+                    if (tab.departureTimeRemaining == "now"){
+                        NowIndicator()
+                    } else if (tab.departureTimeRemaining == "~now"){
+                        NowIndicator(true)
+                    } else {
+                        Text(tab.departureTimeRemaining).font(.headline)
+                    }
                     Text(getPlatformLabel(platformLabels, tab.platform)).font(.system(size: 16.0, weight: .light)).width(22.0)
                 }
             }.padding(.trailing, -12.0)

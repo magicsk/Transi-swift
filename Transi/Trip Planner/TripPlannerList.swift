@@ -8,31 +8,55 @@
 import SwiftUI
 
 struct TripPlannerList: View {
-    private var journeys: [Journey]
-    init(_ journeys: [Journey]) {
-        self.journeys = journeys
+    @ObservedObject var dataProvider: DataProvider
+    init(_ dataProvider: DataProvider) {
+        self.dataProvider = dataProvider
     }
 
     var body: some View {
-        List(journeys, id: \.self) { journey in
-            if let parts = journey.parts {
-                Section(header: Text(getHeaderText(parts, journey.zones))) {
-                    ForEach(parts, id: \.self) { part in
-                        if part.routeType == 64 {
-                            TripPlannerWalkListItem(part)
-                        } else if part.routeType != nil {
-                            TripPlannerTransitListItem(part)
-                        } else {
-                            Text("Something went wrong")
+        let journeys = dataProvider.trip.journey!
+        ScrollViewReader { proxy in
+            List(journeys, id: \.self) { journey in
+                if let parts = journey.parts {
+                    if journey.journeyGuid == journeys.first?.journeyGuid {
+                        EmptyView().id("top")
+                    }
+                    Section {
+                        ForEach(parts, id: \.self) { part in
+                            if part.routeType == 64 {
+                                TripPlannerWalkListItem(part)
+                            } else if part.routeType != nil {
+                                TripPlannerTransitListItem(part)
+                            } else {
+                                Text("Something went wrong")
+                            }
+                        }
+                    } header: {
+                        Text(getHeaderText(parts, journey.zones))
+                    }
+                    .onAppear {
+                        dataProvider.loadMoreTripsIfNeeded(journey)
+                    }
+                    if journey.journeyGuid == journeys.last?.journeyGuid {
+                        if dataProvider.tripLoadingMore {
+                            Section {} header: {
+                                HStack(alignment: .center) {
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                        .padding(.vertical, 2.5)
+                                }.width(1000.0)
+                            }
                         }
                     }
+                } else {
+                    Text("Error")
                 }
-            } else {
-                Text("Error")
+            }
+            .listStyle(.insetGrouped)
+            .onChange(of: dataProvider.tripLoading) {_ in
+                proxy.scrollTo("top", anchor: .init(x: 0.0, y: -10.0))
             }
         }
-        .listStyle(.insetGrouped)
-        .padding(.top, -10.0)
     }
 }
 
@@ -45,8 +69,8 @@ func getHeaderText(_ parts: [Part], _ zones: [Int]?) -> String {
     return "\(startTime) | \(duration) min | \(numOfZones) zones"
 }
 
- struct TripPlannerList_Previews: PreviewProvider {
-    static var previews: some View {
-        TripPlannerList([Journey.example])
-    }
- }
+// struct TripPlannerList_Previews: PreviewProvider {
+//    static var previews: some View {
+//        TripPlannerList([Journey.example])
+//    }
+// }

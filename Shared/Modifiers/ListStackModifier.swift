@@ -9,13 +9,23 @@ import SwiftUI
 
 struct ListStackModifier: ViewModifier {
     func body(content: Content) -> some View {
-        content
-            .padding(.vertical, 12.0)
-            .padding(.leading, 20.0)
-            .frame(maxWidth: .infinity)
-            .backgroundFill(.secondarySystemGroupedBackground)
-            .cornerRadius(10)
-            .padding(.all, 20.0)
-            .backgroundFill(.systemGroupedBackground)
+        ZStack {
+            content
+                .padding(.vertical, 12.0)
+                .frame(maxWidth: .infinity)
+                .background(.secondarySystemGroupedBackground)
+                .cornerRadius(10.0)
+                .padding(.all, 20.0)
+            HStack {
+                VStack(spacing: 3.5) {
+                    ForEach(1 ... 3, id: \.self) { _ in
+                        Circle()
+                            .foregroundColor(.quaternaryLabel)
+                            .frame(width: 3.5, height: 3.5)
+                    }
+                }
+                Spacer()
+            }.padding(.all, 38.5)
+        }
     }
 }

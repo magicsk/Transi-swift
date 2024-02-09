@@ -12,10 +12,11 @@ struct Trip: Codable, Hashable {
 }
 
 struct Journey: Codable, Hashable {
+    var journeyGuid: String
     var parts: [Part]?
     var zones: [Int]?
     var ticketID: Int?
-    static let example = Journey(parts: [Part.example], zones: [1955, 1953], ticketID: 606)
+    static let example = Journey(journeyGuid: "6b657922-b5fe-457c-b8c5-0fd0caa13619", parts: [Part.example], zones: [1955, 1953], ticketID: 606)
 }
 
 struct Part: Codable, Hashable {
@@ -28,7 +29,7 @@ struct Part: Codable, Hashable {
     var tripHeadsign, tripShortName, routeShortName: String?
     var tripZones: [Int]?
     var tripDelay, ticketID: Int?
-    static let example = Part(startStopID: 900, endStopID: 801, startStopName: "Hronská", startStopCode: "A", endStopName: "Pažítková", endStopCode: "A", startStationID: 1386, endStationID: 1341, startStopGps: StopGps(lon: 17.208740234375, lat: 48.1357383728027), endStopGps: StopGps(lon: 17.15305519104, lat: 48.1494674682617), startDeparture: "2023-10-03T14:41:00.000Z", endArrival: "2023-10-03T14:52:00.000Z", duration: 11, routeType: 50, tripID: 11799, tripRouteID: 47, tripHeadsign: "Hlavná stanica", tripShortName: "", routeShortName: "71", tripZones: [1955, 1953], tripDelay: nil, ticketID: 604)
+    static let example = Part(startStopID: 900, endStopID: 801, startStopName: "Hronská", startStopCode: "A", endStopName: "Pažítková", endStopCode: "A", startStationID: 1386, endStationID: 1341, startStopGps: StopGps(lon: 17.208740234375, lat: 48.1357383728027), endStopGps: StopGps(lon: 17.15305519104, lat: 48.1494674682617), startDeparture: "2023-10-03T14:41:00.000Z", endArrival: "2023-10-03T14:52:00.000Z", duration: 11, routeType: 50, tripID: 11799, tripRouteID: 47, tripHeadsign: "Hlavná stanica", tripShortName: "", routeShortName: "X99", tripZones: [1955, 1953], tripDelay: nil, ticketID: 604)
 }
 
 struct TripReq: Codable, Hashable {

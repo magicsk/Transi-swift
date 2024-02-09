@@ -48,8 +48,10 @@ struct VirtualTableView: View {
             }
         }
         .ifCondition(displayClock) { navView in
-            navView.onReceive(Timer.publish(every: 1, on: .current, in: .common).autoconnect()) { _ in
-                self.date = Date()
+            navView.onAppear {
+                Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+                    self.date = Date()
+                }
             }
         }
     }

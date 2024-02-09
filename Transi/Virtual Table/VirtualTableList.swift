@@ -19,6 +19,11 @@ struct VirtualTableList: View {
         List(dataProvider.tabs) { tab in
             let vehicleInfo = dataProvider.vehicleInfo.first(where: { $0.issi == tab.busID })
             VirtualTableListItem(tab, dataProvider.currentStop.platformLabels, vehicleInfo )
+            if (tab.id == dataProvider.tabs.last?.id) {
+                Section{} header: {
+                    Spacer()
+                }
+            }
         }
     }
 }

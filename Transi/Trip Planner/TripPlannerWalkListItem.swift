@@ -21,11 +21,8 @@ struct TripPlannerWalkListItem: View {
                 .font(.system(size: 25.0))
                 .foregroundColor(.accentColor)
                 .frame(minWidth: 36.0)
-                .onPress {
-                    print(part)
-                }
             Text("\(timeDiffFromUtc(part.startDeparture, part.endArrival)) min to \(sameStop ? "platform \(part.endStopCode ?? "X")" : part.endStopName ?? "Error")")
-        }
+        }.padding(.vertical, 3.0)
     }
 }
 

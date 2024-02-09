@@ -7,10 +7,12 @@
 
 import SwiftUI
 import SwiftUIIntrospect
+import AudioToolbox
 
 struct TimetableView: View {
     let route: Route
     let timezoneOffset = TimeZone(identifier: "Europe/Bratislava")!.secondsFromGMT()
+    let feedbackGenerator = UIImpactFeedbackGenerator(style: .rigid)
     @State var departures: [Departure] = []
     @State var selectedDeparture = 0.0
     @State var directions: [Direction] = []
@@ -22,6 +24,7 @@ struct TimetableView: View {
 
     init(_ route: Route) {
         self.route = route
+        feedbackGenerator.prepare()
     }
 
     var body: some View {
@@ -118,6 +121,9 @@ struct TimetableView: View {
                     displayedComponents: [.date]
                 )
             }
+        }
+        .onChange(of: selectedDeparture) { _ in
+            feedbackGenerator.impactOccurred()
         }
         .onChange(of: [selectedDirection.name, dataProvider.timetableSelectedDate.description]) { _ in
             noTimetable = false

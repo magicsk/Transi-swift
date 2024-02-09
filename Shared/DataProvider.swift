@@ -43,13 +43,16 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var sessionToken = ""
 
     @Published var tripLoading: Bool = false
+    @Published var tripLoadingMore: Bool = false
     @Published var tripError: TripError? = nil
     @Published var tripFrom: Stop = .empty
     @Published var tripTo: Stop = .empty
     @Published var tripArrivalDeprature: ArrivalDeparture = .departure
     @Published var tripArrivalDepratureDate = Date()
+    @Published var tripArrivalDepratureCustomDate = false
     @Published var tripSaveDuratiom = -1
     @Published var tripSeachTimestamp: TimeInterval = 0.0
+    @Published var tripLastSeachDate = Date()
 
     @Published var timetableSelectedDate = Date()
 
@@ -63,7 +66,7 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         stopsVersion = userDefaults.string(forKey: Stored.stopsVerison) ?? ""
         tripSaveDuratiom = userDefaults.integer(forKey: Stored.tripSaveDuration)
         tripSeachTimestamp = userDefaults.double(forKey: Stored.tripSeachTimestamp)
-        
+
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.requestWhenInUseAuthorization()
@@ -93,11 +96,15 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
 
-    func fetchTrip() {
+    func fetchTrip(more: Bool = false) {
         DispatchQueue.global(qos: .userInitiated).async { [self] in
             if var fromId = tripFrom.stationId, var toId = tripTo.stationId {
                 DispatchQueue.main.async {
-                    self.tripLoading = true
+                    if more {
+                        self.tripLoadingMore = true
+                    } else {
+                        self.tripLoading = true
+                    }
                 }
                 if fromId == -1 { fromId = getNearestStationId() }
                 if toId == -1 { toId = getNearestStationId() }
@@ -107,17 +114,18 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
 
                 print("fetching trip from \(fromId) to \(toId)")
 
+                let searchDate = more ? tripLastSeachDate.addingTimeInterval(.init(7200.0)) : tripArrivalDepratureCustomDate ? tripArrivalDepratureDate : nil
+                let searchDateFormatted = searchDate != nil ? searchDate!.formatted(.iso8601) : nil
+                let searchFrom = tripArrivalDeprature == ArrivalDeparture.departure ? searchDateFormatted : nil
+                let searchTo = tripArrivalDeprature == ArrivalDeparture.arrival ? searchDateFormatted : nil
+
                 let tripRequestBody = TripReq(
                     max_walk_duration: tripMaxWalkDuration,
                     max_transfers: tripMaxTransfers,
                     search_from_hours: tripArrivalDeprature == ArrivalDeparture.arrival ? 2 : nil,
                     search_to_hours: tripArrivalDeprature == ArrivalDeparture.departure ? 2 : nil,
-                    search_from: tripArrivalDeprature == ArrivalDeparture.departure ?
-                        tripArrivalDepratureDate.formatted(.iso8601) :
-                        nil,
-                    search_to: tripArrivalDeprature == ArrivalDeparture.arrival ?
-                        tripArrivalDepratureDate.formatted(.iso8601) :
-                        nil,
+                    search_from: searchFrom,
+                    search_to: searchTo,
                     from_station_id: [fromId],
                     to_station_id: [toId]
                 )
@@ -144,11 +152,16 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                             }
                         } else {
                             let timestamp = Date().timeIntervalSince1970
+                            self.tripLastSeachDate = searchDate ?? Date()
                             self.userDefaults.save(customObject: trip, forKey: Stored.trip)
                             self.userDefaults.setValue(timestamp, forKey: Stored.tripSeachTimestamp)
                             DispatchQueue.main.async {
                                 self.tripLoading = false
-                                self.trip = trip
+                                if more {
+                                    self.trip.journey?.append(contentsOf: trip.journey!)
+                                } else {
+                                    self.trip = trip
+                                }
                             }
                         }
                     }
@@ -159,6 +172,12 @@ open class DataProvider: NSObject, ObservableObject, CLLocationManagerDelegate {
                     }
                 }
             }
+        }
+    }
+
+    func loadMoreTripsIfNeeded(_ journey: Journey) {
+        if journey.journeyGuid == trip.journey?.last?.journeyGuid {
+            fetchTrip(more: true)
         }
     }
 

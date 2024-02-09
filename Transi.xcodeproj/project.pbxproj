@@ -41,6 +41,7 @@
 		DAA817E62974387D00E2FBB7 /* TransiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */; };
 		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
+		DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */; };
 		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
 		DAB0094A2B2E33B8009DF2CD /* AutoFocusedNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */; };
 		DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = DAB0094B2B2E61A0009DF2CD /* Settings.bundle */; };
@@ -60,6 +61,9 @@
 		DAC80A002B0293AF00CFC7B8 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAC809FF2B0293AF00CFC7B8 /* Fuse */; };
 		DAC9C7082B096FFF00B1AC8C /* MapKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9C7072B096FFF00B1AC8C /* MapKitView.swift */; };
 		DAC9C7142B09761000B1AC8C /* UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9C7132B09761000B1AC8C /* UIKit.swift */; };
+		DACDA7862B7031B100D53F6D /* TripPlannerSearchInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACDA7852B7031B100D53F6D /* TripPlannerSearchInputs.swift */; };
+		DACDA7882B7033F700D53F6D /* CircleIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACDA7872B7033F700D53F6D /* CircleIcon.swift */; };
+		DACDA78A2B7044CB00D53F6D /* TripPlannerDateButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACDA7892B7044CB00D53F6D /* TripPlannerDateButton.swift */; };
 		DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */; };
 		DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */; };
 		DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
@@ -145,6 +149,7 @@
 		DAA817F22974393300E2FBB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DAA817F729743B4B00E2FBB7 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
 		DAA817F929743B6300E2FBB7 /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
+		DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowIndicator.swift; sourceTree = "<group>"; };
 		DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFocusedNavigationView.swift; sourceTree = "<group>"; };
 		DAB0094B2B2E61A0009DF2CD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		DAB0094D2B2E71BF009DF2CD /* View.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
@@ -162,6 +167,9 @@
 		DABD03272A0AF7B800FD2C4B /* Trip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trip.swift; sourceTree = "<group>"; };
 		DAC9C7072B096FFF00B1AC8C /* MapKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapKitView.swift; sourceTree = "<group>"; };
 		DAC9C7132B09761000B1AC8C /* UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKit.swift; sourceTree = "<group>"; };
+		DACDA7852B7031B100D53F6D /* TripPlannerSearchInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerSearchInputs.swift; sourceTree = "<group>"; };
+		DACDA7872B7033F700D53F6D /* CircleIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleIcon.swift; sourceTree = "<group>"; };
+		DACDA7892B7044CB00D53F6D /* TripPlannerDateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDateButton.swift; sourceTree = "<group>"; };
 		DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiWatchApp.swift; sourceTree = "<group>"; };
 		DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapBottomSheetView.swift; sourceTree = "<group>"; };
@@ -215,11 +223,13 @@
 		DA10FA3D2A09397E005D7E49 /* Trip Planner */ = {
 			isa = PBXGroup;
 			children = (
+				DACDA7852B7031B100D53F6D /* TripPlannerSearchInputs.swift */,
 				DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */,
 				DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */,
 				DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */,
 				DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */,
 				DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */,
+				DACDA7892B7044CB00D53F6D /* TripPlannerDateButton.swift */,
 			);
 			path = "Trip Planner";
 			sourceTree = "<group>";
@@ -380,6 +390,8 @@
 				DABAE4082ACC23DA00D66159 /* LineText.swift */,
 				DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */,
 				DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */,
+				DACDA7872B7033F700D53F6D /* CircleIcon.swift */,
+				DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -595,12 +607,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */,
+				DACDA78A2B7044CB00D53F6D /* TripPlannerDateButton.swift in Sources */,
+				DACDA7862B7031B100D53F6D /* TripPlannerSearchInputs.swift in Sources */,
 				DAB4CE1F2B30BD7200ECF6F4 /* TimetableView.swift in Sources */,
 				DA16CE492B33AFE100B27B1E /* TimetableDetailView.swift in Sources */,
 				DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
 				DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */,
 				DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */,
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
+				DACDA7882B7033F700D53F6D /* CircleIcon.swift in Sources */,
 				DAE714E22B2FAF650059B8A1 /* Timetables.swift in Sources */,
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAB0094E2B2E71BF009DF2CD /* View.swift in Sources */,
@@ -637,6 +652,7 @@
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
 				DA10FA3C2A093807005D7E49 /* VirtualTableView.swift in Sources */,
 				DAEF77B129744893008D66DE /* Stops.swift in Sources */,
+				DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */,
 				DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -854,7 +870,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.5;
+				MARKETING_VERSION = 0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -905,7 +921,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.5;
+				MARKETING_VERSION = 0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
