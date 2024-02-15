@@ -9,18 +9,18 @@ import SwiftUI
 import SwiftUIIntrospect
 
 struct TimetableDetailView: View {
-    @EnvironmentObject private var dataProvider: DataProvider
-    
     let route: Route
     let direction: Direction
     let departure: DirectionDeparture
+    let selectedDate: Date
     @State var departures: [HourMinute] = []
     @State var isLoading = true
 
-    init(_ route: Route, _ direction: Direction, _ departure: DirectionDeparture) {
+    init(_ route: Route, _ direction: Direction, _ departure: DirectionDeparture, _ selectedDate: Date) {
         self.route = route
         self.direction = direction
         self.departure = departure
+        self.selectedDate = selectedDate
     }
 
     var body: some View {
@@ -68,11 +68,11 @@ struct TimetableDetailView: View {
             if departures.isEmpty {
                 isLoading = true
                 DispatchQueue.global(qos: .userInitiated).async { [self] in
-                    var request = URLRequest(url: URL(string: "\(dataProvider.bApiBaseUrl)/mobile/v1/route/\(route.id)/departures/\(direction.id)/\(dataProvider.timetableSelectedDate.toString())/\(departure.id)/")!)
+                    var request = URLRequest(url: URL(string: "\(GlobalController.bApiBaseUrl)/mobile/v1/route/\(route.id)/departures/\(direction.id)/\(selectedDate.toString())/\(departure.id)/")!)
                     request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-                    request.setValue(dataProvider.bApiKey, forHTTPHeaderField: "x-api-key")
-                    request.setValue(dataProvider.sessionToken, forHTTPHeaderField: "x-session")
-                    DataProvider.fetchData(request: request, type: TimetableDetails.self) { timetableDetails in
+                    request.setValue(GlobalController.bApiKey, forHTTPHeaderField: "x-api-key")
+                    request.setValue(GlobalController.getSessionToken(), forHTTPHeaderField: "x-session")
+                    GlobalController.fetchData(request: request, type: TimetableDetails.self) { timetableDetails in
                         timetableDetails.all.forEach { departure in
                             let hour = (departure.t / 60) % 24
                             let minute = String(departure.t % 60).leftPadding(toLength: 2, withPad: "0")

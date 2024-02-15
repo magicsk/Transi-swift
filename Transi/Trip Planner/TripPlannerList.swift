@@ -8,13 +8,20 @@
 import SwiftUI
 
 struct TripPlannerList: View {
-    @ObservedObject var dataProvider: DataProvider
-    init(_ dataProvider: DataProvider) {
-        self.dataProvider = dataProvider
+    let trip: Trip
+    let loading: Bool
+    let loadingMore: Bool
+    let loadMoreTripsIfNeeded: (_ journey: Journey) -> Void
+    
+    init(_ trip: Trip, _ loading: Bool, _ loadingMore: Bool, loadMoreTripsIfNeeded: @escaping (_ journey: Journey) -> Void) {
+        self.trip = trip
+        self.loading = loading
+        self.loadingMore = loadingMore
+        self.loadMoreTripsIfNeeded = loadMoreTripsIfNeeded
     }
-
+    
     var body: some View {
-        let journeys = dataProvider.trip.journey!
+        let journeys = trip.journey!
         ScrollViewReader { proxy in
             List(journeys, id: \.self) { journey in
                 if let parts = journey.parts {
@@ -35,10 +42,10 @@ struct TripPlannerList: View {
                         Text(getHeaderText(parts, journey.zones))
                     }
                     .onAppear {
-                        dataProvider.loadMoreTripsIfNeeded(journey)
+                        loadMoreTripsIfNeeded(journey)
                     }
                     if journey.journeyGuid == journeys.last?.journeyGuid {
-                        if dataProvider.tripLoadingMore {
+                        if loadingMore {
                             Section {} header: {
                                 HStack(alignment: .center) {
                                     ProgressView()
@@ -53,7 +60,7 @@ struct TripPlannerList: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .onChange(of: dataProvider.tripLoading) {_ in
+            .onChange(of: loading) {_ in
                 proxy.scrollTo("top", anchor: .init(x: 0.0, y: -10.0))
             }
         }

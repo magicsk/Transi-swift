@@ -9,26 +9,24 @@ import SwiftUI
 import SwiftUIX
 
 struct VirtualTableView: View {
-    @ObservedObject var dataProvider: DataProvider
+    @StateObject var virtualTableController = GlobalController.virtualTable
+    @StateObject var stopListProvider = GlobalController.stopsListProvider
     @State var date = Date()
     @State private var showStopList = false
     @State private var stop: Stop = .example
     @AppStorage(Stored.displaySocketStatus) var displaySocketStatus = false
     @AppStorage(Stored.displayClockOnTable) var displayClock = true
 
-    init(_ dataProvider: DataProvider) {
-        self.dataProvider = dataProvider
+    private let updateTabBarApperance: () -> Void
+
+    init(_ updateTabBarApperance: @escaping () -> Void) {
+        self.updateTabBarApperance = updateTabBarApperance
     }
 
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottom) {
-                VirtualTableList(dataProvider)
-                    .navigationTitle(Text(dataProvider.currentStop.name ?? "Loading..."))
-                    .navigationBarItems(
-                        leading: Text(displaySocketStatus ? dataProvider.socketStatus : ""),
-                        trailing: Text(displayClock ? clockStringFromDate(date) : "")
-                    )
+                VirtualTableList(virtualTableController.tabs, virtualTableController.currentStop, virtualTableController.vehicleInfo)
                 CocoaTextField("Search", text: $stop.name)
                     .disabled(true)
                     .padding(.vertical, 10.0)
@@ -41,11 +39,16 @@ struct VirtualTableView: View {
                         self.showStopList = true
                     }
                     .sheet(isPresented: $showStopList) {
-                        StopListView(stop: self.$stop, stopList: dataProvider.stops, isPresented: self.$showStopList)
+                        StopListView(stop: self.$stop, stopList: stopListProvider.stops, isPresented: self.$showStopList)
                     }.onChange(of: stop) { stop in
-                        dataProvider.changeStop(stop.id ?? 0)
+                        virtualTableController.changeStop(stop.id)
                     }
             }
+            .navigationTitle(Text(virtualTableController.currentStop.name ?? "Loading..."))
+            .navigationBarItems(
+                leading: Text(displaySocketStatus ? virtualTableController.socketStatus : ""),
+                trailing: Text(displayClock ? clockStringFromDate(date) : "")
+            )
         }
         .ifCondition(displayClock) { navView in
             navView.onAppear {
@@ -53,6 +56,9 @@ struct VirtualTableView: View {
                     self.date = Date()
                 }
             }
+        }
+        .onAppear {
+            updateTabBarApperance()
         }
     }
 }

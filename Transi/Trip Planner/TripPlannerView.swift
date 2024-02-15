@@ -8,17 +8,18 @@
 import SwiftUI
 
 struct TripPlannerView: View {
-    @ObservedObject var dataProvider: DataProvider
     @Environment(\.openURL) var openURL
+    @StateObject var tripPlannerController = GlobalController.tripPlanner
+    @StateObject var stopListProvider = GlobalController.stopsListProvider
     @State private var stop: Stop = .example
     @State private var lastField = ""
     @State private var showStopList = false
     @State private var dateDialog = false
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .rigid)
-
-    init(_ dataProvider: DataProvider) {
-        self.dataProvider = dataProvider
-        feedbackGenerator.prepare()
+    private let updateTabBarApperance: () -> Void
+    
+    init(_ updateTabBarApperance: @escaping () -> Void) {
+        self.updateTabBarApperance = updateTabBarApperance
     }
 
     var body: some View {
@@ -27,32 +28,30 @@ struct TripPlannerView: View {
                 Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VStack(spacing: .zero) {
                     TripPlannerSearchInputs(
-                        from: $dataProvider.tripFrom,
-                        to: $dataProvider.tripTo,
+                        from: $tripPlannerController.from,
+                        to: $tripPlannerController.to,
                         lastField: $lastField,
                         showStopList: $showStopList
                     )
                     HStack {
-                        Picker(selection: $dataProvider.tripArrivalDeprature) {
+                        Picker(selection: $tripPlannerController.arrivalDeparture) {
                             Text("Departure").tag(ArrivalDeparture.departure)
                             Text("Arrival").tag(ArrivalDeparture.arrival)
                         }
                         .pickerStyle(.segmented)
                         .width(175.0)
-                        .onChange(of: dataProvider.tripArrivalDeprature) { _ in
-                            feedbackGenerator.impactOccurred()
-                            dataProvider.fetchTrip()
-                        }
                         Spacer()
-                        TripPlannerDateButton($dataProvider.tripArrivalDepratureDate, dateDialog: $dateDialog, customDate: dataProvider.tripArrivalDepratureCustomDate)
+                        TripPlannerDateButton($tripPlannerController.arrivalDepartureDate, dateDialog: $dateDialog, customDate: tripPlannerController.arrivalDepartureCustomDate)
                     }
                     .padding(.horizontal, 24.0)
                     .padding(.top, -10.0)
                     .padding(.bottom, 10.0)
                     ZStack {
                         VStack {
-                            if dataProvider.trip.journey != nil {
-                                TripPlannerList(dataProvider)
+                            if tripPlannerController.trip.journey != nil {
+                                TripPlannerList(tripPlannerController.trip, tripPlannerController.loading, tripPlannerController.loadingMore) { journey in
+                                    tripPlannerController.loadMoreTripsIfNeeded(journey)
+                                }
                             } else {
                                 Image(systemName: "signpost.right.and.left").font(.system(size: 96.0, weight: .light)).foregroundColor(.tertiaryLabel)
                                     .padding(.bottom, 2.5)
@@ -74,8 +73,8 @@ struct TripPlannerView: View {
                                 .background(.ultraThinMaterial)
                                 .blur(radius: 10)
                         )
-                        .visible(dataProvider.tripLoading)
-                        .animation(.easeInOut(duration: 0.25), value: dataProvider.tripLoading)
+                        .visible(tripPlannerController.loading)
+                        .animation(.easeInOut(duration: 0.25), value: tripPlannerController.loading)
                     }
                 }
                 .padding(.top, -20.0)
@@ -87,32 +86,31 @@ struct TripPlannerView: View {
                 }
             }
             .sheet(isPresented: $dateDialog) {
-                TripPlannerDatePicker(dataProvider, $dateDialog, $dataProvider.tripArrivalDepratureCustomDate)
+                TripPlannerDatePicker($dateDialog)
             }
             .sheet(isPresented: $showStopList) {
-                StopListView(stop: self.$stop, stopList: dataProvider.stops, isPresented: self.$showStopList)
+                StopListView(stop: self.$stop, stopList: stopListProvider.stops, isPresented: self.$showStopList)
             }
-            .alert(isPresented: $dataProvider.tripError.isNotNil(), error: dataProvider.tripError) { _ in } message: { error in
+            .alert(isPresented: $tripPlannerController.error.isNotNil() , error: tripPlannerController.error) { _ in } message: { error in
                 if let message = error.errorMessage {
                     Text(message)
                 }
             }
             .onChange(of: stop) { stop in
-                print(stop)
                 if lastField == "from" {
-                    self.dataProvider.tripFrom = stop
+                    tripPlannerController.from = stop
                 } else {
-                    self.dataProvider.tripTo = stop
+                    tripPlannerController.to = stop
                 }
-                dataProvider.fetchTrip()
+                tripPlannerController.fetchTrip()
+            }
+            .onChange(of: tripPlannerController.arrivalDeparture) { _ in
+                feedbackGenerator.impactOccurred()
+                tripPlannerController.fetchTrip()
+            }
+            .onAppear {
+                updateTabBarApperance()
             }
         }
     }
 }
-
-// struct TripPlannerView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        @ObservedObject var dataProvider = DataProvider()
-//        TripPlannerView(dataProvider)
-//    }
-// }

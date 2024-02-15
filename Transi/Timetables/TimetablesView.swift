@@ -9,8 +9,6 @@ import SwiftUI
 import WrappingHStack
 
 struct TimetablesView: View {
-    @EnvironmentObject private var dataProvider: DataProvider
-
     @State var trams: [Route] = []
     @State var trolleybuses: [Route] = []
     @State var buses: [Route] = []
@@ -19,6 +17,11 @@ struct TimetablesView: View {
     @State var regionalbuses: [Route] = []
 
     @State var isLoading = true
+    private let updateTabBarApperance: () -> Void
+    
+    init(_ updateTabBarApperance: @escaping () -> Void) {
+        self.updateTabBarApperance = updateTabBarApperance
+    }
 
     let columns = [
         GridItem(.flexible())
@@ -75,14 +78,15 @@ struct TimetablesView: View {
         .paddingTop(80.0)
         .overlayBackground(Color.systemBackground)
         .onAppear {
+            updateTabBarApperance()
             if regionalbuses.isEmpty {
                 isLoading = true
                 DispatchQueue.global(qos: .userInitiated).async { [self] in
-                    var request = URLRequest(url: URL(string: "\(dataProvider.bApiBaseUrl)/mobile/v1/route/12/")!)
+                    var request = URLRequest(url: URL(string: "\(GlobalController.bApiBaseUrl)/mobile/v1/route/12/")!)
                     request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-                    request.setValue(dataProvider.bApiKey, forHTTPHeaderField: "x-api-key")
-                    request.setValue(dataProvider.sessionToken, forHTTPHeaderField: "x-session")
-                    DataProvider.fetchData(request: request, type: Timetables.self) { timetables in
+                    request.setValue(GlobalController.bApiKey, forHTTPHeaderField: "x-api-key")
+                    request.setValue(GlobalController.getSessionToken(), forHTTPHeaderField: "x-session")
+                    GlobalController.fetchData(request: request, type: Timetables.self) { timetables in
                         let routes = timetables.routes
                         routes.forEach { route in
                             switch route.routeType {

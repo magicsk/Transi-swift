@@ -8,15 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */; };
-		DA10FA3C2A093807005D7E49 /* VirtualTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */; };
 		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
-		DA10FA422A093A5E005D7E49 /* TimetablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA412A0939CA005D7E49 /* TimetablesView.swift */; };
-		DA16CE492B33AFE100B27B1E /* TimetableDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */; };
 		DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7802B02951F00BC8428 /* SwiftUIX */; };
 		DA23A7862B02957700BC8428 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7852B02957700BC8428 /* SocketIO */; };
-		DA269E10298960EF00F42107 /* VirtualTableList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* VirtualTableList.swift */; };
-		DA32836129E19C920070FCA0 /* VirtualTableDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */; };
-		DA32836429E33F650070FCA0 /* VirtualTableListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */; };
 		DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DB2B1E7CB20006F41E /* Errors.swift */; };
 		DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */; };
 		DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */; };
@@ -28,6 +22,15 @@
 		DA63553129E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */; };
 		DA63553329E4957A00AAD7C0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
 		DA63553429E4957A00AAD7C0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
+		DA7887EA2B77DA0800BFFB4F /* TimetablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA412A0939CA005D7E49 /* TimetablesView.swift */; };
+		DA7887EB2B77DA0A00BFFB4F /* TimetableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */; };
+		DA7887EC2B77DA0C00BFFB4F /* TimetableDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */; };
+		DA7887EF2B77E5FE00BFFB4F /* MapKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9C7072B096FFF00B1AC8C /* MapKitView.swift */; };
+		DA7887F02B79235800BFFB4F /* VirtualTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC95A0C2B77A93C005E93C7 /* VirtualTableController.swift */; };
+		DA7887F12B79236000BFFB4F /* VirtualTableList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA269E0F298960EF00F42107 /* VirtualTableList.swift */; };
+		DA7887F22B79236200BFFB4F /* VirtualTableDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */; };
+		DA7887F32B79236400BFFB4F /* VirtualTableListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */; };
+		DA7887F42B79236800BFFB4F /* VirtualTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */; };
 		DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */; };
 		DA7A7D3F2A112FCB0002D7D7 /* DateTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */; };
 		DA855B772AF68BED00372C31 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA855B762AF68BED00372C31 /* Util.swift */; };
@@ -40,14 +43,16 @@
 		DAA817E42974387D00E2FBB7 /* TransiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E32974387D00E2FBB7 /* TransiUITests.swift */; };
 		DAA817E62974387D00E2FBB7 /* TransiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */; };
 		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
-		DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F929743B6300E2FBB7 /* DataProvider.swift */; };
 		DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */; };
 		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
 		DAB0094A2B2E33B8009DF2CD /* AutoFocusedNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */; };
 		DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = DAB0094B2B2E61A0009DF2CD /* Settings.bundle */; };
 		DAB0094E2B2E71BF009DF2CD /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094D2B2E71BF009DF2CD /* View.swift */; };
 		DAB009502B2E7383009DF2CD /* Stored.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094F2B2E7383009DF2CD /* Stored.swift */; };
-		DAB4CE1F2B30BD7200ECF6F4 /* TimetableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */; };
+		DAB467F52B7A489800B45A1C /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */; };
+		DAB467F72B7A48B400B45A1C /* StopsListProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */; };
+		DAB467F82B7A48B400B45A1C /* StopsListProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */; };
+		DAB467F92B7A5C9200B45A1C /* MapBottomSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */; };
 		DAB67B992B363956001DC2E3 /* LoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */; };
 		DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE4082ACC23DA00D66159 /* LineText.swift */; };
 		DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE40A2ACC2E5200D66159 /* Line.swift */; };
@@ -59,7 +64,9 @@
 		DABD03292A0AF7B800FD2C4B /* Trip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03272A0AF7B800FD2C4B /* Trip.swift */; };
 		DAC809FE2B02934C00CFC7B8 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = DAC809FD2B02934C00CFC7B8 /* SwiftUIIntrospect */; };
 		DAC80A002B0293AF00CFC7B8 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAC809FF2B0293AF00CFC7B8 /* Fuse */; };
-		DAC9C7082B096FFF00B1AC8C /* MapKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9C7072B096FFF00B1AC8C /* MapKitView.swift */; };
+		DAC95A0B2B77A92F005E93C7 /* GlobalController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC95A0A2B77A92F005E93C7 /* GlobalController.swift */; };
+		DAC95A0F2B77A948005E93C7 /* TripPlannerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC95A0E2B77A948005E93C7 /* TripPlannerController.swift */; };
+		DAC95A112B77ABAF005E93C7 /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */; };
 		DAC9C7142B09761000B1AC8C /* UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9C7132B09761000B1AC8C /* UIKit.swift */; };
 		DACDA7862B7031B100D53F6D /* TripPlannerSearchInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACDA7852B7031B100D53F6D /* TripPlannerSearchInputs.swift */; };
 		DACDA7882B7033F700D53F6D /* CircleIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACDA7872B7033F700D53F6D /* CircleIcon.swift */; };
@@ -71,7 +78,6 @@
 		DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DAD0CEB429CB9E1D00A43CC6 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAD0CEB329CB9E1D00A43CC6 /* SocketIO */; };
 		DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
-		DAD9BF1B2B0AAF59009F73AE /* MapBottomSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */; };
 		DAD9BF1D2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */; };
 		DAE714D92B2FA2E20059B8A1 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714D82B2FA2E20059B8A1 /* Session.swift */; };
 		DAE714DA2B2FA2E20059B8A1 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714D82B2FA2E20059B8A1 /* Session.swift */; };
@@ -148,12 +154,12 @@
 		DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		DAA817F22974393300E2FBB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DAA817F729743B4B00E2FBB7 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
-		DAA817F929743B6300E2FBB7 /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
 		DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowIndicator.swift; sourceTree = "<group>"; };
 		DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFocusedNavigationView.swift; sourceTree = "<group>"; };
 		DAB0094B2B2E61A0009DF2CD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		DAB0094D2B2E71BF009DF2CD /* View.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		DAB0094F2B2E7383009DF2CD /* Stored.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stored.swift; sourceTree = "<group>"; };
+		DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopsListProvider.swift; sourceTree = "<group>"; };
 		DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableView.swift; sourceTree = "<group>"; };
 		DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingOverlay.swift; sourceTree = "<group>"; };
 		DABAE4082ACC23DA00D66159 /* LineText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineText.swift; sourceTree = "<group>"; };
@@ -165,6 +171,10 @@
 		DABD03212A0AF3BF00FD2C4B /* Binding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Binding.swift; sourceTree = "<group>"; };
 		DABD03242A0AF76E00FD2C4B /* StopGps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopGps.swift; sourceTree = "<group>"; };
 		DABD03272A0AF7B800FD2C4B /* Trip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trip.swift; sourceTree = "<group>"; };
+		DAC95A0A2B77A92F005E93C7 /* GlobalController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalController.swift; sourceTree = "<group>"; };
+		DAC95A0C2B77A93C005E93C7 /* VirtualTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableController.swift; sourceTree = "<group>"; };
+		DAC95A0E2B77A948005E93C7 /* TripPlannerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerController.swift; sourceTree = "<group>"; };
+		DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
 		DAC9C7072B096FFF00B1AC8C /* MapKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapKitView.swift; sourceTree = "<group>"; };
 		DAC9C7132B09761000B1AC8C /* UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKit.swift; sourceTree = "<group>"; };
 		DACDA7852B7031B100D53F6D /* TripPlannerSearchInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerSearchInputs.swift; sourceTree = "<group>"; };
@@ -375,6 +385,15 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		DAB467F42B7A488500B45A1C /* Providers */ = {
+			isa = PBXGroup;
+			children = (
+				DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */,
+				DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */,
+			);
+			path = Providers;
+			sourceTree = "<group>";
+		};
 		DAB73A422B00FC8F009FCCC7 /* Map */ = {
 			isa = PBXGroup;
 			children = (
@@ -396,6 +415,16 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		DAC95A092B77A905005E93C7 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				DAC95A0A2B77A92F005E93C7 /* GlobalController.swift */,
+				DAC95A0C2B77A93C005E93C7 /* VirtualTableController.swift */,
+				DAC95A0E2B77A948005E93C7 /* TripPlannerController.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
 		DAD0CE9929CB97D500A43CC6 /* Transi Watch App */ = {
 			isa = PBXGroup;
 			children = (
@@ -408,13 +437,14 @@
 		DAD0CEAA29CB9B9800A43CC6 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				DAB467F42B7A488500B45A1C /* Providers */,
+				DAC95A092B77A905005E93C7 /* Controllers */,
 				DABAE4072ACC23B800D66159 /* Views */,
 				DA500C002A12B7FC00630226 /* Modifiers */,
 				DA7A7D3D2A1127010002D7D7 /* Util */,
 				DAA817CB2974387C00E2FBB7 /* Assets.xcassets */,
 				DA89EDE429BA980400C32F24 /* Extensions */,
 				DAA817F629743B2A00E2FBB7 /* Models */,
-				DAA817F929743B6300E2FBB7 /* DataProvider.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -609,10 +639,9 @@
 				DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */,
 				DACDA78A2B7044CB00D53F6D /* TripPlannerDateButton.swift in Sources */,
 				DACDA7862B7031B100D53F6D /* TripPlannerSearchInputs.swift in Sources */,
-				DAB4CE1F2B30BD7200ECF6F4 /* TimetableView.swift in Sources */,
-				DA16CE492B33AFE100B27B1E /* TimetableDetailView.swift in Sources */,
 				DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
 				DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */,
+				DA7887EC2B77DA0C00BFFB4F /* TimetableDetailView.swift in Sources */,
 				DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */,
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
 				DACDA7882B7033F700D53F6D /* CircleIcon.swift in Sources */,
@@ -620,37 +649,42 @@
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAB0094E2B2E71BF009DF2CD /* View.swift in Sources */,
 				DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */,
+				DA7887EB2B77DA0A00BFFB4F /* TimetableView.swift in Sources */,
 				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
 				DA855B772AF68BED00372C31 /* Util.swift in Sources */,
+				DA7887F12B79236000BFFB4F /* VirtualTableList.swift in Sources */,
 				DABD03282A0AF7B800FD2C4B /* Trip.swift in Sources */,
 				DA500BF82A11461300630226 /* Date.swift in Sources */,
 				DABD03252A0AF76E00FD2C4B /* StopGps.swift in Sources */,
-				DA10FA422A093A5E005D7E49 /* TimetablesView.swift in Sources */,
-				DA269E10298960EF00F42107 /* VirtualTableList.swift in Sources */,
-				DAD9BF1B2B0AAF59009F73AE /* MapBottomSheetView.swift in Sources */,
 				DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */,
+				DA7887F22B79236200BFFB4F /* VirtualTableDetail.swift in Sources */,
+				DAB467F72B7A48B400B45A1C /* StopsListProvider.swift in Sources */,
+				DAC95A112B77ABAF005E93C7 /* LocationProvider.swift in Sources */,
 				DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */,
 				DAD9BF1D2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift in Sources */,
+				DA7887EA2B77DA0800BFFB4F /* TimetablesView.swift in Sources */,
 				DA7A7D3F2A112FCB0002D7D7 /* DateTime.swift in Sources */,
 				DAE714D92B2FA2E20059B8A1 /* Session.swift in Sources */,
-				DA32836429E33F650070FCA0 /* VirtualTableListItem.swift in Sources */,
+				DA7887EF2B77E5FE00BFFB4F /* MapKitView.swift in Sources */,
+				DAB467F92B7A5C9200B45A1C /* MapBottomSheetView.swift in Sources */,
+				DAC95A0B2B77A92F005E93C7 /* GlobalController.swift in Sources */,
 				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
 				DAB009502B2E7383009DF2CD /* Stored.swift in Sources */,
-				DAA817FA29743B6300E2FBB7 /* DataProvider.swift in Sources */,
 				DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */,
 				DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */,
 				DA500BFF2A12B23900630226 /* Color.swift in Sources */,
-				DA32836129E19C920070FCA0 /* VirtualTableDetail.swift in Sources */,
 				DAB0094A2B2E33B8009DF2CD /* AutoFocusedNavigationView.swift in Sources */,
 				DA500C022A12B81E00630226 /* ListStackModifier.swift in Sources */,
 				DAC9C7142B09761000B1AC8C /* UIKit.swift in Sources */,
-				DAC9C7082B096FFF00B1AC8C /* MapKitView.swift in Sources */,
+				DAC95A0F2B77A948005E93C7 /* TripPlannerController.swift in Sources */,
+				DA7887F42B79236800BFFB4F /* VirtualTableView.swift in Sources */,
 				DA500BF62A1140E600630226 /* TripPlannerWalkListItem.swift in Sources */,
 				DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */,
 				DAB67B992B363956001DC2E3 /* LoadingOverlay.swift in Sources */,
+				DA7887F32B79236400BFFB4F /* VirtualTableListItem.swift in Sources */,
 				DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
-				DA10FA3C2A093807005D7E49 /* VirtualTableView.swift in Sources */,
+				DA7887F02B79235800BFFB4F /* VirtualTableController.swift in Sources */,
 				DAEF77B129744893008D66DE /* Stops.swift in Sources */,
 				DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */,
 				DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */,
@@ -678,6 +712,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAB467F82B7A48B400B45A1C /* StopsListProvider.swift in Sources */,
+				DAB467F52B7A489800B45A1C /* LocationProvider.swift in Sources */,
 				DABD03292A0AF7B800FD2C4B /* Trip.swift in Sources */,
 				DA63553429E4957A00AAD7C0 /* String.swift in Sources */,
 				DABD03262A0AF76E00FD2C4B /* StopGps.swift in Sources */,

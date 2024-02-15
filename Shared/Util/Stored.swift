@@ -9,9 +9,9 @@ import Foundation
 
 struct Stored {
     static let stops = "stops"
-    static let stopsVerison = "stopsVersion"
+    static let stopsVersion = "stopsVersion"
     static let trip = "trip"
-    static let tripSeachTimestamp = "trip_timestamp"
+    static let tripSearchTimestamp = "trip_timestamp"
     static let tripSaveDuration = "trip_save_duration"
     static let tripMaxWalkDuration = "trip_max_walk_duration"
     static let tripMaxTransfers = "trip_max_transfers"

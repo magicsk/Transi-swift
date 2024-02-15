@@ -10,7 +10,7 @@ import SwiftUIIntrospect
 import SwiftUIX
 
 struct ContentView: View {
-    @StateObject private var dataProvider = DataProvider()
+    private let globalController = GlobalController()
     
     @State private var selection = 2
     @State private var tabView: UITabBarController? = nil
@@ -23,32 +23,27 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             TabView(selection: $selection) {
-                TripPlannerView(dataProvider)
+                TripPlannerView(updateTabBarApperance)
                     .tabItem {
-                        Image(systemName: "tram")
-                        Text("Trip planner")
+                        Label("Trip planner", systemImage: "tram")
                     }.tag(1)
-                VirtualTableView(dataProvider)
+                VirtualTableView(updateTabBarApperance)
                     .tabItem {
                         Image(systemName: "clock.arrow.2.circlepath")
                         Text("Virtual Table")
                     }.tag(2)
-                TimetablesView()
-                    .environmentObject(dataProvider)
+                TimetablesView(updateTabBarApperance)
                     .tabItem {
-                        Image(systemName: "calendar")
-                        Text("Timetables")
+                        Label("Timetables", systemImage: "calendar")
                     }.tag(3)
-                MapKitView(dataProvider, changeTab)
+                MapKitView(updateTabBarApperance, changeTab)
                     .ignoresSafeArea()
                     .tabItem {
                         Image(systemName: "map")
                         Text("Map")
                     }.tag(4)
             }
-            .onChange(of: selection) { _ in
-                updateTabBarApperance()
-            }
+            
             .introspect(.tabView, on: .iOS(.v15, .v16, .v17)) { tv in
                 DispatchQueue.main.async {
                     tabView = tv
@@ -73,8 +68,8 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
+//struct ContentView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ContentView()
+//    }
+//}

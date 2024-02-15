@@ -10,23 +10,24 @@ import SwiftUI
 import UIKit
 
 struct MapKitView: UIViewControllerRepresentable {
-    private let dataProvider: DataProvider
+    private let updateTabBarApperance: () -> Void
     private let changeTab: (Int) -> Void
 
-    init(_ dataProvider: DataProvider, _ changeTab: @escaping (Int) -> Void) {
-        self.dataProvider = dataProvider
+    init(_ updateTabBarApperance: @escaping () -> Void, _ changeTab: @escaping (Int) -> Void) {
+        self.updateTabBarApperance = updateTabBarApperance
         self.changeTab = changeTab
     }
 
     func makeUIViewController(context: Context) -> MapViewController {
-        return MapViewController(dataProvider, changeTab)
+        return MapViewController(updateTabBarApperance, changeTab)
     }
 
     func updateUIViewController(_ uiViewController: MapViewController, context: Context) {}
 }
 
 class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentationControllerDelegate {
-    private var dataProvider: DataProvider
+    @StateObject var stopListProvider = GlobalController.stopsListProvider
+    private let updateTabBarApperance: () -> Void
     private var tileLightOverlay: MKTileOverlay?
     private var tileDarkOverlay: MKTileOverlay?
     private var sheetViewController: MapBottomSheetView?
@@ -42,10 +43,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
     let sourceLightUrl = "https://tile.thunderforest.com/transport/{z}/{x}/{y}@2x.png?apikey=628502b3ae3a4c388efde8abb0577ca2"
     let sourceDarkUrl = "https://tile.thunderforest.com/transport-dark/{z}/{x}/{y}@2x.png?apikey=628502b3ae3a4c388efde8abb0577ca2" // TODO: env file
 
-    init(_ dataProvider: DataProvider, _ changeTab: @escaping (Int) -> Void) {
-        self.dataProvider = dataProvider
+    init(_ updateTabBarApperance: @escaping () -> Void, _ changeTab: @escaping (Int) -> Void) {
+        self.updateTabBarApperance = updateTabBarApperance
         self.changeTab = changeTab
         super.init(nibName: nil, bundle: nil)
+        print("map view init")
     }
 
     @available(*, unavailable)
@@ -55,7 +57,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        sheetViewController = MapBottomSheetView(dataProvider, sheetDismiss, changeTab)
+        sheetViewController = MapBottomSheetView(sheetDismiss, changeTab)
         sheetNavController = UIHostingController(rootView: sheetViewController!)
         setupMapView()
         addLocationButton()
@@ -64,6 +66,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        updateTabBarApperance()
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -113,18 +116,23 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
     private func addPoints() {
         DispatchQueue.global(qos: .userInitiated).async {
             let points = self.generatePoints()
-            DispatchQueue.main.async {
-                self.mapView.addAnnotations(points)
+            if points.isEmpty {
+                sleep(1)
+                self.addPoints()
+            } else {
+                DispatchQueue.main.async {
+                    self.mapView.addAnnotations(points)
+                }
             }
         }
     }
 
     private func generatePoints() -> [StopAnnotation] {
         // FIXME: what if stop are not fetched yet ?
-        let points: [StopAnnotation] = dataProvider.stops.map { stop in
+        let points: [StopAnnotation] = stopListProvider.stops.map { stop in
             let pointAnnotation = StopAnnotation(latitude: stop.location.latitude, longitude: stop.location.longitude)
             pointAnnotation.title = stop.name
-            pointAnnotation.subtitle = String(stop.id ?? 0)
+            pointAnnotation.subtitle = String(stop.id)
             return pointAnnotation
         }
         return points
@@ -144,7 +152,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
     }
 
     func sheetDismiss() {
-        self.sheetNavController!.dismiss(animated: true)
+        sheetNavController!.dismiss(animated: true)
         mapView.deselectAnnotation(selectedAnnotation, animated: true)
     }
 
@@ -196,7 +204,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
             mapView.deselectAnnotation(view.annotation, animated: false)
         } else {
             selectedAnnotation = view.annotation
-            dataProvider.changeStop(Int((view.annotation?.subtitle!)!) ?? 0)
+            GlobalController.virtualTable.changeStop(Int((view.annotation?.subtitle!)!) ?? 0)
             presentBottomSheet()
         }
     }

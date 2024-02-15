@@ -63,13 +63,13 @@ struct StopListView: View {
                     let pattern = fuse.createPattern(from: searchText.simplify())
                     let scoredStops = stopList.map { stop -> (Stop) in
                         var newStop: Stop = stop
-                        let score = (stop.id ?? 0 < 0) ? -2 : fuse.search(pattern, in: stop.name?.simplify() ?? "")?.score
+                        let score = (stop.id < 0) ? -2 : fuse.search(pattern, in: stop.name?.simplify() ?? "")?.score
                         newStop.score = score
                         return newStop
                     }
 
                     let filteredStops = scoredStops.filter {
-                        $0.id ?? 0 < 0 || $0.score != nil
+                        $0.id < 0 || $0.score != nil
                     }
 
                     let sortedStops = filteredStops.sorted(by: {

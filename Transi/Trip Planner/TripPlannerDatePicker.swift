@@ -8,52 +8,51 @@
 import SwiftUI
 
 struct TripPlannerDatePicker: View {
-    @ObservedObject var dataProvider: DataProvider
-    @Binding private var arrivalDepratureCustomDate: Bool
+    @StateObject var tripPlannerController = GlobalController.tripPlanner
     @Binding private var dateDialog: Bool
-    @State private var arrivalDepratureSetNow = false
+    @State private var adDate = Date()
+    @State private var arrivalDepartureSetNow = false
     @State private var sheetContentHeight = 270.0
 
-    init(_ dataProvider: DataProvider,_ dateDialog: Binding<Bool> ,_ arrivalDepratureCustomDate: Binding<Bool>) {
-        self.dataProvider = dataProvider
+    init(_ dateDialog: Binding<Bool>) {
         _dateDialog = dateDialog
-        _arrivalDepratureCustomDate = arrivalDepratureCustomDate
     }
     
     var body: some View {
         VStack(spacing: .zero) {
             Text(
-                dataProvider.tripArrivalDeprature == ArrivalDeparture.arrival ? "Arrival" : "Departure"
+                tripPlannerController.arrivalDeparture == ArrivalDeparture.arrival ? "Arrival" : "Departure"
             )
             .font(.system(size: 24.0, weight: .semibold))
             .padding(.top, 5.0)
             DatePicker(
                 "Select date",
-                selection: $dataProvider.tripArrivalDepratureDate,
+                selection: $adDate,
                 displayedComponents: [.date, .hourAndMinute]
             )
             .datePickerStyle(.wheel)
             .labelsHidden()
-            .onChange(of: dataProvider.tripArrivalDepratureDate) { _ in
-                if arrivalDepratureSetNow {
-                    arrivalDepratureCustomDate = false
-                    arrivalDepratureSetNow = false
+            .onChange(of: adDate) { _ in
+                tripPlannerController.arrivalDepartureDate = adDate
+                if arrivalDepartureSetNow {
+                    tripPlannerController.arrivalDepartureCustomDate = false
+                    arrivalDepartureSetNow = false
                 } else {
-                    arrivalDepratureCustomDate = true
+                    tripPlannerController.arrivalDepartureCustomDate = true
                 }
             }
             HStack {
                 Spacer()
                 Button("Now") {
-                    arrivalDepratureSetNow = true
-                    dataProvider.tripArrivalDepratureDate = Date()
+                    arrivalDepartureSetNow = true
+                    tripPlannerController.arrivalDepartureDate = Date()
                     dateDialog = false
-                    dataProvider.fetchTrip()
+                    tripPlannerController.fetchTrip()
                 }
                 Spacer()
                 Button("Done") {
                     dateDialog = false
-                    dataProvider.fetchTrip()
+                    tripPlannerController.fetchTrip()
                 }
                 Spacer()
             }
@@ -62,7 +61,6 @@ struct TripPlannerDatePicker: View {
             GeometryReader { proxy in
                 Color.clear
                     .task {
-                        print("size = \(proxy.size.height)")
                         sheetContentHeight = proxy.size.height
                     }
             }

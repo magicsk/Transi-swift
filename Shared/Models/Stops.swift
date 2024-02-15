@@ -9,7 +9,8 @@ import CoreLocation
 import Foundation
 
 struct Stop: Codable, Identifiable, Hashable {
-    var id, stationId: Int?
+    var id: Int
+    var stationId: Int?
     var name, city: String?
     var type: String?
     var tripsCount: Int?
@@ -20,7 +21,7 @@ struct Stop: Codable, Identifiable, Hashable {
         return CLLocationCoordinate2D(latitude: self.lat ?? 0, longitude: self.lng ?? 0)
     }
 
-    static let example = Stop(id: 94)
+    static let example = Stop(id: 94, stationId: 1386, name: "Hronská", platformLabels: [PlatformLabel(id: "240", label: "A"), PlatformLabel(id: "241", label: "B")])
     static let empty = Stop(id: 0)
     static let actualLocation = Stop(id: -1, stationId: -1, name: "Actual location", type: "location")
 

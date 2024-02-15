@@ -17,10 +17,10 @@ struct TimetableView: View {
     @State var selectedDeparture = 0.0
     @State var directions: [Direction] = []
     @State var selectedDirection: Direction = .initial
+    @State var selectedDate = Date()
     @State var isLoading = true
     @State var isError = false
     @State var noTimetable = false
-    @EnvironmentObject private var dataProvider: DataProvider
 
     init(_ route: Route) {
         self.route = route
@@ -77,7 +77,7 @@ struct TimetableView: View {
                                 Spacer()
                                 Text(Date(timeIntervalSince1970: Double(departure.departure * 60 - timezoneOffset)).formatted(date: .omitted, time: .shortened))
                             }.overlay {
-                                NavigationLink(destination: TimetableDetailView(route, selectedDirection, departure),
+                                NavigationLink(destination: TimetableDetailView(route, selectedDirection, departure, selectedDate),
                                                label: { EmptyView() })
                                     .opacity(0)
                             }
@@ -117,7 +117,7 @@ struct TimetableView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 DatePicker(
                     "",
-                    selection: $dataProvider.timetableSelectedDate,
+                    selection: $selectedDate,
                     displayedComponents: [.date]
                 )
             }
@@ -125,15 +125,15 @@ struct TimetableView: View {
         .onChange(of: selectedDeparture) { _ in
             feedbackGenerator.impactOccurred()
         }
-        .onChange(of: [selectedDirection.name, dataProvider.timetableSelectedDate.description]) { _ in
+        .onChange(of: [selectedDirection.name, selectedDate.description]) { _ in
             noTimetable = false
             isLoading = true
             DispatchQueue.global(qos: .userInitiated).async { [self] in
-                var request = URLRequest(url: URL(string: "\(dataProvider.bApiBaseUrl)/mobile/v1/route/\(route.id)/departures/\(selectedDirection.id)/\(dataProvider.timetableSelectedDate.toString())/0/1440/")!)
+                var request = URLRequest(url: URL(string: "\(GlobalController.bApiBaseUrl)/mobile/v1/route/\(route.id)/departures/\(selectedDirection.id)/\(selectedDate.toString())/0/1440/")!)
                 request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-                request.setValue(dataProvider.bApiKey, forHTTPHeaderField: "x-api-key")
-                request.setValue(dataProvider.sessionToken, forHTTPHeaderField: "x-session")
-                DataProvider.fetchData(request: request, type: Departures.self) { departures in
+                request.setValue(GlobalController.bApiKey, forHTTPHeaderField: "x-api-key")
+                request.setValue(GlobalController.getSessionToken(), forHTTPHeaderField: "x-session")
+                GlobalController.fetchData(request: request, type: Departures.self) { departures in
                     self.departures = departures.all
                     self.selectedDeparture = Double(self.departures.firstIndex(where: { $0.departure > (Int(Date.now.timeIntervalSince1970) + timezoneOffset) / 60 % 1440 }) ?? 0)
                     if departures.all.isEmpty {
@@ -147,11 +147,11 @@ struct TimetableView: View {
         .onAppear {
             DispatchQueue.global(qos: .userInitiated).async { [self] in
                 if directions.isEmpty {
-                    var request = URLRequest(url: URL(string: "\(dataProvider.bApiBaseUrl)/mobile/v1/route/\(route.id)/directions")!)
+                    var request = URLRequest(url: URL(string: "\(GlobalController.bApiBaseUrl)/mobile/v1/route/\(route.id)/directions")!)
                     request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-                    request.setValue(dataProvider.bApiKey, forHTTPHeaderField: "x-api-key")
-                    request.setValue(dataProvider.sessionToken, forHTTPHeaderField: "x-session")
-                    DataProvider.fetchData(request: request, type: Directions.self) { directions in
+                    request.setValue(GlobalController.bApiKey, forHTTPHeaderField: "x-api-key")
+                    request.setValue(GlobalController.getSessionToken(), forHTTPHeaderField: "x-session")
+                    GlobalController.fetchData(request: request, type: Directions.self) { directions in
                         self.directions = directions.all
                         self.selectedDirection = directions.all.first ?? .initial
                     }

@@ -8,18 +8,21 @@
 import SwiftUI
 
 struct VirtualTableList: View {
-    @ObservedObject var dataProvider: DataProvider
-    @State var date = Date()
+    let tabs: [Tab]
+    let currentStop: Stop
+    let vehicleInfo: [VehicleInfo]
     
-    init(_ dataProvider: DataProvider) {
-        self.dataProvider = dataProvider
+    init(_ tabs: [Tab], _ currentStop: Stop, _ vehicleInfo: [VehicleInfo]) {
+        self.tabs = tabs
+        self.currentStop = currentStop
+        self.vehicleInfo = vehicleInfo
     }
     
     var body: some View {
-        List(dataProvider.tabs) { tab in
-            let vehicleInfo = dataProvider.vehicleInfo.first(where: { $0.issi == tab.busID })
-            VirtualTableListItem(tab, dataProvider.currentStop.platformLabels, vehicleInfo )
-            if (tab.id == dataProvider.tabs.last?.id) {
+        List(tabs) { tab in
+            let vehicleInfo = vehicleInfo.first(where: { $0.issi == tab.busID })
+            VirtualTableListItem(tab, currentStop.platformLabels, vehicleInfo )
+            if (tab.id == tabs.last?.id) {
                 Section{} header: {
                     Spacer()
                 }
@@ -27,10 +30,3 @@ struct VirtualTableList: View {
         }
     }
 }
-
-//struct VirtualTableList_Previews: PreviewProvider {
-//    static var previews: some View {
-//        @ObservedObject var dataProvider = DataProvider()
-//        VirtualTableList(dataProvider)
-//    }
-//}
