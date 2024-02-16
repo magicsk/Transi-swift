@@ -20,6 +20,9 @@ struct Stop: Codable, Identifiable, Hashable {
     var location: CLLocationCoordinate2D {
         return CLLocationCoordinate2D(latitude: self.lat ?? 0, longitude: self.lng ?? 0)
     }
+    var normalizedName: String {
+        return self.name?.normalize() ?? ""
+    }
 
     static let example = Stop(id: 94, stationId: 1386, name: "Hronská", platformLabels: [PlatformLabel(id: "240", label: "A"), PlatformLabel(id: "241", label: "B")])
     static let empty = Stop(id: 0)

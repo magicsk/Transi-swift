@@ -17,7 +17,6 @@ struct StopListView: View {
     @Binding var stop: Stop
 
     let fuse = Fuse()
-    let searchTextPublisher = PassthroughSubject<String, Never>()
     var stopList: [Stop]
 
     init(stop: Binding<Stop>, stopList: [Stop], isPresented: Binding<Bool>) {
@@ -50,34 +49,26 @@ struct StopListView: View {
         .disableAutocorrection(true)
         .textInputAutocapitalization(.never)
         .onChange(of: searchText) { searchText in
-            searchTextPublisher.send(searchText)
-        }
-        .onReceive(
-            searchTextPublisher
-                .debounce(for: .milliseconds(150), scheduler: DispatchQueue.main)
-        ) { _ in
             if searchText.isEmpty {
                 searchResults = stopList
             } else {
                 DispatchQueue.global(qos: .userInitiated).async {
-                    let pattern = fuse.createPattern(from: searchText.simplify())
+                    let pattern = fuse.createPattern(from: searchText.normalize())
                     let scoredStops = stopList.map { stop -> (Stop) in
                         var newStop: Stop = stop
-                        let score = (stop.id < 0) ? -2 : fuse.search(pattern, in: stop.name?.simplify() ?? "")?.score
+                        let score = (stop.id < 0) ? -2 : fuse.search(pattern, in: stop.normalizedName)?.score
                         newStop.score = score
                         return newStop
                     }
 
-                    let filteredStops = scoredStops.filter {
+                    let sortedFilteredStops = scoredStops.filter {
                         $0.id < 0 || $0.score != nil
-                    }
-
-                    let sortedStops = filteredStops.sorted(by: {
+                    }.sorted(by: {
                         $0.score ?? 0 < $1.score ?? 0
                     })
 
                     DispatchQueue.main.async {
-                        self.searchResults = sortedStops
+                        self.searchResults = sortedFilteredStops
                     }
                 }
             }

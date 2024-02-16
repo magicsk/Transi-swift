@@ -11,7 +11,7 @@ extension String {
     func leftPadding(toLength: Int, withPad: String) -> String {
         String(String(reversed()).padding(toLength: toLength, withPad: withPad, startingAt: 0).reversed())
     }
-    func simplify() -> String {
+    func normalize() -> String {
         String(folding(options: .diacriticInsensitive, locale: .current).lowercased().trimmingCharacters(in: .whitespaces))
     }
 }
