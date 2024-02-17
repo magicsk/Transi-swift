@@ -46,7 +46,9 @@ struct VirtualTableView: View {
             }
             .navigationTitle(Text(virtualTableController.currentStop.name ?? "Loading..."))
             .navigationBarItems(
-                leading: Text(displaySocketStatus ? virtualTableController.socketStatus : ""),
+                leading: Text(displaySocketStatus ? virtualTableController.socketStatus : "").onPress {
+                    virtualTableController.connect()
+                },
                 trailing: Text(displayClock ? clockStringFromDate(date) : "")
             )
         }

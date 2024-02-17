@@ -82,8 +82,10 @@ class VirtualTableController: ObservableObject {
         }
 
         socket.on(clientEvent: .connect) { _, _ in
-            self.connected = true
-            self.startUpdater()
+            DispatchQueue.main.async {
+                self.connected = true
+                self.startUpdater()
+            }
         }
 
         socket.on(clientEvent: .disconnect) { _, _ in
@@ -101,7 +103,9 @@ class VirtualTableController: ObservableObject {
         }
 
         socket.on("cack") { _, _ in
-            self.socketStatus = "connected"
+            DispatchQueue.main.async {
+                self.socketStatus = "connected"
+            }
             self.socket.emit("tabStart", [self.currentStop.id, "*"] as [Any])
             self.socket.emit("infoStart")
         }
