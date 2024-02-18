@@ -35,27 +35,27 @@ struct LineText: View {
     }
 }
 
-//#Preview {
-//    VStack {
-//        HStack {
-//            LineText("1")
-//            LineText("3")
-//            LineText("14")
-//        }
-//        HStack {
-//            LineText("21")
-//            LineText("71")
-//            LineText("147", 18.0)
-//        }
-//        HStack {
-//            LineText("►")
-//            LineText("X70", 18.0)
-//            LineText("N72", 18.0)
-//        }
-//        HStack {
-//            LineText("AT1")
-//            LineText("S8")
-//            LineText("R60", 18.0)
-//        }
-//    }
-//}
+#Preview {
+    VStack {
+        HStack {
+            LineText("1")
+            LineText("3")
+            LineText("14")
+        }
+        HStack {
+            LineText("21")
+            LineText("71")
+            LineText("147", 18.0)
+        }
+        HStack {
+            LineText("►")
+            LineText("X70", 18.0)
+            LineText("N72", 18.0)
+        }
+        HStack {
+            LineText("AT1")
+            LineText("S8")
+            LineText("R60", 18.0)
+        }
+    }
+}

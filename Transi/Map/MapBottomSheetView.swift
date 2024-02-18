@@ -48,10 +48,10 @@ struct MapBottomSheetView: View {
                     }
                     .padding(.top, 12.0)
                     .padding(.horizontal, 20.0)
-                    VirtualTableList(virtualTableController.tabs, virtualTableController.currentStop, virtualTableController.vehicleInfo)
-                        .introspect(.list(style: .insetGrouped), on: .iOS(.v16, .v17)) { list in
-                            list.contentInset.top = -25
-                        }
+                    VirtualTableList()
+                    .introspect(.list(style: .insetGrouped), on: .iOS(.v16, .v17)) { list in
+                        list.contentInset.top = -25
+                    }
                 }
                 .navigationBarHidden(true)
                 .navigationTitle(Text(virtualTableController.currentStop.name ?? "Loading..."))

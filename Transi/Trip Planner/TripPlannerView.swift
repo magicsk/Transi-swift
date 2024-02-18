@@ -17,7 +17,7 @@ struct TripPlannerView: View {
     @State private var dateDialog = false
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .rigid)
     private let updateTabBarApperance: () -> Void
-    
+
     init(_ updateTabBarApperance: @escaping () -> Void) {
         self.updateTabBarApperance = updateTabBarApperance
     }
@@ -60,21 +60,15 @@ struct TripPlannerView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .backgroundFill(.systemGroupedBackground)
-                        VStack {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                                .padding(.bottom, 2.5)
-                            Text("Loading...")
-                                .foregroundColor(.secondaryLabel)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(
-                            Color.clear
-                                .background(.ultraThinMaterial)
-                                .blur(radius: 10)
-                        )
-                        .visible(tripPlannerController.loading)
-                        .animation(.easeInOut(duration: 0.25), value: tripPlannerController.loading)
+                        LoadingIndicator()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(
+                                Color.clear
+                                    .background(.ultraThinMaterial)
+                                    .blur(radius: 10)
+                            )
+                            .visible(tripPlannerController.loading)
+                            .animation(.easeInOut(duration: 0.25), value: tripPlannerController.loading)
                     }
                 }
                 .padding(.top, -20.0)
@@ -91,7 +85,7 @@ struct TripPlannerView: View {
             .sheet(isPresented: $showStopList) {
                 StopListView(stop: self.$stop, stopList: stopListProvider.stops, isPresented: self.$showStopList)
             }
-            .alert(isPresented: $tripPlannerController.error.isNotNil() , error: tripPlannerController.error) { _ in } message: { error in
+            .alert(isPresented: $tripPlannerController.error.isNotNil(), error: tripPlannerController.error) { _ in } message: { error in
                 if let message = error.errorMessage {
                     Text(message)
                 }

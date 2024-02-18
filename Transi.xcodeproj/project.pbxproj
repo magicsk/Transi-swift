@@ -44,6 +44,9 @@
 		DAA817E62974387D00E2FBB7 /* TransiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */; };
 		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */; };
+		DAAA8A482B823FEE006A1EC8 /* NoDeparturesIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A472B823FEE006A1EC8 /* NoDeparturesIcon.swift */; };
+		DAAA8A4A2B8242D7006A1EC8 /* LoadingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */; };
+		DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */; };
 		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
 		DAB0094A2B2E33B8009DF2CD /* AutoFocusedNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */; };
 		DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = DAB0094B2B2E61A0009DF2CD /* Settings.bundle */; };
@@ -155,6 +158,9 @@
 		DAA817F22974393300E2FBB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DAA817F729743B4B00E2FBB7 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
 		DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowIndicator.swift; sourceTree = "<group>"; };
+		DAAA8A472B823FEE006A1EC8 /* NoDeparturesIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoDeparturesIcon.swift; sourceTree = "<group>"; };
+		DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicator.swift; sourceTree = "<group>"; };
+		DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fetch.swift; sourceTree = "<group>"; };
 		DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFocusedNavigationView.swift; sourceTree = "<group>"; };
 		DAB0094B2B2E61A0009DF2CD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		DAB0094D2B2E71BF009DF2CD /* View.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
@@ -290,6 +296,7 @@
 				DABAE40A2ACC2E5200D66159 /* Line.swift */,
 				DA3F83DB2B1E7CB20006F41E /* Errors.swift */,
 				DAB0094F2B2E7383009DF2CD /* Stored.swift */,
+				DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -411,6 +418,8 @@
 				DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */,
 				DACDA7872B7033F700D53F6D /* CircleIcon.swift */,
 				DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */,
+				DAAA8A472B823FEE006A1EC8 /* NoDeparturesIcon.swift */,
+				DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -636,6 +645,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */,
+				DAAA8A4A2B8242D7006A1EC8 /* LoadingIndicator.swift in Sources */,
 				DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */,
 				DACDA78A2B7044CB00D53F6D /* TripPlannerDateButton.swift in Sources */,
 				DACDA7862B7031B100D53F6D /* TripPlannerSearchInputs.swift in Sources */,
@@ -671,6 +682,7 @@
 				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
 				DAB009502B2E7383009DF2CD /* Stored.swift in Sources */,
 				DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */,
+				DAAA8A482B823FEE006A1EC8 /* NoDeparturesIcon.swift in Sources */,
 				DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */,
 				DA500BFF2A12B23900630226 /* Color.swift in Sources */,
 				DAB0094A2B2E33B8009DF2CD /* AutoFocusedNavigationView.swift in Sources */,

@@ -55,11 +55,8 @@ class VirtualTableController: ObservableObject {
     }
 
     func connect() {
-        print("atempting to connect...")
-        if connected {
-            print("already connected, disconnecting...")
-            disconnect()
-        }
+        print("atempting to connect...")    
+        disconnect()
         // print(manager.engine?.connected)
         if manager.engine?.connected != true {
             manager.engine?.connect()
@@ -75,9 +72,11 @@ class VirtualTableController: ObservableObject {
     func startListeners() {
         socket.on(clientEvent: .statusChange) { _, _ in
             let connectionStatus = self.socket.status.description
-            print(connectionStatus)
-            if connectionStatus != "connected" {
-                self.socketStatus = self.socket.status.description
+            DispatchQueue.main.async {
+//                print(connectionStatus) 
+                if connectionStatus != "connected" {
+                    self.socketStatus = self.socket.status.description
+                }
             }
         }
 
@@ -103,9 +102,7 @@ class VirtualTableController: ObservableObject {
         }
 
         socket.on("cack") { _, _ in
-            DispatchQueue.main.async {
-                self.socketStatus = "connected"
-            }
+//            print("cack")
             self.socket.emit("tabStart", [self.currentStop.id, "*"] as [Any])
             self.socket.emit("infoStart")
         }
@@ -137,6 +134,7 @@ class VirtualTableController: ObservableObject {
             let sortedTabs = newTabs.sorted(by: { Int($0.departureTimeRaw) < Int($1.departureTimeRaw) })
             DispatchQueue.main.async {
                 self.tabs = sortedTabs
+                self.socketStatus = "connected"
             }
         }
         socket.on("vInfo") { data, _ in

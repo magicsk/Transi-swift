@@ -13,7 +13,7 @@ struct VirtualTableView: View {
     @StateObject var stopListProvider = GlobalController.stopsListProvider
     @State var date = Date()
     @State private var showStopList = false
-    @State private var stop: Stop = .example
+    @State private var stop: Stop = .empty
     @AppStorage(Stored.displaySocketStatus) var displaySocketStatus = false
     @AppStorage(Stored.displayClockOnTable) var displayClock = true
 
@@ -26,7 +26,7 @@ struct VirtualTableView: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottom) {
-                VirtualTableList(virtualTableController.tabs, virtualTableController.currentStop, virtualTableController.vehicleInfo)
+                VirtualTableList()
                 CocoaTextField("Search", text: $stop.name)
                     .disabled(true)
                     .padding(.vertical, 10.0)
