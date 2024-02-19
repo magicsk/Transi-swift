@@ -5,47 +5,67 @@
 //  Created by magic_sk on 12/02/2024.
 //
 
-import Foundation
 import CoreLocation
+import Foundation
 
 class StopsListProvider: ObservableObject {
     @Published var stops = [Stop]()
     @Published var unmodifiedStops = [Stop]()
+    @Published var fetchError = false
+    @Published var fetchLoading = false
 
     static var mapPointsNeeded = false
-    
+
+    let cachedStops = UserDefaults.standard.retrieve(object: [Stop].self, forKey: Stored.stops)
     private let stopsVersion = UserDefaults.standard.string(forKey: Stored.stopsVersion) ?? ""
     private let jsonEncoder = JSONEncoder()
-    
+
     init() {
+        if cachedStops != nil {
+            stops = cachedStops!
+            unmodifiedStops = cachedStops!
+        }
         fetchStops()
     }
-    
-    private func fetchStops() {
-        let cachedStops = UserDefaults.standard.retrieve(object: [Stop].self, forKey: Stored.stops)
-        if cachedStops != nil {
-            self.stops = cachedStops!
-            self.unmodifiedStops = cachedStops!
-        }
-        GlobalController.fetchData(url: "\(GlobalController.magicApiBaseUrl)/stops?v", type: StopsVersion.self) { stopsVersion in
-            print(stopsVersion.version)
-            DispatchQueue.main.async {
-                if self.stopsVersion == stopsVersion.version, cachedStops != nil {
-                    print("using cached stops json")
-                } else {
-                    print("getting new stops json")
-                    GlobalController.fetchData(url: "\(GlobalController.magicApiBaseUrl)/stops", type: [Stop].self) { newStops in
-                        self.stops = newStops
-                        self.unmodifiedStops = newStops
-                        UserDefaults.standard.save(customObject: newStops, forKey: Stored.stops)
+
+    func fetchStops() {
+        fetchMagicApi(endpoint: "/stops?v", type: StopsVersion.self) { stopsVersionResult in
+            switch stopsVersionResult {
+                case .success(let stopsVersion):
+                    print(stopsVersion.version)
+                    if self.stopsVersion == stopsVersion.version, self.cachedStops != nil {
+                        print("using cached stops json")
+                    } else {
+                        print("getting new stops json")
+                        fetchMagicApi(endpoint: "/stops", type: [Stop].self) { stopsResult in
+                            switch stopsResult {
+                                case .success(let newStops):
+                                    DispatchQueue.main.async {
+                                        self.stops = newStops
+                                        self.unmodifiedStops = newStops
+                                        self.fetchLoading = false
+                                    }
+                                    UserDefaults.standard.save(customObject: newStops, forKey: Stored.stops)
+                                case .failure:
+                                    DispatchQueue.main.async {
+                                        self.fetchError = true
+                                        self.fetchLoading = true
+                                    }
+                            }
+                        }
+                        UserDefaults.standard.set(stopsVersion.version, forKey: Stored.stopsVersion)
                     }
-                }
-                UserDefaults.standard.set(stopsVersion.version, forKey: Stored.stopsVersion)
-                GlobalController.locationProvider.startUpdatingLocation()
+                    GlobalController.locationProvider.startUpdatingLocation()
+
+                case .failure:
+                    DispatchQueue.main.async {
+                        self.fetchError = true
+                        self.fetchLoading = true
+                    }
             }
         }
     }
-    
+
     private func addUtilsToStopList() {
         stops.insert(Stop.actualLocation, at: 0)
     }
@@ -61,6 +81,4 @@ class StopsListProvider: ObservableObject {
             }
         }
     }
-
-
 }

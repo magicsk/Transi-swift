@@ -10,7 +10,7 @@ import SwiftUIX
 
 struct VirtualTableView: View {
     @StateObject var virtualTableController = GlobalController.virtualTable
-    @StateObject var stopListProvider = GlobalController.stopsListProvider
+    @StateObject var stopsListProvider = GlobalController.stopsListProvider
     @State var date = Date()
     @State private var showStopList = false
     @State private var stop: Stop = .empty
@@ -39,7 +39,7 @@ struct VirtualTableView: View {
                         self.showStopList = true
                     }
                     .sheet(isPresented: $showStopList) {
-                        StopListView(stop: self.$stop, stopList: stopListProvider.stops, isPresented: self.$showStopList)
+                        StopListView(stop: self.$stop, stopList: stopsListProvider.stops, isPresented: self.$showStopList)
                     }.onChange(of: stop) { stop in
                         virtualTableController.changeStop(stop.id)
                     }

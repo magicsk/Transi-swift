@@ -67,39 +67,35 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                 )
 
                 do {
-                    let jsonEncoder = JSONEncoder()
-                    let jsonBody = try jsonEncoder.encode(requestBody)
-                    print(String(data: jsonBody, encoding: String.Encoding.utf8)! as String)
-
-                    var request = URLRequest(url: URL(string: "\(GlobalController.rApiBaseUrl)/mobile/v1/raptor/")!)
-                    request.httpMethod = "POST"
-                    request.setValue("\(String(describing: jsonBody.count))", forHTTPHeaderField: "Content-Length")
-                    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                    request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-                    request.setValue(GlobalController.rApiKey, forHTTPHeaderField: "x-api-key")
-                    request.setValue(GlobalController.getSessionToken(), forHTTPHeaderField: "x-session")
-                    request.httpBody = jsonBody
-
-                    GlobalController.fetchData(request: request, type: Trip.self) { trip in
-                        print("fetched trip \(trip.journey?.count ?? 0)")
-                        if trip.journey?.count ?? 0 < 1 {
-                            DispatchQueue.main.async {
-                                self.loading = false
-                                self.error = .noJourneys
-                            }
-                        } else {
-                            let timestamp = Date().timeIntervalSince1970
-                            self.lastSearchDate = searchDate ?? Date()
-                            UserDefaults.standard.save(customObject: trip, forKey: Stored.trip)
-                            UserDefaults.standard.setValue(timestamp, forKey: Stored.tripSearchTimestamp)
-                            DispatchQueue.main.async {
-                                self.loading = false
-                                if more {
-                                    self.trip.journey?.append(contentsOf: trip.journey!)
+                    let jsonBody = try JSONEncoder().encode(requestBody)
+                    fetchRApiPost(endpoint: "/mobile/v1/raptor/", jsonBody: jsonBody, type: Trip.self) { result in
+                        switch result {
+                            case .success(let trip):
+                                print("fetched trip \(trip.journey?.count ?? 0)")
+                                if trip.journey?.count ?? 0 < 1 {
+                                    DispatchQueue.main.async {
+                                        self.loading = false
+                                        self.error = .noJourneys
+                                    }
                                 } else {
-                                    self.trip = trip
+                                    let timestamp = Date().timeIntervalSince1970
+                                    self.lastSearchDate = searchDate ?? Date()
+                                    UserDefaults.standard.save(customObject: trip, forKey: Stored.trip)
+                                    UserDefaults.standard.setValue(timestamp, forKey: Stored.tripSearchTimestamp)
+                                    DispatchQueue.main.async {
+                                        self.loading = false
+                                        if more {
+                                            self.trip.journey?.append(contentsOf: trip.journey!)
+                                        } else {
+                                            self.trip = trip
+                                        }
+                                    }
                                 }
-                            }
+                            case .failure:
+                                DispatchQueue.main.async {
+                                    self.loading = false
+                                    self.error = .basic
+                                }
                         }
                     }
                 } catch {
@@ -117,7 +113,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             fetchTrip(more: true)
         }
     }
-    
+
     func fetchTripToActualStop() {
         if LocationProvider.lastLocation != nil {
             from = .actualLocation

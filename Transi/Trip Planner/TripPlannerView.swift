@@ -10,7 +10,7 @@ import SwiftUI
 struct TripPlannerView: View {
     @Environment(\.openURL) var openURL
     @StateObject var tripPlannerController = GlobalController.tripPlanner
-    @StateObject var stopListProvider = GlobalController.stopsListProvider
+    @StateObject var stopsListProvider = GlobalController.stopsListProvider
     @State private var stop: Stop = .example
     @State private var lastField = ""
     @State private var showStopList = false
@@ -60,15 +60,7 @@ struct TripPlannerView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .backgroundFill(.systemGroupedBackground)
-                        LoadingIndicator()
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(
-                                Color.clear
-                                    .background(.ultraThinMaterial)
-                                    .blur(radius: 10)
-                            )
-                            .visible(tripPlannerController.loading)
-                            .animation(.easeInOut(duration: 0.25), value: tripPlannerController.loading)
+                        LoadingView($tripPlannerController.loading)
                     }
                 }
                 .padding(.top, -20.0)
@@ -83,10 +75,10 @@ struct TripPlannerView: View {
                 TripPlannerDatePicker($dateDialog)
             }
             .sheet(isPresented: $showStopList) {
-                StopListView(stop: self.$stop, stopList: stopListProvider.stops, isPresented: self.$showStopList)
+                StopListView(stop: self.$stop, stopList: stopsListProvider.stops, isPresented: self.$showStopList)
             }
             .alert(isPresented: $tripPlannerController.error.isNotNil(), error: tripPlannerController.error) { _ in } message: { error in
-                if let message = error.errorMessage {
+                if let message = error.failureReason {
                     Text(message)
                 }
             }

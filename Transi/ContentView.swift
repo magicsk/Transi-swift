@@ -11,7 +11,8 @@ import SwiftUIX
 
 struct ContentView: View {
     private let globalController = GlobalController()
-    
+    @StateObject var stopsListProvider = GlobalController.stopsListProvider
+
     @State private var selection = 2
     @State private var tabView: UITabBarController? = nil
     private let tabBarAppearance = UITabBarAppearance()
@@ -43,11 +44,26 @@ struct ContentView: View {
                         Text("Map")
                     }.tag(4)
             }
-            
             .introspect(.tabView, on: .iOS(.v15, .v16, .v17)) { tv in
                 DispatchQueue.main.async {
                     tabView = tv
                 }
+            }
+            LoadingView($stopsListProvider.fetchLoading)
+        }
+        .alert(isPresented: $stopsListProvider.fetchError, error: StopsListError.basic) { _ in 
+            Button("Retry") {
+                stopsListProvider.fetchStops()
+            }
+            if (stopsListProvider.cachedStops != nil) {
+                Button("Use cached") {
+                    stopsListProvider.fetchLoading = false
+                    GlobalController.locationProvider.startUpdatingLocation()
+                }
+            }
+        } message: { error in
+            if let message = error.failureReason {
+                Text(message)
             }
         }
     }
@@ -55,7 +71,7 @@ struct ContentView: View {
     func changeTab(_ tag: Int) {
         selection = tag
     }
-    
+
     func updateTabBarApperance() {
         DispatchQueue.main.async {
             if selection == 4 {
@@ -68,8 +84,8 @@ struct ContentView: View {
     }
 }
 
-//struct ContentView_Previews: PreviewProvider {
+// struct ContentView_Previews: PreviewProvider {
 //    static var previews: some View {
 //        ContentView()
 //    }
-//}
+// }

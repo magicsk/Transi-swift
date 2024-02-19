@@ -47,6 +47,7 @@
 		DAAA8A482B823FEE006A1EC8 /* NoDeparturesIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A472B823FEE006A1EC8 /* NoDeparturesIcon.swift */; };
 		DAAA8A4A2B8242D7006A1EC8 /* LoadingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */; };
 		DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */; };
+		DAAA8A4E2B8285E9006A1EC8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A4D2B8285E9006A1EC8 /* LoadingView.swift */; };
 		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
 		DAB0094A2B2E33B8009DF2CD /* AutoFocusedNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */; };
 		DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = DAB0094B2B2E61A0009DF2CD /* Settings.bundle */; };
@@ -161,6 +162,7 @@
 		DAAA8A472B823FEE006A1EC8 /* NoDeparturesIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoDeparturesIcon.swift; sourceTree = "<group>"; };
 		DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicator.swift; sourceTree = "<group>"; };
 		DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fetch.swift; sourceTree = "<group>"; };
+		DAAA8A4D2B8285E9006A1EC8 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFocusedNavigationView.swift; sourceTree = "<group>"; };
 		DAB0094B2B2E61A0009DF2CD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		DAB0094D2B2E71BF009DF2CD /* View.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
@@ -291,12 +293,12 @@
 		DA7A7D3D2A1127010002D7D7 /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				DA855B762AF68BED00372C31 /* Util.swift */,
 				DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */,
 				DABAE40A2ACC2E5200D66159 /* Line.swift */,
+				DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */,
 				DA3F83DB2B1E7CB20006F41E /* Errors.swift */,
 				DAB0094F2B2E7383009DF2CD /* Stored.swift */,
-				DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */,
+				DA855B762AF68BED00372C31 /* Util.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -304,15 +306,15 @@
 		DA89EDE429BA980400C32F24 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				DA89EDE529BA981700C32F24 /* UserDefaults.swift */,
-				DA63553229E4957A00AAD7C0 /* String.swift */,
 				DABD03212A0AF3BF00FD2C4B /* Binding.swift */,
-				DA500BF72A11461300630226 /* Date.swift */,
-				DAB0094D2B2E71BF009DF2CD /* View.swift */,
-				DA500BFE2A12B23900630226 /* Color.swift */,
-				DAC9C7132B09761000B1AC8C /* UIKit.swift */,
 				DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */,
+				DA500BFE2A12B23900630226 /* Color.swift */,
+				DA500BF72A11461300630226 /* Date.swift */,
 				DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */,
+				DA63553229E4957A00AAD7C0 /* String.swift */,
+				DAC9C7132B09761000B1AC8C /* UIKit.swift */,
+				DA89EDE529BA981700C32F24 /* UserDefaults.swift */,
+				DAB0094D2B2E71BF009DF2CD /* View.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -381,13 +383,13 @@
 		DAA817F629743B2A00E2FBB7 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				DAA817F729743B4B00E2FBB7 /* Table.swift */,
-				DAEF77B029744893008D66DE /* Stops.swift */,
-				DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */,
-				DABD03242A0AF76E00FD2C4B /* StopGps.swift */,
-				DABD03272A0AF7B800FD2C4B /* Trip.swift */,
 				DAE714D82B2FA2E20059B8A1 /* Session.swift */,
+				DABD03242A0AF76E00FD2C4B /* StopGps.swift */,
+				DAEF77B029744893008D66DE /* Stops.swift */,
+				DAA817F729743B4B00E2FBB7 /* Table.swift */,
 				DAE714E12B2FAF650059B8A1 /* Timetables.swift */,
+				DABD03272A0AF7B800FD2C4B /* Trip.swift */,
+				DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -395,8 +397,8 @@
 		DAB467F42B7A488500B45A1C /* Providers */ = {
 			isa = PBXGroup;
 			children = (
-				DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */,
 				DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */,
+				DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */,
 			);
 			path = Providers;
 			sourceTree = "<group>";
@@ -413,13 +415,14 @@
 		DABAE4072ACC23B800D66159 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				DABAE4082ACC23DA00D66159 /* LineText.swift */,
 				DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */,
-				DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */,
+				DABAE4082ACC23DA00D66159 /* LineText.swift */,
 				DACDA7872B7033F700D53F6D /* CircleIcon.swift */,
 				DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */,
 				DAAA8A472B823FEE006A1EC8 /* NoDeparturesIcon.swift */,
 				DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */,
+				DAAA8A4D2B8285E9006A1EC8 /* LoadingView.swift */,
+				DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -650,6 +653,7 @@
 				DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */,
 				DACDA78A2B7044CB00D53F6D /* TripPlannerDateButton.swift in Sources */,
 				DACDA7862B7031B100D53F6D /* TripPlannerSearchInputs.swift in Sources */,
+				DAAA8A4E2B8285E9006A1EC8 /* LoadingView.swift in Sources */,
 				DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
 				DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */,
 				DA7887EC2B77DA0C00BFFB4F /* TimetableDetailView.swift in Sources */,
@@ -918,7 +922,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.6;
+				MARKETING_VERSION = 0.7;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -969,7 +973,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.6;
+				MARKETING_VERSION = 0.7;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

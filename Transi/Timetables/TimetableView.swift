@@ -7,9 +7,10 @@
 
 import SwiftUI
 import SwiftUIIntrospect
-import AudioToolbox
 
 struct TimetableView: View {
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+
     let route: Route
     let timezoneOffset = TimeZone(identifier: "Europe/Bratislava")!.secondsFromGMT()
     let feedbackGenerator = UIImpactFeedbackGenerator(style: .rigid)
@@ -18,8 +19,9 @@ struct TimetableView: View {
     @State var directions: [Direction] = []
     @State var selectedDirection: Direction = .initial
     @State var selectedDate = Date()
-    @State var isLoading = true
-    @State var isError = false
+    @State var loading = true
+    @State var timetableError = false
+    @State var directionsError = false
     @State var noTimetable = false
 
     init(_ route: Route) {
@@ -29,7 +31,7 @@ struct TimetableView: View {
 
     var body: some View {
         let lastDepartureIndex = departures.count - 1
-        LoadingOverlay($isLoading, true) {
+        LoadingOverlay($loading, true, error: $directionsError, errorText: TimetableError.directions) {
             ZStack {
                 Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VStack(alignment: .leading, spacing: 15.0) {
@@ -102,9 +104,13 @@ struct TimetableView: View {
                 .padding(.top, 10.0)
                 .padding(.horizontal, 20.0)
             }
+        } retry: {
+            fetchDirections()
+        } cancel: {
+            presentationMode.wrappedValue.dismiss()
         }
         .paddingTop(100.0)
-        .overlayBackground(.clear)
+        .overlayBackground(Color.clear)
         .navigationTitle("Line \(route.shortName)")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -126,34 +132,64 @@ struct TimetableView: View {
             feedbackGenerator.impactOccurred()
         }
         .onChange(of: [selectedDirection.name, selectedDate.description]) { _ in
-            noTimetable = false
-            isLoading = true
-            DispatchQueue.global(qos: .userInitiated).async { [self] in
-                var request = URLRequest(url: URL(string: "\(GlobalController.bApiBaseUrl)/mobile/v1/route/\(route.id)/departures/\(selectedDirection.id)/\(selectedDate.toString())/0/1440/")!)
-                request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-                request.setValue(GlobalController.bApiKey, forHTTPHeaderField: "x-api-key")
-                request.setValue(GlobalController.getSessionToken(), forHTTPHeaderField: "x-session")
-                GlobalController.fetchData(request: request, type: Departures.self) { departures in
-                    self.departures = departures.all
-                    self.selectedDeparture = Double(self.departures.firstIndex(where: { $0.departure > (Int(Date.now.timeIntervalSince1970) + timezoneOffset) / 60 % 1440 }) ?? 0)
-                    if departures.all.isEmpty {
-                        self.noTimetable = true
-                        self.departures = [] // do this also on error
-                    }
-                    self.isLoading = false
-                }
+            fetchTimetable()
+        }
+        .alert(isPresented: $timetableError, error: TimetableError.singular) { _ in
+            Button("Cancel") {
+                presentationMode.wrappedValue.dismiss()
+            }
+            Button("Retry") {
+                fetchTimetable()
+            }
+        } message: { error in
+            if let message = error.failureReason {
+                Text(message)
             }
         }
         .onAppear {
-            DispatchQueue.global(qos: .userInitiated).async { [self] in
-                if directions.isEmpty {
-                    var request = URLRequest(url: URL(string: "\(GlobalController.bApiBaseUrl)/mobile/v1/route/\(route.id)/directions")!)
-                    request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-                    request.setValue(GlobalController.bApiKey, forHTTPHeaderField: "x-api-key")
-                    request.setValue(GlobalController.getSessionToken(), forHTTPHeaderField: "x-session")
-                    GlobalController.fetchData(request: request, type: Directions.self) { directions in
-                        self.directions = directions.all
-                        self.selectedDirection = directions.all.first ?? .initial
+            fetchDirections()
+        }
+    }
+
+    func fetchTimetable() {
+        noTimetable = false
+        loading = true
+        DispatchQueue.global(qos: .userInitiated).async { [self] in
+            fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(selectedDirection.id)/\(selectedDate.toString())/0/1440/", type: Departures.self) { result in
+                switch result {
+                    case .success(let departures):
+                        self.departures = departures.all
+                        self.selectedDeparture = Double(self.departures.firstIndex(where: { $0.departure > (Int(Date.now.timeIntervalSince1970) + timezoneOffset) / 60 % 1440 }) ?? 0)
+                        if departures.all.isEmpty {
+                            self.noTimetable = true
+                            self.departures = []
+                        }
+                        self.loading = false
+                    case .failure:
+                        DispatchQueue.main.async {
+                            self.departures = []
+                            self.loading = false
+                            self.timetableError = true
+                        }
+                }
+            }
+        }
+    }
+
+    func fetchDirections() {
+        DispatchQueue.global(qos: .userInitiated).async { [self] in
+            if directions.isEmpty {
+                fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/directions", type: Directions.self) { result in
+                    switch result {
+                        case .success(let directions):
+                            DispatchQueue.main.async {
+                                self.directions = directions.all
+                                self.selectedDirection = directions.all.first ?? .initial
+                            }
+                        case .failure:
+                            DispatchQueue.main.async {
+                                self.directionsError = true
+                            }
                     }
                 }
             }

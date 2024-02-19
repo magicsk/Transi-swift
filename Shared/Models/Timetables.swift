@@ -7,6 +7,24 @@
 
 import Foundation
 
+struct CategorizedTimetables: Codable, Hashable {
+    var trams = [Route]()
+    var trolleybuses = [Route]()
+    var buses = [Route]()
+    var nightlines = [Route]()
+    var trains = [Route]()
+    var regionalbuses = [Route]()
+    
+    mutating func clear() {
+        trams.removeAll()
+        trolleybuses.removeAll()
+        buses.removeAll()
+        nightlines.removeAll()
+        trains.removeAll()
+        regionalbuses.removeAll()
+    }
+}
+
 struct Timetables: Codable, Hashable {
     var routes: [Route]
 }

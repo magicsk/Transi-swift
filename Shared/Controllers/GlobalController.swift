@@ -22,6 +22,7 @@ struct GlobalController {
     static let tripPlanner = TripPlannerController()
 
     static var sessionToken = ""
+    var sessionTokenError = false
 
     init() {
         registerUserDefaults()
@@ -33,20 +34,16 @@ struct GlobalController {
     }
 
     private static func fetchSessionToken() {
-        var request = URLRequest(url: URL(string: "\(GlobalController.bApiBaseUrl)/mobile/v1/startup/")!)
-        let uuid = UUID().uuidString
-        let sessionRequestBody = SessionReq(installation: uuid)
-        let jsonEncoder = JSONEncoder()
-        let jsonBody = try! jsonEncoder.encode(sessionRequestBody)
-        request.httpMethod = "POST"
-        request.setValue("\(String(describing: jsonBody.count))", forHTTPHeaderField: "Content-Length")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-        request.setValue(GlobalController.bApiKey, forHTTPHeaderField: "x-api-key")
-        request.httpBody = jsonBody
-        GlobalController.fetchData(request: request, type: Session.self) { response in
-            print(response.session)
-            GlobalController.sessionToken = response.session
+        let sessionRequestBody = SessionReq()
+        let jsonBody = try! JSONEncoder().encode(sessionRequestBody)
+
+        fetchBApiPost(endpoint: "/mobile/v1/startup", jsonBody: jsonBody, type: Session.self) { result in
+            switch result {
+            case .success(let data):
+                GlobalController.sessionToken = data.session
+            case .failure(let error):
+                print(error)
+            }
         }
     }
 
@@ -74,26 +71,5 @@ struct GlobalController {
         return stopsListProvider.stops.first(where: { $0.id == id })
     }
 
-    static func fetchData<T: Decodable>(request: URLRequest? = nil, url: String? = nil, type: T.Type, completion: @escaping (T) -> ()) {
-        var urlRequest: URLRequest?
-        if request != nil {
-            urlRequest = request!
-        } else if url != nil {
-            urlRequest = URLRequest(url: URL(string: url!)!)
-        } else {
-            urlRequest = nil
-            print("At least one parameter needed!")
-        }
-
-        URLSession.shared.dataTask(with: urlRequest!) { data, _, _ in
-            let jsonDecoder = JSONDecoder()
-            jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-            let stops = try! jsonDecoder.decode(type, from: data!)
-
-            DispatchQueue.main.async {
-                completion(stops)
-            }
-        }
-        .resume()
-    }
+    
 }

@@ -9,12 +9,15 @@ import SwiftUI
 import SwiftUIIntrospect
 
 struct TimetableDetailView: View {
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+
     let route: Route
     let direction: Direction
     let departure: DirectionDeparture
     let selectedDate: Date
     @State var departures: [HourMinute] = []
-    @State var isLoading = true
+    @State var loading = true
+    @State var error = false
 
     init(_ route: Route, _ direction: Direction, _ departure: DirectionDeparture, _ selectedDate: Date) {
         self.route = route
@@ -24,7 +27,7 @@ struct TimetableDetailView: View {
     }
 
     var body: some View {
-        LoadingOverlay($isLoading, true) {
+        LoadingOverlay($loading, true, error: $error, errorText: TimetableError.singular) {
             ZStack {
                 Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VStack(alignment: .leading, spacing: 10.0) {
@@ -61,29 +64,44 @@ struct TimetableDetailView: View {
                     }
                 }
             }
+        } retry: {
+            fetchTimetableDetail()
+        } cancel: {
+            presentationMode.wrappedValue.dismiss()
         }
         .paddingTop(100.0)
-        .overlayBackground(.clear)
+        .overlayBackground(Color.clear)
         .onAppear {
-            if departures.isEmpty {
-                isLoading = true
-                DispatchQueue.global(qos: .userInitiated).async { [self] in
-                    var request = URLRequest(url: URL(string: "\(GlobalController.bApiBaseUrl)/mobile/v1/route/\(route.id)/departures/\(direction.id)/\(selectedDate.toString())/\(departure.id)/")!)
-                    request.setValue("Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)", forHTTPHeaderField: "User-Agent")
-                    request.setValue(GlobalController.bApiKey, forHTTPHeaderField: "x-api-key")
-                    request.setValue(GlobalController.getSessionToken(), forHTTPHeaderField: "x-session")
-                    GlobalController.fetchData(request: request, type: TimetableDetails.self) { timetableDetails in
-                        timetableDetails.all.forEach { departure in
-                            let hour = (departure.t / 60) % 24
-                            let minute = String(departure.t % 60).leftPadding(toLength: 2, withPad: "0")
-                            if let hourMinuteIndex = departures.firstIndex(where: { $0.hour == hour }) {
-                                departures[hourMinuteIndex].minutes.append(minute)
-                            } else {
-                                let hourMinute = HourMinute(hour: hour, minutes: [minute])
-                                departures.append(hourMinute)
+            fetchTimetableDetail()
+        }
+    }
+
+    func fetchTimetableDetail() {
+        if departures.isEmpty {
+            loading = true
+            DispatchQueue.global(qos: .userInitiated).async { [self] in
+                fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(direction.id)/\(selectedDate.toString())/\(departure.id)/", type: TimetableDetails.self) { result in
+                    print(result)
+                    switch result {
+                        case .success(let timetableDetails):
+                            departures.removeAll()
+                            timetableDetails.all.forEach { departure in
+                                let hour = (departure.t / 60) % 24
+                                let minute = String(departure.t % 60).leftPadding(toLength: 2, withPad: "0")
+                                if let hourMinuteIndex = departures.firstIndex(where: { $0.hour == hour }) {
+                                    departures[hourMinuteIndex].minutes.append(minute)
+                                } else {
+                                    let hourMinute = HourMinute(hour: hour, minutes: [minute])
+                                    departures.append(hourMinute)
+                                }
                             }
-                        }
-                        isLoading = false
+                            DispatchQueue.main.async {
+                                loading = false
+                            }
+                        case .failure:
+                            DispatchQueue.main.async {
+                                error = true
+                            }
                     }
                 }
             }

@@ -7,23 +7,25 @@
 
 import SwiftUI
 
-struct LoadingOverlay<Content: View>: View {
+struct LoadingOverlay<Content: View, Error: LocalizedError>: View {
     private var retryFunction: () -> Void
+    private var cancelFunction: () -> Void
     private var retryButtonVisible: Bool = true
     private var topPadding: CGFloat = 0.0
-    private var background = AnyShapeStyle(.ultraThinMaterial)
+    private var background = AnyView(Color.clear.background(.ultraThinMaterial).blur(radius: 10))
     private let delayedLoadingAnimation: Bool
-    @Binding private var isLoading: Bool
-    @Binding private var isError: Bool
-    @Binding private var errorText: String
+    private var errorText: Error
+    @Binding private var loading: Bool
+    @Binding private var error: Bool
     @State private var loadingAnimation = false
     var content: () -> Content
 
-    init(_ isLoading: Binding<Bool>, isError: Binding<Bool> = .constant(false), errorText: Binding<String> = .constant("Something went wrong"), retry: @escaping () -> Void = {}, _ delayedLoadingAnimation: Bool = false, @ViewBuilder content: @escaping () -> Content) {
-        _isLoading = isLoading
-        _isError = isError
-        _errorText = errorText
+    init(_ loading: Binding<Bool>, _ delayedLoadingAnimation: Bool = false, error: Binding<Bool> = .constant(false), errorText: Error = DefaultError.basic, @ViewBuilder content: @escaping () -> Content, retry: @escaping () -> Void = {}, cancel: @escaping () -> Void = {}) {
+        _loading = loading
+        _error = error
+        self.errorText = errorText
         self.retryFunction = retry
+        self.cancelFunction = cancel
         self.content = content
         self.delayedLoadingAnimation = delayedLoadingAnimation
     }
@@ -31,37 +33,33 @@ struct LoadingOverlay<Content: View>: View {
     var body: some View {
         ZStack {
             content()
-            VStack {
-                if isError {
-                    Text("Error").font(.system(size: 24.0, weight: .semibold))
-                    Text(errorText)
-                    if retryButtonVisible {
-                        Button("Retry") {
-                            retryFunction()
-                        }
-                    }
-                } else {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .padding(.bottom, 2.5)
-                    Text("Loading...")
-                        .foregroundColor(.secondaryLabel)
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(background)
-            .padding(.top, topPadding)
-            .visible(delayedLoadingAnimation ? loadingAnimation : isLoading)
-            .animation(.easeInOut(duration: 0.25), value: delayedLoadingAnimation ? loadingAnimation : isLoading)
-        }.onChange(of: isLoading) { _ in
-            if isLoading {
+            LoadingView()
+                .background(background)
+                .padding(.top, topPadding)
+                .visible(delayedLoadingAnimation ? loadingAnimation : loading)
+                .animation(.easeInOut(duration: 0.25), value: delayedLoadingAnimation ? loadingAnimation : loading)
+        }
+        .onChange(of: loading) { _ in
+            if loading {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                    if isLoading {
+                    if loading {
                         loadingAnimation = true
                     }
                 }
             } else {
                 loadingAnimation = false
+            }
+        }
+        .alert(isPresented: $error, error: errorText) { _ in
+            Button("Cancel") {
+                cancelFunction()
+            }
+            Button("Retry") {
+                retryFunction()
+            }
+        } message: { error in
+            if let message = error.failureReason {
+                Text(message)
             }
         }
     }
@@ -80,9 +78,9 @@ extension LoadingOverlay {
         return newView
     }
 
-    func overlayBackground<S>(_ style: S) -> LoadingOverlay where S: ShapeStyle {
+    func overlayBackground<Background>(_ style: Background) -> LoadingOverlay where Background: View {
         var newView = self
-        newView.background = AnyShapeStyle(style)
+        newView.background = AnyView(style)
         return newView
     }
 }

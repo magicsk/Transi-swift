@@ -33,7 +33,6 @@ struct VirtualTableList: View {
                 }
             }
         }.onChange(of: [virtualTableController.socketStatus, virtualTableController.tabs.isEmpty.description]) { _ in
-            print(virtualTableController.socketStatus)
             if virtualTableController.tabs.isEmpty && virtualTableController.socketStatus == "connected" {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     displayNoDeparture = true

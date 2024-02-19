@@ -12,7 +12,7 @@ struct Session: Codable, Hashable {
 }
 
 struct SessionReq: Codable, Hashable {
-    var installation: String
+    var installation = UUID().uuidString
     var language = "en"
     var platform = 2
 }
