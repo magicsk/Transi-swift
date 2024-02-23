@@ -56,12 +56,14 @@ trip planner and timetables for MHD in Bratislava.
 - Detail for each connection
 - Trip planner
 - Maps with all stops
+- Timetables
 
 ### Planned and in-progress
-- Timetables
-- Apple watch app
 - Dynamic island integration
+- Sharing
 - Notifications
+- Apple watch app
+- Macos app
 
 ## Download
 
