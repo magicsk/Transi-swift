@@ -22,8 +22,8 @@ trip planner and timetables for MHD in Bratislava.
 
 <p>
  <picture>
-     <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/f3b812c3-4c4b-4ee7-bfa9-1510f92c86a3" />
-     <img width="200" src="https://github.com/magicsk/Transi-swift/assets/49265057/18985064-1694-4ae4-b347-9a619f85b9c2" />
+     <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/95ba7e86-fb9a-4319-a158-bd90d7920125" />
+     <img width="200" src="https://github.com/magicsk/Transi-swift/assets/49265057/b069a517-8c27-43a2-a6ef-f59a40fa676b" />
  </picture>
 
 
@@ -31,11 +31,13 @@ trip planner and timetables for MHD in Bratislava.
      <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/dd9a5534-fefe-49db-b7f3-ad2814ec8763" />
      <img width="200" src="https://github.com/magicsk/Transi-swift/assets/49265057/a1169866-acf6-4e6d-8327-f929e101960e" />
  </picture> -->
+
  
  <picture>
-     <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/1b09db32-7744-44bf-89a0-446ffdc5df90" />
-     <img width="200" src="https://github.com/magicsk/Transi-swift/assets/49265057/9c033ad1-40c7-4d61-b890-74137ca695ea" />
+     <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/62ddc316-0011-4b2d-a6a8-30deeff280e7" />
+     <img width="200" src="https://github.com/magicsk/Transi-swift/assets/49265057/dbd1641f-a353-41d3-8456-ecc6eeae9433" />
  </picture>
+
  
  <!-- <picture>
      <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/62967629-93ad-4a12-894d-a08348702e97" />
