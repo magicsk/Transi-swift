@@ -27,8 +27,12 @@ struct StopListView: View {
     }
 
     var body: some View {
-        AutoFocusedNavigationView($searchText) {
+        SearchBar(text: $searchText, placeholder: "Search").padding(.horizontal, 12.0)
+        ScrollViewReader { proxy in
             List(searchResults) { stop in
+                if stop.id == searchResults.first?.id {
+                    EmptyView().id("top")
+                }
                 Label {
                     Text(stop.name ?? "Error").font(.headline)
                     Spacer()
@@ -42,33 +46,39 @@ struct StopListView: View {
                     self.isPresented = false
                 }
             }
+            .gesture(
+                DragGesture().onChanged { _ in
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+            )
             .introspect(.list(style: .insetGrouped), on: .iOS(.v16, .v17)) { list in
-                list.contentInset.top = -30
+                list.contentInset.top = -35.0
             }
-        }
-        .disableAutocorrection(true)
-        .textInputAutocapitalization(.never)
-        .onChange(of: searchText) { searchText in
-            if searchText.isEmpty {
-                searchResults = stopList
-            } else {
-                DispatchQueue.global(qos: .userInitiated).async {
-                    let pattern = fuse.createPattern(from: searchText.normalize())
-                    let scoredStops = stopList.map { stop -> (Stop) in
-                        var newStop: Stop = stop
-                        let score = (stop.id < 0) ? -2 : fuse.search(pattern, in: stop.normalizedName)?.score
-                        newStop.score = score
-                        return newStop
-                    }
+            .onChange(of: searchText) { searchText in
+                if searchText.isEmpty {
+                    searchResults = stopList
+                } else {
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        let pattern = fuse.createPattern(from: searchText.normalize())
+                        let scoredStops = stopList.map { stop -> (Stop) in
+                            var newStop: Stop = stop
+                            let score = (stop.id < 0) ? -2 : fuse.search(pattern, in: stop.normalizedName)?.score
+                            newStop.score = score
+                            return newStop
+                        }
 
-                    let sortedFilteredStops = scoredStops.filter {
-                        $0.id < 0 || $0.score != nil
-                    }.sorted(by: {
-                        $0.score ?? 0 < $1.score ?? 0
-                    })
+                        let sortedFilteredStops = scoredStops.filter {
+                            $0.id < 0 || $0.score != nil
+                        }.sorted(by: {
+                            $0.score ?? 0 < $1.score ?? 0
+                        })
 
-                    DispatchQueue.main.async {
-                        self.searchResults = sortedFilteredStops
+                        DispatchQueue.main.async {
+                            self.searchResults = sortedFilteredStops
+                            withAnimation {
+                                proxy.scrollTo("top", anchor: .init(x: 0.0, y: 0.0))
+                            }
+                        }
                     }
                 }
             }
