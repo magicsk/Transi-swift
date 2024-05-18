@@ -70,4 +70,4 @@ trip planner and timetables for MHD in Bratislava.
 Add source to [SideStore](https://intradeus.github.io/http-protocol-redirector?r=sidestore://source?URL=https://api.magicsk.eu/transi/store.json) / [AltStore](https://intradeus.github.io/http-protocol-redirector?r=altstore://source?URL=https://api.magicsk.eu/transi/store.json)
 
 Transi IPA is available for download in
-[GitHub releases](https://github.com/magicsk/Transi/releases). 
+[GitHub releases](https://github.com/magicsk/Transi-swift/releases). 
