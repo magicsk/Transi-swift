@@ -10,8 +10,6 @@ import SwiftUIX
 
 struct VirtualTableView: View {
     @StateObject var virtualTableController = GlobalController.virtualTable
-    @StateObject var stopsListProvider = GlobalController.stopsListProvider
-    @State var date = Date()
     @State private var showStopList = false
     @State private var stop: Stop = .empty
     @AppStorage(Stored.displaySocketStatus) var displaySocketStatus = false
@@ -25,39 +23,37 @@ struct VirtualTableView: View {
 
     var body: some View {
         NavigationView {
-            ZStack(alignment: .bottom) {
+            ZStack {
+                Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VirtualTableList()
-                CocoaTextField("Search", text: $stop.name)
-                    .disabled(true)
-                    .padding(.vertical, 10.0)
-                    .padding(.horizontal, 16.0)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(14.0, style: .circular)
-                    .padding(.horizontal, 24.0)
-                    .offset(y: -16.0)
-                    .onPress {
-                        self.showStopList = true
-                    }
-                    .sheet(isPresented: $showStopList) {
-                        StopListView(stop: self.$stop, stopList: stopsListProvider.stops, isPresented: self.$showStopList)
-                    }.onChange(of: stop) { stop in
-                        virtualTableController.changeStop(stop.id)
-                    }
+                VStack {
+                    Spacer()
+                    CocoaTextField("Search", text: $stop.name)
+                        .alignmentGuide(VerticalAlignment.center, computeValue: { d in d[.bottom] })
+                        .disabled(true)
+                        .padding(.vertical, 10.0)
+                        .padding(.horizontal, 16.0)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(14.0, style: .circular)
+                        .padding(.horizontal, 24.0)
+                        .offset(y: -16.0)
+                        .onPress {
+                            self.showStopList = true
+                        }
+                        .sheet(isPresented: $showStopList) {
+                            StopListView(stop: self.$stop, isPresented: self.$showStopList)
+                        }.onChange(of: stop) { stop in
+                            virtualTableController.changeStop(stop.id)
+                        }
+                }
             }
             .navigationTitle(Text(virtualTableController.currentStop.name ?? "Loading..."))
             .navigationBarItems(
-                leading: Text(displaySocketStatus ? virtualTableController.socketStatus : "").onPress {
-                    virtualTableController.connect()
-                },
-                trailing: Text(displayClock ? clockStringFromDate(date) : "")
+                leading: Text(displaySocketStatus ? virtualTableController.socketStatus : ""),
+                trailing: displayClock ? AnyView(TimelineView(.periodic(from: .now, by: 1)) { context in
+                    Text(clockStringFromDate(context.date))
+                }) : AnyView(EmptyView())
             )
-        }
-        .ifCondition(displayClock) { navView in
-            navView.onAppear {
-                Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-                    self.date = Date()
-                }
-            }
         }
         .onAppear {
             updateTabBarApperance()

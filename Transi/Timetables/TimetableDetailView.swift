@@ -81,7 +81,6 @@ struct TimetableDetailView: View {
             loading = true
             DispatchQueue.global(qos: .userInitiated).async { [self] in
                 fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(direction.id)/\(selectedDate.toString())/\(departure.id)/", type: TimetableDetails.self) { result in
-                    print(result)
                     switch result {
                         case .success(let timetableDetails):
                             departures.removeAll()

@@ -17,4 +17,5 @@ struct Stored {
     static let tripMaxTransfers = "trip_max_transfers"
     static let displaySocketStatus = "display_socket_status"
     static let displayClockOnTable = "display_table_clock"
+    static let liveActivitiesSounds = "live_activities_sounds"
 }

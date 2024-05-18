@@ -5,6 +5,7 @@
 //  Created by magic_sk on 18/11/2023.
 //
 
+import Combine
 import MapKit
 import SwiftUI
 import UIKit
@@ -25,8 +26,9 @@ struct MapKitView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: MapViewController, context: Context) {}
 }
 
-class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentationControllerDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentationControllerDelegate, UISceneDelegate {
     @StateObject var stopListProvider = GlobalController.stopsListProvider
+    @StateObject var appState = GlobalController.appState
     private let updateTabBarApperance: () -> Void
     private var tileLightOverlay: MKTileOverlay?
     private var tileDarkOverlay: MKTileOverlay?
@@ -34,18 +36,21 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
     private var sheetNavController: UIHostingController<MapBottomSheetView>?
     private var mapView: MKMapView!
     private let changeTab: (Int) -> Void
+    private var subscription: Cancellable? = nil
+    private var stopIdFromUrl: String? = nil
 
     private var mapLoaded = false
     private var selectedAnnotation: MKAnnotation? = nil
     private let defaultLocation = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 48.145, longitude: 17.107), latitudinalMeters: 500, longitudinalMeters: 500)
     private lazy var locationButton = UIButton(configuration: .filled())
 
-    let sourceLightUrl = "https://tile.thunderforest.com/transport/{z}/{x}/{y}@2x.png?apikey=628502b3ae3a4c388efde8abb0577ca2"
-    let sourceDarkUrl = "https://tile.thunderforest.com/transport-dark/{z}/{x}/{y}@2x.png?apikey=628502b3ae3a4c388efde8abb0577ca2" // TODO: env file
+    let sourceLightUrl = "\(GlobalController.thunderforestApiUrl)/transport/{z}/{x}/{y}@2x.png?apikey=\(GlobalController.thunderforestApiKey)"
+    let sourceDarkUrl = "\(GlobalController.thunderforestApiUrl)/transport-dark/{z}/{x}/{y}@2x.png?apikey=\(GlobalController.thunderforestApiKey)"
 
     init(_ updateTabBarApperance: @escaping () -> Void, _ changeTab: @escaping (Int) -> Void) {
         self.updateTabBarApperance = updateTabBarApperance
         self.changeTab = changeTab
+
         super.init(nibName: nil, bundle: nil)
         print("map view init")
     }
@@ -59,6 +64,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         super.viewDidLoad()
         sheetViewController = MapBottomSheetView(sheetDismiss, changeTab)
         sheetNavController = UIHostingController(rootView: sheetViewController!)
+
         setupMapView()
         addLocationButton()
         addPoints()
@@ -120,15 +126,34 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
                 sleep(1)
                 self.addPoints()
             } else {
-                DispatchQueue.main.async {
+                DispatchQueue.main.sync {
                     self.mapView.addAnnotations(points)
+                }
+                self.subscription = self.appState.$openedURL.sink { optionalUrl in
+                    if let url = optionalUrl {
+                        if url.host == "map" {
+                            if let stopId = Int(url.pathComponents[1]) {
+                                if !self.mapView.annotations.isEmpty {
+                                    if let foundStop = self.mapView.annotations.first(where: { annotation in
+                                        annotation.subtitle == stopId.description
+                                    }) {
+                                        DispatchQueue.main.async {
+                                            self.mapView.selectAnnotation(foundStop, animated: true)
+                                            let region = MKCoordinateRegion(center: foundStop.coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
+                                            self.mapView.animatedZoom(region, 1.0)
+                                        }
+                                    }
+                                }
+                            }
+                            self.appState.openedURL = nil
+                        }
+                    }
                 }
             }
         }
     }
 
     private func generatePoints() -> [StopAnnotation] {
-        // FIXME: what if stop are not fetched yet ?
         let points: [StopAnnotation] = stopListProvider.stops.map { stop in
             let pointAnnotation = StopAnnotation(latitude: stop.location.latitude, longitude: stop.location.longitude)
             pointAnnotation.title = stop.name
@@ -164,7 +189,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         locationButton.clipsToBounds = true
         locationButton.configuration?.baseBackgroundColor = .clear
         locationButton.configuration?.background.visualEffect = UIBlurEffect(style: .systemMaterial)
-        locationButton.configuration?.baseForegroundColor = .systemBlue
+        locationButton.configuration?.baseForegroundColor = .accent
         locationButton.configuration?.contentInsets = NSDirectionalEdgeInsets(top: 16.0, leading: 16.0, bottom: 16.0, trailing: 16.0)
 
         locationButton.translatesAutoresizingMaskIntoConstraints = false

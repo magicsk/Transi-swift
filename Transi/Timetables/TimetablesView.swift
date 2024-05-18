@@ -12,6 +12,10 @@ struct TimetablesView: View {
     @State var category = CategorizedTimetables()
     @State var loading = true
     @State var error = false
+    @State var openUrl = false
+    @State var openFromUrl = ""
+    @State var urlNavigateDestination: Route = .empty
+    @State var navigateInsideFromUrl = false
     private let updateTabBarApperance: () -> Void
 
     init(_ updateTabBarApperance: @escaping () -> Void) {
@@ -24,7 +28,7 @@ struct TimetablesView: View {
 
     var body: some View {
         LoadingOverlay($loading, error: $error, errorText: TimetableError.plural) {
-            NavigationView {
+            NavigationStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 5.0) {
                         Text("Trams").font(.system(size: 24.0, weight: .semibold))
@@ -68,19 +72,55 @@ struct TimetablesView: View {
                     .padding(.horizontal, 12.0)
                 }
                 .navigationTitle(Text("Timetables"))
+                .navigationDestination(isPresented: $navigateInsideFromUrl) {
+                    TimetableView(urlNavigateDestination)
+                }
             }
         } retry: {
             fetchTimetables()
         } cancel: {}
-        .paddingTop(80.0)
-        .overlayBackground(Color.systemBackground)
-        .onAppear {
-            updateTabBarApperance()
-            fetchTimetables()
-        }
+            .paddingTop(80.0)
+            .overlayBackground(Color.systemBackground)
+            .onAppear {
+                updateTabBarApperance()
+                fetchTimetables()
+            }
+            .onOpenURL { url in
+                print(url)
+                print(url.pathComponents)
+                if url.host == "timetable" {
+                    if url.pathComponents.endIndex >= 2 {
+                        openUrl = false
+                        openFromUrl = url.pathComponents[1]
+                        if !category.regionalbuses.isEmpty {
+                            let mirror = Mirror(reflecting: category)
+                            var foundRoute: Route? = nil
+                            for (_, attr) in mirror.children.enumerated() {
+                                if let routes = attr.value as! [Route]? {
+                                    let route = routes.first(where: { route in
+                                        route.shortName == openFromUrl
+                                    })
+                                    if route != nil {
+                                        foundRoute = route
+                                        break
+                                    }
+                                }
+                            }
+                            if let route = foundRoute {
+                                navigateInsideFromUrl = false
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+                                    urlNavigateDestination = route
+                                    navigateInsideFromUrl = true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
     }
-    
+
     func fetchTimetables() {
+        var foundRoute: Route? = nil
         if category.regionalbuses.isEmpty {
             loading = true
             DispatchQueue.global(qos: .userInitiated).async { [self] in
@@ -113,9 +153,17 @@ struct TimetablesView: View {
                             default:
                                 category.regionalbuses.append(route)
                             }
+
+                            if openFromUrl != "", route.shortName == openFromUrl {
+                                foundRoute = route
+                            }
                         }
                         DispatchQueue.main.async {
                             loading = false
+                            if let route = foundRoute {
+                                urlNavigateDestination = route
+                                navigateInsideFromUrl = true
+                            }
                         }
                     case .failure:
                         DispatchQueue.main.async {

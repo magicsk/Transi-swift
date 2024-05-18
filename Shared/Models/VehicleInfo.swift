@@ -15,7 +15,8 @@ struct VehicleInfo: Codable, Identifiable, Hashable {
     var img: Int
     var imgt: String
     var type: String
-    static let example = VehicleInfo(id: 13142, issi: "1:2552", lf: 1, ac: true, img: 1017, imgt: "vm", type: "SOR NS 12 Diesel")
+    static let example = VehicleInfo(id: 13142, issi: "1:2552", lf: 1, ac: false, img: 1591, imgt: "vs", type: "SOR NS 12 Diesel")
+    static let example2 = VehicleInfo(id: 13143, issi: "1:6722", lf: 1, ac: true, img: 1032, imgt: "vm", type: "Škoda 27 Tr Solaris")
 }
 
 extension VehicleInfo {

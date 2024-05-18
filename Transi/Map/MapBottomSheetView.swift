@@ -22,7 +22,7 @@ struct MapBottomSheetView: View {
         NavigationView {
             ZStack {
                 Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
-                VStack(alignment: .leading, spacing: .zero) {
+                VStack(alignment: .center, spacing: .zero) {
                     HStack(alignment: .center) {
                         Text(virtualTableController.currentStop.name ?? "Loading...").font(.system(size: 32.0, weight: .bold))
                         Spacer()
@@ -46,12 +46,10 @@ struct MapBottomSheetView: View {
                                 .cornerRadius(1000)
                         }
                     }
-                    .padding(.top, 12.0)
+                    .padding(.top, 14.0)
                     .padding(.horizontal, 20.0)
+                    Spacer()
                     VirtualTableList()
-                    .introspect(.list(style: .insetGrouped), on: .iOS(.v16, .v17)) { list in
-                        list.contentInset.top = -25
-                    }
                 }
                 .navigationBarHidden(true)
                 .navigationTitle(Text(virtualTableController.currentStop.name ?? "Loading..."))

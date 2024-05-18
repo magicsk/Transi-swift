@@ -11,27 +11,11 @@ struct VirtualTableDetail: View {
     var tab: Tab
     var vehicleInfo: VehicleInfo?
     var platformLabels: [PlatformLabel]?
-    var delayColor: Color = .gray
-
-    private let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
 
     init(_ tab: Tab, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?) {
         self.tab = tab
         self.vehicleInfo = vehicleInfo
         self.platformLabels = platformLabels
-        switch tab.delay {
-            case 0...1:
-                delayColor = Color.green
-
-            case 2...3:
-                delayColor = Color.orange
-
-            case 4...999:
-                delayColor = Color.red
-
-            default:
-                delayColor = Color.purple
-        }
     }
 
     var body: some View {
@@ -46,7 +30,7 @@ struct VirtualTableDetail: View {
                     Image("stop").resizable(resizingMode: .stretch).frame(width: 7.0, height: 10.0)
                     Text(tab.delayText).font(.system(size: 12))
                     Image(systemName: "circle.fill")
-                        .foregroundColor(delayColor)
+                        .foregroundColor(getDelayColor(tab.delay, tab.type))
                         .font(.system(size: 12.0))
                 }
                 if vehicleInfo != nil {
@@ -54,11 +38,11 @@ struct VirtualTableDetail: View {
                         Text("Vehicle is \(vehicleInfo!.ac ? "" : "not ")air conditioned").font(.system(size: 12.0))
                         Image(systemName: vehicleInfo!.ac ? "snowflake" : "snowflake.slash")
                             .symbolRenderingMode(.palette)
-                            .foregroundStyle(vehicleInfo!.ac ? Color.accentColor : Color.red, Color.gray)
+                            .foregroundStyle(vehicleInfo!.ac ? Color.accent : Color.red, Color.gray)
                             .font(.system(size: 14.0))
                     }
 
-                    AsyncImage(url: URL(string: "\(iApiBaseUrl)/ba/media/\(vehicleInfo!.imgt)/\(String(vehicleInfo!.img).leftPadding(toLength: 8, withPad: "0"))/\(busID)")) { image in
+                    AsyncImage(url: URL(string: "\(GlobalController.iApiBaseUrl)/ba/media/\(vehicleInfo!.imgt)/\(String(vehicleInfo!.img).leftPadding(toLength: 8, withPad: "0"))/\(busID)")) { image in
                         image
                             .resizable()
                             .scaledToFit()

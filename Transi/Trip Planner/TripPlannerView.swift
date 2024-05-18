@@ -10,7 +10,6 @@ import SwiftUI
 struct TripPlannerView: View {
     @Environment(\.openURL) var openURL
     @StateObject var tripPlannerController = GlobalController.tripPlanner
-    @StateObject var stopsListProvider = GlobalController.stopsListProvider
     @State private var stop: Stop = .example
     @State private var lastField = ""
     @State private var showStopList = false
@@ -75,7 +74,7 @@ struct TripPlannerView: View {
                 TripPlannerDatePicker($dateDialog)
             }
             .sheet(isPresented: $showStopList) {
-                StopListView(stop: self.$stop, stopList: stopsListProvider.stops, isPresented: self.$showStopList)
+                StopListView(stop: self.$stop, isPresented: self.$showStopList)
             }
             .alert(isPresented: $tripPlannerController.error.isNotNil(), error: tripPlannerController.error) { _ in } message: { error in
                 if let message = error.failureReason {

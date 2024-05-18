@@ -45,6 +45,7 @@ class StopsListProvider: ObservableObject {
                                         self.unmodifiedStops = newStops
                                         self.fetchLoading = false
                                     }
+                                    self.addUtilsToStopList()
                                     UserDefaults.standard.save(customObject: newStops, forKey: Stored.stops)
                                 case .failure:
                                     DispatchQueue.main.async {
@@ -67,7 +68,9 @@ class StopsListProvider: ObservableObject {
     }
 
     private func addUtilsToStopList() {
-        stops.insert(Stop.actualLocation, at: 0)
+        DispatchQueue.main.async {
+            self.stops.insert(Stop.actualLocation, at: 0)
+        }
     }
 
     func sortStops(coordinates: CLLocationCoordinate2D) {
@@ -76,9 +79,15 @@ class StopsListProvider: ObservableObject {
                 self.stops = self.unmodifiedStops.sorted(by: { $0.distance(to: coordinates) < $1.distance(to: coordinates) })
                 self.addUtilsToStopList()
                 if GlobalController.virtualTable.changeLocation {
-                    GlobalController.virtualTable.changeStop(GlobalController.getNearestStopId(), true)
+                    GlobalController.virtualTable.changeStop(GlobalController.getNearestStopId(), switchOnly: true)
                 }
             }
         }
+    }
+    
+    func getStopIdFromName(_ stopName: String) -> Int? {
+        return self.stops.first(where: { stop in
+            stop.name == stopName
+        })?.id
     }
 }

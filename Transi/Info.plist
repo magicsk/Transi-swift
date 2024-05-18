@@ -6,6 +6,19 @@
 	<string>$(B_API_KEY)</string>
 	<key>B_API_URL</key>
 	<string>$(B_API_URL)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>eu.magicsk.transi</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>transi</string>
+			</array>
+		</dict>
+	</array>
 	<key>I_API_URL</key>
 	<string>$(I_API_URL)</string>
 	<key>MAGIC_API_URL</key>
@@ -18,7 +31,9 @@
 	<string>$(THUNDERFOREST_API_KEY)</string>
 	<key>THUNDERFOREST_API_URL</key>
 	<string>$(THUNDERFOREST_API_URL)</string>
-	<key>X_SESSION</key>
-	<string>$(X_SESSION)</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 </dict>
 </plist>

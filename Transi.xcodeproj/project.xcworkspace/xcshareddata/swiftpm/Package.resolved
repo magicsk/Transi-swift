@@ -1,4 +1,5 @@
 {
+  "originHash" : "28fd4c9f2382ab7290cedab7422df69867d6e755c41d78754c6911807cba0782",
   "pins" : [
     {
       "identity" : "fuse-swift",
@@ -32,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/siteline/swiftui-introspect.git",
       "state" : {
-        "revision" : "18e965f867e37a558ad13c12d330dbe047099180",
-        "version" : "1.1.2"
+        "revision" : "0cd2a5a5895306bc21d54a2254302d24a9a571e4",
+        "version" : "1.1.3"
       }
     },
     {
@@ -46,14 +47,23 @@
       }
     },
     {
+      "identity" : "swipeactions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/aheze/SwipeActions",
+      "state" : {
+        "revision" : "41e6f6dce02d8cfa164f8c5461a41340850ca3ab",
+        "version" : "1.1.0"
+      }
+    },
+    {
       "identity" : "wrappinghstack",
       "kind" : "remoteSourceControl",
-      "location" : "git@github.com:dkk/WrappingHStack.git",
+      "location" : "https://github.com/dkk/WrappingHStack",
       "state" : {
         "revision" : "425d9488ba55f58f0b34498c64c054c77fc2a44b",
         "version" : "2.2.11"
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

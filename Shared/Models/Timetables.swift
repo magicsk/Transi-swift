@@ -38,6 +38,8 @@ struct Route: Codable, Hashable, Identifiable {
     var routeType: Int
     var color: String?
     var textColor: String?
+    
+    static let empty = Route(routeId: 0, shortName: "", longName: "", routeType: 0)
 }
 
 struct Directions: Codable, Hashable {

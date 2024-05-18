@@ -6,7 +6,7 @@
 //
 
 import CoreLocation
-import Foundation
+import SwiftUI
 
 struct GlobalController {
     static let magicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
@@ -15,22 +15,68 @@ struct GlobalController {
     static let rApiBaseUrl = (Bundle.main.infoDictionary?["R_API_URL"] as? String)!
     static let bApiKey = (Bundle.main.infoDictionary?["B_API_KEY"] as? String)!
     static let rApiKey = (Bundle.main.infoDictionary?["R_API_KEY"] as? String)!
+    static let thunderforestApiUrl = (Bundle.main.infoDictionary?["THUNDERFOREST_API_URL"] as? String)!
+    static let thunderforestApiKey = (Bundle.main.infoDictionary?["THUNDERFOREST_API_KEY"] as? String)!
 
+    static let appState = AppStateProvider()
     static let locationProvider = LocationProvider()
     static let stopsListProvider = StopsListProvider()
     static let virtualTable = VirtualTableController()
     static let tripPlanner = TripPlannerController()
 
     static var sessionToken = ""
+    static var shouldRunInBackground = false
     var sessionTokenError = false
 
-    init() {
+    static func appLaunch() {
+        registerForNotifications()
         registerUserDefaults()
-        GlobalController.fetchSessionToken()
+        fetchSessionToken()
+        VirtualTableLiveActivityController.activateExistingActitivites()
     }
 
-    private func registerUserDefaults() {
-        UserDefaults.standard.register(defaults: [Stored.tripSaveDuration: -1, Stored.tripMaxTransfers: 3, Stored.tripMaxWalkDuration: 15])
+    static func scenePhaseChange(_ phase: ScenePhase) {
+        appState.scene = phase
+        _ = VirtualTableLiveActivityController.listAllTabActivities()
+        switch phase {
+            case .background:
+                virtualTable.disconnect()
+                if shouldRunInBackground {
+                    locationProvider.decreaseAccuracy()
+                } else {
+                    locationProvider.stopUpdatingLocation()
+                }
+            case .active:
+                locationProvider.startUpdatingLocation()
+                if virtualTable.socketStatus != "connected" {
+                    virtualTable.connect()
+                }
+            default:
+                break
+        }
+    }
+
+    static func startBackgroundMode() {
+        shouldRunInBackground = true
+        if locationProvider.locationManager.authorizationStatus != .authorizedAlways {
+            locationProvider.locationManager.requestAlwaysAuthorization()
+        }
+        cancelApplicationQuitNotification()
+        scheduleApplicationQuitNotification()
+    }
+
+    static func stopBackgroundMode() {
+        shouldRunInBackground = false
+        cancelApplicationQuitNotification()
+        DispatchQueue.global().asyncAfter(deadline: .now() + 6) {
+            if !shouldRunInBackground, appState.scene == .background {
+                locationProvider.stopUpdatingLocation()
+            }
+        }
+    }
+
+    private static func registerUserDefaults() {
+        UserDefaults.standard.register(defaults: [Stored.tripSaveDuration: -1, Stored.tripMaxTransfers: 3, Stored.tripMaxWalkDuration: 15, Stored.liveActivitiesSounds: true])
     }
 
     private static func fetchSessionToken() {
@@ -40,9 +86,40 @@ struct GlobalController {
         fetchBApiPost(endpoint: "/mobile/v1/startup", jsonBody: jsonBody, type: Session.self) { result in
             switch result {
             case .success(let data):
-                GlobalController.sessionToken = data.session
+                sessionToken = data.session
             case .failure(let error):
                 print(error)
+            }
+        }
+    }
+
+    private static func registerForNotifications() {
+        let category = UNNotificationCategory(identifier: "Transi", actions: [], intentIdentifiers: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in
+        }
+    }
+
+    static func cancelApplicationQuitNotification() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["eu.magicsk.Transi.AppStoppedRunning"])
+    }
+
+    static func scheduleApplicationQuitNotification() {
+        let delay = 5 as TimeInterval
+
+        let content = UNMutableNotificationContent()
+        content.title = NSLocalizedString("App Stopped Running", comment: "")
+        content.body = NSLocalizedString("Tap this notification to resume live activity.", comment: "")
+        content.sound = .defaultCritical
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: delay + 1, repeats: false)
+
+        let request = UNNotificationRequest(identifier: "eu.magicsk.Transi.AppStoppedRunning", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+
+        DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
+            if shouldRunInBackground {
+                self.scheduleApplicationQuitNotification()
             }
         }
     }
@@ -70,6 +147,4 @@ struct GlobalController {
     static func getStopById(_ id: Int) -> Stop? {
         return stopsListProvider.stops.first(where: { $0.id == id })
     }
-
-    
 }

@@ -19,7 +19,7 @@ struct TripPlannerWalkListItem: View {
         HStack {
             Image(systemName: "figure.walk")
                 .font(.system(size: 25.0))
-                .foregroundColor(.accentColor)
+                .foregroundColor(.accent)
                 .frame(minWidth: 36.0)
             Text("\(timeDiffFromUtc(part.startDeparture, part.endArrival)) min to \(sameStop ? "platform \(part.endStopCode ?? "X")" : part.endStopName ?? "Error")")
         }.padding(.vertical, 3.0)

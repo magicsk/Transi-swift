@@ -6,9 +6,9 @@
 //
 
 import SwiftUI
+import SwiftUIX
 
-extension Color {
-     
+extension Color {     
     // MARK: - Text Colors
     static let lightText = Color(UIColor.lightText)
     static let darkText = Color(UIColor.darkText)

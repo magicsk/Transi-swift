@@ -6,9 +6,9 @@
 //
 
 import Combine
-import Foundation
-import SocketIO
 import CoreLocation
+import SocketIO
+import SwiftUI
 
 class VirtualTableController: ObservableObject {
     private let manager: SocketManager
@@ -16,19 +16,22 @@ class VirtualTableController: ObservableObject {
     private var connected = false
     private var updater: Timer.TimerPublisher?
     private var updaterSubscription: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
     private var reconnect: Bool = false
+    private var expadndTabId: Int? = nil
 
     @Published var tabs = [Tab]()
     @Published var vehicleInfo = [VehicleInfo]()
     @Published var changeLocation = true
     @Published var currentStop: Stop = .example
     @Published var socketStatus = "unknown"
-    
+    @Published var lastExpandedTab: Tab? = nil
+
     init() {
         manager = SocketManager(socketURL: URL(string: GlobalController.iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true), .log(false), .reconnectAttempts(-1), .reconnectWaitMax(1)])
         socket = manager.defaultSocket
         startListeners()
-        connect()
+//            connect() // TODO: Disable this and change Loading to searching location and add default location that can be stop or actual location
     }
 
     private func startUpdater() {
@@ -38,24 +41,32 @@ class VirtualTableController: ObservableObject {
         })
     }
 
-    private func stopUpdater() { // TODO: also stop if inactive and time inforamation is not needed
+    private func stopUpdater() {
         updaterSubscription?.cancel()
         updaterSubscription = nil
         updater = nil
     }
 
     private func updateTabs() {
-        var updatedTabs = tabs
-        for index in updatedTabs.indices {
-            updatedTabs[index].departureTimeRemaining = getDepartureTimeRemainingText(updatedTabs[index].departureTime, updatedTabs[index].departureTimeRaw, updatedTabs[index].type)
-        }
-        DispatchQueue.main.async {
-            self.tabs = updatedTabs
+//        print("update")
+        for index in tabs.indices {
+            let tab = tabs[index]
+            let oldTimeRemaining = tab.departureTimeRemaining
+            let updatedTimeRemaining = getDepartureTimeRemainingText(
+                tab.departureTime,
+                tab.departureTimeRaw,
+                tab.type
+            )
+            if oldTimeRemaining != updatedTimeRemaining {
+                DispatchQueue.main.async {
+                    self.tabs[index].departureTimeRemaining = updatedTimeRemaining
+                }
+            }
         }
     }
 
     func connect() {
-        print("atempting to connect...")    
+        print("atempting to connect...")
         disconnect()
         // print(manager.engine?.connected)
         if manager.engine?.connected != true {
@@ -73,7 +84,7 @@ class VirtualTableController: ObservableObject {
         socket.on(clientEvent: .statusChange) { _, _ in
             let connectionStatus = self.socket.status.description
             DispatchQueue.main.async {
-//                print(connectionStatus) 
+                print(connectionStatus)
                 if connectionStatus != "connected" {
                     self.socketStatus = self.socket.status.description
                 }
@@ -82,7 +93,6 @@ class VirtualTableController: ObservableObject {
 
         socket.on(clientEvent: .connect) { _, _ in
             DispatchQueue.main.async {
-                self.connected = true
                 self.startUpdater()
             }
         }
@@ -103,6 +113,7 @@ class VirtualTableController: ObservableObject {
 
         socket.on("cack") { _, _ in
 //            print("cack")
+            self.connected = true
             self.socket.emit("tabStart", [self.currentStop.id, "*"] as [Any])
             self.socket.emit("infoStart")
         }
@@ -121,7 +132,11 @@ class VirtualTableController: ObservableObject {
                         var tabs = [Tab]()
                         for object in tabsJson {
                             if let tabJson = object as? [String: Any] {
-                                if let tab = Tab(json: tabJson, platform: _platform, stopId: _stopId) {
+                                if var tab = Tab(json: tabJson, platform: _platform, stopId: _stopId) {
+                                    if tab.id == self.expadndTabId {
+                                        tab.expanded = true
+                                        self.expadndTabId = nil
+                                    }
                                     tabs.append(tab)
                                 }
                             }
@@ -131,9 +146,9 @@ class VirtualTableController: ObservableObject {
                     }
                 }
             }
-            let sortedTabs = newTabs.sorted(by: { Int($0.departureTimeRaw) < Int($1.departureTimeRaw) })
+            newTabs.sort(by: { Int($0.departureTimeRaw) == Int($1.departureTimeRaw) ? $0.id < $1.id : Int($0.departureTimeRaw) < Int($1.departureTimeRaw) })
             DispatchQueue.main.async {
-                self.tabs = sortedTabs
+                self.tabs = newTabs
                 self.socketStatus = "connected"
             }
         }
@@ -153,21 +168,31 @@ class VirtualTableController: ObservableObject {
     func switchLocationChanging(_ value: Bool) {
         if value {
             changeLocation = true
-            changeStop(GlobalController.getNearestStopId(), true)
+            changeStop(GlobalController.getNearestStopId(), switchOnly: true)
         } else {
             changeLocation = false
         }
     }
 
-    func changeStop(_ stopId: Int, _ switchOnly: Bool = false) { // FIXME: this function is called multiple times and one change of location stop location changeing
+    func changeStop(_ stopId: Int, switchOnly: Bool = false, expandTab: Int? = nil) {
         if stopId == -1 {
             switchLocationChanging(true)
         } else {
             if currentStop.id != stopId {
                 if !switchOnly { switchLocationChanging(false) }
                 currentStop.id = stopId
-                if let currentStop = GlobalController.getStopById(stopId) { self.currentStop = currentStop }
-                disconnect(reconnect: true)
+                if let currentStop = GlobalController.getStopById(stopId) {
+                    self.socketStatus = "connecting"
+                    self.tabs = [Tab]()
+                    self.socket.emit("tabStart", [currentStop.id, "*"] as [Any])
+                    self.currentStop = currentStop
+                }
+            }
+            if !connected {
+                connect()
+            }
+            if let tabId = expandTab {
+                expadndTabId = tabId
             }
         }
     }

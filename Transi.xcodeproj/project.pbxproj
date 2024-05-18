@@ -13,6 +13,16 @@
 		DA23A7862B02957700BC8428 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7852B02957700BC8428 /* SocketIO */; };
 		DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DB2B1E7CB20006F41E /* Errors.swift */; };
 		DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */; };
+		DA467DEB2BE9156F00057872 /* AppStateProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA467DEA2BE9156F00057872 /* AppStateProvider.swift */; };
+		DA4DDA5B2B8BF86100E8DFCA /* VirtualTableActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4DDA582B8BF86100E8DFCA /* VirtualTableActivityBundle.swift */; };
+		DA4DDA5E2B8BF9D000E8DFCA /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE40A2ACC2E5200D66159 /* Line.swift */; };
+		DA4DDA5F2B8BF9F500E8DFCA /* LineText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE4082ACC23DA00D66159 /* LineText.swift */; };
+		DA4DDA672B8D560300E8DFCA /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DA4DDA662B8D560300E8DFCA /* SwiftUIX */; };
+		DA4DDA682B8D56A500E8DFCA /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BFE2A12B23900630226 /* Color.swift */; };
+		DA4DDA6A2B8D593600E8DFCA /* NowIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */; };
+		DA4DDA6B2B8D594600E8DFCA /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094D2B2E71BF009DF2CD /* View.swift */; };
+		DA4DDA6D2B8D5C0F00E8DFCA /* RemainingTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4DDA6C2B8D5C0F00E8DFCA /* RemainingTime.swift */; };
+		DA4DDA6E2B8D5C0F00E8DFCA /* RemainingTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4DDA6C2B8D5C0F00E8DFCA /* RemainingTime.swift */; };
 		DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */; };
 		DA500BF62A1140E600630226 /* TripPlannerWalkListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */; };
 		DA500BF82A11461300630226 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF72A11461300630226 /* Date.swift */; };
@@ -22,6 +32,18 @@
 		DA63553129E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */; };
 		DA63553329E4957A00AAD7C0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
 		DA63553429E4957A00AAD7C0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
+		DA66CA9C2BDC926200C4C4E6 /* SwipeActions in Frameworks */ = {isa = PBXBuildFile; productRef = DA66CA9B2BDC926200C4C4E6 /* SwipeActions */; };
+		DA737DDB2B8FA4710093FAC6 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
+		DA737DDC2B8FA5840093FAC6 /* VehicleInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */; };
+		DA737DDD2B8FA6210093FAC6 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
+		DA737DE02B8FA76D0093FAC6 /* StopIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA737DDF2B8FA76D0093FAC6 /* StopIcon.swift */; };
+		DA737DE12B8FB1A50093FAC6 /* StopIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA737DDF2B8FA76D0093FAC6 /* StopIcon.swift */; };
+		DA737DE22B8FB3E40093FAC6 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA855B762AF68BED00372C31 /* Util.swift */; };
+		DA737DE32B8FB4700093FAC6 /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
+		DA737DE42B8FB4870093FAC6 /* CLLocationCoordinate2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */; };
+		DA737DE62B90D20E0093FAC6 /* RemoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA737DE52B90D20E0093FAC6 /* RemoteImage.swift */; };
+		DA737DEC2B90E2D40093FAC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
+		DA737DEF2B9116840093FAC6 /* Vehicles.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */; };
 		DA7887EA2B77DA0800BFFB4F /* TimetablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA412A0939CA005D7E49 /* TimetablesView.swift */; };
 		DA7887EB2B77DA0A00BFFB4F /* TimetableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */; };
 		DA7887EC2B77DA0C00BFFB4F /* TimetableDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */; };
@@ -36,6 +58,9 @@
 		DA855B772AF68BED00372C31 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA855B762AF68BED00372C31 /* Util.swift */; };
 		DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
+		DA939E0F2BB0664C0014B0C0 /* ExpandableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA939E0E2BB0664C0014B0C0 /* ExpandableView.swift */; };
+		DAA552382B9D28E900C750BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA552372B9D28E900C750BC /* SearchBar.swift */; };
+		DAA552392B9D28E900C750BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA552372B9D28E900C750BC /* SearchBar.swift */; };
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
 		DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C92974387B00E2FBB7 /* ContentView.swift */; };
 		DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
@@ -49,15 +74,20 @@
 		DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */; };
 		DAAA8A4E2B8285E9006A1EC8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A4D2B8285E9006A1EC8 /* LoadingView.swift */; };
 		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
-		DAB0094A2B2E33B8009DF2CD /* AutoFocusedNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */; };
 		DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = DAB0094B2B2E61A0009DF2CD /* Settings.bundle */; };
 		DAB0094E2B2E71BF009DF2CD /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094D2B2E71BF009DF2CD /* View.swift */; };
 		DAB009502B2E7383009DF2CD /* Stored.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094F2B2E7383009DF2CD /* Stored.swift */; };
+		DAB40A892BEFD58D0067F972 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAE77C3F2B88DE8C008F3185 /* WidgetKit.framework */; };
 		DAB467F52B7A489800B45A1C /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */; };
 		DAB467F72B7A48B400B45A1C /* StopsListProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */; };
 		DAB467F82B7A48B400B45A1C /* StopsListProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */; };
 		DAB467F92B7A5C9200B45A1C /* MapBottomSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */; };
 		DAB67B992B363956001DC2E3 /* LoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */; };
+		DAB981682B926ED90052376C /* VirtualTableConnectionDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB981672B926ED90052376C /* VirtualTableConnectionDetail.swift */; };
+		DAB981692B926ED90052376C /* VirtualTableConnectionDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB981672B926ED90052376C /* VirtualTableConnectionDetail.swift */; };
+		DAB9816A2B9277D20052376C /* VirtualTableActivityLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE77C462B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift */; };
+		DAB9818B2B93CC410052376C /* Collapsible.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB9818A2B93CC410052376C /* Collapsible.swift */; };
+		DAB9818C2B93CC410052376C /* Collapsible.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB9818A2B93CC410052376C /* Collapsible.swift */; };
 		DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE4082ACC23DA00D66159 /* LineText.swift */; };
 		DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE40A2ACC2E5200D66159 /* Line.swift */; };
 		DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03212A0AF3BF00FD2C4B /* Binding.swift */; };
@@ -82,16 +112,21 @@
 		DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DAD0CEB429CB9E1D00A43CC6 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAD0CEB329CB9E1D00A43CC6 /* SocketIO */; };
 		DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
+		DAD294B92BA38C9900875B3A /* SimpleVirtualTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD294B82BA38C9900875B3A /* SimpleVirtualTableController.swift */; };
 		DAD9BF1D2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */; };
 		DAE714D92B2FA2E20059B8A1 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714D82B2FA2E20059B8A1 /* Session.swift */; };
 		DAE714DA2B2FA2E20059B8A1 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714D82B2FA2E20059B8A1 /* Session.swift */; };
-		DAE714DD2B2FAACF0059B8A1 /* swift.yml in Resources */ = {isa = PBXBuildFile; fileRef = DAE714DC2B2FAACF0059B8A1 /* swift.yml */; };
 		DAE714DE2B2FAACF0059B8A1 /* swift.yml in Resources */ = {isa = PBXBuildFile; fileRef = DAE714DC2B2FAACF0059B8A1 /* swift.yml */; };
 		DAE714E22B2FAF650059B8A1 /* Timetables.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714E12B2FAF650059B8A1 /* Timetables.swift */; };
 		DAE714E32B2FAF650059B8A1 /* Timetables.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714E12B2FAF650059B8A1 /* Timetables.swift */; };
 		DAE714E62B2FC0D50059B8A1 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = DAE714E52B2FC0D50059B8A1 /* WrappingHStack */; };
+		DAE77C422B88DE8C008F3185 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAE77C412B88DE8C008F3185 /* SwiftUI.framework */; };
+		DAE77C472B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE77C462B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift */; };
+		DAE77C512B88DE8E008F3185 /* VirtualTableActivityExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DAE77C3E2B88DE8C008F3185 /* VirtualTableActivityExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DAE77C572B8A5C9C008F3185 /* VirtualTableLiveActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE77C562B8A5C9B008F3185 /* VirtualTableLiveActivityController.swift */; };
 		DAEF77B129744893008D66DE /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
 		DAEF77B32974680B008D66DE /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
+		DAF4A9242BF1058600A46591 /* Vehicles.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,6 +144,13 @@
 			remoteGlobalIDString = DAA817C32974387B00E2FBB7;
 			remoteInfo = Transi;
 		};
+		DAE77C4F2B88DE8E008F3185 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DAA817BC2974387B00E2FBB7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DAE77C3D2B88DE8C008F3185;
+			remoteInfo = VirtualTableActivityExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -120,6 +162,17 @@
 			files = (
 			);
 			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DAE77C522B88DE8E008F3185 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DAE77C512B88DE8E008F3185 /* VirtualTableActivityExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -135,6 +188,9 @@
 		DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableListItem.swift; sourceTree = "<group>"; };
 		DA3F83DB2B1E7CB20006F41E /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
 		DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKMapView.swift; sourceTree = "<group>"; };
+		DA467DEA2BE9156F00057872 /* AppStateProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateProvider.swift; sourceTree = "<group>"; };
+		DA4DDA582B8BF86100E8DFCA /* VirtualTableActivityBundle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityBundle.swift; sourceTree = "<group>"; };
+		DA4DDA6C2B8D5C0F00E8DFCA /* RemainingTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemainingTime.swift; sourceTree = "<group>"; };
 		DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerTransitListItem.swift; sourceTree = "<group>"; };
 		DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerWalkListItem.swift; sourceTree = "<group>"; };
 		DA500BF72A11461300630226 /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
@@ -142,12 +198,17 @@
 		DA500C012A12B81E00630226 /* ListStackModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListStackModifier.swift; sourceTree = "<group>"; };
 		DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleInfo.swift; sourceTree = "<group>"; };
 		DA63553229E4957A00AAD7C0 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
+		DA737DDF2B8FA76D0093FAC6 /* StopIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopIcon.swift; sourceTree = "<group>"; };
+		DA737DE52B90D20E0093FAC6 /* RemoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImage.swift; sourceTree = "<group>"; };
+		DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Vehicles.xcassets; sourceTree = "<group>"; };
 		DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerList.swift; sourceTree = "<group>"; };
 		DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTime.swift; sourceTree = "<group>"; };
 		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		DA855B762AF68BED00372C31 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		DA89EDE529BA981700C32F24 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListIcon.swift; sourceTree = "<group>"; };
+		DA939E0E2BB0664C0014B0C0 /* ExpandableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandableView.swift; sourceTree = "<group>"; };
+		DAA552372B9D28E900C750BC /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
 		DAA817C92974387B00E2FBB7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DAA817CB2974387C00E2FBB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -163,13 +224,14 @@
 		DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicator.swift; sourceTree = "<group>"; };
 		DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fetch.swift; sourceTree = "<group>"; };
 		DAAA8A4D2B8285E9006A1EC8 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
-		DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFocusedNavigationView.swift; sourceTree = "<group>"; };
 		DAB0094B2B2E61A0009DF2CD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		DAB0094D2B2E71BF009DF2CD /* View.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		DAB0094F2B2E7383009DF2CD /* Stored.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stored.swift; sourceTree = "<group>"; };
 		DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopsListProvider.swift; sourceTree = "<group>"; };
 		DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableView.swift; sourceTree = "<group>"; };
 		DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingOverlay.swift; sourceTree = "<group>"; };
+		DAB981672B926ED90052376C /* VirtualTableConnectionDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableConnectionDetail.swift; sourceTree = "<group>"; };
+		DAB9818A2B93CC410052376C /* Collapsible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collapsible.swift; sourceTree = "<group>"; };
 		DABAE4082ACC23DA00D66159 /* LineText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineText.swift; sourceTree = "<group>"; };
 		DABAE40A2ACC2E5200D66159 /* Line.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Line.swift; sourceTree = "<group>"; };
 		DABD031B2A097ABE00FD2C4B /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -190,11 +252,18 @@
 		DACDA7892B7044CB00D53F6D /* TripPlannerDateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDateButton.swift; sourceTree = "<group>"; };
 		DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiWatchApp.swift; sourceTree = "<group>"; };
 		DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DAD294B82BA38C9900875B3A /* SimpleVirtualTableController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleVirtualTableController.swift; sourceTree = "<group>"; };
 		DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapBottomSheetView.swift; sourceTree = "<group>"; };
 		DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocationCoordinate2D.swift; sourceTree = "<group>"; };
 		DAE714D82B2FA2E20059B8A1 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		DAE714DC2B2FAACF0059B8A1 /* swift.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; name = swift.yml; path = .github/workflows/swift.yml; sourceTree = "<group>"; };
 		DAE714E12B2FAF650059B8A1 /* Timetables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timetables.swift; sourceTree = "<group>"; };
+		DAE77C3E2B88DE8C008F3185 /* VirtualTableActivityExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VirtualTableActivityExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAE77C3F2B88DE8C008F3185 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		DAE77C412B88DE8C008F3185 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		DAE77C462B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveActivity.swift; sourceTree = "<group>"; };
+		DAE77C4E2B88DE8E008F3185 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DAE77C562B8A5C9B008F3185 /* VirtualTableLiveActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableLiveActivityController.swift; sourceTree = "<group>"; };
 		DAEF77B029744893008D66DE /* Stops.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stops.swift; sourceTree = "<group>"; };
 		DAEF77B22974680B008D66DE /* StopListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -205,6 +274,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */,
+				DA66CA9C2BDC926200C4C4E6 /* SwipeActions in Frameworks */,
 				DAC809FE2B02934C00CFC7B8 /* SwiftUIIntrospect in Frameworks */,
 				DA23A7862B02957700BC8428 /* SocketIO in Frameworks */,
 				DAC80A002B0293AF00CFC7B8 /* Fuse in Frameworks */,
@@ -232,6 +302,16 @@
 			files = (
 				DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */,
 				DAD0CEB429CB9E1D00A43CC6 /* SocketIO in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DAE77C3B2B88DE8C008F3185 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA4DDA672B8D560300E8DFCA /* SwiftUIX in Frameworks */,
+				DAE77C422B88DE8C008F3185 /* SwiftUI.framework in Frameworks */,
+				DAB40A892BEFD58D0067F972 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -290,6 +370,14 @@
 			path = "Stop List";
 			sourceTree = "<group>";
 		};
+		DA737DDE2B8FA7590093FAC6 /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+				DA737DDF2B8FA76D0093FAC6 /* StopIcon.swift */,
+			);
+			path = Icons;
+			sourceTree = "<group>";
+		};
 		DA7A7D3D2A1127010002D7D7 /* Util */ = {
 			isa = PBXGroup;
 			children = (
@@ -329,11 +417,13 @@
 				DAD0CE9929CB97D500A43CC6 /* Transi Watch App */,
 				DAA817D82974387D00E2FBB7 /* TransiTests */,
 				DAA817E22974387D00E2FBB7 /* TransiUITests */,
+				DAE77C432B88DE8C008F3185 /* VirtualTableActivity */,
 				DAD0CEB229CB9E1D00A43CC6 /* Frameworks */,
 				DABD031B2A097ABE00FD2C4B /* Transi.app */,
 				DABD031C2A097ABE00FD2C4B /* Transi.app */,
 				DABD031D2A097ABE00FD2C4B /* TransiTests.xctest */,
 				DABD031E2A097ABE00FD2C4B /* TransiUITests.xctest */,
+				DAE77C3E2B88DE8C008F3185 /* VirtualTableActivityExtension.appex */,
 			);
 			sourceTree = "<group>";
 		};
@@ -399,6 +489,7 @@
 			children = (
 				DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */,
 				DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */,
+				DA467DEA2BE9156F00057872 /* AppStateProvider.swift */,
 			);
 			path = Providers;
 			sourceTree = "<group>";
@@ -415,7 +506,6 @@
 		DABAE4072ACC23B800D66159 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				DAB009492B2E33B8009DF2CD /* AutoFocusedNavigationView.swift */,
 				DABAE4082ACC23DA00D66159 /* LineText.swift */,
 				DACDA7872B7033F700D53F6D /* CircleIcon.swift */,
 				DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */,
@@ -423,6 +513,12 @@
 				DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */,
 				DAAA8A4D2B8285E9006A1EC8 /* LoadingView.swift */,
 				DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */,
+				DA4DDA6C2B8D5C0F00E8DFCA /* RemainingTime.swift */,
+				DA737DE52B90D20E0093FAC6 /* RemoteImage.swift */,
+				DAB981672B926ED90052376C /* VirtualTableConnectionDetail.swift */,
+				DAB9818A2B93CC410052376C /* Collapsible.swift */,
+				DAA552372B9D28E900C750BC /* SearchBar.swift */,
+				DA939E0E2BB0664C0014B0C0 /* ExpandableView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -432,7 +528,9 @@
 			children = (
 				DAC95A0A2B77A92F005E93C7 /* GlobalController.swift */,
 				DAC95A0C2B77A93C005E93C7 /* VirtualTableController.swift */,
+				DAD294B82BA38C9900875B3A /* SimpleVirtualTableController.swift */,
 				DAC95A0E2B77A948005E93C7 /* TripPlannerController.swift */,
+				DAE77C562B8A5C9B008F3185 /* VirtualTableLiveActivityController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -449,14 +547,16 @@
 		DAD0CEAA29CB9B9800A43CC6 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				DA737DDE2B8FA7590093FAC6 /* Icons */,
 				DAB467F42B7A488500B45A1C /* Providers */,
 				DAC95A092B77A905005E93C7 /* Controllers */,
 				DABAE4072ACC23B800D66159 /* Views */,
 				DA500C002A12B7FC00630226 /* Modifiers */,
 				DA7A7D3D2A1127010002D7D7 /* Util */,
-				DAA817CB2974387C00E2FBB7 /* Assets.xcassets */,
 				DA89EDE429BA980400C32F24 /* Extensions */,
 				DAA817F629743B2A00E2FBB7 /* Models */,
+				DAA817CB2974387C00E2FBB7 /* Assets.xcassets */,
+				DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -464,8 +564,20 @@
 		DAD0CEB229CB9E1D00A43CC6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DAE77C3F2B88DE8C008F3185 /* WidgetKit.framework */,
+				DAE77C412B88DE8C008F3185 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DAE77C432B88DE8C008F3185 /* VirtualTableActivity */ = {
+			isa = PBXGroup;
+			children = (
+				DA4DDA582B8BF86100E8DFCA /* VirtualTableActivityBundle.swift */,
+				DAE77C462B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift */,
+				DAE77C4E2B88DE8E008F3185 /* Info.plist */,
+			);
+			path = VirtualTableActivity;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -479,10 +591,12 @@
 				DAA817C12974387B00E2FBB7 /* Frameworks */,
 				DAA817C22974387B00E2FBB7 /* Resources */,
 				DAD0CEA929CB97D700A43CC6 /* Embed Watch Content */,
+				DAE77C522B88DE8E008F3185 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				DAE77C502B88DE8E008F3185 /* PBXTargetDependency */,
 			);
 			name = Transi;
 			packageProductDependencies = (
@@ -491,6 +605,7 @@
 				DA23A7802B02951F00BC8428 /* SwiftUIX */,
 				DA23A7852B02957700BC8428 /* SocketIO */,
 				DAE714E52B2FC0D50059B8A1 /* WrappingHStack */,
+				DA66CA9B2BDC926200C4C4E6 /* SwipeActions */,
 			);
 			productName = Transi;
 			productReference = DABD031B2A097ABE00FD2C4B /* Transi.app */;
@@ -553,6 +668,26 @@
 			productReference = DABD031C2A097ABE00FD2C4B /* Transi.app */;
 			productType = "com.apple.product-type.application";
 		};
+		DAE77C3D2B88DE8C008F3185 /* VirtualTableActivityExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DAE77C552B88DE8E008F3185 /* Build configuration list for PBXNativeTarget "VirtualTableActivityExtension" */;
+			buildPhases = (
+				DAE77C3A2B88DE8C008F3185 /* Sources */,
+				DAE77C3B2B88DE8C008F3185 /* Frameworks */,
+				DAE77C3C2B88DE8C008F3185 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VirtualTableActivityExtension;
+			packageProductDependencies = (
+				DA4DDA662B8D560300E8DFCA /* SwiftUIX */,
+			);
+			productName = VirtualTableActivityExtension;
+			productReference = DAE77C3E2B88DE8C008F3185 /* VirtualTableActivityExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -560,7 +695,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1400;
+				LastSwiftUpdateCheck = 1520;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					DAA817C32974387B00E2FBB7 = {
@@ -576,6 +711,9 @@
 					};
 					DAD0CE9729CB97D500A43CC6 = {
 						CreatedOnToolsVersion = 14.0.1;
+					};
+					DAE77C3D2B88DE8C008F3185 = {
+						CreatedOnToolsVersion = 15.2;
 					};
 				};
 			};
@@ -594,6 +732,7 @@
 				DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */,
 				DAB73A3F2B00F2E5009FCCC7 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 				DAE714E42B2FC0D50059B8A1 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
+				DA66CA9A2BDC926200C4C4E6 /* XCRemoteSwiftPackageReference "SwipeActions" */,
 			);
 			productRefGroup = DAA817BB2974387B00E2FBB7;
 			projectDirPath = "";
@@ -603,6 +742,7 @@
 				DAA817D42974387D00E2FBB7 /* TransiTests */,
 				DAA817DE2974387D00E2FBB7 /* TransiUITests */,
 				DAD0CE9729CB97D500A43CC6 /* Transi Watch App */,
+				DAE77C3D2B88DE8C008F3185 /* VirtualTableActivityExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -612,8 +752,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA737DEF2B9116840093FAC6 /* Vehicles.xcassets in Resources */,
 				DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */,
-				DAE714DD2B2FAACF0059B8A1 /* swift.yml in Resources */,
 				DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -641,6 +781,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DAE77C3C2B88DE8C008F3185 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DAF4A9242BF1058600A46591 /* Vehicles.xcassets in Resources */,
+				DA737DEC2B90E2D40093FAC6 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -650,16 +799,19 @@
 			files = (
 				DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */,
 				DAAA8A4A2B8242D7006A1EC8 /* LoadingIndicator.swift in Sources */,
+				DAD294B92BA38C9900875B3A /* SimpleVirtualTableController.swift in Sources */,
 				DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */,
 				DACDA78A2B7044CB00D53F6D /* TripPlannerDateButton.swift in Sources */,
 				DACDA7862B7031B100D53F6D /* TripPlannerSearchInputs.swift in Sources */,
 				DAAA8A4E2B8285E9006A1EC8 /* LoadingView.swift in Sources */,
 				DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */,
 				DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */,
+				DA737DE02B8FA76D0093FAC6 /* StopIcon.swift in Sources */,
 				DA7887EC2B77DA0C00BFFB4F /* TimetableDetailView.swift in Sources */,
 				DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */,
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
 				DACDA7882B7033F700D53F6D /* CircleIcon.swift in Sources */,
+				DAE77C572B8A5C9C008F3185 /* VirtualTableLiveActivityController.swift in Sources */,
 				DAE714E22B2FAF650059B8A1 /* Timetables.swift in Sources */,
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
 				DAB0094E2B2E71BF009DF2CD /* View.swift in Sources */,
@@ -667,9 +819,11 @@
 				DA7887EB2B77DA0A00BFFB4F /* TimetableView.swift in Sources */,
 				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
 				DA855B772AF68BED00372C31 /* Util.swift in Sources */,
+				DAA552382B9D28E900C750BC /* SearchBar.swift in Sources */,
 				DA7887F12B79236000BFFB4F /* VirtualTableList.swift in Sources */,
 				DABD03282A0AF7B800FD2C4B /* Trip.swift in Sources */,
 				DA500BF82A11461300630226 /* Date.swift in Sources */,
+				DA737DE62B90D20E0093FAC6 /* RemoteImage.swift in Sources */,
 				DABD03252A0AF76E00FD2C4B /* StopGps.swift in Sources */,
 				DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */,
 				DA7887F22B79236200BFFB4F /* VirtualTableDetail.swift in Sources */,
@@ -677,27 +831,32 @@
 				DAC95A112B77ABAF005E93C7 /* LocationProvider.swift in Sources */,
 				DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */,
 				DAD9BF1D2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift in Sources */,
+				DAB981682B926ED90052376C /* VirtualTableConnectionDetail.swift in Sources */,
 				DA7887EA2B77DA0800BFFB4F /* TimetablesView.swift in Sources */,
 				DA7A7D3F2A112FCB0002D7D7 /* DateTime.swift in Sources */,
 				DAE714D92B2FA2E20059B8A1 /* Session.swift in Sources */,
 				DA7887EF2B77E5FE00BFFB4F /* MapKitView.swift in Sources */,
+				DA4DDA6D2B8D5C0F00E8DFCA /* RemainingTime.swift in Sources */,
 				DAB467F92B7A5C9200B45A1C /* MapBottomSheetView.swift in Sources */,
 				DAC95A0B2B77A92F005E93C7 /* GlobalController.swift in Sources */,
 				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
 				DAB009502B2E7383009DF2CD /* Stored.swift in Sources */,
 				DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */,
 				DAAA8A482B823FEE006A1EC8 /* NoDeparturesIcon.swift in Sources */,
+				DAB9816A2B9277D20052376C /* VirtualTableActivityLiveActivity.swift in Sources */,
 				DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */,
 				DA500BFF2A12B23900630226 /* Color.swift in Sources */,
-				DAB0094A2B2E33B8009DF2CD /* AutoFocusedNavigationView.swift in Sources */,
 				DA500C022A12B81E00630226 /* ListStackModifier.swift in Sources */,
 				DAC9C7142B09761000B1AC8C /* UIKit.swift in Sources */,
 				DAC95A0F2B77A948005E93C7 /* TripPlannerController.swift in Sources */,
 				DA7887F42B79236800BFFB4F /* VirtualTableView.swift in Sources */,
 				DA500BF62A1140E600630226 /* TripPlannerWalkListItem.swift in Sources */,
+				DA467DEB2BE9156F00057872 /* AppStateProvider.swift in Sources */,
 				DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */,
 				DAB67B992B363956001DC2E3 /* LoadingOverlay.swift in Sources */,
 				DA7887F32B79236400BFFB4F /* VirtualTableListItem.swift in Sources */,
+				DA939E0F2BB0664C0014B0C0 /* ExpandableView.swift in Sources */,
+				DAB9818B2B93CC410052376C /* Collapsible.swift in Sources */,
 				DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
 				DA7887F02B79235800BFFB4F /* VirtualTableController.swift in Sources */,
@@ -745,6 +904,31 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DAE77C3A2B88DE8C008F3185 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA4DDA5F2B8BF9F500E8DFCA /* LineText.swift in Sources */,
+				DA737DE32B8FB4700093FAC6 /* Stops.swift in Sources */,
+				DA737DDD2B8FA6210093FAC6 /* String.swift in Sources */,
+				DAE77C472B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift in Sources */,
+				DA4DDA5E2B8BF9D000E8DFCA /* Line.swift in Sources */,
+				DAA552392B9D28E900C750BC /* SearchBar.swift in Sources */,
+				DA737DDB2B8FA4710093FAC6 /* Table.swift in Sources */,
+				DA4DDA682B8D56A500E8DFCA /* Color.swift in Sources */,
+				DA4DDA6A2B8D593600E8DFCA /* NowIndicator.swift in Sources */,
+				DA737DE42B8FB4870093FAC6 /* CLLocationCoordinate2D.swift in Sources */,
+				DA737DE22B8FB3E40093FAC6 /* Util.swift in Sources */,
+				DA737DDC2B8FA5840093FAC6 /* VehicleInfo.swift in Sources */,
+				DAB981692B926ED90052376C /* VirtualTableConnectionDetail.swift in Sources */,
+				DA737DE12B8FB1A50093FAC6 /* StopIcon.swift in Sources */,
+				DA4DDA6B2B8D594600E8DFCA /* View.swift in Sources */,
+				DA4DDA5B2B8BF86100E8DFCA /* VirtualTableActivityBundle.swift in Sources */,
+				DAB9818C2B93CC410052376C /* Collapsible.swift in Sources */,
+				DA4DDA6E2B8D5C0F00E8DFCA /* RemainingTime.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -757,6 +941,11 @@
 			isa = PBXTargetDependency;
 			target = DAA817C32974387B00E2FBB7 /* Transi */;
 			targetProxy = DAA817E02974387D00E2FBB7 /* PBXContainerItemProxy */;
+		};
+		DAE77C502B88DE8E008F3185 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DAE77C3D2B88DE8C008F3185 /* VirtualTableActivityExtension */;
+			targetProxy = DAE77C4F2B88DE8E008F3185 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -815,12 +1004,19 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location is used to sort stops list by nearest and show your position on the map.";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				SKIP_INSTALL = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -874,11 +1070,18 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location is used to sort stops list by nearest and show your position on the map.";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				SKIP_INSTALL = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
@@ -886,24 +1089,30 @@
 		};
 		DAA817EA2974387D00E2FBB7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA80284C2B24E39D0011390B /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Transi/Transi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Transi/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Transi;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location is used to sort stops list by nearest and show your position on the map.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -918,43 +1127,51 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.7;
+				MARKETING_VERSION = 0.9;
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
 		DAA817EB2974387D00E2FBB7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA80284C2B24E39D0011390B /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Transi/Transi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Transi/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Transi;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location is used to sort stops list by nearest and show your position on the map.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -969,20 +1186,21 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.7;
+				MARKETING_VERSION = 0.9;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -994,7 +1212,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -1018,7 +1236,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -1041,7 +1259,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -1064,7 +1282,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -1090,7 +1308,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Transi-Watch-App-Info.plist";
@@ -1126,7 +1344,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Transi-Watch-App-Info.plist";
@@ -1150,6 +1368,86 @@
 				TARGETED_DEVICE_FAMILY = 4;
 				VALIDATE_PRODUCT = YES;
 				WATCHOS_DEPLOYMENT_TARGET = 8.6;
+			};
+			name = Release;
+		};
+		DAE77C532B88DE8E008F3185 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA80284C2B24E39D0011390B /* Release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SF24X772VL;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VirtualTableActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = VirtualTableActivity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location is used to sort stops list by nearest and show your position on the map.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.9;
+				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi.VirtualTableActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		DAE77C542B88DE8E008F3185 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA80284C2B24E39D0011390B /* Release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SF24X772VL;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VirtualTableActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = VirtualTableActivity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location is used to sort stops list by nearest and show your position on the map.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.9;
+				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi.VirtualTableActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -1201,9 +1499,26 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		DAE77C552B88DE8E008F3185 /* Build configuration list for PBXNativeTarget "VirtualTableActivityExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DAE77C532B88DE8E008F3185 /* Debug */,
+				DAE77C542B88DE8E008F3185 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		DA66CA9A2BDC926200C4C4E6 /* XCRemoteSwiftPackageReference "SwipeActions" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aheze/SwipeActions";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
 		DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
@@ -1256,6 +1571,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;
 			productName = SocketIO;
+		};
+		DA4DDA662B8D560300E8DFCA /* SwiftUIX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */;
+			productName = SwiftUIX;
+		};
+		DA66CA9B2BDC926200C4C4E6 /* SwipeActions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA66CA9A2BDC926200C4C4E6 /* XCRemoteSwiftPackageReference "SwipeActions" */;
+			productName = SwipeActions;
 		};
 		DAAB2C0929F8751F00D79A70 /* Fuse */ = {
 			isa = XCSwiftPackageProductDependency;

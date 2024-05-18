@@ -37,7 +37,7 @@ struct PlatformLabel: Codable, Identifiable, Hashable {
     let id: String
     let label: String
     
-    static let example = PlatformLabel(id: "300", label: "A")
+    static let example = PlatformLabel(id: "099", label: "A")
 }
 
 struct StopsVersion: Codable, Hashable {

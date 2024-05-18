@@ -9,9 +9,18 @@ import SwiftUI
 
 @main
 struct TransiApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+
+    init() {
+        GlobalController.appLaunch()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+        }
+        .onChange(of: scenePhase) { _ in
+            GlobalController.scenePhaseChange(scenePhase)
         }
     }
 }
