@@ -64,9 +64,6 @@
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
 		DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C92974387B00E2FBB7 /* ContentView.swift */; };
 		DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
-		DAA817DA2974387D00E2FBB7 /* TransiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817D92974387D00E2FBB7 /* TransiTests.swift */; };
-		DAA817E42974387D00E2FBB7 /* TransiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E32974387D00E2FBB7 /* TransiUITests.swift */; };
-		DAA817E62974387D00E2FBB7 /* TransiUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */; };
 		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */; };
 		DAAA8A482B823FEE006A1EC8 /* NoDeparturesIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A472B823FEE006A1EC8 /* NoDeparturesIcon.swift */; };
@@ -130,20 +127,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		DAA817D62974387D00E2FBB7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = DAA817BC2974387B00E2FBB7 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = DAA817C32974387B00E2FBB7;
-			remoteInfo = Transi;
-		};
-		DAA817E02974387D00E2FBB7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = DAA817BC2974387B00E2FBB7 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = DAA817C32974387B00E2FBB7;
-			remoteInfo = Transi;
-		};
 		DAE77C4F2B88DE8E008F3185 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = DAA817BC2974387B00E2FBB7 /* Project object */;
@@ -214,9 +197,6 @@
 		DAA817CB2974387C00E2FBB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DAA817CD2974387C00E2FBB7 /* Transi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Transi.entitlements; sourceTree = "<group>"; };
 		DAA817CF2974387C00E2FBB7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		DAA817D92974387D00E2FBB7 /* TransiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiTests.swift; sourceTree = "<group>"; };
-		DAA817E32974387D00E2FBB7 /* TransiUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiUITests.swift; sourceTree = "<group>"; };
-		DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		DAA817F22974393300E2FBB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DAA817F729743B4B00E2FBB7 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Table.swift; sourceTree = "<group>"; };
 		DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowIndicator.swift; sourceTree = "<group>"; };
@@ -236,8 +216,6 @@
 		DABAE40A2ACC2E5200D66159 /* Line.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Line.swift; sourceTree = "<group>"; };
 		DABD031B2A097ABE00FD2C4B /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DABD031C2A097ABE00FD2C4B /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DABD031D2A097ABE00FD2C4B /* TransiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DABD031E2A097ABE00FD2C4B /* TransiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DABD03212A0AF3BF00FD2C4B /* Binding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Binding.swift; sourceTree = "<group>"; };
 		DABD03242A0AF76E00FD2C4B /* StopGps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopGps.swift; sourceTree = "<group>"; };
 		DABD03272A0AF7B800FD2C4B /* Trip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trip.swift; sourceTree = "<group>"; };
@@ -279,20 +257,6 @@
 				DA23A7862B02957700BC8428 /* SocketIO in Frameworks */,
 				DAC80A002B0293AF00CFC7B8 /* Fuse in Frameworks */,
 				DAE714E62B2FC0D50059B8A1 /* WrappingHStack in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DAA817D22974387D00E2FBB7 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DAA817DC2974387D00E2FBB7 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -415,14 +379,10 @@
 				DAD0CEAA29CB9B9800A43CC6 /* Shared */,
 				DAA817C62974387B00E2FBB7 /* Transi */,
 				DAD0CE9929CB97D500A43CC6 /* Transi Watch App */,
-				DAA817D82974387D00E2FBB7 /* TransiTests */,
-				DAA817E22974387D00E2FBB7 /* TransiUITests */,
 				DAE77C432B88DE8C008F3185 /* VirtualTableActivity */,
 				DAD0CEB229CB9E1D00A43CC6 /* Frameworks */,
 				DABD031B2A097ABE00FD2C4B /* Transi.app */,
 				DABD031C2A097ABE00FD2C4B /* Transi.app */,
-				DABD031D2A097ABE00FD2C4B /* TransiTests.xctest */,
-				DABD031E2A097ABE00FD2C4B /* TransiUITests.xctest */,
 				DAE77C3E2B88DE8C008F3185 /* VirtualTableActivityExtension.appex */,
 			);
 			sourceTree = "<group>";
@@ -451,23 +411,6 @@
 				DAA817CF2974387C00E2FBB7 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		DAA817D82974387D00E2FBB7 /* TransiTests */ = {
-			isa = PBXGroup;
-			children = (
-				DAA817D92974387D00E2FBB7 /* TransiTests.swift */,
-			);
-			path = TransiTests;
-			sourceTree = "<group>";
-		};
-		DAA817E22974387D00E2FBB7 /* TransiUITests */ = {
-			isa = PBXGroup;
-			children = (
-				DAA817E32974387D00E2FBB7 /* TransiUITests.swift */,
-				DAA817E52974387D00E2FBB7 /* TransiUITestsLaunchTests.swift */,
-			);
-			path = TransiUITests;
 			sourceTree = "<group>";
 		};
 		DAA817F629743B2A00E2FBB7 /* Models */ = {
@@ -611,42 +554,6 @@
 			productReference = DABD031B2A097ABE00FD2C4B /* Transi.app */;
 			productType = "com.apple.product-type.application";
 		};
-		DAA817D42974387D00E2FBB7 /* TransiTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = DAA817EC2974387D00E2FBB7 /* Build configuration list for PBXNativeTarget "TransiTests" */;
-			buildPhases = (
-				DAA817D12974387D00E2FBB7 /* Sources */,
-				DAA817D22974387D00E2FBB7 /* Frameworks */,
-				DAA817D32974387D00E2FBB7 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				DAA817D72974387D00E2FBB7 /* PBXTargetDependency */,
-			);
-			name = TransiTests;
-			productName = TransiTests;
-			productReference = DABD031D2A097ABE00FD2C4B /* TransiTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		DAA817DE2974387D00E2FBB7 /* TransiUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = DAA817EF2974387D00E2FBB7 /* Build configuration list for PBXNativeTarget "TransiUITests" */;
-			buildPhases = (
-				DAA817DB2974387D00E2FBB7 /* Sources */,
-				DAA817DC2974387D00E2FBB7 /* Frameworks */,
-				DAA817DD2974387D00E2FBB7 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				DAA817E12974387D00E2FBB7 /* PBXTargetDependency */,
-			);
-			name = TransiUITests;
-			productName = TransiUITests;
-			productReference = DABD031E2A097ABE00FD2C4B /* TransiUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 		DAD0CE9729CB97D500A43CC6 /* Transi Watch App */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DAD0CEA629CB97D700A43CC6 /* Build configuration list for PBXNativeTarget "Transi Watch App" */;
@@ -701,14 +608,6 @@
 					DAA817C32974387B00E2FBB7 = {
 						CreatedOnToolsVersion = 14.1;
 					};
-					DAA817D42974387D00E2FBB7 = {
-						CreatedOnToolsVersion = 14.1;
-						TestTargetID = DAA817C32974387B00E2FBB7;
-					};
-					DAA817DE2974387D00E2FBB7 = {
-						CreatedOnToolsVersion = 14.1;
-						TestTargetID = DAA817C32974387B00E2FBB7;
-					};
 					DAD0CE9729CB97D500A43CC6 = {
 						CreatedOnToolsVersion = 14.0.1;
 					};
@@ -739,8 +638,6 @@
 			projectRoot = "";
 			targets = (
 				DAA817C32974387B00E2FBB7 /* Transi */,
-				DAA817D42974387D00E2FBB7 /* TransiTests */,
-				DAA817DE2974387D00E2FBB7 /* TransiUITests */,
 				DAD0CE9729CB97D500A43CC6 /* Transi Watch App */,
 				DAE77C3D2B88DE8C008F3185 /* VirtualTableActivityExtension */,
 			);
@@ -755,20 +652,6 @@
 				DA737DEF2B9116840093FAC6 /* Vehicles.xcassets in Resources */,
 				DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */,
 				DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DAA817D32974387D00E2FBB7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DAA817DD2974387D00E2FBB7 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -866,23 +749,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DAA817D12974387D00E2FBB7 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DAA817DA2974387D00E2FBB7 /* TransiTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DAA817DB2974387D00E2FBB7 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DAA817E42974387D00E2FBB7 /* TransiUITests.swift in Sources */,
-				DAA817E62974387D00E2FBB7 /* TransiUITestsLaunchTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		DAD0CE9429CB97D500A43CC6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -932,16 +798,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		DAA817D72974387D00E2FBB7 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = DAA817C32974387B00E2FBB7 /* Transi */;
-			targetProxy = DAA817D62974387D00E2FBB7 /* PBXContainerItemProxy */;
-		};
-		DAA817E12974387D00E2FBB7 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = DAA817C32974387B00E2FBB7 /* Transi */;
-			targetProxy = DAA817E02974387D00E2FBB7 /* PBXContainerItemProxy */;
-		};
 		DAE77C502B88DE8E008F3185 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = DAE77C3D2B88DE8C008F3185 /* VirtualTableActivityExtension */;
@@ -1110,9 +966,10 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location is used to sort stops list by nearest and show your position on the map.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
-				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = NO;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -1122,6 +979,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = "";
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
@@ -1131,7 +989,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.9;
+				MARKETING_VERSION = 0.9.1;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1169,9 +1027,10 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location is used to sort stops list by nearest and show your position on the map.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
-				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = NO;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -1181,6 +1040,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = "";
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
@@ -1190,7 +1050,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.9;
+				MARKETING_VERSION = 0.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1201,100 +1061,6 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Release;
-		};
-		DAA817ED2974387D00E2FBB7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = SF24X772VL;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Transi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Transi";
-			};
-			name = Debug;
-		};
-		DAA817EE2974387D00E2FBB7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = SF24X772VL;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Transi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Transi";
-			};
-			name = Release;
-		};
-		DAA817F02974387D00E2FBB7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = SF24X772VL;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Transi;
-			};
-			name = Debug;
-		};
-		DAA817F12974387D00E2FBB7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = SF24X772VL;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.TransiUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Transi;
 			};
 			name = Release;
 		};
@@ -1468,24 +1234,6 @@
 			buildConfigurations = (
 				DAA817EA2974387D00E2FBB7 /* Debug */,
 				DAA817EB2974387D00E2FBB7 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		DAA817EC2974387D00E2FBB7 /* Build configuration list for PBXNativeTarget "TransiTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				DAA817ED2974387D00E2FBB7 /* Debug */,
-				DAA817EE2974387D00E2FBB7 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		DAA817EF2974387D00E2FBB7 /* Build configuration list for PBXNativeTarget "TransiUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				DAA817F02974387D00E2FBB7 /* Debug */,
-				DAA817F12974387D00E2FBB7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
