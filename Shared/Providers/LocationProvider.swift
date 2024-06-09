@@ -42,7 +42,7 @@ class LocationProvider: NSObject, CLLocationManagerDelegate {
     }
     
     func stopUpdatingLocation() {
-        if GlobalController.appState.scene == .background {
+        if GlobalController.appState.phase == .background {
             locationManager.stopUpdatingLocation()
         }
     }

@@ -19,8 +19,8 @@ struct TransiApp: App {
         WindowGroup {
             ContentView()
         }
-        .onChange(of: scenePhase) { _ in
-            GlobalController.scenePhaseChange(scenePhase)
+        .onChange(of: scenePhase) { phase in
+            GlobalController.scenePhaseChange(phase)
         }
     }
 }

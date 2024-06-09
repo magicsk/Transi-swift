@@ -36,7 +36,7 @@ struct GlobalController {
     }
 
     static func scenePhaseChange(_ phase: ScenePhase) {
-        appState.scene = phase
+        appState.phase = phase
         _ = VirtualTableLiveActivityController.listAllTabActivities()
         switch phase {
             case .background:
@@ -69,7 +69,7 @@ struct GlobalController {
         shouldRunInBackground = false
         cancelApplicationQuitNotification()
         DispatchQueue.global().asyncAfter(deadline: .now() + 6) {
-            if !shouldRunInBackground, appState.scene == .background {
+            if !shouldRunInBackground, appState.phase == .background {
                 locationProvider.stopUpdatingLocation()
             }
         }

@@ -11,7 +11,6 @@ import SwiftUIX
 
 struct ContentView: View {
     @StateObject var stopsListProvider = GlobalController.stopsListProvider
-    @Environment(\.colorScheme) private var colorScheme
 
     @State private var selection = 2
     @State private var tabView: UITabBarController? = nil

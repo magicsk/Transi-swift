@@ -8,6 +8,6 @@
 import SwiftUI
 
 class AppStateProvider: ObservableObject {
-    @Published var scene: ScenePhase = .active
+    @Published var phase: ScenePhase = .active
     @Published var openedURL: URL? = nil
 }

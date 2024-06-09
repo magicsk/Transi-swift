@@ -94,7 +94,7 @@ enum VirtualTableLiveActivityController {
             }
             return containts
         }
-        if liveActivities.isEmpty && GlobalController.appState.scene == .background {
+        if liveActivities.isEmpty && GlobalController.appState.phase == .background {
             GlobalController.stopBackgroundMode()
         }
         return liveActivities
@@ -135,7 +135,7 @@ enum VirtualTableLiveActivityController {
             )
         }
         await activity?.update(using: updatedContentState, alertConfiguration: alertConfig)
-        if alertConfig != nil, liveActivitySounds, GlobalController.appState.scene == .background, await UIApplication.shared.isProtectedDataAvailable {
+        if alertConfig != nil, liveActivitySounds, GlobalController.appState.phase == .background, await UIApplication.shared.isProtectedDataAvailable {
             AudioServicesPlayAlertSound(SystemSoundID(1111))
         }
     }
