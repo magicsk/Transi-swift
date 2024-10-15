@@ -7,6 +7,7 @@
 
 import Combine
 import MapKit
+import MapCache
 import SwiftUI
 import UIKit
 
@@ -94,10 +95,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         mapView.mapType = .satellite
         mapView.userTrackingMode = .follow
 
-        tileLightOverlay = MKTileOverlay(urlTemplate: sourceLightUrl)
+        let tileLightConfig = MapCache(withConfig: MapCacheConfig(withUrlTemplate: sourceLightUrl))
+        tileLightOverlay = CachedTileOverlay(withCache: tileLightConfig)
         tileLightOverlay?.tileSize = .init(width: 512, height: 512)
         tileLightOverlay?.canReplaceMapContent = true
-        tileDarkOverlay = MKTileOverlay(urlTemplate: sourceDarkUrl)
+        let tileDarkConfig = MapCache(withConfig: MapCacheConfig(withUrlTemplate: sourceDarkUrl))
+        tileDarkOverlay = CachedTileOverlay(withCache: tileDarkConfig)
         tileDarkOverlay?.tileSize = .init(width: 512, height: 512)
         tileDarkOverlay?.canReplaceMapContent = true
 
@@ -244,12 +247,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
     }
 
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        if overlay is MKTileOverlay {
-            let renderer = MKTileOverlayRenderer(overlay: overlay)
-            return renderer
-        } else {
-            return MKTileOverlayRenderer()
-        }
+        return mapView.mapCacheRenderer(forOverlay: overlay)
     }
 
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {

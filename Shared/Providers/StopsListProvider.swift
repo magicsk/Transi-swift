@@ -69,7 +69,9 @@ class StopsListProvider: ObservableObject {
 
     private func addUtilsToStopList() {
         DispatchQueue.main.async {
-            self.stops.insert(Stop.actualLocation, at: 0)
+            if self.stops.first?.id != Stop.actualLocation.id {
+                self.stops.insert(Stop.actualLocation, at: 0)
+            }
         }
     }
 
@@ -84,9 +86,9 @@ class StopsListProvider: ObservableObject {
             }
         }
     }
-    
+
     func getStopIdFromName(_ stopName: String) -> Int? {
-        return self.stops.first(where: { stop in
+        return stops.first(where: { stop in
             stop.name == stopName
         })?.id
     }

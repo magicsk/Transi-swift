@@ -40,8 +40,7 @@ struct VirtualTableList: View {
                                 VirtualTableListItem(
                                     tab,
                                     virtualTableController.currentStop.platformLabels,
-                                    vehicleInfo,
-                                    first: virtualTableController.tabs.first?.id == tab.id
+                                    vehicleInfo
                                 ).id(tab.id)
                             }
                         }

@@ -19,24 +19,7 @@ struct VirtualTableActivityAttributes: ActivityAttributes {
 struct VirtualTableActivityLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: VirtualTableActivityAttributes.self) { context in
-            ZStack {
-                Color.systemBackground.opacity(0.43).ignoresSafeArea()
-                VStack {
-                    HStack {
-                        LineText(context.state.tab.line, 20.0)
-                        Text(context.state.tab.headsign).font(.headline).lineLimit(1)
-                        Spacer()
-                        Text(context.state.tab.departureTimeRemaining)
-                            .contentTransition(.numericText(countsDown: true))
-                            .font(.headline)
-                    }
-                    VirtualTableConnectionDetail(context.state.tab, context.state.vehicleInfo)
-                }
-                .padding(.all, 15.0)
-            }
-            .widgetURL(URL(string: "transi://table/\(context.state.tab.stopId)/\(context.state.tab.id)"))
-            .activityBackgroundTint(Color.clear)
-
+            VirtualTableActivityLiveView(context: context)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -67,6 +50,18 @@ struct VirtualTableActivityLiveActivity: Widget {
             }
             .widgetURL(URL(string: "transi://table/\(context.state.tab.stopId)/\(context.state.tab.id)"))
         }
+        .supplementalActivityFamiliesIfAvailable()
+//        .supplementalActivityFamilies([.small, .medium])
+    }
+}
+
+extension ActivityConfiguration {
+    func supplementalActivityFamiliesIfAvailable() -> some WidgetConfiguration {
+        if #available(iOS 18.0, *) {
+            return self.supplementalActivityFamilies([ActivityFamily.small, ActivityFamily.medium])
+        } else {
+            return self
+        }
     }
 }
 
@@ -76,19 +71,19 @@ private extension VirtualTableActivityAttributes {
     }
 }
 
-//private extension VirtualTableActivityAttributes.ContentState {
-//    static var online: VirtualTableActivityAttributes.ContentState {
-//        VirtualTableActivityAttributes.ContentState(tab: Tab.example, vehicleInfo: VehicleInfo.example)
-//    }
-//
-//    static var offline: VirtualTableActivityAttributes.ContentState {
-//        VirtualTableActivityAttributes.ContentState(tab: Tab.example)
-//    }
-//}
+private extension VirtualTableActivityAttributes.ContentState {
+    static var online: VirtualTableActivityAttributes.ContentState {
+        VirtualTableActivityAttributes.ContentState(tab: Tab.example, vehicleInfo: VehicleInfo.example)
+    }
 
-// #Preview("Notification", as: .content, using: VirtualTableActivityAttributes.preview) {
-//   VirtualTableActivityLiveActivity()
-// } contentStates: {
+    static var offline: VirtualTableActivityAttributes.ContentState {
+        VirtualTableActivityAttributes.ContentState(tab: Tab.example)
+    }
+}
+
+//#Preview("Content", as: .content, using: VirtualTableActivityAttributes.preview) {
+//    VirtualTableActivityLiveActivity()
+//} contentStates: {
 //    VirtualTableActivityAttributes.ContentState.online
 //    VirtualTableActivityAttributes.ContentState.offline
-// }
+//}

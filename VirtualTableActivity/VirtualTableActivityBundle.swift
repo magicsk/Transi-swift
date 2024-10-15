@@ -5,8 +5,8 @@
 //  Created by magic_sk on 23/02/2024.
 //
 
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 @main
 struct VirtualTableActivityBundle: WidgetBundle {

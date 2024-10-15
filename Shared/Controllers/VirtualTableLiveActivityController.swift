@@ -128,9 +128,10 @@ enum VirtualTableLiveActivityController {
 
         let isNew = oldTab?.lastStopName != tab.lastStopName || oldTab?.delayText != tab.delayText || oldTab?.departureTimeRemaining != tab.departureTimeRemaining
         if departureTimeRemainingRaw < 200, isNew {
+            let vehicleText = vehicleInfo != nil ? "\n\(vehicleInfo!.type) #\(String(tab.busID.dropFirst(2)))" : ""
             alertConfig = AlertConfiguration(
                 title: "\(tab.line) ▶ \(tab.headsign) in \(tab.departureTimeRemaining)",
-                body: "\(tab.lastStopName)\n\(tab.delayText)\n\(vehicleInfo!.type) #\(String(tab.busID.dropFirst(2)))",
+                body: "\(tab.lastStopName)\n\(tab.delayText)\(vehicleText)",
                 sound: .named("")
             )
         }

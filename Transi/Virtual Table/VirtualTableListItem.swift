@@ -9,6 +9,7 @@ import SwiftUI
 import SwipeActions
 
 struct VirtualTableListItem: View {
+    @StateObject var virtualTableController = GlobalController.virtualTable
     @Environment(\.openURL) private var openURL
     
     var tab: Tab
@@ -17,14 +18,12 @@ struct VirtualTableListItem: View {
     @State var date = Date()
     @State var image: CGImage? = nil
     @State var loadedImage: UIImage? = nil
-    @State var first: Bool = false
     @State var expanded: Bool = false
 
-    init(_ tab: Tab, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?, first: Bool = false) {
+    init(_ tab: Tab, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?) {
         self.tab = tab
         self.platformLabels = platformLabels
         self.vehicleInfo = vehicleInfo
-        self.first = first
     }
 
     var body: some View {
@@ -79,7 +78,7 @@ struct VirtualTableListItem: View {
                     expanded = expanded ? true : tab.expanded
                 }
                 .padding(.bottom, -1.5)
-                Divider().padding(.leading, expanded ? 0.0 : 65.0)
+                Divider().padding(.leading, expanded ? 0.0 : 65.0).opacity(virtualTableController.tabs.last?.id == tab.id ? 0.0 : 1.0)
             }
         } leadingActions: { context in
             SwipeAction(systemImage: "bell.fill") {
@@ -127,7 +126,7 @@ struct VirtualTableListItem: View {
         .swipeMinimumDistance(25.0)
         .swipeActionWidth(60.0)
         .swipeActionsVisibleEndPoint(60.0)
-        .onChange(of: expanded) { _ in
+        .onChange(of: expanded) { expanded in
             if expanded == true {
                 GlobalController.virtualTable.lastExpandedTab = tab
             }

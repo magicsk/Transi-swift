@@ -30,8 +30,10 @@ struct ContentView: View {
                     }.tag(1)
                 VirtualTableView(updateTabBarApperance)
                     .tabItem {
-                        Image(systemName: "clock.arrow.2.circlepath")
-                        Text("Virtual Table")
+                        VStack{
+                            Image(systemName: "clock.arrow.2.circlepath")
+                            Text("Virtual Table")
+                        }
                     }.tag(2)
                 TimetablesView(updateTabBarApperance)
                     .tabItem {
@@ -44,11 +46,6 @@ struct ContentView: View {
                         Image(systemName: "map")
                         Text("Map")
                     }.tag(4)
-            }
-            .onTapGesture(count: 2) {
-                if self.selection == 2 {
-                    GlobalController.virtualTable.changeStop(-1)
-                }
             }
             .onOpenURL { url in
                 print(url)
@@ -77,7 +74,7 @@ struct ContentView: View {
                         break
                 }
             }
-            .introspect(.tabView, on: .iOS(.v15, .v16, .v17)) { tv in
+            .introspect(.tabView, on: .iOS(.v16, .v17, .v18)) { tv in
                 DispatchQueue.main.async {
                     tabView = tv
                 }

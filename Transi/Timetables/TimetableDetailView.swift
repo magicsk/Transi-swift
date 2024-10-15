@@ -59,7 +59,7 @@ struct TimetableDetailView: View {
                             }
                         }
                     }
-                    .introspect(.list(style: .insetGrouped), on: .iOS(.v16, .v17)) { list in
+                    .introspect(.list(style: .insetGrouped), on: .iOS(.v16, .v17, .v18)) { list in
                         list.contentInset.top = -25.0
                     }
                 }

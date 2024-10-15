@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */; };
 		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
+		DA1C5A162CB2D7C900DB1032 /* CustomDisclosureGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C5A152CB2D7C900DB1032 /* CustomDisclosureGroup.swift */; };
+		DA1C5A182CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */; };
+		DA1C5A192CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */; };
+		DA1F2E6E2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */; };
+		DA1F2E6F2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */; };
 		DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7802B02951F00BC8428 /* SwiftUIX */; };
 		DA23A7862B02957700BC8428 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7852B02957700BC8428 /* SocketIO */; };
 		DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DB2B1E7CB20006F41E /* Errors.swift */; };
@@ -59,6 +64,8 @@
 		DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
 		DA939E0F2BB0664C0014B0C0 /* ExpandableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA939E0E2BB0664C0014B0C0 /* ExpandableView.swift */; };
+		DA96FBC22CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */; };
+		DA96FBC32CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */; };
 		DAA552382B9D28E900C750BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA552372B9D28E900C750BC /* SearchBar.swift */; };
 		DAA552392B9D28E900C750BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA552372B9D28E900C750BC /* SearchBar.swift */; };
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
@@ -109,8 +116,13 @@
 		DAD0CEAE29CB9DCB00A43CC6 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DAD0CEB429CB9E1D00A43CC6 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DAD0CEB329CB9E1D00A43CC6 /* SocketIO */; };
 		DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
+		DAD16F302C1B085700E620C4 /* VirtualTableActivityLiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD16F2F2C1B085700E620C4 /* VirtualTableActivityLiveView.swift */; };
+		DAD16F312C1B085700E620C4 /* VirtualTableActivityLiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD16F2F2C1B085700E620C4 /* VirtualTableActivityLiveView.swift */; };
+		DAD16F332C1B170800E620C4 /* VirtualTableActivityLiveViewSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD16F322C1B170200E620C4 /* VirtualTableActivityLiveViewSmall.swift */; };
+		DAD16F352C1B190F00E620C4 /* VirtualTableActivityLiveViewSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD16F322C1B170200E620C4 /* VirtualTableActivityLiveViewSmall.swift */; };
 		DAD294B92BA38C9900875B3A /* SimpleVirtualTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD294B82BA38C9900875B3A /* SimpleVirtualTableController.swift */; };
 		DAD9BF1D2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */; };
+		DADF72BE2C15D0AD008CF3F2 /* MapCache in Frameworks */ = {isa = PBXBuildFile; productRef = DADF72BD2C15D0AD008CF3F2 /* MapCache */; };
 		DAE714D92B2FA2E20059B8A1 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714D82B2FA2E20059B8A1 /* Session.swift */; };
 		DAE714DA2B2FA2E20059B8A1 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714D82B2FA2E20059B8A1 /* Session.swift */; };
 		DAE714DE2B2FAACF0059B8A1 /* swift.yml in Resources */ = {isa = PBXBuildFile; fileRef = DAE714DC2B2FAACF0059B8A1 /* swift.yml */; };
@@ -166,6 +178,9 @@
 		DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerView.swift; sourceTree = "<group>"; };
 		DA10FA412A0939CA005D7E49 /* TimetablesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetablesView.swift; sourceTree = "<group>"; };
 		DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDetailView.swift; sourceTree = "<group>"; };
+		DA1C5A152CB2D7C900DB1032 /* CustomDisclosureGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDisclosureGroup.swift; sourceTree = "<group>"; };
+		DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveViewLarge.swift; sourceTree = "<group>"; };
+		DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityDynamicIsland.swift; sourceTree = "<group>"; };
 		DA269E0F298960EF00F42107 /* VirtualTableList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableList.swift; sourceTree = "<group>"; };
 		DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableDetail.swift; sourceTree = "<group>"; };
 		DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableListItem.swift; sourceTree = "<group>"; };
@@ -191,6 +206,7 @@
 		DA89EDE529BA981700C32F24 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListIcon.swift; sourceTree = "<group>"; };
 		DA939E0E2BB0664C0014B0C0 /* ExpandableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandableView.swift; sourceTree = "<group>"; };
+		DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveDynamicView.swift; sourceTree = "<group>"; };
 		DAA552372B9D28E900C750BC /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
 		DAA817C92974387B00E2FBB7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -230,6 +246,8 @@
 		DACDA7892B7044CB00D53F6D /* TripPlannerDateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDateButton.swift; sourceTree = "<group>"; };
 		DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiWatchApp.swift; sourceTree = "<group>"; };
 		DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DAD16F2F2C1B085700E620C4 /* VirtualTableActivityLiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveView.swift; sourceTree = "<group>"; };
+		DAD16F322C1B170200E620C4 /* VirtualTableActivityLiveViewSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveViewSmall.swift; sourceTree = "<group>"; };
 		DAD294B82BA38C9900875B3A /* SimpleVirtualTableController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleVirtualTableController.swift; sourceTree = "<group>"; };
 		DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapBottomSheetView.swift; sourceTree = "<group>"; };
 		DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocationCoordinate2D.swift; sourceTree = "<group>"; };
@@ -256,6 +274,7 @@
 				DAC809FE2B02934C00CFC7B8 /* SwiftUIIntrospect in Frameworks */,
 				DA23A7862B02957700BC8428 /* SocketIO in Frameworks */,
 				DAC80A002B0293AF00CFC7B8 /* Fuse in Frameworks */,
+				DADF72BE2C15D0AD008CF3F2 /* MapCache in Frameworks */,
 				DAE714E62B2FC0D50059B8A1 /* WrappingHStack in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -449,6 +468,7 @@
 		DABAE4072ACC23B800D66159 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				DA1C5A152CB2D7C900DB1032 /* CustomDisclosureGroup.swift */,
 				DABAE4082ACC23DA00D66159 /* LineText.swift */,
 				DACDA7872B7033F700D53F6D /* CircleIcon.swift */,
 				DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */,
@@ -516,9 +536,14 @@
 		DAE77C432B88DE8C008F3185 /* VirtualTableActivity */ = {
 			isa = PBXGroup;
 			children = (
+				DAD16F322C1B170200E620C4 /* VirtualTableActivityLiveViewSmall.swift */,
+				DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */,
 				DA4DDA582B8BF86100E8DFCA /* VirtualTableActivityBundle.swift */,
 				DAE77C462B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift */,
 				DAE77C4E2B88DE8E008F3185 /* Info.plist */,
+				DAD16F2F2C1B085700E620C4 /* VirtualTableActivityLiveView.swift */,
+				DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */,
+				DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */,
 			);
 			path = VirtualTableActivity;
 			sourceTree = "<group>";
@@ -549,6 +574,7 @@
 				DA23A7852B02957700BC8428 /* SocketIO */,
 				DAE714E52B2FC0D50059B8A1 /* WrappingHStack */,
 				DA66CA9B2BDC926200C4C4E6 /* SwipeActions */,
+				DADF72BD2C15D0AD008CF3F2 /* MapCache */,
 			);
 			productName = Transi;
 			productReference = DABD031B2A097ABE00FD2C4B /* Transi.app */;
@@ -603,7 +629,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1520;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					DAA817C32974387B00E2FBB7 = {
 						CreatedOnToolsVersion = 14.1;
@@ -632,6 +658,7 @@
 				DAB73A3F2B00F2E5009FCCC7 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 				DAE714E42B2FC0D50059B8A1 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
 				DA66CA9A2BDC926200C4C4E6 /* XCRemoteSwiftPackageReference "SwipeActions" */,
+				DADF72BC2C15D0AD008CF3F2 /* XCRemoteSwiftPackageReference "MapCache" */,
 			);
 			productRefGroup = DAA817BB2974387B00E2FBB7;
 			projectDirPath = "";
@@ -694,6 +721,7 @@
 				DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */,
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
 				DACDA7882B7033F700D53F6D /* CircleIcon.swift in Sources */,
+				DAD16F352C1B190F00E620C4 /* VirtualTableActivityLiveViewSmall.swift in Sources */,
 				DAE77C572B8A5C9C008F3185 /* VirtualTableLiveActivityController.swift in Sources */,
 				DAE714E22B2FAF650059B8A1 /* Timetables.swift in Sources */,
 				DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */,
@@ -704,15 +732,18 @@
 				DA855B772AF68BED00372C31 /* Util.swift in Sources */,
 				DAA552382B9D28E900C750BC /* SearchBar.swift in Sources */,
 				DA7887F12B79236000BFFB4F /* VirtualTableList.swift in Sources */,
+				DA1C5A162CB2D7C900DB1032 /* CustomDisclosureGroup.swift in Sources */,
 				DABD03282A0AF7B800FD2C4B /* Trip.swift in Sources */,
 				DA500BF82A11461300630226 /* Date.swift in Sources */,
 				DA737DE62B90D20E0093FAC6 /* RemoteImage.swift in Sources */,
 				DABD03252A0AF76E00FD2C4B /* StopGps.swift in Sources */,
+				DA1F2E6E2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift in Sources */,
 				DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */,
 				DA7887F22B79236200BFFB4F /* VirtualTableDetail.swift in Sources */,
 				DAB467F72B7A48B400B45A1C /* StopsListProvider.swift in Sources */,
 				DAC95A112B77ABAF005E93C7 /* LocationProvider.swift in Sources */,
 				DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */,
+				DA96FBC32CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift in Sources */,
 				DAD9BF1D2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift in Sources */,
 				DAB981682B926ED90052376C /* VirtualTableConnectionDetail.swift in Sources */,
 				DA7887EA2B77DA0800BFFB4F /* TimetablesView.swift in Sources */,
@@ -736,9 +767,11 @@
 				DA500BF62A1140E600630226 /* TripPlannerWalkListItem.swift in Sources */,
 				DA467DEB2BE9156F00057872 /* AppStateProvider.swift in Sources */,
 				DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */,
+				DAD16F302C1B085700E620C4 /* VirtualTableActivityLiveView.swift in Sources */,
 				DAB67B992B363956001DC2E3 /* LoadingOverlay.swift in Sources */,
 				DA7887F32B79236400BFFB4F /* VirtualTableListItem.swift in Sources */,
 				DA939E0F2BB0664C0014B0C0 /* ExpandableView.swift in Sources */,
+				DA1C5A182CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */,
 				DAB9818B2B93CC410052376C /* Collapsible.swift in Sources */,
 				DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
@@ -775,11 +808,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA4DDA5F2B8BF9F500E8DFCA /* LineText.swift in Sources */,
+				DAD16F312C1B085700E620C4 /* VirtualTableActivityLiveView.swift in Sources */,
 				DA737DE32B8FB4700093FAC6 /* Stops.swift in Sources */,
 				DA737DDD2B8FA6210093FAC6 /* String.swift in Sources */,
 				DAE77C472B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift in Sources */,
 				DA4DDA5E2B8BF9D000E8DFCA /* Line.swift in Sources */,
+				DA1C5A192CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */,
+				DAD16F332C1B170800E620C4 /* VirtualTableActivityLiveViewSmall.swift in Sources */,
 				DAA552392B9D28E900C750BC /* SearchBar.swift in Sources */,
+				DA96FBC22CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift in Sources */,
 				DA737DDB2B8FA4710093FAC6 /* Table.swift in Sources */,
 				DA4DDA682B8D56A500E8DFCA /* Color.swift in Sources */,
 				DA4DDA6A2B8D593600E8DFCA /* NowIndicator.swift in Sources */,
@@ -792,6 +829,7 @@
 				DA4DDA5B2B8BF86100E8DFCA /* VirtualTableActivityBundle.swift in Sources */,
 				DAB9818C2B93CC410052376C /* Collapsible.swift in Sources */,
 				DA4DDA6E2B8D5C0F00E8DFCA /* RemainingTime.swift in Sources */,
+				DA1F2E6F2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -947,7 +985,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DA80284C2B24E39D0011390B /* Release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
@@ -989,7 +1026,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.9.1;
+				MARKETING_VERSION = 0.9.2;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1008,7 +1045,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DA80284C2B24E39D0011390B /* Release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
@@ -1050,7 +1086,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.9.1;
+				MARKETING_VERSION = 0.9.2;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1162,7 +1198,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 0.9;
+				MARKETING_VERSION = 0.9.2;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi.VirtualTableActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -1202,7 +1238,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 0.9;
+				MARKETING_VERSION = 0.9.2;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi.VirtualTableActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -1299,6 +1335,14 @@
 				minimumVersion = 0.1.4;
 			};
 		};
+		DADF72BC2C15D0AD008CF3F2 /* XCRemoteSwiftPackageReference "MapCache" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/merlos/MapCache";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.10.0;
+			};
+		};
 		DAE714E42B2FC0D50059B8A1 /* XCRemoteSwiftPackageReference "WrappingHStack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/dkk/WrappingHStack";
@@ -1348,6 +1392,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;
 			productName = SocketIO;
+		};
+		DADF72BD2C15D0AD008CF3F2 /* MapCache */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DADF72BC2C15D0AD008CF3F2 /* XCRemoteSwiftPackageReference "MapCache" */;
+			productName = MapCache;
 		};
 		DAE714E52B2FC0D50059B8A1 /* WrappingHStack */ = {
 			isa = XCSwiftPackageProductDependency;

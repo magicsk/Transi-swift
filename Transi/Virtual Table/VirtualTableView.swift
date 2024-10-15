@@ -38,6 +38,7 @@ struct VirtualTableView: View {
                         .padding(.horizontal, 24.0)
                         .offset(y: -16.0)
                         .onPress {
+                            print("tapped")
                             self.showStopList = true
                         }
                         .sheet(isPresented: $showStopList) {

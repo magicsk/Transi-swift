@@ -40,8 +40,10 @@ struct StopListView: View {
                             EmptyView().id("top")
                         }
                         Label {
-                            Text(stop.name ?? "Error").font(.headline)
-                            Spacer()
+                            HStack {
+                                Text(stop.name ?? "Error").font(.headline)
+                                Spacer()
+                            }
                         }
                         icon: {
                             StopListIcon(stop.type)
@@ -57,7 +59,7 @@ struct StopListView: View {
                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         }
                     )
-                    .introspect(.list(style: .insetGrouped), on: .iOS(.v16, .v17)) { list in
+                    .introspect(.list(style: .insetGrouped), on: .iOS(.v16, .v17, .v18)) { list in
                         list.contentInset.top = -35.0
                     }
                     .onChange(of: searchText) { searchText in
