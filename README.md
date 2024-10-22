@@ -54,17 +54,16 @@ trip planner and timetables for MHD in Bratislava.
 </p>
 
 ## Features
-
-- Virtual table for every stop in BK
+- Virtual table
 - Detail for each connection
 - Trip planner
 - Maps with all stops
 - Timetables
+- Dynamic island integration
+- Live activities
+- Sharing
 
 ### Planned and in-progress
-- Dynamic island integration
-- Sharing
-- Notifications
 - Apple watch app
 - Macos app
 
