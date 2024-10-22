@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="https://github.com/magicsk/Transi-swift/assets/49265057/80fe0bce-0e58-406e-a386-fae221251a56" alt="MHDTable" width="100"/>
+   <picture>
+     <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/084590ee-b52f-4168-8b69-42c3870a8601" />
+     <img width="200" src="https://github.com/user-attachments/assets/afb8b9d7-e1c3-4513-b08c-6d62522ead14" />
+   </picture>
    <br>
    <br>
   <picture>
