@@ -71,7 +71,7 @@ jobs:
 
     - name: Upload app
       if: steps.app_version.outputs.tag != steps.previous_tag.outputs.tag
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: app-release
         path: Transi.ipa
