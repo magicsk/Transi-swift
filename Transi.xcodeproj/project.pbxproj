@@ -146,6 +146,13 @@
 			remoteGlobalIDString = DAE77C3D2B88DE8C008F3185;
 			remoteInfo = VirtualTableActivityExtension;
 		};
+		DAE77C4F2B88DE8E008F3185 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DAA817BC2974387B00E2FBB7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DAE77C3D2B88DE8C008F3185;
+			remoteInfo = VirtualTableActivityExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -836,6 +843,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		DAE77C502B88DE8E008F3185 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DAE77C3D2B88DE8C008F3185 /* VirtualTableActivityExtension */;
+			targetProxy = DAE77C4F2B88DE8E008F3185 /* PBXContainerItemProxy */;
+		};
 		DAE77C502B88DE8E008F3185 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = DAE77C3D2B88DE8C008F3185 /* VirtualTableActivityExtension */;

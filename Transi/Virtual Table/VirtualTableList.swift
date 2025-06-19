@@ -29,6 +29,19 @@ struct VirtualTableList: View {
                         Spacer()
                         LoadingIndicator()
                         Spacer()
+                        ForEach(virtualTableController.tabs) { tab in
+                            let vehicleInfo = virtualTableController.vehicleInfo.first(where: { $0.issi == tab.busID })
+                            VirtualTableListItem(tab, virtualTableController.currentStop.platformLabels, vehicleInfo).id(tab.id)
+                        }
+                    }
+                    .animation(.default, value: virtualTableController.tabs)
+                    .background(.secondarySystemGroupedBackground)
+                    .cornerRadius(12.0)
+                    Spacer().padding(.bottom, 60.0)
+                }
+                .refreshable {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        virtualTableController.disconnect(reconnect: true)
                     }
                 }
             } else {
