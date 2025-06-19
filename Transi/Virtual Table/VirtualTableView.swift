@@ -22,7 +22,7 @@ struct VirtualTableView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VirtualTableList()
@@ -51,9 +51,11 @@ struct VirtualTableView: View {
             .navigationTitle(Text(virtualTableController.currentStop.name ?? "Loading..."))
             .navigationBarItems(
                 leading: Text(displaySocketStatus ? virtualTableController.socketStatus : ""),
-                trailing: displayClock ? AnyView(TimelineView(.periodic(from: .now, by: 1)) { context in
-                    Text(clockStringFromDate(context.date))
-                }) : AnyView(EmptyView())
+                trailing: displayClock
+                    ? AnyView(
+                        TimelineView(.periodic(from: .now, by: 1)) { context in
+                            Text(clockStringFromDate(context.date))
+                        }) : AnyView(EmptyView())
             )
         }
         .onAppear {

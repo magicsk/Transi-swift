@@ -28,10 +28,20 @@ class VirtualTableController: ObservableObject {
     @Published var lastExpandedTab: Tab? = nil
 
     init() {
-        manager = SocketManager(socketURL: URL(string: GlobalController.iApiBaseUrl)!, config: [.path("/rt/sio2/"), .version(.two), .forceWebsockets(true), .log(false), .reconnectAttempts(-1), .reconnectWaitMax(1)])
+        manager = SocketManager(
+            socketURL: URL(string: GlobalController.iApiBaseUrl)!,
+            config: [
+                .path("/rt/sio2"),
+                .version(.two),
+                .log(false),
+                .reconnects(true),
+                .reconnectAttempts(-1),
+                .reconnectWait(1),
+                .reconnectWaitMax(5),
+            ]
+        )
         socket = manager.defaultSocket
         startListeners()
-//            connect() // TODO: Disable this and change Loading to searching location and add default location that can be stop or actual location
     }
 
     private func startUpdater() {
@@ -48,7 +58,7 @@ class VirtualTableController: ObservableObject {
     }
 
     private func updateTabs() {
-//        print("update")
+        //  print("update")
         for index in tabs.indices {
             let tab = tabs[index]
             let oldTimeRemaining = tab.departureTimeRemaining
@@ -66,13 +76,10 @@ class VirtualTableController: ObservableObject {
     }
 
     func connect() {
-        print("atempting to connect...")
-        disconnect()
-        // print(manager.engine?.connected)
-        if manager.engine?.connected != true {
-            manager.engine?.connect()
+        if socket.status == .notConnected || socket.status == .disconnected {
+            print("Socket not connected, attempting to connect...")
+            socket.connect()
         }
-        socket.connect()
     }
 
     func disconnect(reconnect: Bool = false) {
@@ -112,46 +119,57 @@ class VirtualTableController: ObservableObject {
         }
 
         socket.on("cack") { _, _ in
-//            print("cack")
+            // print("cack")
             self.connected = true
             self.socket.emit("tabStart", [self.currentStop.id, "*"] as [Any])
             self.socket.emit("infoStart")
         }
 
         socket.on("tabs") { data, _ in
-//            print("tabs")
+            guard let platformArray = data.first as? [[String: Any]] else {
+                print("Error: Could not cast incoming data to the expected [[String: Any]] structure.")
+                DispatchQueue.main.async {
+                    self.tabs = []
+                    self.socketStatus = "connected"
+                }
+                return
+            }
+
             var newTabs = [Tab]()
             newTabs.append(contentsOf: self.tabs)
-            if let platforms = data[0] as? [String: Any] {
-                for (_, value) in platforms {
-                    if let json = value as? [String: Any],
-                       let _platform = json["nastupiste"] as? Int,
-                       let _stopId = json["zastavka"] as? Int,
-                       let tabsJson = json["tab"] as? [Any]
-                    {
-                        var tabs = [Tab]()
-                        for object in tabsJson {
-                            if let tabJson = object as? [String: Any] {
-                                if var tab = Tab(json: tabJson, platform: _platform, stopId: _stopId) {
-                                    if tab.id == self.expadndTabId {
-                                        tab.expanded = true
-                                        self.expadndTabId = nil
-                                    }
-                                    tabs.append(tab)
+            for platformObject in platformArray {
+                if let _platform = platformObject["nastupiste"] as? Int,
+                   let _stopId = platformObject["zastavka"] as? Int,
+                   let tabsJson = platformObject["tab"] as? [Any]
+                {
+                    var tabs = [Tab]()
+                    for object in tabsJson {
+                        if let tabJson = object as? [String: Any] {
+                            if var tab = Tab(json: tabJson, platform: _platform, stopId: _stopId) {
+                                if tab.id == self.expadndTabId {
+                                    tab.expanded = true
+                                    self.expadndTabId = nil
                                 }
+                                tabs.append(tab)
                             }
                         }
-                        newTabs.removeAll(where: { $0.platform == _platform || $0.stopId != self.currentStop.id })
-                        newTabs.append(contentsOf: tabs)
                     }
+                    newTabs.removeAll(where: { $0.platform == _platform || $0.stopId != self.currentStop.id })
+                    newTabs.append(contentsOf: tabs)
                 }
             }
-            newTabs.sort(by: { Int($0.departureTimeRaw) == Int($1.departureTimeRaw) ? $0.id < $1.id : Int($0.departureTimeRaw) < Int($1.departureTimeRaw) })
+
+            newTabs.sort {
+                Int($0.departureTimeRaw) == Int($1.departureTimeRaw)
+                    ? $0.id < $1.id : Int($0.departureTimeRaw) < Int($1.departureTimeRaw)
+            }
+
             DispatchQueue.main.async {
                 self.tabs = newTabs
                 self.socketStatus = "connected"
             }
         }
+
         socket.on("vInfo") { data, _ in
             if let vehicleInfoJson = data[0] as? [String: Any] {
                 if let newVehicleInfo = VehicleInfo(json: vehicleInfoJson) {
@@ -182,9 +200,9 @@ class VirtualTableController: ObservableObject {
                 if !switchOnly { switchLocationChanging(false) }
                 currentStop.id = stopId
                 if let currentStop = GlobalController.getStopById(stopId) {
-                    self.socketStatus = "connecting"
-                    self.tabs = [Tab]()
-                    self.socket.emit("tabStart", [currentStop.id, "*"] as [Any])
+                    socketStatus = "connecting"
+                    tabs = [Tab]()
+                    socket.emit("tabStart", [currentStop.id, "*"] as [Any])
                     self.currentStop = currentStop
                 }
             }

@@ -19,7 +19,7 @@ struct MapBottomSheetView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VStack(alignment: .center, spacing: .zero) {

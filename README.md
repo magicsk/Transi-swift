@@ -59,8 +59,8 @@ trip planner and timetables for MHD in Bratislava.
 - Trip planner
 - Maps with all stops
 - Timetables
-- Dynamic island integration
 - Live activities
+- Dynamic island integration
 - Sharing
 
 ### Planned and in-progress

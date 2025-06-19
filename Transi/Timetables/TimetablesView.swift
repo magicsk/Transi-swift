@@ -28,6 +28,7 @@ struct TimetablesView: View {
 
     var body: some View {
         LoadingOverlay($loading, error: $error, errorText: TimetableError.plural) {
+            //TODO: change to NavigationSplitView
             NavigationStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 5.0) {

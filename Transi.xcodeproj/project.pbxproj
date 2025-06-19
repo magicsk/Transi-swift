@@ -63,7 +63,6 @@
 		DA855B772AF68BED00372C31 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA855B762AF68BED00372C31 /* Util.swift */; };
 		DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
-		DA939E0F2BB0664C0014B0C0 /* ExpandableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA939E0E2BB0664C0014B0C0 /* ExpandableView.swift */; };
 		DA96FBC22CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */; };
 		DA96FBC32CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */; };
 		DAA552382B9D28E900C750BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA552372B9D28E900C750BC /* SearchBar.swift */; };
@@ -90,8 +89,6 @@
 		DAB981682B926ED90052376C /* VirtualTableConnectionDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB981672B926ED90052376C /* VirtualTableConnectionDetail.swift */; };
 		DAB981692B926ED90052376C /* VirtualTableConnectionDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB981672B926ED90052376C /* VirtualTableConnectionDetail.swift */; };
 		DAB9816A2B9277D20052376C /* VirtualTableActivityLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE77C462B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift */; };
-		DAB9818B2B93CC410052376C /* Collapsible.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB9818A2B93CC410052376C /* Collapsible.swift */; };
-		DAB9818C2B93CC410052376C /* Collapsible.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB9818A2B93CC410052376C /* Collapsible.swift */; };
 		DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE4082ACC23DA00D66159 /* LineText.swift */; };
 		DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABAE40A2ACC2E5200D66159 /* Line.swift */; };
 		DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03212A0AF3BF00FD2C4B /* Binding.swift */; };
@@ -205,7 +202,6 @@
 		DA855B762AF68BED00372C31 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		DA89EDE529BA981700C32F24 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListIcon.swift; sourceTree = "<group>"; };
-		DA939E0E2BB0664C0014B0C0 /* ExpandableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandableView.swift; sourceTree = "<group>"; };
 		DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveDynamicView.swift; sourceTree = "<group>"; };
 		DAA552372B9D28E900C750BC /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
@@ -227,7 +223,6 @@
 		DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableView.swift; sourceTree = "<group>"; };
 		DAB67B982B363956001DC2E3 /* LoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingOverlay.swift; sourceTree = "<group>"; };
 		DAB981672B926ED90052376C /* VirtualTableConnectionDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableConnectionDetail.swift; sourceTree = "<group>"; };
-		DAB9818A2B93CC410052376C /* Collapsible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collapsible.swift; sourceTree = "<group>"; };
 		DABAE4082ACC23DA00D66159 /* LineText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineText.swift; sourceTree = "<group>"; };
 		DABAE40A2ACC2E5200D66159 /* Line.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Line.swift; sourceTree = "<group>"; };
 		DABD031B2A097ABE00FD2C4B /* Transi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Transi.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -368,7 +363,6 @@
 				DABAE40A2ACC2E5200D66159 /* Line.swift */,
 				DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */,
 				DA3F83DB2B1E7CB20006F41E /* Errors.swift */,
-				DAB0094F2B2E7383009DF2CD /* Stored.swift */,
 				DA855B762AF68BED00372C31 /* Util.swift */,
 			);
 			path = Util;
@@ -442,6 +436,7 @@
 				DAE714E12B2FAF650059B8A1 /* Timetables.swift */,
 				DABD03272A0AF7B800FD2C4B /* Trip.swift */,
 				DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */,
+				DAB0094F2B2E7383009DF2CD /* Stored.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -479,9 +474,7 @@
 				DA4DDA6C2B8D5C0F00E8DFCA /* RemainingTime.swift */,
 				DA737DE52B90D20E0093FAC6 /* RemoteImage.swift */,
 				DAB981672B926ED90052376C /* VirtualTableConnectionDetail.swift */,
-				DAB9818A2B93CC410052376C /* Collapsible.swift */,
 				DAA552372B9D28E900C750BC /* SearchBar.swift */,
-				DA939E0E2BB0664C0014B0C0 /* ExpandableView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -770,9 +763,7 @@
 				DAD16F302C1B085700E620C4 /* VirtualTableActivityLiveView.swift in Sources */,
 				DAB67B992B363956001DC2E3 /* LoadingOverlay.swift in Sources */,
 				DA7887F32B79236400BFFB4F /* VirtualTableListItem.swift in Sources */,
-				DA939E0F2BB0664C0014B0C0 /* ExpandableView.swift in Sources */,
 				DA1C5A182CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */,
-				DAB9818B2B93CC410052376C /* Collapsible.swift in Sources */,
 				DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
 				DA7887F02B79235800BFFB4F /* VirtualTableController.swift in Sources */,
@@ -827,7 +818,6 @@
 				DA737DE12B8FB1A50093FAC6 /* StopIcon.swift in Sources */,
 				DA4DDA6B2B8D594600E8DFCA /* View.swift in Sources */,
 				DA4DDA5B2B8BF86100E8DFCA /* VirtualTableActivityBundle.swift in Sources */,
-				DAB9818C2B93CC410052376C /* Collapsible.swift in Sources */,
 				DA4DDA6E2B8D5C0F00E8DFCA /* RemainingTime.swift in Sources */,
 				DA1F2E6F2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift in Sources */,
 			);
@@ -994,7 +984,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
-				DEVELOPMENT_TEAM = SF24X772VL;
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1037,7 +1027,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1054,7 +1044,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
-				DEVELOPMENT_TEAM = SF24X772VL;
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1096,7 +1086,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -1182,7 +1172,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SF24X772VL;
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = VirtualTableActivity/Info.plist;
@@ -1222,7 +1212,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SF24X772VL;
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = VirtualTableActivity/Info.plist;

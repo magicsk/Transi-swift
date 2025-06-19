@@ -22,7 +22,7 @@ struct TripPlannerView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VStack(spacing: .zero) {
