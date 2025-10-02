@@ -64,11 +64,13 @@ struct VirtualTableList: View {
     .onChange(of: [virtualTableController.socketStatus, String(virtualTableController.tabs.count)])
     { _ in
       if virtualTableController.tabs.isEmpty && virtualTableController.socketStatus == "connected" {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
           if virtualTableController.tabs.isEmpty
             && virtualTableController.socketStatus == "connected"
           {
-            displayNoDeparture = true
+            displayNoDeparture = false
+          } else {
+              displayNoDeparture = false
           }
         }
       } else {

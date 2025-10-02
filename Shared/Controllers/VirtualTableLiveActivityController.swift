@@ -16,7 +16,7 @@ enum LiveActivityManagerError: Error {
 
 struct LiveActivityTab {
     let id: String
-    let tabId: Int
+    let tabId: String
     let platform: Int
     let stopId: Int
     var controller: SimpleVirtualTableController?

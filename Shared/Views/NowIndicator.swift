@@ -15,7 +15,7 @@ struct NowIndicator: View {
     init(_ justStroke: Bool = false) {
         self.justStroke = justStroke
     }
-    
+
     var body: some View {
         HStack(spacing: 5.0) {
             Circle()
@@ -24,30 +24,32 @@ struct NowIndicator: View {
                 }
                 .opacity(firstOpacity)
                 .foregroundStyle(Color.label)
-                .animation(
-                    .easeInOut(duration: 1).repeatForever(),
-                    value: firstOpacity
-                )
                 .frame(width: 15.0, height: 15.0)
-                .onAppear(perform: { firstOpacity = 1 })
             Circle()
                 .ifCondition(justStroke) { circle in
                     circle.stroke(Color.label, lineWidth: 1.5)
                 }
                 .opacity(secondOpacity)
                 .foregroundStyle(Color.label)
-                .animation(
-                    .easeInOut(duration: 1).repeatForever(),
-                    value: secondOpacity
-                )
                 .frame(width: 15.0, height: 15.0)
-                .onAppear(perform: { secondOpacity = 0 })
-        }.padding(.horizontal, 2.5)
+        }
+        .padding(.horizontal, 2.5)
+        .onAppear(perform: {
+            firstOpacity = 0
+            secondOpacity = 1
+            let baseAnimation = Animation.easeInOut(duration: 1)
+            let repeated = baseAnimation.repeatForever(autoreverses: true)
+
+            withAnimation(repeated) {
+                firstOpacity = 1
+                secondOpacity = 0
+            }
+        })
     }
 }
 
 #Preview {
-    VStack(spacing: 35.0){
+    VStack(spacing: 35.0) {
         NowIndicator()
         NowIndicator(true)
     }

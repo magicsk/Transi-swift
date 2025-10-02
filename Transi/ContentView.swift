@@ -58,7 +58,7 @@ struct ContentView: View {
                             if let stopId = Int(url.pathComponents[1]) {
                                 print(url.pathComponents.endIndex)
                                 if url.pathComponents.endIndex >= 3 {
-                                    GlobalController.virtualTable.changeStop(stopId, expandTab: Int(url.pathComponents[2]))
+                                    GlobalController.virtualTable.changeStop(stopId, expandTab: url.pathComponents[2])
                                 } else {
                                     GlobalController.virtualTable.changeStop(stopId)
                                 }

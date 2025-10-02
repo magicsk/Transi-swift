@@ -7,7 +7,7 @@
 
 import Foundation
 
-let USER_AGENT = "Dalvik/2.1.0 (Linux; U; Android 12; Pixel 6)"
+let USER_AGENT = "ProdProd/204 CFNetwork/3826.600.41 Darwin/24.6.0"
 
 func fetchData<T: Decodable>(request: URLRequest, type: T.Type, completion: @escaping (Result<T, Error>) -> ()) {
     URLSession.shared.dataTask(with: request) { data, _, error in
@@ -54,6 +54,7 @@ func fetchBApiPost<T: Decodable>(endpoint: String, jsonBody: Data, type: T.Type,
 }
 
 func fetchBApi<T: Decodable>(endpoint: String, type: T.Type, completion: @escaping (Result<T, Error>) -> ()) {
+    print(endpoint)
     var request = URLRequest(url: URL(string: "\(GlobalController.bApiBaseUrl)\(endpoint)")!)
     request.setValue(USER_AGENT, forHTTPHeaderField: "User-Agent")
     request.setValue(GlobalController.bApiKey, forHTTPHeaderField: "x-api-key")

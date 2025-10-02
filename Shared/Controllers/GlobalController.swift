@@ -48,9 +48,7 @@ struct GlobalController {
                 }
             case .active:
                 locationProvider.startUpdatingLocation()
-                if virtualTable.socketStatus != "connected" {
-                    virtualTable.connect()
-                }
+                virtualTable.connect()
             default:
                 break
         }

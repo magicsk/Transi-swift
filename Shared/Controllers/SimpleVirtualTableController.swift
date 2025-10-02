@@ -18,7 +18,8 @@ class SimpleVirtualTableController: ObservableObject {
             .version(.two), .forceWebsockets(true),
             .log(false),
             .reconnectAttempts(-1),
-            .reconnectWaitMax(1)
+            .reconnectWaitMax(1),
+            .reconnectWait(1),
         ]
     )
     private var socket: SocketIOClient
@@ -124,40 +125,46 @@ class SimpleVirtualTableController: ObservableObject {
         }
 
         socket.on("tabs") { data, _ in
+            guard let platformArray = data.first as? [[String: Any]] else {
+                print("Error: Could not cast incoming data to the expected [[String: Any]] structure.")
+                DispatchQueue.main.async {
+                    self.tabs = [Tab]()
+                    self.socketStatus = "error"
+                }
+                return
+            }
+            
             var newTabs = [Tab]()
             newTabs.append(contentsOf: self.tabs)
-            if let platforms = data[0] as? [String: Any] {
-                for (_, value) in platforms {
-                    if let json = value as? [String: Any],
-                       let _platform = json["nastupiste"] as? Int,
-                       let _stopId = json["zastavka"] as? Int,
-                       let tabsJson = json["tab"] as? [Any]
-                    {
-                        var tabs = [Tab]()
-                        for object in tabsJson {
-                            if let tabJson = object as? [String: Any] {
-                                if let tab = Tab(json: tabJson, platform: _platform, stopId: _stopId) {
-                                    if VirtualTableLiveActivityController.listAllTabActivities().contains(where: { la in la.tabId == tab.id }) {
-                                        tabs.append(tab)
-                                    }
+            for platformObject in platformArray {
+                if let _platform = platformObject["nastupiste"] as? Int,
+                   let _stopId = platformObject["zastavka"] as? Int,
+                   let tabsJson = platformObject["tab"] as? [Any]
+                {
+                    var tabs = [Tab]()
+                    for object in tabsJson {
+                        if let tabJson = object as? [String: Any] {
+                            if let tab = Tab(json: tabJson, platform: _platform, stopId: _stopId) {
+                                if VirtualTableLiveActivityController.listAllTabActivities().contains(where: { la in la.tabId == tab.id }) {
+                                    tabs.append(tab)
                                 }
                             }
                         }
-                        let liveActivities = VirtualTableLiveActivityController.listAllTabActivities().filter { la in la.platform == _platform }
-                        for liveActivity in liveActivities {
-                            if let tab = tabs.first(where: { t in t.id == liveActivity.tabId }) {
-                                Task { await VirtualTableLiveActivityController.updateActivity(
-                                    id: liveActivity.id,
-                                    tab: tab,
-                                    vehicleInfo: self.vehicleInfo.first(where: { $0.issi == tab.busID })
-                                ) }
-                            } else {
-                                Task { await VirtualTableLiveActivityController.endActivity(liveActivity.id) }
-                            }
-                        }
-                        newTabs.removeAll(where: { $0.platform == _platform || $0.stopId != self.currentStop })
-                        newTabs.append(contentsOf: tabs)
                     }
+                    let liveActivities = VirtualTableLiveActivityController.listAllTabActivities().filter { la in la.platform == _platform }
+                    for liveActivity in liveActivities {
+                        if let tab = tabs.first(where: { t in t.id == liveActivity.tabId }) {
+                            Task { await VirtualTableLiveActivityController.updateActivity(
+                                id: liveActivity.id,
+                                tab: tab,
+                                vehicleInfo: self.vehicleInfo.first(where: { $0.issi == tab.busID })
+                            ) }
+                        } else {
+                            Task { await VirtualTableLiveActivityController.endActivity(liveActivity.id) }
+                        }
+                    }
+                    newTabs.removeAll(where: { $0.platform == _platform || $0.stopId != self.currentStop })
+                    newTabs.append(contentsOf: tabs)
                 }
             }
             self.tabs = newTabs
