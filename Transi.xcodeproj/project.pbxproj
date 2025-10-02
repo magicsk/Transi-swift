@@ -16,6 +16,9 @@
 		DA1F2E6F2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */; };
 		DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7802B02951F00BC8428 /* SwiftUIX */; };
 		DA23A7862B02957700BC8428 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7852B02957700BC8428 /* SocketIO */; };
+		DA3059502E8EDF220055A692 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA30594F2E8EDF220055A692 /* AppIcon.icon */; };
+		DA3059512E8EDF220055A692 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA30594F2E8EDF220055A692 /* AppIcon.icon */; };
+		DA3059522E8EDF220055A692 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA30594F2E8EDF220055A692 /* AppIcon.icon */; };
 		DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DB2B1E7CB20006F41E /* Errors.swift */; };
 		DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */; };
 		DA467DEB2BE9156F00057872 /* AppStateProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA467DEA2BE9156F00057872 /* AppStateProvider.swift */; };
@@ -179,6 +182,7 @@
 		DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveViewLarge.swift; sourceTree = "<group>"; };
 		DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityDynamicIsland.swift; sourceTree = "<group>"; };
 		DA269E0F298960EF00F42107 /* VirtualTableList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableList.swift; sourceTree = "<group>"; };
+		DA30594F2E8EDF220055A692 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableDetail.swift; sourceTree = "<group>"; };
 		DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableListItem.swift; sourceTree = "<group>"; };
 		DA3F83DB2B1E7CB20006F41E /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
@@ -513,6 +517,7 @@
 				DAA817F629743B2A00E2FBB7 /* Models */,
 				DAA817CB2974387C00E2FBB7 /* Assets.xcassets */,
 				DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */,
+				DA30594F2E8EDF220055A692 /* AppIcon.icon */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -672,6 +677,7 @@
 				DA737DEF2B9116840093FAC6 /* Vehicles.xcassets in Resources */,
 				DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */,
 				DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */,
+				DA3059502E8EDF220055A692 /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -680,6 +686,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAE714DE2B2FAACF0059B8A1 /* swift.yml in Resources */,
+				DA3059522E8EDF220055A692 /* AppIcon.icon in Resources */,
 				DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -689,6 +696,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAF4A9242BF1058600A46591 /* Vehicles.xcassets in Resources */,
+				DA3059512E8EDF220055A692 /* AppIcon.icon in Resources */,
 				DA737DEC2B90E2D40093FAC6 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -977,14 +985,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Transi/Transi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1037,14 +1045,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Transi/Transi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1172,7 +1180,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = VirtualTableActivity/Info.plist;
@@ -1212,7 +1220,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 8G65S9KX9U;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = VirtualTableActivity/Info.plist;

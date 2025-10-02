@@ -1,0 +1,88 @@
+{
+  "fill" : "automatic",
+  "groups" : [
+    {
+      "blend-mode" : "normal",
+      "blur-material" : null,
+      "layers" : [
+        {
+          "fill-specializations" : [
+            {
+              "value" : {
+                "linear-gradient" : [
+                  "display-p3:0.94510,0.22353,0.32549,1.00000",
+                  "srgb:0.66275,0.12157,0.07451,1.00000"
+                ],
+                "orientation" : {
+                  "start" : {
+                    "x" : 0.5,
+                    "y" : 0
+                  },
+                  "stop" : {
+                    "x" : 0.5,
+                    "y" : 0.7
+                  }
+                }
+              }
+            },
+            {
+              "appearance" : "tinted",
+              "value" : {
+                "linear-gradient" : [
+                  "gray:0.90340,1.00000",
+                  "gray:0.30216,1.00000"
+                ],
+                "orientation" : {
+                  "start" : {
+                    "x" : 0.43342330820658176,
+                    "y" : -0.09689169063477505
+                  },
+                  "stop" : {
+                    "x" : 0.685909859844398,
+                    "y" : 0.9526649623137864
+                  }
+                }
+              }
+            }
+          ],
+          "image-name" : "Transi_logo.svg",
+          "name" : "Transi"
+        }
+      ],
+      "lighting" : "combined",
+      "position" : {
+        "scale" : 1.04,
+        "translation-in-points" : [
+          0,
+          0
+        ]
+      },
+      "shadow-specializations" : [
+        {
+          "value" : {
+            "kind" : "layer-color",
+            "opacity" : 0.58
+          }
+        },
+        {
+          "appearance" : "dark",
+          "value" : {
+            "kind" : "neutral",
+            "opacity" : 0.45
+          }
+        }
+      ],
+      "specular" : true,
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.26
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
