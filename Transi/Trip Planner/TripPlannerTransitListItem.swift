@@ -17,7 +17,9 @@ struct TripPlannerTransitListItem: View {
     var body: some View {
         Label {
             VStack(alignment: .leading) {
-                Text(part.tripHeadsign ?? "Error").font(.headline).lineLimit(1)
+                Text(part.tripHeadsign ?? "Error")
+                    .font(.headline).lineLimit(1)
+                    .padding(.leading, 20.0)
                 VStack(alignment: .leading) {
                     HStack {
                         Text(timeStringFromUtc(part.startDeparture)).frame(width: 47.5, alignment: .leading)
@@ -27,7 +29,7 @@ struct TripPlannerTransitListItem: View {
                         Text(timeStringFromUtc(part.endArrival)).frame(width: 47.5, alignment: .leading)
                         Text(part.endStopName ?? "Error")
                     }
-                }.padding(.leading, 2.5)
+                }.padding(.leading, 25.5)
             }
         }
         icon: {
@@ -36,7 +38,7 @@ struct TripPlannerTransitListItem: View {
                 Rectangle()
                     .frame(width: 2.5, height: 40.0)
                     .foregroundColor(colorFromLineNum(part.routeShortName ?? "Error")!)
-            }
+            }.padding(.leading, 20.0)
         }
 //        .gesture(DragGesture(minimumDistance: 10, coordinateSpace: .global)
 //            .onChanged { value in
@@ -54,8 +56,8 @@ struct TripPlannerTransitListItem: View {
     }
 }
 
- struct TripPlannerTransitListItem_Previews: PreviewProvider {
-    static var previews: some View {
-        TripPlannerTransitListItem(Part.example)
+#Preview {
+//        TripPlannerTransitListItem(Part.example)
+    TripPlannerList(Trip(journey: [Journey.example]), false, false) { _ in
     }
- }
+}

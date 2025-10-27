@@ -20,14 +20,14 @@ struct TripPlannerWalkListItem: View {
             Image(systemName: "figure.walk")
                 .font(.system(size: 25.0))
                 .foregroundColor(.accent)
-                .frame(minWidth: 36.0)
+                .frame(minWidth: 46.0)
             Text("\(timeDiffFromUtc(part.startDeparture, part.endArrival)) min to \(sameStop ? "platform \(part.endStopCode ?? "X")" : part.endStopName ?? "Error")")
+                .padding(.leading, 7.0)
         }.padding(.vertical, 3.0)
     }
 }
 
- struct TripPlannerWalkListItem_Previews: PreviewProvider {
-    static var previews: some View {
-        TripPlannerWalkListItem(Part.example)
+#Preview {
+    TripPlannerList(Trip(journey: [Journey.example]), false, false) { _ in
     }
- }
+}

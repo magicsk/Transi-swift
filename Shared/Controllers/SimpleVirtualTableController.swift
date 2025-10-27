@@ -28,7 +28,7 @@ class SimpleVirtualTableController: ObservableObject {
     private var updaterSubscription: AnyCancellable?
     private var reconnect: Bool = false
 
-    var tabs = [Tab]()
+    var connections = [Connection]()
     var vehicleInfo = [VehicleInfo]()
     var socketStatus = "unknown"
     var currentStop: Int
@@ -49,7 +49,7 @@ class SimpleVirtualTableController: ObservableObject {
     private func startUpdater() {
         updater = Timer.publish(every: 10, on: .current, in: .common)
         updaterSubscription = updater?.autoconnect().sink(receiveValue: { [weak self] _ in
-            self?.updateTabs()
+            self?.updateConnections()
         })
     }
 
@@ -59,20 +59,28 @@ class SimpleVirtualTableController: ObservableObject {
         updater = nil
     }
 
-    private func updateTabs() {
+    private func updateConnections() {
         let liveActivities = VirtualTableLiveActivityController.listAllTabActivities()
         for liveActivity in liveActivities {
-            if var tab = tabs.first(where: { t in t.id == liveActivity.tabId && t.stopId == liveActivity.stopId }) {
-                let oldDepartureTime = tab.departureTimeRemaining
-                tab.departureTimeRemaining = getDepartureTimeRemainingText(tab.departureTime, tab.departureTimeRaw, tab.type)
-                tab.departureTimeRemainingShortened = getShortDepartureTimeRemainingText(tab.departureTime, tab.departureTimeRaw, tab.type)
-                let updatedTab = tab
-                if oldDepartureTime != tab.departureTimeRemaining {
-                    Task { await VirtualTableLiveActivityController.updateActivity(
-                        id: liveActivity.id,
-                        tab: updatedTab,
-                        vehicleInfo: self.vehicleInfo.first(where: { $0.issi == updatedTab.busID })
-                    ) }
+            if var connection = connections.first(where: { t in
+                t.id == liveActivity.connectionId && t.stopId == liveActivity.stopId
+            }) {
+                let oldDepartureTime = connection.departureTimeRemaining
+                connection.departureTimeRemaining = getDepartureTimeRemainingText(
+                    connection.departureTime, connection.departureTimeRaw, connection.type
+                )
+                connection.departureTimeRemainingShortened = getShortDepartureTimeRemainingText(
+                    connection.departureTime, connection.departureTimeRaw, connection.type
+                )
+                let updatedConnection = connection
+                if oldDepartureTime != connection.departureTimeRemaining {
+                    Task {
+                        await VirtualTableLiveActivityController.updateActivity(
+                            id: liveActivity.id,
+                            connection: updatedConnection,
+                            vehicleInfo: self.vehicleInfo.first(where: { $0.issi == updatedConnection.busID })
+                        )
+                    }
                 }
             }
         }
@@ -107,7 +115,7 @@ class SimpleVirtualTableController: ObservableObject {
         }
 
         socket.on(clientEvent: .disconnect) { _, _ in
-            self.tabs = [Tab]()
+            self.connections = [Connection]()
             self.vehicleInfo = [VehicleInfo]()
             self.connected = false
             if self.reconnect {
@@ -128,46 +136,55 @@ class SimpleVirtualTableController: ObservableObject {
             guard let platformArray = data.first as? [[String: Any]] else {
                 print("Error: Could not cast incoming data to the expected [[String: Any]] structure.")
                 DispatchQueue.main.async {
-                    self.tabs = [Tab]()
+                    self.connections = [Connection]()
                     self.socketStatus = "error"
                 }
                 return
             }
-            
-            var newTabs = [Tab]()
-            newTabs.append(contentsOf: self.tabs)
+
+            var newConnections = [Connection]()
+            newConnections.append(contentsOf: self.connections)
             for platformObject in platformArray {
                 if let _platform = platformObject["nastupiste"] as? Int,
                    let _stopId = platformObject["zastavka"] as? Int,
-                   let tabsJson = platformObject["tab"] as? [Any]
+                   let connectionsJson = platformObject["tab"] as? [Any]
                 {
-                    var tabs = [Tab]()
-                    for object in tabsJson {
+                    var connections = [Connection]()
+                    for object in connectionsJson {
                         if let tabJson = object as? [String: Any] {
-                            if let tab = Tab(json: tabJson, platform: _platform, stopId: _stopId) {
-                                if VirtualTableLiveActivityController.listAllTabActivities().contains(where: { la in la.tabId == tab.id }) {
-                                    tabs.append(tab)
+                            if let connection = Connection(json: tabJson, platform: _platform, stopId: _stopId) {
+                                if VirtualTableLiveActivityController.listAllTabActivities().contains(where: { la in
+                                    la.connectionId == connection.id
+                                }) {
+                                    connections.append(connection)
                                 }
                             }
                         }
                     }
-                    let liveActivities = VirtualTableLiveActivityController.listAllTabActivities().filter { la in la.platform == _platform }
+                    let liveActivities = VirtualTableLiveActivityController.listAllTabActivities().filter {
+                        la in la.platform == _platform
+                    }
                     for liveActivity in liveActivities {
-                        if let tab = tabs.first(where: { t in t.id == liveActivity.tabId }) {
-                            Task { await VirtualTableLiveActivityController.updateActivity(
-                                id: liveActivity.id,
-                                tab: tab,
-                                vehicleInfo: self.vehicleInfo.first(where: { $0.issi == tab.busID })
-                            ) }
+                        if let connection = connections.first(where: { t in t.id == liveActivity.connectionId })
+                        {
+                            Task {
+                                await VirtualTableLiveActivityController.updateActivity(
+                                    id: liveActivity.id,
+                                    connection: connection,
+                                    vehicleInfo: self.vehicleInfo.first(where: { $0.issi == connection.busID })
+                                )
+                            }
                         } else {
                             Task { await VirtualTableLiveActivityController.endActivity(liveActivity.id) }
                         }
                     }
-                    newTabs.removeAll(where: { $0.platform == _platform || $0.stopId != self.currentStop })
-                    newTabs.append(contentsOf: tabs)
+                    newConnections.removeAll(where: {
+                        $0.platform == _platform || $0.stopId != self.currentStop
+                    })
+                    newConnections.append(contentsOf: connections)
                 }
             }
-            self.tabs = newTabs
+            self.connections = newConnections
             self.socketStatus = "connected"
         }
         socket.on("vInfo") { data, _ in

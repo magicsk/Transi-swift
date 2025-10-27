@@ -5,117 +5,123 @@
 //  Created by magic_sk on 05/11/2022.
 //
 
+import Combine
 import SwiftUI
-import SwiftUIIntrospect
-import SwiftUIX
+import UIKit
 
-struct ContentView: View {
-    @StateObject var stopsListProvider = GlobalController.stopsListProvider
+struct ContentView: UIViewControllerRepresentable {
+    @Binding var selectedIndex: Int
 
-    @State private var selection = 2
-    @State private var tabView: UITabBarController? = nil
-    private let tabBarAppearance = UITabBarAppearance()
-
-    init() {
-        tabBarAppearance.configureWithTransparentBackground()
-    }
-
-    var body: some View {
-        ZStack(alignment: .bottom) {
-            TabView(selection: $selection) {
-                TripPlannerView(updateTabBarApperance)
-                    .tabItem {
-                        Image(systemName: "tram")
-                        Text("Trip planner")
-                    }.tag(1)
-                VirtualTableView(updateTabBarApperance)
-                    .tabItem {
-                        VStack{
-                            Image(systemName: "clock.arrow.2.circlepath")
-                            Text("Virtual Table")
-                        }
-                    }.tag(2)
-                TimetablesView(updateTabBarApperance)
-                    .tabItem {
-                        Image(systemName: "calendar")
-                        Text("Timetables")
-                    }.tag(3)
-                MapKitView(updateTabBarApperance, changeTab)
-                    .ignoresSafeArea()
-                    .tabItem {
-                        Image(systemName: "map")
-                        Text("Map")
-                    }.tag(4)
-            }
-            .onOpenURL { url in
-                print(url)
-                switch url.host {
-                    case "trip":
-                        selection = 1
-                    case "table":
-                        selection = 2
-                        if url.pathComponents.endIndex >= 2 {
-                            if let stopId = Int(url.pathComponents[1]) {
-                                print(url.pathComponents.endIndex)
-                                if url.pathComponents.endIndex >= 3 {
-                                    GlobalController.virtualTable.changeStop(stopId, expandTab: url.pathComponents[2])
-                                } else {
-                                    GlobalController.virtualTable.changeStop(stopId)
-                                }
-                            }
-                        }
-                    case "timetable":
-                        selection = 3
-                    case "map":
-                        selection = 4
-                        GlobalController.appState.openedURL = url
-                    default:
-                        // Alert unsupported url
-                        break
-                }
-            }
-            .introspect(.tabView, on: .iOS(.v16, .v17, .v18)) { tv in
-                DispatchQueue.main.async {
-                    tabView = tv
-                }
-            }
-            LoadingView($stopsListProvider.fetchLoading)
-        }
-        .alert(isPresented: $stopsListProvider.fetchError, error: StopsListError.basic) { _ in
-            Button("Retry") {
-                stopsListProvider.fetchStops()
-            }
-            if stopsListProvider.cachedStops != nil {
-                Button("Use cached") {
-                    stopsListProvider.fetchLoading = false
-                    GlobalController.locationProvider.startUpdatingLocation()
-                }
-            }
-        } message: { error in
-            if let message = error.failureReason {
-                Text(message)
-            }
-        }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
     }
 
     func changeTab(_ tag: Int) {
-        selection = tag
+        selectedIndex = tag
     }
 
-    func updateTabBarApperance() {
-        DispatchQueue.main.async {
-            if selection == 4 {
+    func makeUIViewController(context: Context) -> UITabBarController {
+        let tabBarController = UITabBarController()
+
+        let plannerVC = UIHostingController(rootView: TripPlannerView())
+        plannerVC.tabBarItem = UITabBarItem(title: "Planner", image: UIImage(systemName: "tram"), tag: 0)
+
+        let tableVC = UIHostingController(rootView: VirtualTableView())
+        tableVC.tabBarItem = UITabBarItem(title: "Table", image: UIImage(systemName: "clock.arrow.2.circlepath"), tag: 1)
+
+        let timetablesVC = UIHostingController(rootView: TimetablesView())
+        timetablesVC.tabBarItem = UITabBarItem(title: "Timetables", image: UIImage(systemName: "calendar"), tag: 2)
+
+        let mapVC = UIHostingController(rootView: MapKitView(changeTab).ignoresSafeArea())
+        mapVC.tabBarItem = UITabBarItem(title: "Map", image: UIImage(systemName: "map"), tag: 3)
+
+        let searchVC = HybridSearchViewController(coordinator: context.coordinator)
+        searchVC.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 4)
+
+        tabBarController.delegate = context.coordinator
+        tabBarController.viewControllers = [plannerVC, tableVC, timetablesVC, mapVC, searchVC]
+
+        return tabBarController
+    }
+
+    func updateUIViewController(_ uiViewController: UITabBarController, context _: Context) {
+        uiViewController.selectedIndex = selectedIndex
+        if #available(iOS 26.0, *) {} else {
+            let tabBarAppearance = UITabBarAppearance()
+            if uiViewController.selectedIndex == 3 {
                 tabBarAppearance.backgroundEffect = UIBlurEffect(style: .systemMaterial)
             } else {
                 tabBarAppearance.configureWithTransparentBackground()
             }
-            tabView?.tabBar.scrollEdgeAppearance = tabBarAppearance
+            uiViewController.tabBar.scrollEdgeAppearance = tabBarAppearance
+        }
+
+        if let searchVC = uiViewController.viewControllers?[selectedIndex] as? HybridSearchViewController {
+            DispatchQueue.main.async {
+                searchVC.searchController?.searchBar.becomeFirstResponder()
+            }
+        }
+    }
+
+    class Coordinator: NSObject, ObservableObject, UISearchResultsUpdating, UITabBarControllerDelegate {
+        @Published var searchText = ""
+        var parent: ContentView
+
+        init(_ parent: ContentView) {
+            self.parent = parent
+        }
+
+        func updateSearchResults(for searchController: UISearchController) {
+            searchText = searchController.searchBar.text ?? ""
+        }
+
+        func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+            guard let newIndex = tabBarController.viewControllers?.firstIndex(of: viewController) else {
+                return true
+            }
+
+            if newIndex != tabBarController.selectedIndex {
+                parent.selectedIndex = newIndex
+                return false
+            }
+
+            return true
         }
     }
 }
 
-// struct ContentView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ContentView()
-//    }
-// }
+class HybridSearchViewController: UINavigationController, UISearchBarDelegate {
+    private let coordinator: ContentView.Coordinator
+    private let hostingController: UIHostingController<StopListView>!
+    var searchController: UISearchController!
+
+    init(coordinator: ContentView.Coordinator) {
+        self.coordinator = coordinator
+        hostingController = UIHostingController(rootView: StopListView(coordinator: coordinator))
+
+        super.init(rootViewController: hostingController)
+    }
+
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = coordinator
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.delegate = self
+        searchController.searchBar.placeholder = "Search"
+
+        hostingController.navigationItem.title = "Stops"
+        hostingController.navigationItem.searchController = searchController
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        hostingController.navigationController?.navigationBar.prefersLargeTitles = true
+    }
+}

@@ -16,7 +16,7 @@ enum LiveActivityManagerError: Error {
 
 struct LiveActivityTab {
     let id: String
-    let tabId: String
+    let connectionId: String
     let platform: Int
     let stopId: Int
     var controller: SimpleVirtualTableController?
@@ -26,10 +26,10 @@ enum VirtualTableLiveActivityController {
     static var liveActivities = [LiveActivityTab]()
 
     @discardableResult
-    static func startActivity(_ tab: Tab, _ vehicleInfo: VehicleInfo?) throws -> String {
+    static func startActivity(_ connection: Connection, _ vehicleInfo: VehicleInfo?) throws -> String {
         GlobalController.startBackgroundMode()
         var activity: Activity<VirtualTableActivityAttributes>?
-        let initialState = VirtualTableActivityAttributes.ContentState(tab: tab, vehicleInfo: vehicleInfo)
+        let initialState = VirtualTableActivityAttributes.ContentState(connection: connection, vehicleInfo: vehicleInfo)
         do {
             activity = try Activity.request(
                 attributes: VirtualTableActivityAttributes(),
@@ -38,15 +38,15 @@ enum VirtualTableLiveActivityController {
             )
             guard let id = activity?.id else { throw LiveActivityManagerError.failedToGetId }
             let reuseController = liveActivities.first(where: { la in
-                la.stopId == tab.stopId
+                la.stopId == connection.stopId
             })
             liveActivities.append(
                 LiveActivityTab(
                     id: id,
-                    tabId: tab.id,
-                    platform: tab.platform,
-                    stopId: tab.stopId,
-                    controller: reuseController?.controller ?? SimpleVirtualTableController(stop: tab.stopId)
+                    connectionId: connection.id,
+                    platform: connection.platform,
+                    stopId: connection.stopId,
+                    controller: reuseController?.controller ?? SimpleVirtualTableController(stop: connection.stopId)
                 )
             )
             return id
@@ -61,17 +61,17 @@ enum VirtualTableLiveActivityController {
         if !activities.isEmpty {
             GlobalController.startBackgroundMode()
             activities.forEach { activity in
-                let tab = activity.contentState.tab
+                let connection = activity.contentState.connection
                 let reuseController = liveActivities.first(where: { la in
-                    la.stopId == tab.stopId
+                    la.stopId == connection.stopId
                 })
                 liveActivities.append(
                     LiveActivityTab(
                         id: activity.id,
-                        tabId: tab.id,
-                        platform: tab.platform,
-                        stopId: tab.stopId,
-                        controller: reuseController?.controller ?? SimpleVirtualTableController(stop: tab.stopId)
+                        connectionId: connection.id,
+                        platform: connection.platform,
+                        stopId: connection.stopId,
+                        controller: reuseController?.controller ?? SimpleVirtualTableController(stop: connection.stopId)
                     )
                 )
             }
@@ -113,25 +113,25 @@ enum VirtualTableLiveActivityController {
         }
     }
 
-    static func updateActivity(id: String, tab: Tab, vehicleInfo: VehicleInfo?) async {
+    static func updateActivity(id: String, connection: Connection, vehicleInfo: VehicleInfo?) async {
         let updatedContentState =
             VirtualTableActivityAttributes.ContentState(
-                tab: tab,
+                connection: connection,
                 vehicleInfo: vehicleInfo
             )
         let activity = Activity<VirtualTableActivityAttributes>.activities.first(where: { $0.id == id })
-        let oldTab = activity?.contentState.tab
+        let oldConnection = activity?.contentState.connection
 
         var alertConfig: AlertConfiguration?
-        let departureTimeRemainingRaw = Int(tab.departureTimeRaw - Date().timeIntervalSince1970)
+        let departureTimeRemainingRaw = Int(connection.departureTimeRaw - Date().timeIntervalSince1970)
         let liveActivitySounds = UserDefaults.standard.bool(forKey: Stored.liveActivitiesSounds)
 
-        let isNew = oldTab?.lastStopName != tab.lastStopName || oldTab?.delayText != tab.delayText || oldTab?.departureTimeRemaining != tab.departureTimeRemaining
+        let isNew = oldConnection?.lastStopName != connection.lastStopName || oldConnection?.delayText != connection.delayText || oldConnection?.departureTimeRemaining != connection.departureTimeRemaining
         if departureTimeRemainingRaw < 200, isNew {
-            let vehicleText = vehicleInfo != nil ? "\n\(vehicleInfo!.type) #\(String(tab.busID.dropFirst(2)))" : ""
+            let vehicleText = vehicleInfo != nil ? "\n\(vehicleInfo!.type) #\(String(connection.busID.dropFirst(2)))" : ""
             alertConfig = AlertConfiguration(
-                title: "\(tab.line) ▶ \(tab.headsign) in \(tab.departureTimeRemaining)",
-                body: "\(tab.lastStopName)\n\(tab.delayText)\(vehicleText)",
+                title: "\(connection.line) ▶ \(connection.headsign) in \(connection.departureTimeRemaining)",
+                body: "\(connection.lastStopName)\n\(connection.delayText)\(vehicleText)",
                 sound: .named("")
             )
         }

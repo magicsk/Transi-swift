@@ -11,7 +11,7 @@ import WidgetKit
 
 struct VirtualTableActivityAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
-        var tab: Tab
+        var connection: Connection
         var vehicleInfo: VehicleInfo?
     }
 }
@@ -23,32 +23,32 @@ struct VirtualTableActivityLiveActivity: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    LineText(context.state.tab.line, 20.0).padding(.leading, 10.0)
+                    LineText(context.state.connection.line, 20.0).padding(.leading, 10.0)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(context.state.tab.departureTimeRemaining)
+                    Text(context.state.connection.departureTimeRemaining)
                         .font(.headline)
                         .padding(.top, 3.5).padding(.trailing, 10.0)
                         .contentTransition(.numericText(countsDown: true))
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(spacing: 5.0) {
-                        Text(context.state.tab.headsign).font(.headline).lineLimit(1).padding(.top, -20.0)
-                        VirtualTableConnectionDetail(context.state.tab, context.state.vehicleInfo).padding(.all, 3.0)
+                        Text(context.state.connection.headsign).font(.headline).lineLimit(1).padding(.top, -20.0)
+                        VirtualTableConnectionDetail(context.state.connection, context.state.vehicleInfo).padding(.all, 3.0)
                     }
                 }
             } compactLeading: {
-                LineText(context.state.tab.line, 16.0).padding(.leading, 7.5)
+                LineText(context.state.connection.line, 16.0).padding(.leading, 7.5)
             } compactTrailing: {
-                Text(context.state.tab.departureTimeRemaining).font(.headline)
+                Text(context.state.connection.departureTimeRemaining).font(.headline)
                     .padding(.trailing, 7.5)
                     .contentTransition(.numericText(countsDown: true))
             } minimal: {
-                Text(context.state.tab.departureTimeRemainingShortened)
+                Text(context.state.connection.departureTimeRemainingShortened)
                     .font(.system(size: 16.0))
                     .contentTransition(.numericText(countsDown: true))
             }
-            .widgetURL(URL(string: "transi://table/\(context.state.tab.stopId)/\(context.state.tab.id)"))
+            .widgetURL(URL(string: "transi://table/\(context.state.connection.stopId)/\(context.state.connection.id)"))
         }
         .supplementalActivityFamiliesIfAvailable()
 //        .supplementalActivityFamilies([.small, .medium])
@@ -73,11 +73,11 @@ private extension VirtualTableActivityAttributes {
 
 private extension VirtualTableActivityAttributes.ContentState {
     static var online: VirtualTableActivityAttributes.ContentState {
-        VirtualTableActivityAttributes.ContentState(tab: Tab.example, vehicleInfo: VehicleInfo.example)
+        VirtualTableActivityAttributes.ContentState(connection: Connection.example, vehicleInfo: VehicleInfo.example)
     }
 
     static var offline: VirtualTableActivityAttributes.ContentState {
-        VirtualTableActivityAttributes.ContentState(tab: Tab.example)
+        VirtualTableActivityAttributes.ContentState(connection: Connection.example)
     }
 }
 

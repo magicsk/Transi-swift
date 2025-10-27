@@ -11,11 +11,12 @@ struct ListStackModifier: ViewModifier {
     func body(content: Content) -> some View {
         ZStack {
             content
-                .padding(.vertical, 12.0)
+                .padding(.vertical, 15.0)
+                .padding(.horizontal, 4.0)
                 .frame(maxWidth: .infinity)
                 .background(.secondarySystemGroupedBackground)
-                .cornerRadius(10.0)
-                .padding(.all, 20.0)
+                .cornerRadius(26.0)
+                .padding(.all, 16.0)
             HStack {
                 VStack(spacing: 3.5) {
                     ForEach(1 ... 3, id: \.self) { _ in
@@ -26,6 +27,20 @@ struct ListStackModifier: ViewModifier {
                 }
                 Spacer()
             }.padding(.all, 38.5)
+        }
+    }
+}
+
+#Preview {
+    ZStack {
+        Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
+        VStack {
+            TripPlannerSearchInputs(
+                from: .constant(.actualLocation),
+                to: .constant(.example),
+                lastField: .constant("to"),
+                showStopList: .constant(false)
+            )
         }
     }
 }

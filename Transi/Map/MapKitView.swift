@@ -6,50 +6,53 @@
 //
 
 import Combine
-import MapKit
 import MapCache
+import MapKit
 import SwiftUI
 import UIKit
 
 struct MapKitView: UIViewControllerRepresentable {
-    private let updateTabBarApperance: () -> Void
     private let changeTab: (Int) -> Void
 
-    init(_ updateTabBarApperance: @escaping () -> Void, _ changeTab: @escaping (Int) -> Void) {
-        self.updateTabBarApperance = updateTabBarApperance
+    init(_ changeTab: @escaping (Int) -> Void) {
         self.changeTab = changeTab
     }
 
-    func makeUIViewController(context: Context) -> MapViewController {
-        return MapViewController(updateTabBarApperance, changeTab)
+    func makeUIViewController(context _: Context) -> MapViewController {
+        return MapViewController(changeTab)
     }
 
-    func updateUIViewController(_ uiViewController: MapViewController, context: Context) {}
+    func updateUIViewController(_: MapViewController, context _: Context) {}
 }
 
-class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentationControllerDelegate, UISceneDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentationControllerDelegate,
+    UISceneDelegate
+{
     @StateObject var stopListProvider = GlobalController.stopsListProvider
     @StateObject var appState = GlobalController.appState
-    private let updateTabBarApperance: () -> Void
     private var tileLightOverlay: MKTileOverlay?
     private var tileDarkOverlay: MKTileOverlay?
     private var sheetViewController: MapBottomSheetView?
     private var sheetNavController: UIHostingController<MapBottomSheetView>?
     private var mapView: MKMapView!
     private let changeTab: (Int) -> Void
-    private var subscription: Cancellable? = nil
-    private var stopIdFromUrl: String? = nil
+    private var subscription: Cancellable?
+    private var stopIdFromUrl: String?
 
     private var mapLoaded = false
-    private var selectedAnnotation: MKAnnotation? = nil
-    private let defaultLocation = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 48.145, longitude: 17.107), latitudinalMeters: 500, longitudinalMeters: 500)
+    private var selectedAnnotation: MKAnnotation?
+    private let defaultLocation = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 48.145, longitude: 17.107), latitudinalMeters: 500,
+        longitudinalMeters: 500
+    )
     private lazy var locationButton = UIButton(configuration: .filled())
 
-    let sourceLightUrl = "\(GlobalController.thunderforestApiUrl)/transport/{z}/{x}/{y}@2x.png?apikey=\(GlobalController.thunderforestApiKey)"
-    let sourceDarkUrl = "\(GlobalController.thunderforestApiUrl)/transport-dark/{z}/{x}/{y}@2x.png?apikey=\(GlobalController.thunderforestApiKey)"
+    let sourceLightUrl =
+        "\(GlobalController.thunderforestApiUrl)/transport/{z}/{x}/{y}@2x.png?apikey=\(GlobalController.thunderforestApiKey)"
+    let sourceDarkUrl =
+        "\(GlobalController.thunderforestApiUrl)/transport-dark/{z}/{x}/{y}@2x.png?apikey=\(GlobalController.thunderforestApiKey)"
 
-    init(_ updateTabBarApperance: @escaping () -> Void, _ changeTab: @escaping (Int) -> Void) {
-        self.updateTabBarApperance = updateTabBarApperance
+    init(_ changeTab: @escaping (Int) -> Void) {
         self.changeTab = changeTab
 
         super.init(nibName: nil, bundle: nil)
@@ -57,7 +60,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) {
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -73,14 +76,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateTabBarApperance()
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if mapLoaded {
-            mapView.removeOverlay(traitCollection.userInterfaceStyle == .dark ? tileLightOverlay! : tileDarkOverlay!)
-            mapView.addOverlay(traitCollection.userInterfaceStyle == .dark ? tileDarkOverlay! : tileLightOverlay!)
+            mapView.removeOverlay(
+                traitCollection.userInterfaceStyle == .dark ? tileLightOverlay! : tileDarkOverlay!)
+            mapView.addOverlay(
+                traitCollection.userInterfaceStyle == .dark ? tileDarkOverlay! : tileLightOverlay!)
         }
     }
 
@@ -104,7 +108,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         tileDarkOverlay?.tileSize = .init(width: 512, height: 512)
         tileDarkOverlay?.canReplaceMapContent = true
 
-        mapView.addOverlay(traitCollection.userInterfaceStyle == .dark ? tileDarkOverlay! : tileLightOverlay!)
+        mapView.addOverlay(
+            traitCollection.userInterfaceStyle == .dark ? tileDarkOverlay! : tileLightOverlay!)
 
         view.addSubview(mapView)
 
@@ -142,7 +147,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
                                     }) {
                                         DispatchQueue.main.async {
                                             self.mapView.selectAnnotation(foundStop, animated: true)
-                                            let region = MKCoordinateRegion(center: foundStop.coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
+                                            let region = MKCoordinateRegion(
+                                                center: foundStop.coordinate, latitudinalMeters: 500,
+                                                longitudinalMeters: 500
+                                            )
                                             self.mapView.animatedZoom(region, 1.0)
                                         }
                                     }
@@ -158,7 +166,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
 
     private func generatePoints() -> [StopAnnotation] {
         let points: [StopAnnotation] = stopListProvider.stops.map { stop in
-            let pointAnnotation = StopAnnotation(latitude: stop.location.latitude, longitude: stop.location.longitude)
+            let pointAnnotation = StopAnnotation(
+                latitude: stop.location.latitude, longitude: stop.location.longitude
+            )
             pointAnnotation.title = stop.name
             pointAnnotation.subtitle = String(stop.id)
             return pointAnnotation
@@ -168,7 +178,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
 
     private func presentBottomSheet() {
         if let sheet = sheetNavController?.sheetPresentationController {
-            let customDent = UISheetPresentationController.Detent.custom(resolver: { context in 0.4 * context.maximumDetentValue })
+            let customDent = UISheetPresentationController.Detent.custom(resolver: { context in
+                0.4 * context.maximumDetentValue
+            })
             sheet.detents = [customDent, .large()]
             sheet.largestUndimmedDetentIdentifier = customDent.identifier
             sheet.prefersGrabberVisible = true
@@ -184,29 +196,50 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         mapView.deselectAnnotation(selectedAnnotation, animated: true)
     }
 
-    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+    func presentationControllerDidDismiss(_: UIPresentationController) {
         mapView.deselectAnnotation(selectedAnnotation, animated: true)
     }
 
     private func addLocationButton() {
         locationButton.clipsToBounds = true
         locationButton.configuration?.baseBackgroundColor = .clear
-        locationButton.configuration?.background.visualEffect = UIBlurEffect(style: .systemMaterial)
+        if #available(iOS 26.0, *) {
+            locationButton.configuration?.background.visualEffect = UIGlassEffect(style: .regular)
+            locationButton.configuration?.background.cornerRadius = 100.0
+            locationButton.configuration?.contentInsets = NSDirectionalEdgeInsets(
+                top: 22.0, leading: 22.0, bottom: 22.0, trailing: 22.0
+            )
+        } else {
+            locationButton.configuration?.background.visualEffect = UIBlurEffect(style: .systemMaterial)
+            locationButton.configuration?.contentInsets = NSDirectionalEdgeInsets(
+                top: 16.0, leading: 16.0, bottom: 16.0, trailing: 16.0
+            )
+        }
         locationButton.configuration?.baseForegroundColor = .accent
-        locationButton.configuration?.contentInsets = NSDirectionalEdgeInsets(top: 16.0, leading: 16.0, bottom: 16.0, trailing: 16.0)
 
         locationButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(locationButton)
 
-        locationButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20.0).isActive = true
-        locationButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20.0).isActive = true
+        if #available(iOS 26.0, *) {
+            locationButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -26.0)
+                .isActive = true
+        } else {
+            locationButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20.0)
+                .isActive = true
+        }
+        locationButton.bottomAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20.0
+        ).isActive = true
 
         updateButtonIcon()
         locationButton.addTarget(self, action: #selector(focusLocation), for: .touchUpInside)
     }
 
     private func updateButtonIcon() {
-        locationButton.setImage(UIImage(systemName: mapView.userTrackingMode == .none ? "location" : "location.fill"), for: .normal)
+        locationButton.setImage(
+            UIImage(systemName: mapView.userTrackingMode == .none ? "location" : "location.fill"),
+            for: .normal
+        )
     }
 
     @objc func focusLocation() {
@@ -218,7 +251,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         }
     }
 
-    func mapView(_ mapView: MKMapView, didChange mode: MKUserTrackingMode, animated: Bool) {
+    func mapView(_: MKMapView, didChange _: MKUserTrackingMode, animated _: Bool) {
         updateButtonIcon()
     }
 
@@ -227,7 +260,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
             // user location selected
         } else if view.annotation is MKClusterAnnotation {
             let coordinate = view.annotation?.coordinate
-            let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinate!.latitude, longitude: coordinate!.longitude), span: MKCoordinateSpan(latitudeDelta: mapView.region.span.latitudeDelta * 0.6, longitudeDelta: mapView.region.span.longitudeDelta * 0.6))
+            let region = MKCoordinateRegion(
+                center: CLLocationCoordinate2D(
+                    latitude: coordinate!.latitude, longitude: coordinate!.longitude
+                ),
+                span: MKCoordinateSpan(
+                    latitudeDelta: mapView.region.span.latitudeDelta * 0.6,
+                    longitudeDelta: mapView.region.span.longitudeDelta * 0.6
+                )
+            )
             mapView.animatedZoom(region, 0.15)
             mapView.deselectAnnotation(view.annotation, animated: false)
         } else {
@@ -237,7 +278,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         }
     }
 
-    func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
+    func mapView(_ mapView: MKMapView, didDeselect _: MKAnnotationView) {
         selectedAnnotation = nil
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             if mapView.selectedAnnotations.count < 1 {
@@ -254,15 +295,25 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         if annotation is MKUserLocation {
             return nil
         } else if annotation is MKClusterAnnotation {
-            return ClusterAnnotationView(annotation: annotation, reuseIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier)
+            return ClusterAnnotationView(
+                annotation: annotation,
+                reuseIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier
+            )
         } else if annotation is StopAnnotation {
-            guard let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: MKMapViewDefaultAnnotationViewReuseIdentifier) as? StopAnnotationView else {
-                return StopAnnotationView(annotation: annotation, reuseIdentifier: MKMapViewDefaultAnnotationViewReuseIdentifier)
+            guard
+                let annotationView = mapView.dequeueReusableAnnotationView(
+                    withIdentifier: MKMapViewDefaultAnnotationViewReuseIdentifier) as? StopAnnotationView
+            else {
+                return StopAnnotationView(
+                    annotation: annotation, reuseIdentifier: MKMapViewDefaultAnnotationViewReuseIdentifier
+                )
             }
             annotationView.annotation = annotation
             return annotationView
         } else {
-            return MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: MKMapViewDefaultAnnotationViewReuseIdentifier)
+            return MKMarkerAnnotationView(
+                annotation: annotation, reuseIdentifier: MKMapViewDefaultAnnotationViewReuseIdentifier
+            )
         }
     }
 }
@@ -270,7 +321,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
 class StopAnnotation: MKPointAnnotation {
     init(latitude: Double, longitude: Double) {
         super.init()
-        self.coordinate = CLLocationCoordinate2DMake(latitude, longitude)
+        coordinate = CLLocationCoordinate2DMake(latitude, longitude)
     }
 }
 

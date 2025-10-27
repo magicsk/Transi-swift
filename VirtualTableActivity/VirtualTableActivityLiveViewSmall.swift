@@ -12,29 +12,29 @@ struct VirtualTableActivityLiveViewSmall: View {
     var context: ActivityViewContext<VirtualTableActivityAttributes>
 
     var body: some View {
-        let tab = context.state.tab
+        let connection = context.state.connection
         VStack(spacing: 2.5) {
             HStack {
-                LineText(tab.line, 18.0).padding(-2.0)
-                Text(tab.headsign).font(.system(size: 14.0, weight: .semibold)).lineLimit(1)
+                LineText(connection.line, 18.0).padding(-2.0)
+                Text(connection.headsign).font(.system(size: 14.0, weight: .semibold)).lineLimit(1)
                 Spacer()
             }.padding(.bottom, 1.5)
             HStack {
-                if tab.type == "online" {
+                if connection.type == "online" {
                     HStack {
                         StopIcon(.accent)
-                        Text(tab.lastStopName).font(.system(size: 12.0)).lineLimit(1)
+                        Text(connection.lastStopName).font(.system(size: 12.0)).lineLimit(1)
                     }
                 } else {
-                    Text(tab.departureTime).font(.system(size: 12.0)).lineLimit(1)
+                    Text(connection.departureTime).font(.system(size: 12.0)).lineLimit(1)
                 }
                 Spacer()
-                Text(tab.departureTimeRemaining)
+                Text(connection.departureTimeRemaining)
                     .contentTransition(.numericText(countsDown: true))
                     .font(.system(size: 14.0, weight: .bold))
             }
             HStack(alignment: .bottom) {
-                if tab.type == "online" {
+                if connection.type == "online" {
                     if let vehicleInfo = context.state.vehicleInfo {
                         HStack(spacing: 2.0) {
                             Text("\(vehicleInfo.type)")
@@ -50,9 +50,9 @@ struct VirtualTableActivityLiveViewSmall: View {
                 Spacer()
                 HStack(alignment: .center, spacing: 5.0) {
                     Image(systemName: "circle.fill")
-                        .foregroundColor(getDelayColor(tab.delay, tab.type))
+                        .foregroundColor(getDelayColor(connection.delay, connection.type))
                         .font(.system(size: 12.0))
-                    Text(tab.delayText).font(.system(size: 12.0)).lineLimit(1).fixedSize(horizontal: true, vertical: false)
+                    Text(connection.delayText).font(.system(size: 12.0)).lineLimit(1).fixedSize(horizontal: true, vertical: false)
                 }
             }
         }.padding(10.0)

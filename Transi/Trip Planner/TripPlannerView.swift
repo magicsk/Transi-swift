@@ -15,11 +15,6 @@ struct TripPlannerView: View {
     @State private var showStopList = false
     @State private var dateDialog = false
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .rigid)
-    private let updateTabBarApperance: () -> Void
-
-    init(_ updateTabBarApperance: @escaping () -> Void) {
-        self.updateTabBarApperance = updateTabBarApperance
-    }
 
     var body: some View {
         NavigationStack {
@@ -62,11 +57,11 @@ struct TripPlannerView: View {
                         LoadingView($tripPlannerController.loading)
                     }
                 }
-                .padding(.top, -20.0)
+                .padding(.top, -16.0)
                 .navigationTitle(Text("Trip planner"))
                 .toolbar {
                     Button("Settings") {
-                        openURL(URL(string: UIApplication.openSettingsURLString)!)
+                            openURL(URL(string: UIApplication.openSettingsURLString)!)
                     }
                 }
             }
@@ -93,9 +88,10 @@ struct TripPlannerView: View {
                 feedbackGenerator.impactOccurred()
                 tripPlannerController.fetchTrip()
             }
-            .onAppear {
-                updateTabBarApperance()
-            }
         }
     }
+}
+
+#Preview {
+    TripPlannerView()
 }

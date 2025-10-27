@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftUIX
 
 struct TripPlannerSearchInputs: View {
     @Binding private var from: Stop
@@ -25,7 +24,7 @@ struct TripPlannerSearchInputs: View {
         VStack {
             HStack(spacing: .zero) {
                 getInputIcon(from.type ?? "")
-                CocoaTextField(text: $from.name.toUnwrapped(defaultValue: "")) {
+                TextField(text: $from.name.toUnwrapped(defaultValue: "")) {
                     Text("From").foregroundColor(.placeholderText)
                 }
             }
@@ -38,10 +37,11 @@ struct TripPlannerSearchInputs: View {
                 lastField = "from"
                 showStopList = true
             }
-            Divider().padding(.leading, 40.0).padding(.bottom, 5.0)
+            .padding(.bottom, 5.0)
+            Divider().padding(.leading, 40.0).padding(.bottom, 15.0)
             HStack(spacing: .zero) {
                 getInputIcon(to.type ?? "")
-                CocoaTextField(text: $to.name.toUnwrapped(defaultValue: "")) {
+                TextField(text: $to.name.toUnwrapped(defaultValue: "")) {
                     Text("To").foregroundColor(.placeholderText)
                 }
             }
@@ -59,16 +59,30 @@ struct TripPlannerSearchInputs: View {
 
     func getInputIcon(_ iconType: String) -> some View {
         switch iconType {
-            case "bus":
-                return CircleIcon("bus.fill", .white, .systemRed)
-            case "regio_bus":
-                return CircleIcon("bus.fill", .white, .systemYellow)
-            case "train":
-                return CircleIcon("tram.fill", .white, .systemBlue)
-            case "location":
-                return CircleIcon("location.fill", .white, .systemBlue)
-            default:
-                return CircleIcon("circle.inset.filled", .white, .systemFill)
+        case "bus":
+            return CircleIcon("bus.fill", .white, .systemRed)
+        case "regio_bus":
+            return CircleIcon("bus.fill", .white, .systemYellow)
+        case "train":
+            return CircleIcon("tram.fill", .white, .systemBlue)
+        case "location":
+            return CircleIcon("location.fill", .white, .systemBlue)
+        default:
+            return CircleIcon("circle.inset.filled", .white, .systemFill)
+        }
+    }
+}
+
+#Preview {
+    ZStack {
+        Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
+        VStack{
+            TripPlannerSearchInputs(
+                from: .constant(.empty),
+                to: .constant(.example),
+                lastField: .constant("to"),
+                showStopList: .constant(false)
+            )
         }
     }
 }

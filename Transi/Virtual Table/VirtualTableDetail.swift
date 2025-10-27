@@ -8,29 +8,29 @@
 import SwiftUI
 
 struct VirtualTableDetail: View {
-    var tab: Tab
+    var connection: Connection
     var vehicleInfo: VehicleInfo?
     var platformLabels: [PlatformLabel]?
 
-    init(_ tab: Tab, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?) {
-        self.tab = tab
+    init(_ connection: Connection, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?) {
+        self.connection = connection
         self.vehicleInfo = vehicleInfo
         self.platformLabels = platformLabels
     }
 
     var body: some View {
-        let busID = String(tab.busID.dropFirst(2))
+        let busID = String(connection.busID.dropFirst(2))
 
         NavigationView {
             VStack(alignment: .leading, spacing: 6.0) {
-                Text("\(tab.stuck ? "would" : "will") depart in \(tab.departureTimeRemaining) at \(tab.departureTime)\nfrom platform \(getPlatformLabel(platformLabels, tab.platform))")
+                Text("\(connection.stuck ? "would" : "will") depart in \(connection.departureTimeRemaining) at \(connection.departureTime)\nfrom platform \(getPlatformLabel(platformLabels, connection.platform))")
                     .font(.system(size: 24.0))
                 HStack(spacing: 4.0) {
-                    Text("\(tab.stuck ? "Stucked" : "Last seen") on \(tab.lastStopName)").font(.system(size: 12.0))
+                    Text("\(connection.stuck ? "Stucked" : "Last seen") on \(connection.lastStopName)").font(.system(size: 12.0))
                     Image("stop").resizable(resizingMode: .stretch).frame(width: 7.0, height: 10.0)
-                    Text(tab.delayText).font(.system(size: 12))
+                    Text(connection.delayText).font(.system(size: 12))
                     Image(systemName: "circle.fill")
-                        .foregroundColor(getDelayColor(tab.delay, tab.type))
+                        .foregroundColor(getDelayColor(connection.delay, connection.type))
                         .font(.system(size: 12.0))
                 }
                 if vehicleInfo != nil {
@@ -60,10 +60,10 @@ struct VirtualTableDetail: View {
             .padding(.horizontal, 22.0)
             .navigationBarItems(
                 leading: HStack {
-                    LineText(tab.line)
-                    Text(tab.headsign).font(.largeTitle.bold())
+                    LineText(connection.line)
+                    Text(connection.headsign).font(.largeTitle.bold())
                 },
-                trailing: Image(tab.stuck ? "exclamationmark.triangle.fill" : "")
+                trailing: Image(connection.stuck ? "exclamationmark.triangle.fill" : "")
                     .foregroundColor(.yellow)
                     .font(.system(size: 28))
             )
@@ -73,6 +73,6 @@ struct VirtualTableDetail: View {
 
 struct VirtualTableDetailPreview: PreviewProvider {
     static var previews: some View {
-        VirtualTableDetail(Tab.example, [PlatformLabel.example] , VehicleInfo.example)
+        VirtualTableDetail(Connection.example, [PlatformLabel.example] , VehicleInfo.example)
     }
 }

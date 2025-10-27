@@ -16,11 +16,6 @@ struct TimetablesView: View {
     @State var openFromUrl = ""
     @State var urlNavigateDestination: Route = .empty
     @State var navigateInsideFromUrl = false
-    private let updateTabBarApperance: () -> Void
-
-    init(_ updateTabBarApperance: @escaping () -> Void) {
-        self.updateTabBarApperance = updateTabBarApperance
-    }
 
     let columns = [
         GridItem(.flexible())
@@ -83,7 +78,6 @@ struct TimetablesView: View {
             .paddingTop(80.0)
             .overlayBackground(Color.systemBackground)
             .onAppear {
-                updateTabBarApperance()
                 fetchTimetables()
             }
             .onOpenURL { url in

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */; };
 		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
-		DA1C5A162CB2D7C900DB1032 /* CustomDisclosureGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C5A152CB2D7C900DB1032 /* CustomDisclosureGroup.swift */; };
 		DA1C5A182CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */; };
 		DA1C5A192CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */; };
 		DA1F2E6E2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */; };
@@ -19,6 +18,8 @@
 		DA3059502E8EDF220055A692 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA30594F2E8EDF220055A692 /* AppIcon.icon */; };
 		DA3059512E8EDF220055A692 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA30594F2E8EDF220055A692 /* AppIcon.icon */; };
 		DA3059522E8EDF220055A692 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA30594F2E8EDF220055A692 /* AppIcon.icon */; };
+		DA3059542E9012D20055A692 /* DisclosureGroupStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3059532E9012C10055A692 /* DisclosureGroupStyle.swift */; };
+		DA3059562E9043440055A692 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = DA3059552E9043440055A692 /* SwiftUIIntrospect */; };
 		DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DB2B1E7CB20006F41E /* Errors.swift */; };
 		DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */; };
 		DA467DEB2BE9156F00057872 /* AppStateProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA467DEA2BE9156F00057872 /* AppStateProvider.swift */; };
@@ -71,7 +72,6 @@
 		DAA552382B9D28E900C750BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA552372B9D28E900C750BC /* SearchBar.swift */; };
 		DAA552392B9D28E900C750BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA552372B9D28E900C750BC /* SearchBar.swift */; };
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
-		DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C92974387B00E2FBB7 /* ContentView.swift */; };
 		DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
 		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */; };
@@ -100,15 +100,14 @@
 		DABD03262A0AF76E00FD2C4B /* StopGps.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03242A0AF76E00FD2C4B /* StopGps.swift */; };
 		DABD03282A0AF7B800FD2C4B /* Trip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03272A0AF7B800FD2C4B /* Trip.swift */; };
 		DABD03292A0AF7B800FD2C4B /* Trip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABD03272A0AF7B800FD2C4B /* Trip.swift */; };
-		DAC809FE2B02934C00CFC7B8 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = DAC809FD2B02934C00CFC7B8 /* SwiftUIIntrospect */; };
 		DAC80A002B0293AF00CFC7B8 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAC809FF2B0293AF00CFC7B8 /* Fuse */; };
 		DAC95A0B2B77A92F005E93C7 /* GlobalController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC95A0A2B77A92F005E93C7 /* GlobalController.swift */; };
 		DAC95A0F2B77A948005E93C7 /* TripPlannerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC95A0E2B77A948005E93C7 /* TripPlannerController.swift */; };
 		DAC95A112B77ABAF005E93C7 /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */; };
-		DAC9C7142B09761000B1AC8C /* UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC9C7132B09761000B1AC8C /* UIKit.swift */; };
 		DACDA7862B7031B100D53F6D /* TripPlannerSearchInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACDA7852B7031B100D53F6D /* TripPlannerSearchInputs.swift */; };
 		DACDA7882B7033F700D53F6D /* CircleIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACDA7872B7033F700D53F6D /* CircleIcon.swift */; };
 		DACDA78A2B7044CB00D53F6D /* TripPlannerDateButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACDA7892B7044CB00D53F6D /* TripPlannerDateButton.swift */; };
+		DACFD5D82EAD28FA009720B5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACFD5D72EAD28DE009720B5 /* ContentView.swift */; };
 		DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */; };
 		DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */; };
 		DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
@@ -178,11 +177,11 @@
 		DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerView.swift; sourceTree = "<group>"; };
 		DA10FA412A0939CA005D7E49 /* TimetablesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetablesView.swift; sourceTree = "<group>"; };
 		DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDetailView.swift; sourceTree = "<group>"; };
-		DA1C5A152CB2D7C900DB1032 /* CustomDisclosureGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDisclosureGroup.swift; sourceTree = "<group>"; };
 		DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveViewLarge.swift; sourceTree = "<group>"; };
 		DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityDynamicIsland.swift; sourceTree = "<group>"; };
 		DA269E0F298960EF00F42107 /* VirtualTableList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableList.swift; sourceTree = "<group>"; };
 		DA30594F2E8EDF220055A692 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		DA3059532E9012C10055A692 /* DisclosureGroupStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisclosureGroupStyle.swift; sourceTree = "<group>"; };
 		DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableDetail.swift; sourceTree = "<group>"; };
 		DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableListItem.swift; sourceTree = "<group>"; };
 		DA3F83DB2B1E7CB20006F41E /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
@@ -209,7 +208,6 @@
 		DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveDynamicView.swift; sourceTree = "<group>"; };
 		DAA552372B9D28E900C750BC /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
-		DAA817C92974387B00E2FBB7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DAA817CB2974387C00E2FBB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DAA817CD2974387C00E2FBB7 /* Transi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Transi.entitlements; sourceTree = "<group>"; };
 		DAA817CF2974387C00E2FBB7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -239,10 +237,10 @@
 		DAC95A0E2B77A948005E93C7 /* TripPlannerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerController.swift; sourceTree = "<group>"; };
 		DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProvider.swift; sourceTree = "<group>"; };
 		DAC9C7072B096FFF00B1AC8C /* MapKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapKitView.swift; sourceTree = "<group>"; };
-		DAC9C7132B09761000B1AC8C /* UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKit.swift; sourceTree = "<group>"; };
 		DACDA7852B7031B100D53F6D /* TripPlannerSearchInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerSearchInputs.swift; sourceTree = "<group>"; };
 		DACDA7872B7033F700D53F6D /* CircleIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleIcon.swift; sourceTree = "<group>"; };
 		DACDA7892B7044CB00D53F6D /* TripPlannerDateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDateButton.swift; sourceTree = "<group>"; };
+		DACFD5D72EAD28DE009720B5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiWatchApp.swift; sourceTree = "<group>"; };
 		DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DAD16F2F2C1B085700E620C4 /* VirtualTableActivityLiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveView.swift; sourceTree = "<group>"; };
@@ -268,9 +266,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA3059562E9043440055A692 /* SwiftUIIntrospect in Frameworks */,
 				DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */,
 				DA66CA9C2BDC926200C4C4E6 /* SwipeActions in Frameworks */,
-				DAC809FE2B02934C00CFC7B8 /* SwiftUIIntrospect in Frameworks */,
 				DA23A7862B02957700BC8428 /* SocketIO in Frameworks */,
 				DAC80A002B0293AF00CFC7B8 /* Fuse in Frameworks */,
 				DADF72BE2C15D0AD008CF3F2 /* MapCache in Frameworks */,
@@ -381,7 +379,6 @@
 				DA500BF72A11461300630226 /* Date.swift */,
 				DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */,
 				DA63553229E4957A00AAD7C0 /* String.swift */,
-				DAC9C7132B09761000B1AC8C /* UIKit.swift */,
 				DA89EDE529BA981700C32F24 /* UserDefaults.swift */,
 				DAB0094D2B2E71BF009DF2CD /* View.swift */,
 			);
@@ -414,7 +411,7 @@
 				DA32835F29E19C670070FCA0 /* Virtual Table */,
 				DAA817F22974393300E2FBB7 /* Info.plist */,
 				DAA817C72974387B00E2FBB7 /* TransiApp.swift */,
-				DAA817C92974387B00E2FBB7 /* ContentView.swift */,
+				DACFD5D72EAD28DE009720B5 /* ContentView.swift */,
 				DAA817CD2974387C00E2FBB7 /* Transi.entitlements */,
 				DAA817CE2974387C00E2FBB7 /* Preview Content */,
 				DAB0094B2B2E61A0009DF2CD /* Settings.bundle */,
@@ -467,7 +464,6 @@
 		DABAE4072ACC23B800D66159 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				DA1C5A152CB2D7C900DB1032 /* CustomDisclosureGroup.swift */,
 				DABAE4082ACC23DA00D66159 /* LineText.swift */,
 				DACDA7872B7033F700D53F6D /* CircleIcon.swift */,
 				DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */,
@@ -479,6 +475,7 @@
 				DA737DE52B90D20E0093FAC6 /* RemoteImage.swift */,
 				DAB981672B926ED90052376C /* VirtualTableConnectionDetail.swift */,
 				DAA552372B9D28E900C750BC /* SearchBar.swift */,
+				DA3059532E9012C10055A692 /* DisclosureGroupStyle.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -566,13 +563,13 @@
 			);
 			name = Transi;
 			packageProductDependencies = (
-				DAC809FD2B02934C00CFC7B8 /* SwiftUIIntrospect */,
 				DAC809FF2B0293AF00CFC7B8 /* Fuse */,
 				DA23A7802B02951F00BC8428 /* SwiftUIX */,
 				DA23A7852B02957700BC8428 /* SocketIO */,
 				DAE714E52B2FC0D50059B8A1 /* WrappingHStack */,
 				DA66CA9B2BDC926200C4C4E6 /* SwipeActions */,
 				DADF72BD2C15D0AD008CF3F2 /* MapCache */,
+				DA3059552E9043440055A692 /* SwiftUIIntrospect */,
 			);
 			productName = Transi;
 			productReference = DABD031B2A097ABE00FD2C4B /* Transi.app */;
@@ -627,7 +624,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1520;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					DAA817C32974387B00E2FBB7 = {
 						CreatedOnToolsVersion = 14.1;
@@ -729,11 +726,9 @@
 				DAB0094E2B2E71BF009DF2CD /* View.swift in Sources */,
 				DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */,
 				DA7887EB2B77DA0A00BFFB4F /* TimetableView.swift in Sources */,
-				DAA817CA2974387B00E2FBB7 /* ContentView.swift in Sources */,
 				DA855B772AF68BED00372C31 /* Util.swift in Sources */,
 				DAA552382B9D28E900C750BC /* SearchBar.swift in Sources */,
 				DA7887F12B79236000BFFB4F /* VirtualTableList.swift in Sources */,
-				DA1C5A162CB2D7C900DB1032 /* CustomDisclosureGroup.swift in Sources */,
 				DABD03282A0AF7B800FD2C4B /* Trip.swift in Sources */,
 				DA500BF82A11461300630226 /* Date.swift in Sources */,
 				DA737DE62B90D20E0093FAC6 /* RemoteImage.swift in Sources */,
@@ -754,6 +749,7 @@
 				DA4DDA6D2B8D5C0F00E8DFCA /* RemainingTime.swift in Sources */,
 				DAB467F92B7A5C9200B45A1C /* MapBottomSheetView.swift in Sources */,
 				DAC95A0B2B77A92F005E93C7 /* GlobalController.swift in Sources */,
+				DA3059542E9012D20055A692 /* DisclosureGroupStyle.swift in Sources */,
 				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
 				DAB009502B2E7383009DF2CD /* Stored.swift in Sources */,
 				DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */,
@@ -762,7 +758,7 @@
 				DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */,
 				DA500BFF2A12B23900630226 /* Color.swift in Sources */,
 				DA500C022A12B81E00630226 /* ListStackModifier.swift in Sources */,
-				DAC9C7142B09761000B1AC8C /* UIKit.swift in Sources */,
+				DACFD5D82EAD28FA009720B5 /* ContentView.swift in Sources */,
 				DAC95A0F2B77A948005E93C7 /* TripPlannerController.swift in Sources */,
 				DA7887F42B79236800BFFB4F /* VirtualTableView.swift in Sources */,
 				DA500BF62A1140E600630226 /* TripPlannerWalkListItem.swift in Sources */,
@@ -879,6 +875,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = SF24X772VL;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -909,6 +906,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SKIP_INSTALL = NO;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -951,6 +949,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = SF24X772VL;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -974,6 +973,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SKIP_INSTALL = NO;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
@@ -992,9 +992,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
-				DEVELOPMENT_TEAM = SF24X772VL;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Transi/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Transi;
@@ -1024,7 +1026,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.9.3;
+				MARKETING_VERSION = 0.9.4;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1052,9 +1054,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
-				DEVELOPMENT_TEAM = SF24X772VL;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Transi/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Transi;
@@ -1084,7 +1088,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.9.3;
+				MARKETING_VERSION = 0.9.4;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1108,7 +1112,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = SF24X772VL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Transi-Watch-App-Info.plist";
@@ -1144,7 +1147,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = SF24X772VL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Transi-Watch-App-Info.plist";
@@ -1180,7 +1182,6 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SF24X772VL;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = VirtualTableActivity/Info.plist;
@@ -1196,7 +1197,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 0.9.3;
+				MARKETING_VERSION = 0.9.4;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi.VirtualTableActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -1220,7 +1221,6 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SF24X772VL;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = VirtualTableActivity/Info.plist;
@@ -1236,7 +1236,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 0.9.3;
+				MARKETING_VERSION = 0.9.4;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi.VirtualTableActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -1321,8 +1321,9 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/siteline/swiftui-introspect.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.1.1;
+				kind = versionRange;
+				maximumVersion = 27.0.0;
+				minimumVersion = 1.3.0;
 			};
 		};
 		DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */ = {
@@ -1362,6 +1363,11 @@
 			package = DAA817F329743A9C00E2FBB7 /* XCRemoteSwiftPackageReference "socket" */;
 			productName = SocketIO;
 		};
+		DA3059552E9043440055A692 /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DAB73A3F2B00F2E5009FCCC7 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = SwiftUIIntrospect;
+		};
 		DA4DDA662B8D560300E8DFCA /* SwiftUIX */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */;
@@ -1376,10 +1382,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DAAB2C0629F8727900D79A70 /* XCRemoteSwiftPackageReference "fuse-swift" */;
 			productName = Fuse;
-		};
-		DAC809FD2B02934C00CFC7B8 /* SwiftUIIntrospect */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = SwiftUIIntrospect;
 		};
 		DAC809FF2B0293AF00CFC7B8 /* Fuse */ = {
 			isa = XCSwiftPackageProductDependency;

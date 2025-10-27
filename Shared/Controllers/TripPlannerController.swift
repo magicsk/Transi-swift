@@ -46,8 +46,9 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
 
                 print("fetching trip from \(fromId) to \(toId)")
 
+                let lastJourneyTime = dateFromUtc(self.trip.journey?.last?.parts?.first?.startDeparture)?.addingTimeInterval(.init(1.0))
                 let searchDate = more ?
-                    self.lastSearchDate.addingTimeInterval(.init(7200.0)) :
+                    lastJourneyTime ?? self.lastSearchDate.addingTimeInterval(.init(7200.0)) :
                     self.arrivalDepartureCustomDate ?
                     self.arrivalDepartureDate :
                     nil
@@ -70,32 +71,32 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                     let jsonBody = try JSONEncoder().encode(requestBody)
                     fetchRApiPost(endpoint: "/mobile/v1/raptor/", jsonBody: jsonBody, type: Trip.self) { result in
                         switch result {
-                            case .success(let trip):
-                                print("fetched trip \(trip.journey?.count ?? 0)")
-                                if trip.journey?.count ?? 0 < 1 {
-                                    DispatchQueue.main.async {
-                                        self.loading = false
-                                        self.error = .noJourneys
-                                    }
-                                } else {
-                                    let timestamp = Date().timeIntervalSince1970
-                                    self.lastSearchDate = searchDate ?? Date()
-                                    UserDefaults.standard.save(customObject: trip, forKey: Stored.trip)
-                                    UserDefaults.standard.setValue(timestamp, forKey: Stored.tripSearchTimestamp)
-                                    DispatchQueue.main.async {
-                                        self.loading = false
-                                        if more {
-                                            self.trip.journey?.append(contentsOf: trip.journey!)
-                                        } else {
-                                            self.trip = trip
-                                        }
-                                    }
-                                }
-                            case .failure:
+                        case let .success(trip):
+                            print("fetched trip \(trip.journey?.count ?? 0)")
+                            if trip.journey?.count ?? 0 < 1 {
                                 DispatchQueue.main.async {
                                     self.loading = false
-                                    self.error = .basic
+                                    self.error = .noJourneys
                                 }
+                            } else {
+                                let timestamp = Date().timeIntervalSince1970
+                                self.lastSearchDate = searchDate ?? Date()
+                                UserDefaults.standard.save(customObject: trip, forKey: Stored.trip)
+                                UserDefaults.standard.setValue(timestamp, forKey: Stored.tripSearchTimestamp)
+                                DispatchQueue.main.async {
+                                    self.loading = false
+                                    if more {
+                                        self.trip.journey?.append(contentsOf: trip.journey!)
+                                    } else {
+                                        self.trip = trip
+                                    }
+                                }
+                            }
+                        case .failure:
+                            DispatchQueue.main.async {
+                                self.loading = false
+                                self.error = .basic
+                            }
                         }
                     }
                 } catch {
@@ -134,7 +135,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
-    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    public func locationManager(_: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard locations.last != nil else { return }
         print("got new location trip")
         DispatchQueue.main.async {

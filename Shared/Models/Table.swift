@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Tab: Codable, Identifiable, Hashable {
+struct Connection: Codable, Identifiable, Hashable {
     var id: String
     var line: String
     var platform: Int
@@ -28,13 +28,39 @@ struct Tab: Codable, Identifiable, Hashable {
     var stuck: Bool
     var expanded: Bool = false
 
-    static let example = Tab(id: "1:099", line: "72", platform: 099, stopId: 82, busID: "1:2552", headsign: "Čiližská", departureTimeCP: TimeInterval(1680959460000), departureTime: "22:30", departureTimeRaw: TimeInterval(1680959460000), departureTimeRemaining: "now", departureTimeRemainingShortened: "now", delay: 23, delayText: "23 minutes delay", type: "online", currentStopId: 12, lastStopId: 12, lastStopName: "Cintorín Vrakuňa", stuck: false)
-    static let example2 = Tab(id: "2:099", line: "71", platform: 099, stopId: 82, busID: "1:6722", headsign: "Hlavná stanica", departureTimeCP: TimeInterval(1680959460000), departureTime: "22:36", departureTimeRaw: TimeInterval(1680959470000), departureTimeRemaining: "2 min", departureTimeRemainingShortened: "2m", delay: 0, delayText: "on time", type: "online", currentStopId: 0, lastStopId: 0, lastStopName: "none", stuck: true)
-    static let example3 = Tab(id: "3:099", line: "736", platform: 099, stopId: 82, busID: "1:2552", headsign: "Bratislava, Autobusová stanica", departureTimeCP: TimeInterval(1680959460000), departureTime: "22:40", departureTimeRaw: TimeInterval(1680959480000), departureTimeRemaining: "~17 min", departureTimeRemainingShortened: "17m", delay: 0, delayText: "offline", type: "offline", currentStopId: 0, lastStopId: 0, lastStopName: "none", stuck: true)
-    static let empty = Tab(id: "-1:-1", line: "", platform: -1, stopId: -1, busID: "", headsign: "", departureTimeCP: TimeInterval(1000000000000000), departureTime: "", departureTimeRaw: TimeInterval(1000000000000000), departureTimeRemaining: "", departureTimeRemainingShortened: "", delay: -1, delayText: "", type: "", currentStopId: -1, lastStopId: -1, lastStopName: "", stuck: false)
+    static let example = Connection(
+        id: "1:099", line: "72", platform: 099, stopId: 82, busID: "1:2552", headsign: "Čiližská",
+        departureTimeCP: TimeInterval(1_680_959_460_000), departureTime: "22:30",
+        departureTimeRaw: TimeInterval(1_680_959_460_000), departureTimeRemaining: "now",
+        departureTimeRemainingShortened: "now", delay: 23, delayText: "23 minutes delay",
+        type: "online", currentStopId: 12, lastStopId: 12, lastStopName: "Cintorín Vrakuňa",
+        stuck: false
+    )
+    static let example2 = Connection(
+        id: "2:099", line: "71", platform: 099, stopId: 82, busID: "1:6722", headsign: "Hlavná stanica",
+        departureTimeCP: TimeInterval(1_680_959_460_000), departureTime: "22:36",
+        departureTimeRaw: TimeInterval(1_680_959_470_000), departureTimeRemaining: "2 min",
+        departureTimeRemainingShortened: "2m", delay: 0, delayText: "on time", type: "online",
+        currentStopId: 0, lastStopId: 0, lastStopName: "none", stuck: true
+    )
+    static let example3 = Connection(
+        id: "3:099", line: "736", platform: 099, stopId: 82, busID: "1:2552",
+        headsign: "Bratislava, Autobusová stanica", departureTimeCP: TimeInterval(1_680_959_460_000),
+        departureTime: "22:40", departureTimeRaw: TimeInterval(1_680_959_480_000),
+        departureTimeRemaining: "~17 min", departureTimeRemainingShortened: "17m", delay: 0,
+        delayText: "offline", type: "offline", currentStopId: 0, lastStopId: 0, lastStopName: "none",
+        stuck: true
+    )
+    static let empty = Connection(
+        id: "-1:-1", line: "", platform: -1, stopId: -1, busID: "", headsign: "",
+        departureTimeCP: TimeInterval(1_000_000_000_000_000), departureTime: "",
+        departureTimeRaw: TimeInterval(1_000_000_000_000_000), departureTimeRemaining: "",
+        departureTimeRemainingShortened: "", delay: -1, delayText: "", type: "", currentStopId: -1,
+        lastStopId: -1, lastStopName: "", stuck: false
+    )
 }
 
-extension Tab {
+extension Connection {
     init?(json: [String: Any], platform: Int, stopId: Int, expanded: Bool = false) {
         let id = "\(json["i"] as? Int ?? 0):\(platform)"
         let line = json["linka"] as? String ?? "Error"
@@ -49,8 +75,9 @@ extension Tab {
         let lastStopName = json["predoslaZstr"] as? String ?? "none"
         let stuck = json["uviaznute"] as? Bool ?? false
 
-        let departureTime = Date(timeIntervalSince1970: TimeInterval(departureTimeRaw)).formatted(date: .omitted, time: .shortened)
-        
+        let departureTime = Date(timeIntervalSince1970: TimeInterval(departureTimeRaw)).formatted(
+            date: .omitted, time: .shortened
+        )
 
         self.id = id
         self.line = line
@@ -61,16 +88,19 @@ extension Tab {
         self.departureTimeCP = (departureTimeCP / 60.0).rounded() * 60.0
         self.departureTime = departureTime
         self.departureTimeRaw = departureTimeRaw
-        self.departureTimeRemaining = getDepartureTimeRemainingText(departureTime, departureTimeRaw, type)
-        self.departureTimeRemainingShortened = getShortDepartureTimeRemainingText(departureTime, departureTimeRaw, type)
+        departureTimeRemaining = getDepartureTimeRemainingText(
+            departureTime, departureTimeRaw, type
+        )
+        departureTimeRemainingShortened = getShortDepartureTimeRemainingText(
+            departureTime, departureTimeRaw, type
+        )
         self.delay = delay
         self.type = type
         self.currentStopId = currentStopId
         self.lastStopId = lastStopId
-        print(lastStopName)
         self.lastStopName = lastStopName.replacingOccurrences(of: "Bratislava, ", with: "")
         self.stuck = stuck
-        self.delayText = getDelayText(delay, type)
+        delayText = getDelayText(delay, type)
         self.expanded = expanded
     }
 }
@@ -91,14 +121,15 @@ func getDelayText(_ delay: Int, _ type: String) -> String {
     }
 }
 
-func getDepartureTimeRemainingText(_ departureTime: String, _ departureTimeRaw: TimeInterval, _ type: String) -> String {
+func getDepartureTimeRemainingText(
+    _ departureTime: String, _ departureTimeRaw: TimeInterval, _ type: String
+) -> String {
     let departureTimeRemainingRaw = Int(departureTimeRaw - Date().timeIntervalSince1970)
     let timeInMins = departureTimeRemainingRaw / 60
-    let departureTimeRemaining = departureTimeRemainingRaw > 59 ?
-        timeInMins > 59 ?
-        departureTime :
-        "\(timeInMins) min" :
-        departureTimeRemainingRaw > 0 ? "<1 min" : "now"
+    let departureTimeRemaining =
+        departureTimeRemainingRaw > 59
+            ? timeInMins > 59 ? departureTime : "\(timeInMins) min"
+            : departureTimeRemainingRaw > 0 ? "<1 min" : "now"
 
     if type != "online" {
         return "~\(departureTimeRemaining)"
@@ -106,22 +137,22 @@ func getDepartureTimeRemainingText(_ departureTime: String, _ departureTimeRaw: 
     return departureTimeRemaining
 }
 
-func getShortDepartureTimeRemainingText(_ departureTime: String, _ departureTimeRaw: TimeInterval, _ type: String) -> String {
+func getShortDepartureTimeRemainingText(
+    _ departureTime: String, _ departureTimeRaw: TimeInterval, _: String
+) -> String {
     let departureTimeRemainingRaw = Int(departureTimeRaw - Date().timeIntervalSince1970)
     let timeInMins = departureTimeRemainingRaw / 60
     let shortenedFullTime = ":" + (departureTime.components(separatedBy: ":").last ?? "?")
-    return departureTimeRemainingRaw > 59 ?
-        timeInMins > 59 ?
-        shortenedFullTime :
-        "\(timeInMins)m" :
-        departureTimeRemainingRaw > 0 ? "<1" : "now"
+    return departureTimeRemainingRaw > 59
+        ? timeInMins > 59 ? shortenedFullTime : "\(timeInMins)m"
+        : departureTimeRemainingRaw > 0 ? "<1" : "now"
 }
 
-struct RegionalTabsResponse: Codable {
-    let current: [RegionalTab]
+struct RegionalConnectionsResponse: Codable {
+    let current: [RegionalConnection]
 }
 
-struct RegionalTab: Codable, Hashable {
+struct RegionalConnection: Codable, Hashable {
     let tripId: Int
     let tripHeadsign: String
     let routeShortName: String
@@ -133,45 +164,52 @@ struct RegionalTab: Codable, Hashable {
     let lastStationId: Int?
 }
 
-extension Tab {
-    init(from tab: RegionalTab, for stop: Stop) {
+extension Connection {
+    init(from connection: RegionalConnection, for stop: Stop) {
         let calendar = Calendar.current
         let now = Date()
         let startOfToday = calendar.startOfDay(for: now)
-        let delayMinutes = (tab.tripDelay ?? 0)/60
-        let departureDateCP = calendar.date(byAdding: .minute, value: (tab.departure), to: startOfToday) ?? startOfToday
-        let departureDate = calendar.date(byAdding: .minute, value: (delayMinutes), to: departureDateCP) ?? startOfToday
+        let delayMinutes = (connection.tripDelay ?? 0) / 60
+        let departureDateCP =
+            calendar.date(byAdding: .minute, value: connection.departure, to: startOfToday)
+                ?? startOfToday
+        let departureDate =
+            calendar.date(byAdding: .minute, value: delayMinutes, to: departureDateCP) ?? startOfToday
         let departureTimeRaw = departureDate.timeIntervalSince1970
         let departureTime = departureDate.formatted(date: .omitted, time: .shortened)
 
-        self.line = tab.routeShortName
-        
-        
-        if let platformCode = tab.stopCode,
-           let platform = stop.platformLabels?.first(where: { $0.label == platformCode }) {
+        line = connection.routeShortName
+
+        if let platformCode = connection.stopCode,
+           let platform = stop.platformLabels?.first(where: { $0.label == platformCode })
+        {
             self.platform = Int(platform.id) ?? -1
         } else {
-            self.platform = -1
+            platform = -1
         }
 
-        self.stopId = stop.id
-        self.busID = "0:0"
-        self.headsign = tab.tripHeadsign
-        self.departureTimeCP = departureDateCP.timeIntervalSince1970
-        self.id = "\(tab.tripId):\(tab.stopId):\(self.departureTimeCP)"
+        stopId = stop.id
+        busID = "0:0"
+        headsign = connection.tripHeadsign
+        departureTimeCP = departureDateCP.timeIntervalSince1970
+        id = "\(connection.tripId):\(connection.stopId):\(departureTimeCP)"
         self.departureTime = departureTime
         self.departureTimeRaw = departureTimeRaw
-        self.delay = delayMinutes
-        self.type = tab.tripDelay == nil ? "cp" : "online"
-        
-        self.departureTimeRemaining = getDepartureTimeRemainingText(departureTime, departureTimeRaw, self.type)
-        self.departureTimeRemainingShortened = getShortDepartureTimeRemainingText(departureTime, departureTimeRaw, self.type)
-        self.delayText = getDelayText(delayMinutes, self.type)
-        
-        self.currentStopId = -1
-        self.lastStopId = tab.lastStationId ?? -1
-        self.lastStopName = tab.lastStation ?? "none"
-        self.stuck = false
-        self.expanded = false
+        delay = delayMinutes
+        type = connection.tripDelay == nil ? "cp" : "online"
+
+        departureTimeRemaining = getDepartureTimeRemainingText(
+            departureTime, departureTimeRaw, type
+        )
+        departureTimeRemainingShortened = getShortDepartureTimeRemainingText(
+            departureTime, departureTimeRaw, type
+        )
+        delayText = getDelayText(delayMinutes, type)
+
+        currentStopId = -1
+        lastStopId = connection.lastStationId ?? -1
+        lastStopName = connection.lastStation ?? "none"
+        stuck = false
+        expanded = false
     }
 }

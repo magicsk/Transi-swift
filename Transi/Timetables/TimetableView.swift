@@ -121,11 +121,17 @@ struct TimetableView: View {
                 }.frame(width: 100)
             }
             ToolbarItem(placement: .topBarTrailing) {
-                DatePicker(
-                    "",
-                    selection: $selectedDate,
-                    displayedComponents: [.date]
-                )
+                ZStack {
+                    DatePicker(
+                        "",
+                        selection: $selectedDate,
+                        displayedComponents: .date
+                    )
+                    .labelsHidden()
+                    .colorMultiply(.clear)
+                    Text(datePickerFormatter.string(from: selectedDate))
+                        .allowsHitTesting(false)
+                }
             }
         }
         .onChange(of: selectedDeparture) { _ in
@@ -157,20 +163,23 @@ struct TimetableView: View {
         DispatchQueue.global(qos: .userInitiated).async { [self] in
             fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(selectedDirection.id)/\(selectedDate.toString())/0/1440/", type: Departures.self) { result in
                 switch result {
-                    case .success(let departures):
-                        self.departures = departures.all
+                case let .success(departures):
+                    self.departures = departures.all
+                    if departures.all.isEmpty {
+                        self.noTimetable = true
+                        self.departures = []
+                    }
+                    self.loading = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self.selectedDeparture = Double(self.departures.firstIndex(where: { $0.departure > (Int(Date.now.timeIntervalSince1970) + timezoneOffset) / 60 % 1440 }) ?? 0)
-                        if departures.all.isEmpty {
-                            self.noTimetable = true
-                            self.departures = []
-                        }
+                    }
+
+                case .failure:
+                    DispatchQueue.main.async {
+                        self.departures = []
                         self.loading = false
-                    case .failure:
-                        DispatchQueue.main.async {
-                            self.departures = []
-                            self.loading = false
-                            self.timetableError = true
-                        }
+                        self.timetableError = true
+                    }
                 }
             }
         }
@@ -181,20 +190,26 @@ struct TimetableView: View {
             if directions.isEmpty {
                 fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/directions", type: Directions.self) { result in
                     switch result {
-                        case .success(let directions):
-                            DispatchQueue.main.async {
-                                self.directions = directions.all
-                                self.selectedDirection = directions.all.first ?? .initial
-                            }
-                        case .failure:
-                            DispatchQueue.main.async {
-                                self.directionsError = true
-                            }
+                    case let .success(directions):
+                        DispatchQueue.main.async {
+                            self.directions = directions.all
+                            self.selectedDirection = directions.all.first ?? .initial
+                        }
+                    case .failure:
+                        DispatchQueue.main.async {
+                            self.directionsError = true
+                        }
                     }
                 }
             }
         }
     }
+
+    private let datePickerFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMM yyyy"
+        return formatter
+    }()
 }
 
 // #Preview {

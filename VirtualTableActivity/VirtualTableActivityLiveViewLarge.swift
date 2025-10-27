@@ -14,14 +14,14 @@ struct VirtualTableActivityLiveViewLarge: View {
     var body: some View {
         VStack {
             HStack {
-                LineText(context.state.tab.line, 20.0)
-                Text(context.state.tab.headsign).font(.headline).lineLimit(1)
+                LineText(context.state.connection.line, 20.0)
+                Text(context.state.connection.headsign).font(.headline).lineLimit(1)
                 Spacer()
-                Text(context.state.tab.departureTimeRemaining)
+                Text(context.state.connection.departureTimeRemaining)
                     .contentTransition(.numericText(countsDown: true))
                     .font(.headline)
             }
-            VirtualTableConnectionDetail(context.state.tab, context.state.vehicleInfo)
+            VirtualTableConnectionDetail(context.state.connection, context.state.vehicleInfo)
         }
         .padding(.all, 15.0)
     }

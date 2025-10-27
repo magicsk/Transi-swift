@@ -16,22 +16,24 @@ class VirtualTableController: ObservableObject {
     private var connected = false
     private var updater: Timer.TimerPublisher?
     private var updaterSubscription: AnyCancellable?
-    private var updaterRegionalTabs: Timer.TimerPublisher?
-    private var updaterRegionalTabsSubscription: AnyCancellable?
-    private var publisheDebouncer: Timer?
+    private var updaterRegionalConnections: Timer.TimerPublisher?
+    private var updaterRegionalConnectionsSubscription: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
     private var reconnect: Bool = false
-    private var expadndTabId: String? = nil
-    private let tabsProcessingQueue = DispatchQueue(label: "eu.magicsk.transi.tabsProcessingQueue")
+    private var loadedStatus: Int = 0
+    private var expandedConnectionId: String? = nil
+    private let connectionsProcessingQueue = DispatchQueue(
+        label: "eu.magicsk.transi.connectionsProcessingQueue")
 
-    @Published var tabs = [Tab]()
-    var internalTabs = [Tab]()
-    var internalRegionalTabs = [Tab]()
+    @Published var connections = [Connection]()
+    var internalConnections = [Connection]()
+    var internalRegionalConnections = [Connection]()
     @Published var vehicleInfo = [VehicleInfo]()
     @Published var changeLocation = true
-    @Published var currentStop: Stop = .example
-    @Published var socketStatus = "unknown"
-    @Published var lastExpandedTab: Tab? = nil
+    @Published var currentStop: Stop = .empty
+    @Published var socketStatus: SocketIOStatus = .notConnected
+    @Published var connectionsEmpty = false
+    @Published var lastExpandedConnection: Connection? = nil
 
     init() {
         manager = SocketManager(
@@ -51,44 +53,46 @@ class VirtualTableController: ObservableObject {
     }
 
     private func startUpdater() {
+        loadedStatus = 0
         Task {
             await self.fetchRegionalLiveDepartures()
         }
         updater = Timer.publish(every: 10, on: .current, in: .common)
         updaterSubscription = updater?.autoconnect().sink(receiveValue: { [weak self] _ in
-            self?.updateTabs()
+            self?.updateConnections()
         })
 
-        updaterRegionalTabs = Timer.publish(every: 50, on: .current, in: .common)
-        updaterRegionalTabsSubscription = updaterRegionalTabs?.autoconnect().sink(receiveValue: { [weak self] _ in
-            Task {
-                await self?.fetchRegionalLiveDepartures()
-            }
-        })
+        updaterRegionalConnections = Timer.publish(every: 50, on: .current, in: .common)
+        updaterRegionalConnectionsSubscription = updaterRegionalConnections?.autoconnect().sink(
+            receiveValue: { [weak self] _ in
+                Task {
+                    await self?.fetchRegionalLiveDepartures()
+                }
+            })
     }
 
     private func stopUpdater() {
         updaterSubscription?.cancel()
         updaterSubscription = nil
         updater = nil
-        updaterRegionalTabsSubscription?.cancel()
-        updaterRegionalTabsSubscription = nil
-        updaterRegionalTabs = nil
+        updaterRegionalConnectionsSubscription?.cancel()
+        updaterRegionalConnectionsSubscription = nil
+        updaterRegionalConnections = nil
     }
 
-    private func updateTabs() {
+    private func updateConnections() {
         //  print("update")
-        for index in tabs.indices {
-            let tab = tabs[index]
-            let oldTimeRemaining = tab.departureTimeRemaining
+        for index in connections.indices {
+            let connection = connections[index]
+            let oldTimeRemaining = connection.departureTimeRemaining
             let updatedTimeRemaining = getDepartureTimeRemainingText(
-                tab.departureTime,
-                tab.departureTimeRaw,
-                tab.type
+                connection.departureTime,
+                connection.departureTimeRaw,
+                connection.type
             )
             if oldTimeRemaining != updatedTimeRemaining {
                 DispatchQueue.main.async {
-                    self.tabs[index].departureTimeRemaining = updatedTimeRemaining
+                    self.connections[index].departureTimeRemaining = updatedTimeRemaining
                 }
             }
         }
@@ -97,6 +101,7 @@ class VirtualTableController: ObservableObject {
     private func fetchRegionalLiveDepartures() async {
         guard let stationId = currentStop.stationId else {
             print("Current stop has no stationId. Cannot fetch regional departures.")
+            loadedStatus += 1
             return
         }
 
@@ -110,64 +115,80 @@ class VirtualTableController: ObservableObject {
 
         fetchBApi(
             endpoint: "/mobile/v1/station/\(stationId)/timetable/\(dateString)/\(minutes)/1",
-            type: RegionalTabsResponse.self
+            type: RegionalConnectionsResponse.self
         ) { result in
 
             switch result {
             case let .success(response):
-                var newRegionalTabs = response.current.map { Tab(from: $0, for: self.currentStop) }
-                newRegionalTabs.removeAll { tab in
-                    tab.departureTimeRaw < (Date().timeIntervalSince1970 + 15) || tab.type != "online"
+                var newRegionalConnections = response.current.map {
+                    Connection(from: $0, for: self.currentStop)
+                }
+                newRegionalConnections.removeAll { connection in
+                    connection.departureTimeRaw < (Date().timeIntervalSince1970 + 15)
+                        || connection.type != "online"
                 }
 
-                self.internalRegionalTabs = newRegionalTabs
-                self.sortAndPublishTabs()
+                self.internalRegionalConnections = newRegionalConnections
+                self.sortAndPublishConnections()
             case let .failure(err):
                 print("Error fetching or decoding regional departures. \(err)")
             }
+            self.loadedStatus += 1
         }
     }
 
-    private func getRegionalTab(_ tab: Tab) -> Tab? {
-        return internalRegionalTabs.first(where: { $0.line == tab.line && $0.type == "online" && $0.departureTimeCP == tab.departureTimeCP })
+    private func getRegionalConnection(_ connection: Connection) -> Connection? {
+        return internalRegionalConnections.first(where: {
+            $0.line == connection.line && $0.type == "online"
+                && $0.departureTimeCP == connection.departureTimeCP
+        })
     }
 
-    private func sortAndPublishTabs() {
+    private func sortAndPublishConnections() {
         DispatchQueue.global(qos: .userInteractive).async { [weak self] in
             guard let self = self else { return }
-            print("run", self.internalTabs.count)
-            var tabsForPublish: [Tab] = []
-            var regionalTabsToRemove: [String] = []
-            tabsForPublish.append(contentsOf: self.internalTabs)
+            var connectionsForPublish: [Connection] = []
+            var regionalConnectionsToRemove: [String] = []
+            connectionsForPublish.append(contentsOf: self.internalConnections)
 
-            tabsForPublish = self.internalTabs.map { tab in
-                if var regionalTab = self.getRegionalTab(tab) {
-                    print("Replacing \(tab.id) with \(regionalTab.id)")
-                    regionalTabsToRemove.append(regionalTab.id)
-                    if tab.type == "online" {
-                        return tab
+            connectionsForPublish = self.internalConnections.map { connection in
+                if var regionalConnection = self.getRegionalConnection(connection) {
+                    //                    print("Replacing \(connection.id) with \(regionalConnection.id)")
+                    regionalConnectionsToRemove.append(regionalConnection.id)
+                    if connection.type == "online" {
+                        return connection
                     }
-                    regionalTab.platform = tab.platform
-                    return regionalTab
+                    regionalConnection.platform = connection.platform
+                    return regionalConnection
                 }
-                return tab
+                return connection
             }
-            print(regionalTabsToRemove)
-            let newRegionalTabs = self.internalRegionalTabs.filter { $0.departureTimeCP < Date().timeIntervalSince1970 && !regionalTabsToRemove.contains($0.id) }
-            print(newRegionalTabs)
-            tabsForPublish.append(contentsOf: newRegionalTabs)
-            
-            tabsForPublish.sort { tab1, tab2 in
-                if tab1.departureTimeRaw == tab2.departureTimeRaw {
-                    return tab1.id < tab2.id
+            let newRegionalConnections = self.internalRegionalConnections.filter {
+                $0.departureTimeCP < Date().timeIntervalSince1970
+                    && !regionalConnectionsToRemove.contains($0.id)
+            }
+            connectionsForPublish.append(contentsOf: newRegionalConnections)
+
+            connectionsForPublish.sort { a, b in
+                if a.departureTimeRaw == b.departureTimeRaw {
+                    return a.id < b.id
                 } else {
-                    return tab1.departureTimeRaw < tab2.departureTimeRaw
+                    return a.departureTimeRaw < b.departureTimeRaw
                 }
             }
-            
+
             DispatchQueue.main.async {
-                self.tabs = tabsForPublish
-                self.socketStatus = "connected"
+                self.connections = connectionsForPublish
+                if self.socket.status == .connected {
+                    self.socketStatus = .connected
+                    if self.loadedStatus > 1 {
+                        self.connectionsEmpty =
+                            self.connections.isEmpty && self.internalConnections.isEmpty
+                                && self.internalRegionalConnections.isEmpty
+                    }
+                } else {
+                    self.disconnect(reconnect: true)
+                }
             }
         }
     }
@@ -186,11 +207,11 @@ class VirtualTableController: ObservableObject {
 
     func startListeners() {
         socket.on(clientEvent: .statusChange) { _, _ in
-            let connectionStatus = self.socket.status.description
+            let connectionStatus = self.socket.status
             DispatchQueue.main.async {
-                print(connectionStatus)
-                if connectionStatus != "connected" {
-                    self.socketStatus = self.socket.status.description
+                print(connectionStatus.description)
+                if connectionStatus != .connected {
+                    self.socketStatus = connectionStatus
                 }
             }
         }
@@ -204,8 +225,8 @@ class VirtualTableController: ObservableObject {
 
         socket.on(clientEvent: .disconnect) { _, _ in
             DispatchQueue.main.async {
-                self.tabs = [Tab]()
-                self.internalTabs = [Tab]()
+                self.connections = [Connection]()
+                self.internalConnections = [Connection]()
                 self.vehicleInfo = [VehicleInfo]()
                 self.connected = false
                 if self.reconnect {
@@ -218,53 +239,56 @@ class VirtualTableController: ObservableObject {
         }
 
         socket.on("cack") { _, _ in
-            print("cack")
+            //            print("cack")
             self.connected = true
             self.socket.emit("tabStart", [self.currentStop.id, "*"] as [Any])
             self.socket.emit("infoStart")
         }
 
         socket.on("tabs") { data, _ in
-            self.tabsProcessingQueue.async {
+            self.connectionsProcessingQueue.async {
                 guard let platformArray = data.first as? [[String: Any]] else {
                     print("Error: Could not cast incoming data to the expected [[String: Any]] structure.")
+                    self.loadedStatus += 1
                     DispatchQueue.main.async {
-                        self.tabs = [Tab]()
-                        self.internalTabs = [Tab]()
-                        self.socketStatus = "error"
+                        self.connections = [Connection]()
+                        self.internalConnections = [Connection]()
                     }
                     return
                 }
 
-                var newTabs = [Tab]()
+                var newConnections = [Connection]()
                 var platformsToUpdate = Set<Int>()
 
                 for platformObject in platformArray {
                     if let _platform = platformObject["nastupiste"] as? Int,
                        let _stopId = platformObject["zastavka"] as? Int,
-                       let tabsJson = platformObject["tab"] as? [Any]
+                       let connectionsJson = platformObject["tab"] as? [Any]
                     {
                         platformsToUpdate.insert(_platform)
-                        for object in tabsJson {
-                            if let tabJson = object as? [String: Any] {
-                                if var tab = Tab(json: tabJson, platform: _platform, stopId: _stopId) {
-                                    if tab.id == self.expadndTabId {
-                                        tab.expanded = true
-                                        self.expadndTabId = nil
+                        for object in connectionsJson {
+                            if let connectionJson = object as? [String: Any] {
+                                if var connection = Connection(
+                                    json: connectionJson, platform: _platform, stopId: _stopId
+                                ) {
+                                    if connection.id == self.expandedConnectionId {
+                                        connection.expanded = true
+                                        self.expandedConnectionId = nil
                                     }
-                                    newTabs.append(tab)
+                                    newConnections.append(connection)
                                 }
                             }
                         }
                     }
                 }
 
-                self.internalTabs.removeAll { tab in
-                    platformsToUpdate.contains(tab.platform)
+                self.internalConnections.removeAll { connection in
+                    platformsToUpdate.contains(connection.platform)
                 }
 
-                self.internalTabs.append(contentsOf: newTabs)
-                self.sortAndPublishTabs()
+                self.internalConnections.append(contentsOf: newConnections)
+                self.loadedStatus += 1
+                self.sortAndPublishConnections()
             }
         }
 
@@ -290,7 +314,7 @@ class VirtualTableController: ObservableObject {
         }
     }
 
-    func changeStop(_ stopId: Int, switchOnly: Bool = false, expandTab: String? = nil) {
+    func changeStop(_ stopId: Int, switchOnly: Bool = false, expandConnection: String? = nil) {
         if stopId == -1 {
             switchLocationChanging(true)
         } else {
@@ -305,8 +329,8 @@ class VirtualTableController: ObservableObject {
             if !connected {
                 connect()
             }
-            if let tabId = expandTab {
-                expadndTabId = tabId
+            if let connectionId = expandConnection {
+                expandedConnectionId = connectionId
             }
         }
     }

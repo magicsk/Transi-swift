@@ -11,8 +11,8 @@ import SwipeActions
 struct VirtualTableListItem: View {
     @StateObject var virtualTableController = GlobalController.virtualTable
     @Environment(\.openURL) private var openURL
-    
-    var tab: Tab
+
+    var connection: Connection
     var platformLabels: [PlatformLabel]?
     var vehicleInfo: VehicleInfo?
     @State var date = Date()
@@ -20,8 +20,8 @@ struct VirtualTableListItem: View {
     @State var loadedImage: UIImage? = nil
     @State var expanded: Bool = false
 
-    init(_ tab: Tab, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?) {
-        self.tab = tab
+    init(_ connection: Connection, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?) {
+        self.connection = connection
         self.platformLabels = platformLabels
         self.vehicleInfo = vehicleInfo
     }
@@ -30,25 +30,24 @@ struct VirtualTableListItem: View {
         SwipeView {
             VStack(spacing: 0) {
                 DisclosureGroup(isExpanded: $expanded) {
-                    VirtualTableConnectionDetail(tab, vehicleInfo, true)
-                        .padding(.trailing, 20.0)
+                    VirtualTableConnectionDetail(connection, vehicleInfo, true)
                         .padding(.horizontal, 14.0)
                         .padding(.vertical, 10.0)
                 } label: {
                     HStack {
                         VStack {
-                            LineText(tab.line, 20.0)
+                            LineText(connection.line, 20.0)
                         }
                         .width(50.0)
-                        .padding(.leading, 6.0)
+                        .padding(.leading, 14.0)
                         VStack {
                             HStack {
                                 VStack(alignment: .leading, spacing: .zero) {
-                                    Text(tab.headsign).font(.system(size: 16.0, weight: .medium)).lineLimit(1)
-                                    if tab.lastStopName != "none" && !expanded {
+                                    Text(connection.headsign).font(.system(size: 16.0, weight: .medium)).lineLimit(1)
+                                    if connection.lastStopName != "none" && !expanded {
                                         HStack(spacing: 4.0) {
                                             StopIcon()
-                                            Text(tab.lastStopName)
+                                            Text(connection.lastStopName)
                                                 .font(.system(size: 10.0, weight: .light))
                                                 .foregroundColor(.systemGray)
                                         }.padding(.leading, 1.5)
@@ -59,32 +58,32 @@ struct VirtualTableListItem: View {
                                     Spacer()
                                 }
                                 HStack(spacing: 6.0) {
-                                    if tab.stuck {
+                                    if connection.stuck {
                                         Image("exclamationmark.triangle.fill").foregroundColor(.yellow)
                                     }
-                                    RemainingTime(tab.departureTimeRemaining)
-                                    Text(getPlatformLabel(platformLabels, tab.platform)).font(.system(size: 16.0, weight: .light)).width(22.0)
-                                }.padding(.trailing, 10.0)
+                                    RemainingTime(connection.departureTimeRemaining)
+                                    Text(getPlatformLabel(platformLabels, connection.platform)).font(.system(size: 16.0, weight: .light)).width(22.0)
+                                }.padding(.trailing, 15.0).buttonStyle(PlainButtonStyle())
                             }
                         }
                     }
-                    .padding(.top, 7.5)
-                    .padding(.bottom, 2.5)
+                    .padding(.top, 12.0)
+                    .padding(.bottom, 10.7)
                     .foregroundColor(.label)
                 }
-                .accentColor(.clear)
-                .padding(.trailing, -20.0)
+                .disclosureGroupStyle(HideArrowDisclosureGroupStyle())
+                .padding(.trailing, 0.0)
                 .onAppear {
-                    expanded = expanded ? true : tab.expanded
+                    expanded = expanded ? true : connection.expanded
                 }
                 .padding(.bottom, -1.5)
-                Divider().padding(.leading, expanded ? 0.0 : 65.0).opacity(virtualTableController.tabs.last?.id == tab.id ? 0.0 : 1.0)
+                Divider().padding(.leading, expanded ? 0.0 : 65.0).opacity(virtualTableController.connections.last?.id == connection.id ? 0.0 : 1.0)
             }
         } leadingActions: { context in
             SwipeAction(systemImage: "bell.fill") {
                 DispatchQueue.main.asyncAfter(deadline: .now()) {
                     context.state.wrappedValue = .closed
-                    let aid = try! VirtualTableLiveActivityController.startActivity(tab, vehicleInfo)
+                    let aid = try! VirtualTableLiveActivityController.startActivity(connection, vehicleInfo)
                     print(aid)
                 }
             }
@@ -94,7 +93,7 @@ struct VirtualTableListItem: View {
         }
     trailingActions: { context in
             SwipeAction(systemImage: "square.and.arrow.up") {
-                let url = URL(string: "transi://table/\(tab.stopId)/\(tab.id)")
+                let url = URL(string: "transi://table/\(connection.stopId)/\(connection.id)")
                 let av = UIActivityViewController(activityItems: [url!], applicationActivities: nil)
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
                     windowScene.windows.first?.rootViewController?.present(av, animated: true, completion: nil)
@@ -105,13 +104,13 @@ struct VirtualTableListItem: View {
             .background(.systemYellow)
             .foregroundStyle(.white)
             SwipeAction(systemImage: "calendar") {
-                openURL(URL(string: "transi://timetable/\(tab.line)")!)
+                openURL(URL(string: "transi://timetable/\(connection.line)")!)
                 context.state.wrappedValue = .closed
             }
             .background(.systemGreen)
             .foregroundStyle(.white)
             SwipeAction(systemImage: "map.fill") {
-                if let stopId = GlobalController.stopsListProvider.getStopIdFromName(tab.lastStopName) {
+                if let stopId = GlobalController.stopsListProvider.getStopIdFromName(connection.lastStopName) {
                     openURL(URL(string: "transi://map/\(stopId)")!)
                 }
                 context.state.wrappedValue = .closed
@@ -128,7 +127,7 @@ struct VirtualTableListItem: View {
         .swipeActionsVisibleEndPoint(60.0)
         .onChange(of: expanded) { expanded in
             if expanded == true {
-                GlobalController.virtualTable.lastExpandedTab = tab
+                GlobalController.virtualTable.lastExpandedConnection = connection
             }
         }
 //        .overlay {
@@ -142,18 +141,23 @@ struct VirtualTableListItem: View {
 }
 
 #Preview {
-    ZStack {
-        Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
-        VStack {
-            LazyVStack {
-                Spacer()
-                ForEach([Tab.example, Tab.example2, Tab.example3]) { tab in
-                    VirtualTableListItem(tab, [PlatformLabel.example], VehicleInfo.example)
+    NavigationStack {
+        ZStack {
+            Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
+            ScrollView {
+                LazyVStack(spacing: .zero) {
+                    SwipeViewGroup {
+                        ForEach([Connection.example2, Connection.example, Connection.example3]) { connection in
+                            VirtualTableListItem(connection, [PlatformLabel.example], VehicleInfo.example)
+                        }
+                    }
                 }
+                .background(.secondarySystemGroupedBackground)
+                .cornerRadius(26.0)
+                .padding(.horizontal, 15.9)
+                Spacer().padding(.bottom, 60.0)
             }
-            .background(.secondarySystemGroupedBackground)
-            .cornerRadius(12.0)
-            Spacer()
-        }.padding(.horizontal, 12.0)
+        }
+        .navigationTitle(Text("Loading..."))
     }
 }

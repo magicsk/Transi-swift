@@ -10,20 +10,23 @@ import SwiftUI
 import WidgetKit
 
 struct VirtualTableActivityLiveView: View {
-    @Environment(\.self) var environment
-    @Environment(\.isLuminanceReduced) var isLuminanceReduced
+    @Environment(\.colorScheme) var colorScheme
 
     var context: ActivityViewContext<VirtualTableActivityAttributes>
 
     var body: some View {
-        VStack {
+        let liveActivity = VStack {
             if #available(iOS 18.0, *) {
                 VirtualTableActivityLiveDynamicView(context: context)
             } else {
                 VirtualTableActivityLiveViewLarge(context: context)
             }
         }
-        .widgetURL(URL(string: "transi://table/\(context.state.tab.stopId)/\(context.state.tab.id)"))
-        .activityBackgroundTint(Color(uiColor: UIColor.systemBackground).opacity(0.43))
+        .widgetURL(URL(string: "transi://table/\(context.state.connection.stopId)/\(context.state.connection.id)"))
+        if #available(iOS 26.0, *) {
+            liveActivity.activityBackgroundTint(Color.clear)
+        } else {
+            liveActivity.activityBackgroundTint(colorScheme == .dark ? Color.black.opacity(0.43) : Color.systemBackground.opacity(0.43))
+        }
     }
 }

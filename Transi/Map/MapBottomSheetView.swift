@@ -27,7 +27,7 @@ struct MapBottomSheetView: View {
                         Text(virtualTableController.currentStop.name ?? "Loading...").font(.system(size: 32.0, weight: .bold))
                         Spacer()
                         Button(action: {
-                            changeTab(1)
+                            changeTab(0)
                             dismiss()
                             GlobalController.tripPlanner.fetchTripToActualStop()
                         }) {

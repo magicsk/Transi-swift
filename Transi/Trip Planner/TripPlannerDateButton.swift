@@ -21,17 +21,20 @@ struct TripPlannerDateButton: View {
     }
 
     var body: some View {
-        Button(
-            customDate ?
-                formatter.string(from: date) :
-                "now"
-        ) {
-            dateDialog = true
+        Button(action: {dateDialog = true}) {
+            Text(customDate ? formatter.string(from: date) : "now")
+                .padding(.vertical, 6.0)
+                .frame(maxWidth: .infinity)
+                .background(.secondarySystemGroupedBackground)
+                .cornerRadius(26.0)
+                .padding(.leading, 10.0)
         }
-        .padding(.vertical, 6.0)
-        .frame(maxWidth: .infinity)
-        .background(.secondarySystemGroupedBackground)
-        .cornerRadius(8.0)
-        .padding(.leading, 10.0)
+    }
+}
+
+#Preview {
+    ZStack {
+        Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
+        TripPlannerDateButton(.constant(.now), dateDialog: .constant(false), customDate: false)
     }
 }
