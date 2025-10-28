@@ -61,9 +61,6 @@ struct StopListView: View {
                 }
                 ScrollViewReader { _ in
                     List(filteredItems) { stop in
-                        if stop.id == filteredItems.first?.id {
-                            EmptyView().id("top")
-                        }
                         Label {
                             HStack {
                                 Text(stop.name ?? "Error")
