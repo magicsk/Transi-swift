@@ -13,8 +13,6 @@
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<key>CFBundleURLIconFile</key>
-			<string>Shared/Assets.xcassets/AppIcon.appiconset/1024.png</string>
 			<key>CFBundleURLName</key>
 			<string>eu.magicsk.transi</string>
 			<key>CFBundleURLSchemes</key>

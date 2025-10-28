@@ -15,9 +15,6 @@
 		DA1F2E6F2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */; };
 		DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7802B02951F00BC8428 /* SwiftUIX */; };
 		DA23A7862B02957700BC8428 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7852B02957700BC8428 /* SocketIO */; };
-		DA3059502E8EDF220055A692 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA30594F2E8EDF220055A692 /* AppIcon.icon */; };
-		DA3059512E8EDF220055A692 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA30594F2E8EDF220055A692 /* AppIcon.icon */; };
-		DA3059522E8EDF220055A692 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA30594F2E8EDF220055A692 /* AppIcon.icon */; };
 		DA3059542E9012D20055A692 /* DisclosureGroupStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3059532E9012C10055A692 /* DisclosureGroupStyle.swift */; };
 		DA3059562E9043440055A692 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = DA3059552E9043440055A692 /* SwiftUIIntrospect */; };
 		DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DB2B1E7CB20006F41E /* Errors.swift */; };
@@ -108,6 +105,9 @@
 		DACDA7882B7033F700D53F6D /* CircleIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACDA7872B7033F700D53F6D /* CircleIcon.swift */; };
 		DACDA78A2B7044CB00D53F6D /* TripPlannerDateButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACDA7892B7044CB00D53F6D /* TripPlannerDateButton.swift */; };
 		DACFD5D82EAD28FA009720B5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACFD5D72EAD28DE009720B5 /* ContentView.swift */; };
+		DACFD5E02EB0E928009720B5 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DACFD5DF2EB0E928009720B5 /* AppIcon.icon */; };
+		DACFD5E12EB0E928009720B5 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DACFD5DF2EB0E928009720B5 /* AppIcon.icon */; };
+		DACFD5E22EB0E928009720B5 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DACFD5DF2EB0E928009720B5 /* AppIcon.icon */; };
 		DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */; };
 		DAD0CE9D29CB97D500A43CC6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */; };
 		DAD0CEAC29CB9D5400A43CC6 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
@@ -180,7 +180,6 @@
 		DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveViewLarge.swift; sourceTree = "<group>"; };
 		DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityDynamicIsland.swift; sourceTree = "<group>"; };
 		DA269E0F298960EF00F42107 /* VirtualTableList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableList.swift; sourceTree = "<group>"; };
-		DA30594F2E8EDF220055A692 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		DA3059532E9012C10055A692 /* DisclosureGroupStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisclosureGroupStyle.swift; sourceTree = "<group>"; };
 		DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableDetail.swift; sourceTree = "<group>"; };
 		DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableListItem.swift; sourceTree = "<group>"; };
@@ -241,6 +240,7 @@
 		DACDA7872B7033F700D53F6D /* CircleIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleIcon.swift; sourceTree = "<group>"; };
 		DACDA7892B7044CB00D53F6D /* TripPlannerDateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDateButton.swift; sourceTree = "<group>"; };
 		DACFD5D72EAD28DE009720B5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		DACFD5DF2EB0E928009720B5 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		DAD0CE9A29CB97D500A43CC6 /* TransiWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiWatchApp.swift; sourceTree = "<group>"; };
 		DAD0CE9C29CB97D500A43CC6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DAD16F2F2C1B085700E620C4 /* VirtualTableActivityLiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveView.swift; sourceTree = "<group>"; };
@@ -514,7 +514,7 @@
 				DAA817F629743B2A00E2FBB7 /* Models */,
 				DAA817CB2974387C00E2FBB7 /* Assets.xcassets */,
 				DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */,
-				DA30594F2E8EDF220055A692 /* AppIcon.icon */,
+				DACFD5DF2EB0E928009720B5 /* AppIcon.icon */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -672,9 +672,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA737DEF2B9116840093FAC6 /* Vehicles.xcassets in Resources */,
+				DACFD5E22EB0E928009720B5 /* AppIcon.icon in Resources */,
 				DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */,
 				DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */,
-				DA3059502E8EDF220055A692 /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -683,8 +683,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAE714DE2B2FAACF0059B8A1 /* swift.yml in Resources */,
-				DA3059522E8EDF220055A692 /* AppIcon.icon in Resources */,
 				DAD0CEB529CB9E3C00A43CC6 /* Assets.xcassets in Resources */,
+				DACFD5E02EB0E928009720B5 /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -693,8 +693,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAF4A9242BF1058600A46591 /* Vehicles.xcassets in Resources */,
-				DA3059512E8EDF220055A692 /* AppIcon.icon in Resources */,
 				DA737DEC2B90E2D40093FAC6 /* Assets.xcassets in Resources */,
+				DACFD5E12EB0E928009720B5 /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1178,7 +1178,6 @@
 			baseConfigurationReference = DA80284C2B24E39D0011390B /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1217,7 +1216,6 @@
 			baseConfigurationReference = DA80284C2B24E39D0011390B /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
