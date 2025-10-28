@@ -12,7 +12,7 @@ jobs:
     runs-on: macos-15
     steps:
     - name: Set Xcode Version
-      run: sudo xcode-select -s /Applications/Xcode.app
+      run: sudo xcode-select -s /Applications/Xcode_26.0.app
     - name: Checkout code
       uses: actions/checkout@v4
 
