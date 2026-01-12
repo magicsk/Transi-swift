@@ -1,5 +1,5 @@
 {
-  "originHash" : "e1d2b1a0a67c403ea23eea387ac5f811bfdb38eb3d98d2a868a0e43e41e6c028",
+  "originHash" : "190999bc1afb47d780ec593f1266d36120dee978b4f89f20b8cbe50a62bb27b9",
   "pins" : [
     {
       "identity" : "fuse-swift",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "c18c99823de57b6d91c6af248a1e436d380f88cc",
         "version" : "0.10.0"
+      }
+    },
+    {
+      "identity" : "marqueetext",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/joekndy/MarqueeText.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "22309f6863a182e81a2b4ebbca8cdc044f854b33"
       }
     },
     {

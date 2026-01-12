@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */; };
+		DA09CC782F032B81006E4FB9 /* MarqueeText in Frameworks */ = {isa = PBXBuildFile; productRef = DA09CC772F032B81006E4FB9 /* MarqueeText */; };
 		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
 		DA1C5A182CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */; };
 		DA1C5A192CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */; };
@@ -34,6 +35,7 @@
 		DA500BF82A11461300630226 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BF72A11461300630226 /* Date.swift */; };
 		DA500BFF2A12B23900630226 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500BFE2A12B23900630226 /* Color.swift */; };
 		DA500C022A12B81E00630226 /* ListStackModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA500C012A12B81E00630226 /* ListStackModifier.swift */; };
+		DA5C43122F1458D600B08763 /* AnyCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5C43112F1458D600B08763 /* AnyCodable.swift */; };
 		DA63553029E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */; };
 		DA63553129E48A3E00AAD7C0 /* VehicleInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */; };
 		DA63553329E4957A00AAD7C0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63553229E4957A00AAD7C0 /* String.swift */; };
@@ -50,6 +52,8 @@
 		DA737DE62B90D20E0093FAC6 /* RemoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA737DE52B90D20E0093FAC6 /* RemoteImage.swift */; };
 		DA737DEC2B90E2D40093FAC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
 		DA737DEF2B9116840093FAC6 /* Vehicles.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */; };
+		DA76B57C2ECE4B620074F4E2 /* ApiModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76B57B2ECE4B620074F4E2 /* ApiModels.swift */; };
+		DA76B57D2ECE4B620074F4E2 /* ApiModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76B57B2ECE4B620074F4E2 /* ApiModels.swift */; };
 		DA7887EA2B77DA0800BFFB4F /* TimetablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA412A0939CA005D7E49 /* TimetablesView.swift */; };
 		DA7887EB2B77DA0A00BFFB4F /* TimetableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */; };
 		DA7887EC2B77DA0C00BFFB4F /* TimetableDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */; };
@@ -135,6 +139,7 @@
 		DAEF77B129744893008D66DE /* Stops.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B029744893008D66DE /* Stops.swift */; };
 		DAEF77B32974680B008D66DE /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
 		DAF4A9242BF1058600A46591 /* Vehicles.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */; };
+		DAF4C8242F14236D00C6E906 /* TripPlannerController+Mapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4C8232F14236D00C6E906 /* TripPlannerController+Mapping.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -193,11 +198,13 @@
 		DA500BF72A11461300630226 /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
 		DA500BFE2A12B23900630226 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		DA500C012A12B81E00630226 /* ListStackModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListStackModifier.swift; sourceTree = "<group>"; };
+		DA5C43112F1458D600B08763 /* AnyCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodable.swift; sourceTree = "<group>"; };
 		DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleInfo.swift; sourceTree = "<group>"; };
 		DA63553229E4957A00AAD7C0 /* String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
 		DA737DDF2B8FA76D0093FAC6 /* StopIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopIcon.swift; sourceTree = "<group>"; };
 		DA737DE52B90D20E0093FAC6 /* RemoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImage.swift; sourceTree = "<group>"; };
 		DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Vehicles.xcassets; sourceTree = "<group>"; };
+		DA76B57B2ECE4B620074F4E2 /* ApiModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiModels.swift; sourceTree = "<group>"; };
 		DA7A7D3B2A11184A0002D7D7 /* TripPlannerList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerList.swift; sourceTree = "<group>"; };
 		DA7A7D3E2A112FCB0002D7D7 /* DateTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTime.swift; sourceTree = "<group>"; };
 		DA80284C2B24E39D0011390B /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
@@ -259,6 +266,7 @@
 		DAE77C562B8A5C9B008F3185 /* VirtualTableLiveActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableLiveActivityController.swift; sourceTree = "<group>"; };
 		DAEF77B029744893008D66DE /* Stops.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stops.swift; sourceTree = "<group>"; };
 		DAEF77B22974680B008D66DE /* StopListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListView.swift; sourceTree = "<group>"; };
+		DAF4C8232F14236D00C6E906 /* TripPlannerController+Mapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TripPlannerController+Mapping.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -266,6 +274,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA09CC782F032B81006E4FB9 /* MarqueeText in Frameworks */,
 				DA3059562E9043440055A692 /* SwiftUIIntrospect in Frameworks */,
 				DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */,
 				DA66CA9C2BDC926200C4C4E6 /* SwipeActions in Frameworks */,
@@ -354,6 +363,7 @@
 			isa = PBXGroup;
 			children = (
 				DA737DDF2B8FA76D0093FAC6 /* StopIcon.swift */,
+				DACDA7872B7033F700D53F6D /* CircleIcon.swift */,
 			);
 			path = Icons;
 			sourceTree = "<group>";
@@ -430,6 +440,8 @@
 		DAA817F629743B2A00E2FBB7 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				DA5C43112F1458D600B08763 /* AnyCodable.swift */,
+				DA76B57B2ECE4B620074F4E2 /* ApiModels.swift */,
 				DAE714D82B2FA2E20059B8A1 /* Session.swift */,
 				DABD03242A0AF76E00FD2C4B /* StopGps.swift */,
 				DAEF77B029744893008D66DE /* Stops.swift */,
@@ -465,7 +477,6 @@
 			isa = PBXGroup;
 			children = (
 				DABAE4082ACC23DA00D66159 /* LineText.swift */,
-				DACDA7872B7033F700D53F6D /* CircleIcon.swift */,
 				DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */,
 				DAAA8A472B823FEE006A1EC8 /* NoDeparturesIcon.swift */,
 				DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */,
@@ -483,6 +494,7 @@
 		DAC95A092B77A905005E93C7 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				DAF4C8232F14236D00C6E906 /* TripPlannerController+Mapping.swift */,
 				DAC95A0A2B77A92F005E93C7 /* GlobalController.swift */,
 				DAC95A0C2B77A93C005E93C7 /* VirtualTableController.swift */,
 				DAD294B82BA38C9900875B3A /* SimpleVirtualTableController.swift */,
@@ -570,6 +582,7 @@
 				DA66CA9B2BDC926200C4C4E6 /* SwipeActions */,
 				DADF72BD2C15D0AD008CF3F2 /* MapCache */,
 				DA3059552E9043440055A692 /* SwiftUIIntrospect */,
+				DA09CC772F032B81006E4FB9 /* MarqueeText */,
 			);
 			productName = Transi;
 			productReference = DABD031B2A097ABE00FD2C4B /* Transi.app */;
@@ -654,6 +667,7 @@
 				DAE714E42B2FC0D50059B8A1 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
 				DA66CA9A2BDC926200C4C4E6 /* XCRemoteSwiftPackageReference "SwipeActions" */,
 				DADF72BC2C15D0AD008CF3F2 /* XCRemoteSwiftPackageReference "MapCache" */,
+				DA09CC762F032B81006E4FB9 /* XCRemoteSwiftPackageReference "MarqueeText" */,
 			);
 			productRefGroup = DAA817BB2974387B00E2FBB7;
 			projectDirPath = "";
@@ -707,8 +721,10 @@
 			files = (
 				DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */,
 				DAAA8A4A2B8242D7006A1EC8 /* LoadingIndicator.swift in Sources */,
+				DA76B57C2ECE4B620074F4E2 /* ApiModels.swift in Sources */,
 				DAD294B92BA38C9900875B3A /* SimpleVirtualTableController.swift in Sources */,
 				DABAE40B2ACC2E5200D66159 /* Line.swift in Sources */,
+				DA5C43122F1458D600B08763 /* AnyCodable.swift in Sources */,
 				DACDA78A2B7044CB00D53F6D /* TripPlannerDateButton.swift in Sources */,
 				DACDA7862B7031B100D53F6D /* TripPlannerSearchInputs.swift in Sources */,
 				DAAA8A4E2B8285E9006A1EC8 /* LoadingView.swift in Sources */,
@@ -716,6 +732,7 @@
 				DA7A7D3C2A11184A0002D7D7 /* TripPlannerList.swift in Sources */,
 				DA737DE02B8FA76D0093FAC6 /* StopIcon.swift in Sources */,
 				DA7887EC2B77DA0C00BFFB4F /* TimetableDetailView.swift in Sources */,
+				DAF4C8242F14236D00C6E906 /* TripPlannerController+Mapping.swift in Sources */,
 				DABAE4092ACC23DA00D66159 /* LineText.swift in Sources */,
 				DA63553329E4957A00AAD7C0 /* String.swift in Sources */,
 				DACDA7882B7033F700D53F6D /* CircleIcon.swift in Sources */,
@@ -793,6 +810,7 @@
 				DAE714DA2B2FA2E20059B8A1 /* Session.swift in Sources */,
 				DAD0CE9B29CB97D500A43CC6 /* TransiWatchApp.swift in Sources */,
 				DAE714E32B2FAF650059B8A1 /* Timetables.swift in Sources */,
+				DA76B57D2ECE4B620074F4E2 /* ApiModels.swift in Sources */,
 				DAD0CEAD29CB9D5700A43CC6 /* Stops.swift in Sources */,
 				DABD03232A0AF3BF00FD2C4B /* Binding.swift in Sources */,
 			);
@@ -989,9 +1007,10 @@
 				CODE_SIGN_ENTITLEMENTS = Transi/Transi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -1026,7 +1045,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.9.5;
+				MARKETING_VERSION = 0.9.6;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1051,9 +1070,10 @@
 				CODE_SIGN_ENTITLEMENTS = Transi/Transi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Transi/Preview Content\"";
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -1088,7 +1108,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.9.5;
+				MARKETING_VERSION = 0.9.6;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1112,6 +1132,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Transi-Watch-App-Info.plist";
@@ -1147,6 +1168,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Transi-Watch-App-Info.plist";
@@ -1181,6 +1203,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = VirtualTableActivity/Info.plist;
@@ -1196,7 +1219,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 0.9.5;
+				MARKETING_VERSION = 0.9.6;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi.VirtualTableActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -1219,6 +1242,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8G65S9KX9U;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = VirtualTableActivity/Info.plist;
@@ -1234,7 +1258,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 0.9.5;
+				MARKETING_VERSION = 0.9.6;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.magicsk.Transi.VirtualTableActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -1291,6 +1315,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		DA09CC762F032B81006E4FB9 /* XCRemoteSwiftPackageReference "MarqueeText" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/joekndy/MarqueeText.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		DA66CA9A2BDC926200C4C4E6 /* XCRemoteSwiftPackageReference "SwipeActions" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/aheze/SwipeActions";
@@ -1351,6 +1383,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		DA09CC772F032B81006E4FB9 /* MarqueeText */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA09CC762F032B81006E4FB9 /* XCRemoteSwiftPackageReference "MarqueeText" */;
+			productName = MarqueeText;
+		};
 		DA23A7802B02951F00BC8428 /* SwiftUIX */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DABD032A2A0BE61F00FD2C4B /* XCRemoteSwiftPackageReference "SwiftUIX" */;

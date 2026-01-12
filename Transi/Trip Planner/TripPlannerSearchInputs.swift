@@ -8,14 +8,11 @@
 import SwiftUI
 
 struct TripPlannerSearchInputs: View {
-    @Binding private var from: Stop
-    @Binding private var to: Stop
     @Binding private var lastField: String
     @Binding private var showStopList: Bool
+    @StateObject var tripPlannerController = GlobalController.tripPlanner
 
-    init(from: Binding<Stop>, to: Binding<Stop>, lastField: Binding<String>, showStopList: Binding<Bool>) {
-        _from = from
-        _to = to
+    init(lastField: Binding<String>, showStopList: Binding<Bool>) {
         _lastField = lastField
         _showStopList = showStopList
     }
@@ -23,12 +20,19 @@ struct TripPlannerSearchInputs: View {
     var body: some View {
         VStack {
             HStack(spacing: .zero) {
-                getInputIcon(from.type ?? "")
-                TextField(text: $from.name.toUnwrapped(defaultValue: "")) {
+                getInputIcon(tripPlannerController.from.type ?? "")
+                TextField(text: $tripPlannerController.from.name.toUnwrapped(defaultValue: "")) {
                     Text("From").foregroundColor(.placeholderText)
                 }
+                .disabled(true)
+                Image(systemName: "arrow.up.arrow.down")
+                    .foregroundColor(.label)
+                    .padding(.horizontal, 14.0)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        switchStops()
+                    }
             }
-            .disabled(true)
             .onTapGestureOnBackground {
                 lastField = "from"
                 showStopList = true
@@ -40,8 +44,8 @@ struct TripPlannerSearchInputs: View {
             .padding(.bottom, 5.0)
             Divider().padding(.leading, 40.0).padding(.bottom, 15.0)
             HStack(spacing: .zero) {
-                getInputIcon(to.type ?? "")
-                TextField(text: $to.name.toUnwrapped(defaultValue: "")) {
+                getInputIcon(tripPlannerController.to.type ?? "")
+                TextField(text: $tripPlannerController.to.name.toUnwrapped(defaultValue: "")) {
                     Text("To").foregroundColor(.placeholderText)
                 }
             }
@@ -55,6 +59,13 @@ struct TripPlannerSearchInputs: View {
                 showStopList = true
             }
         }.modifier(ListStackModifier())
+    }
+
+    func switchStops() {
+        let temp = tripPlannerController.from
+        tripPlannerController.from = tripPlannerController.to
+        tripPlannerController.to = temp
+        tripPlannerController.fetchTrip()
     }
 
     func getInputIcon(_ iconType: String) -> some View {
@@ -76,10 +87,8 @@ struct TripPlannerSearchInputs: View {
 #Preview {
     ZStack {
         Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
-        VStack{
+        VStack {
             TripPlannerSearchInputs(
-                from: .constant(.empty),
-                to: .constant(.example),
                 lastField: .constant("to"),
                 showStopList: .constant(false)
             )

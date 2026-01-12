@@ -6,19 +6,15 @@
 //
 
 import SwiftUI
-
 struct StopIcon: View {
-    var color: Color
-    
-    init(_ color: Color = Color.systemGray) {
-        self.color = color
-    }
+    var color: Color = Color.systemGray
+    var scale: CGFloat = 1.0
     
     var body: some View {
         Image("stop")
             .resizable(resizingMode: .stretch)
             .foregroundColor(color)
-            .frame(width: 7.0, height: 10.0)
+            .frame(width: scale * 7.0, height: scale * 10.0)
     }
 }
 

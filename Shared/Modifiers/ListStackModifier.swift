@@ -19,7 +19,7 @@ struct ListStackModifier: ViewModifier {
                 .padding(.all, 16.0)
             HStack {
                 VStack(spacing: 3.5) {
-                    ForEach(1 ... 3, id: \.self) { _ in
+                    ForEach(1...3, id: \.self) { _ in
                         Circle()
                             .foregroundColor(.quaternaryLabel)
                             .frame(width: 3.5, height: 3.5)
@@ -36,8 +36,6 @@ struct ListStackModifier: ViewModifier {
         Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
         VStack {
             TripPlannerSearchInputs(
-                from: .constant(.actualLocation),
-                to: .constant(.example),
                 lastField: .constant("to"),
                 showStopList: .constant(false)
             )

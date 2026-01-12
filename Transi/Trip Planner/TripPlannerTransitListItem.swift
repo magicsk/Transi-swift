@@ -5,10 +5,11 @@
 //  Created by magic_sk on 14/05/2023.
 //
 
+import MarqueeText
 import SwiftUI
 
 struct TripPlannerTransitListItem: View {
-    private let part: Part
+    let part: Part
 
     init(_ part: Part) {
         self.part = part
@@ -17,22 +18,30 @@ struct TripPlannerTransitListItem: View {
     var body: some View {
         Label {
             VStack(alignment: .leading) {
-                Text(part.tripHeadsign ?? "Error")
-                    .font(.headline).lineLimit(1)
-                    .padding(.leading, 20.0)
+                MarqueeText(
+                    text: part.tripHeadsign ?? "Error",
+                    font: UIFont.preferredFont(forTextStyle: .headline),
+                    leftFade: 16,
+                    rightFade: 16,
+                    startDelay: 0
+                )
+                .padding(.leading, 20.0)
                 VStack(alignment: .leading) {
-                    HStack {
-                        Text(timeStringFromUtc(part.startDeparture)).frame(width: 47.5, alignment: .leading)
+                    HStack(alignment: .bottom) {
+                        Text(timeStringFromDate(part.startDeparture)).frame(
+                            width: 47.5, alignment: .leading)
                         Text(part.startStopName ?? "Error")
+                        TripPlannerStopCodeView(code: part.startStopCode)
                     }
-                    HStack {
-                        Text(timeStringFromUtc(part.endArrival)).frame(width: 47.5, alignment: .leading)
+                    HStack(alignment: .bottom) {
+                        Text(timeStringFromDate(part.endArrival)).frame(
+                            width: 47.5, alignment: .leading)
                         Text(part.endStopName ?? "Error")
+                        TripPlannerStopCodeView(code: part.endStopCode)
                     }
                 }.padding(.leading, 25.5)
             }
-        }
-        icon: {
+        } icon: {
             VStack(spacing: .zero) {
                 LineText(part.routeShortName ?? "Error", 20.0).frame(minWidth: 50.0)
                 Rectangle()
@@ -40,24 +49,29 @@ struct TripPlannerTransitListItem: View {
                     .foregroundColor(colorFromLineNum(part.routeShortName ?? "Error")!)
             }.padding(.leading, 20.0)
         }
-//        .gesture(DragGesture(minimumDistance: 10, coordinateSpace: .global)
-//            .onChanged { value in
-//                print(value)
-//                let draggedOffset = value.translation.height
-//                if draggedOffset > 0 {
-//                    offset = draggedOffset
-//                } else {
-//                    offset = 0
-//                }
-//            }
-//            .onEnded { value in
-//
-//            })
+    }
+}
+
+struct TripPlannerStopCodeView: View {
+    let code: String?
+
+    var body: some View {
+        if let stopCode = code {
+            HStack(alignment: .bottom, spacing: -2.0) {
+                Image("stop")
+                    .scaledToFit()
+                    .foregroundColor(.systemGray)
+                Text(stopCode)
+                    .font(.system(size: 15.0, weight: .medium))
+                    .foregroundColor(.systemGray)
+            }
+        } else {
+            EmptyView()
+        }
     }
 }
 
 #Preview {
-//        TripPlannerTransitListItem(Part.example)
-    TripPlannerList(Trip(journey: [Journey.example]), false, false) { _ in
-    }
+    TripPlannerTransitListItem(Part.example)
+    Spacer()
 }

@@ -1,5 +1,5 @@
 //
-//  Journey.swift
+//  Trip.swift
 //  Transi
 //
 //  Created by magic_sk on 09/05/2023.
@@ -12,34 +12,76 @@ struct Trip: Codable, Hashable {
 }
 
 struct Journey: Codable, Hashable {
-    var journeyGuid: String
+    var id: String
     var parts: [Part]?
-    var zones: [Int]?
-    var ticketID: Int?
-    static let example = Journey(journeyGuid: "6b657922-b5fe-457c-b8c5-0fd0caa13619", parts: [Part.example, Part.example2], zones: [1955, 1953], ticketID: 606)
+    var zones: [String]?
+
+    static func == (lhs: Journey, rhs: Journey) -> Bool {
+        guard let lParts = lhs.parts, let rParts = rhs.parts, lParts.count == rParts.count else {
+            return false
+        }
+        for (i, lPart) in lParts.enumerated() {
+            let rPart = rParts[i]
+
+            if lPart.routeType == 64 && rPart.routeType == 64 {
+                continue
+            }
+
+            if timeStringFromDate(lPart.startDeparture) != timeStringFromDate(rPart.startDeparture)
+                || timeStringFromDate(lPart.endArrival) != timeStringFromDate(rPart.endArrival)
+                || lPart.routeShortName != rPart.routeShortName
+                || lPart.startStopName != rPart.startStopName
+                || lPart.endStopName != rPart.endStopName
+            {
+                return false
+            }
+        }
+        return true
+    }
+
+    func hash(into hasher: inout Hasher) {
+        if let parts = parts {
+            for part in parts {
+                if part.routeType == 64 {
+                    hasher.combine("walking")
+                } else {
+                    hasher.combine(timeStringFromDate(part.startDeparture))
+                    hasher.combine(timeStringFromDate(part.endArrival))
+                    hasher.combine(part.routeShortName)
+                    hasher.combine(part.startStopName)
+                    hasher.combine(part.endStopName)
+                }
+            }
+        } else {
+            hasher.combine("no_parts")
+        }
+    }
 }
 
 struct Part: Codable, Hashable {
-    var startStopID, endStopID: Int?
-    var startStopName, startStopCode, endStopName, endStopCode: String?
-    var startStationID, endStationID: Int?
-    var startStopGps, endStopGps: StopGps?
-    var startDeparture, endArrival: String?
-    var duration, routeType, tripID, tripRouteID: Int?
-    var tripHeadsign, tripShortName, routeShortName: String?
-    var tripZones: [Int]?
-    var tripDelay, ticketID: Int?
-    static let example = Part(startStopID: 900, endStopID: 801, startStopName: "Hronská", startStopCode: "A", endStopName: "Pažítková", endStopCode: "A", startStationID: 1386, endStationID: 1341, startStopGps: StopGps(lon: 17.208740234375, lat: 48.1357383728027), endStopGps: StopGps(lon: 17.15305519104, lat: 48.1494674682617), startDeparture: "2023-10-03T14:41:00.000Z", endArrival: "2023-10-03T14:52:00.000Z", duration: 11, routeType: 50, tripID: 11799, tripRouteID: 47, tripHeadsign: "Hlavná stanica", tripShortName: "", routeShortName: "X99", tripZones: [1955, 1953], tripDelay: nil, ticketID: 604)
-    static let example2 = Part(startStopID: 900, endStopID: 801, startStopName: "Hronská", startStopCode: "A", endStopName: "Pažítková", endStopCode: "A", startStationID: 1386, endStationID: 1341, startStopGps: StopGps(lon: 17.208740234375, lat: 48.1357383728027), endStopGps: StopGps(lon: 17.15305519104, lat: 48.1494674682617), startDeparture: "2023-10-03T14:41:00.000Z", endArrival: "2023-10-03T14:52:00.000Z", duration: 11, routeType: 64, tripID: 11799, tripRouteID: 47, tripHeadsign: "Hlavná stanica", tripShortName: "", routeShortName: "X99", tripZones: [1955, 1953], tripDelay: nil, ticketID: 604)
-}
+    var startStopName: String?
+    var endStopName: String?
+    var startStopCode: String?
+    var endStopCode: String?
 
-struct TripReq: Codable, Hashable {
-    var org_id = 120
-    var max_walk_duration: Int
-    var max_transfers: Int
-    var search_from_hours, search_to_hours: Int?
-    var search_from, search_to: String?
-    var from_station_id, to_station_id: [Int]
+    var startDeparture: Date
+    var endArrival: Date
+
+    var routeType: Int?
+    var tripHeadsign: String?
+    var routeShortName: String?
+
+    static let example = Part(
+        startStopName: "Hronská",
+        endStopName: "Pažítková",
+        startStopCode: "A",
+        endStopCode: "A",
+        startDeparture: dateFromUtc("2023-10-03T14:41:00.000Z"),
+        endArrival: dateFromUtc("2023-10-03T14:52:00.000Z"),
+        routeType: 50,
+        tripHeadsign: "Hlavná stanica",
+        routeShortName: "X99"
+    )
 }
 
 enum ArrivalDeparture {

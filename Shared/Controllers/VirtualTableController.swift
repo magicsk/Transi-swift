@@ -26,8 +26,8 @@ class VirtualTableController: ObservableObject {
         label: "eu.magicsk.transi.connectionsProcessingQueue")
 
     @Published var connections = [Connection]()
-    var internalConnections = [Connection]()
-    var internalRegionalConnections = [Connection]()
+    private var internalConnections = [Connection]()
+    private var internalRegionalConnections = [Connection]()
     @Published var vehicleInfo = [VehicleInfo]()
     @Published var changeLocation = true
     @Published var currentStop: Stop = .empty
@@ -92,7 +92,9 @@ class VirtualTableController: ObservableObject {
             )
             if oldTimeRemaining != updatedTimeRemaining {
                 DispatchQueue.main.async {
-                    self.connections[index].departureTimeRemaining = updatedTimeRemaining
+                    if self.connections.indices.contains(index) {
+                        self.connections[index].departureTimeRemaining = updatedTimeRemaining
+                    }
                 }
             }
         }
@@ -111,7 +113,8 @@ class VirtualTableController: ObservableObject {
 
         let calendar = Calendar.current
         let now = Date()
-        let minutes = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
+        let minutes =
+            calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
 
         fetchBApi(
             endpoint: "/mobile/v1/station/\(stationId)/timetable/\(dateString)/\(minutes)/1",
@@ -119,7 +122,7 @@ class VirtualTableController: ObservableObject {
         ) { result in
 
             switch result {
-            case let .success(response):
+            case .success(let response):
                 var newRegionalConnections = response.current.map {
                     Connection(from: $0, for: self.currentStop)
                 }
@@ -130,7 +133,7 @@ class VirtualTableController: ObservableObject {
 
                 self.internalRegionalConnections = newRegionalConnections
                 self.sortAndPublishConnections()
-            case let .failure(err):
+            case .failure(let err):
                 print("Error fetching or decoding regional departures. \(err)")
             }
             self.loadedStatus += 1
@@ -153,7 +156,7 @@ class VirtualTableController: ObservableObject {
 
             connectionsForPublish = self.internalConnections.map { connection in
                 if var regionalConnection = self.getRegionalConnection(connection) {
-                    //                    print("Replacing \(connection.id) with \(regionalConnection.id)")
+                    // print("Replacing \(connection.id) with \(regionalConnection.id)")
                     regionalConnectionsToRemove.append(regionalConnection.id)
                     if connection.type == "online" {
                         return connection
@@ -179,12 +182,14 @@ class VirtualTableController: ObservableObject {
 
             DispatchQueue.main.async {
                 self.connections = connectionsForPublish
+                print("connections", self.connections)
+                print("socket.status", self.socket.status)
                 if self.socket.status == .connected {
                     self.socketStatus = .connected
                     if self.loadedStatus > 1 {
                         self.connectionsEmpty =
                             self.connections.isEmpty && self.internalConnections.isEmpty
-                                && self.internalRegionalConnections.isEmpty
+                            && self.internalRegionalConnections.isEmpty
                     }
                 } else {
                     self.disconnect(reconnect: true)
@@ -239,16 +244,19 @@ class VirtualTableController: ObservableObject {
         }
 
         socket.on("cack") { _, _ in
-            //            print("cack")
+            print("cack")
             self.connected = true
             self.socket.emit("tabStart", [self.currentStop.id, "*"] as [Any])
             self.socket.emit("infoStart")
         }
 
         socket.on("tabs") { data, _ in
+            print("tabs")
             self.connectionsProcessingQueue.async {
                 guard let platformArray = data.first as? [[String: Any]] else {
-                    print("Error: Could not cast incoming data to the expected [[String: Any]] structure.")
+                    print(
+                        "Error: Could not cast incoming data to the expected [[String: Any]] structure."
+                    )
                     self.loadedStatus += 1
                     DispatchQueue.main.async {
                         self.connections = [Connection]()
@@ -262,8 +270,8 @@ class VirtualTableController: ObservableObject {
 
                 for platformObject in platformArray {
                     if let _platform = platformObject["nastupiste"] as? Int,
-                       let _stopId = platformObject["zastavka"] as? Int,
-                       let connectionsJson = platformObject["tab"] as? [Any]
+                        let _stopId = platformObject["zastavka"] as? Int,
+                        let connectionsJson = platformObject["tab"] as? [Any]
                     {
                         platformsToUpdate.insert(_platform)
                         for object in connectionsJson {

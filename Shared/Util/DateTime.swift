@@ -7,9 +7,9 @@
 
 import Foundation
 
-func dateFromUtc(_ isoString: String?) -> Date? {
+func dateFromUtc(_ isoString: String?) -> Date {
     if isoString == nil {
-        return nil
+        return Date()
     } else {
         let isoDateFormatter = ISO8601DateFormatter()
         isoDateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
@@ -23,33 +23,22 @@ func dateFromUtc(_ isoString: String?) -> Date? {
         if let date = isoDateFormatter.date(from: isoString!) {
             return date
         } else {
-            return nil
+            return Date()
         }
     }
 }
 
-func timeStringFromUtc(_ isoString: String?) -> String {
-    if isoString == nil {
-        return "Error"
-    } else {
-        if let date = dateFromUtc(isoString) {
-            return date.formatted(date: .omitted, time: .shortened)
-        } else {
-            return "Error"
-        }
-    }
+func timeStringFromDate(_ date: Date) -> String {
+    return date.formatted(date: .omitted, time: .shortened)
 }
 
-func timeDiffFromUtc(_ from: String?, _ to: String?) -> String {
-    if from != nil && to != nil {
-        if let fromDate = dateFromUtc(from!) {
-            if let toDate = dateFromUtc(to!) {
-                let diff = toDate - fromDate
-                return "\(Int(diff / 60))"
-            }
-        }
-    }
-    return "Error"
+func dateStringFromDate(_ date: Date) -> String {
+    return date.formatted(date: .numeric, time: .omitted)
+}
+
+func timeDiffFromDates(_ from: Date, _ to: Date) -> String {
+    let diff = to - from
+    return "\(Int(diff / 60))"
 }
 
 func clockStringFromDate(_ time: Date) -> String {

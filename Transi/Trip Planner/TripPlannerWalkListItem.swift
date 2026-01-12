@@ -9,9 +9,11 @@ import SwiftUI
 
 struct TripPlannerWalkListItem: View {
     private let part: Part
+    private let last: Bool
 
-    init(_ part: Part) {
+    init(_ part: Part, last: Bool = false) {
         self.part = part
+        self.last = last
     }
 
     var body: some View {
@@ -21,13 +23,18 @@ struct TripPlannerWalkListItem: View {
                 .font(.system(size: 25.0))
                 .foregroundColor(.accent)
                 .frame(minWidth: 46.0)
-            Text("\(timeDiffFromUtc(part.startDeparture, part.endArrival)) min to \(sameStop ? "platform \(part.endStopCode ?? "X")" : part.endStopName ?? "Error")")
-                .padding(.leading, 7.0)
+            Text(
+                "\(timeDiffFromDates(part.startDeparture, part.endArrival)) min to \(sameStop ? "platform \(part.endStopCode ?? "X")" : part.endStopName ?? "Error")"
+            )
+            .padding(.leading, 7.0)
+            if !(sameStop || last) {
+                TripPlannerStopCodeView(code: part.endStopCode)
+            }
         }.padding(.vertical, 3.0)
     }
 }
 
 #Preview {
-    TripPlannerList(Trip(journey: [Journey.example]), false, false) { _ in
-    }
+    //    TripPlannerList(Trip(journey: [Journey.example]), false, false) { _ in
+    //    }
 }

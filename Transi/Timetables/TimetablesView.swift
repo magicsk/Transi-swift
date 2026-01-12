@@ -30,37 +30,43 @@ struct TimetablesView: View {
                         Text("Trams").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.trams) { route in
                             NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(.vertical, 5.0)
+                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
+                                    .vertical, 5.0)
                             }
                         }
                         Text("Trolleybuses").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.trolleybuses) { route in
                             NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(.vertical, 5.0)
+                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
+                                    .vertical, 5.0)
                             }
                         }
                         Text("Buses").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.buses) { route in
                             NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(.vertical, 5.0)
+                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
+                                    .vertical, 5.0)
                             }
                         }
                         Text("Night lines").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.nightlines) { route in
                             NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(.vertical, 5.0)
+                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
+                                    .vertical, 5.0)
                             }
                         }
                         Text("Trains").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.trains) { route in
                             NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(.vertical, 5.0)
+                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
+                                    .vertical, 5.0)
                             }
                         }
                         Text("Regional Buses").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.regionalbuses) { route in
                             NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(.vertical, 5.0)
+                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
+                                    .vertical, 5.0)
                             }
                         }
                     }
@@ -74,44 +80,43 @@ struct TimetablesView: View {
             }
         } retry: {
             fetchTimetables()
-        } cancel: {}
-            .paddingTop(80.0)
-            .overlayBackground(Color.systemBackground)
-            .onAppear {
-                fetchTimetables()
-            }
-            .onOpenURL { url in
-                print(url)
-                print(url.pathComponents)
-                if url.host == "timetable" {
-                    if url.pathComponents.endIndex >= 2 {
-                        openUrl = false
-                        openFromUrl = url.pathComponents[1]
-                        if !category.regionalbuses.isEmpty {
-                            let mirror = Mirror(reflecting: category)
-                            var foundRoute: Route? = nil
-                            for (_, attr) in mirror.children.enumerated() {
-                                if let routes = attr.value as! [Route]? {
-                                    let route = routes.first(where: { route in
-                                        route.shortName == openFromUrl
-                                    })
-                                    if route != nil {
-                                        foundRoute = route
-                                        break
-                                    }
+        } cancel: {
+        }
+        .paddingTop(80.0)
+        .overlayBackground(Color.systemBackground)
+        .onAppear {
+            fetchTimetables()
+        }
+        .onOpenURL { url in
+            if url.host == "timetable" {
+                if url.pathComponents.endIndex >= 2 {
+                    openUrl = false
+                    openFromUrl = url.pathComponents[1]
+                    if !category.regionalbuses.isEmpty {
+                        let mirror = Mirror(reflecting: category)
+                        var foundRoute: Route? = nil
+                        for (_, attr) in mirror.children.enumerated() {
+                            if let routes = attr.value as! [Route]? {
+                                let route = routes.first(where: { route in
+                                    route.shortName == openFromUrl
+                                })
+                                if route != nil {
+                                    foundRoute = route
+                                    break
                                 }
                             }
-                            if let route = foundRoute {
-                                navigateInsideFromUrl = false
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
-                                    urlNavigateDestination = route
-                                    navigateInsideFromUrl = true
-                                }
+                        }
+                        if let route = foundRoute {
+                            navigateInsideFromUrl = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+                                urlNavigateDestination = route
+                                navigateInsideFromUrl = true
                             }
                         }
                     }
                 }
             }
+        }
     }
 
     func fetchTimetables() {

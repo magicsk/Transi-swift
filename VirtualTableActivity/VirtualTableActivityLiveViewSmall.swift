@@ -22,7 +22,7 @@ struct VirtualTableActivityLiveViewSmall: View {
             HStack {
                 if connection.type == "online" {
                     HStack {
-                        StopIcon(.accent)
+                        StopIcon(color: .accent)
                         Text(connection.lastStopName).font(.system(size: 12.0)).lineLimit(1)
                     }
                 } else {

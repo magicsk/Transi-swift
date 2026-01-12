@@ -5,6 +5,7 @@
 //  Created by magic_sk on 09/04/2023.
 //
 
+import MarqueeText
 import SwiftUI
 import SwipeActions
 
@@ -20,7 +21,8 @@ struct VirtualTableListItem: View {
     @State var loadedImage: UIImage? = nil
     @State var expanded: Bool = false
 
-    init(_ connection: Connection, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?) {
+    init(_ connection: Connection, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?)
+    {
         self.connection = connection
         self.platformLabels = platformLabels
         self.vehicleInfo = vehicleInfo
@@ -43,7 +45,13 @@ struct VirtualTableListItem: View {
                         VStack {
                             HStack {
                                 VStack(alignment: .leading, spacing: .zero) {
-                                    Text(connection.headsign).font(.system(size: 16.0, weight: .medium)).lineLimit(1)
+                                    MarqueeText(
+                                        text: connection.headsign,
+                                        font: UIFont.systemFont(ofSize: 16.0, weight: .medium),
+                                        leftFade: 16,
+                                        rightFade: 16,
+                                        startDelay: 1
+                                    )
                                     if connection.lastStopName != "none" && !expanded {
                                         HStack(spacing: 4.0) {
                                             StopIcon()
@@ -59,10 +67,12 @@ struct VirtualTableListItem: View {
                                 }
                                 HStack(spacing: 6.0) {
                                     if connection.stuck {
-                                        Image("exclamationmark.triangle.fill").foregroundColor(.yellow)
+                                        Image("exclamationmark.triangle.fill").foregroundColor(
+                                            .yellow)
                                     }
                                     RemainingTime(connection.departureTimeRemaining)
-                                    Text(getPlatformLabel(platformLabels, connection.platform)).font(.system(size: 16.0, weight: .light)).width(22.0)
+                                    Text(getPlatformLabel(platformLabels, connection.platform))
+                                        .font(.system(size: 16.0, weight: .light)).width(22.0)
                                 }.padding(.trailing, 15.0).buttonStyle(PlainButtonStyle())
                             }
                         }
@@ -77,26 +87,26 @@ struct VirtualTableListItem: View {
                     expanded = expanded ? true : connection.expanded
                 }
                 .padding(.bottom, -1.5)
-                Divider().padding(.leading, expanded ? 0.0 : 65.0).opacity(virtualTableController.connections.last?.id == connection.id ? 0.0 : 1.0)
+                Divider().padding(.leading, expanded ? 0.0 : 65.0).opacity(
+                    virtualTableController.connections.last?.id == connection.id ? 0.0 : 1.0)
             }
         } leadingActions: { context in
             SwipeAction(systemImage: "bell.fill") {
                 DispatchQueue.main.asyncAfter(deadline: .now()) {
                     context.state.wrappedValue = .closed
-                    let aid = try! VirtualTableLiveActivityController.startActivity(connection, vehicleInfo)
-                    print(aid)
+                    try! VirtualTableLiveActivityController.startActivity(connection, vehicleInfo)
                 }
             }
             .allowSwipeToTrigger()
             .background(.systemBlue)
             .foregroundStyle(.white)
-        }
-    trailingActions: { context in
+        } trailingActions: { context in
             SwipeAction(systemImage: "square.and.arrow.up") {
                 let url = URL(string: "transi://table/\(connection.stopId)/\(connection.id)")
                 let av = UIActivityViewController(activityItems: [url!], applicationActivities: nil)
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                    windowScene.windows.first?.rootViewController?.present(av, animated: true, completion: nil)
+                    windowScene.windows.first?.rootViewController?.present(
+                        av, animated: true, completion: nil)
                 }
                 context.state.wrappedValue = .closed
             }
@@ -110,7 +120,9 @@ struct VirtualTableListItem: View {
             .background(.systemGreen)
             .foregroundStyle(.white)
             SwipeAction(systemImage: "map.fill") {
-                if let stopId = GlobalController.stopsListProvider.getStopIdFromName(connection.lastStopName) {
+                if let stopId = GlobalController.stopsListProvider.getStopIdFromName(
+                    connection.lastStopName)
+                {
                     openURL(URL(string: "transi://map/\(stopId)")!)
                 }
                 context.state.wrappedValue = .closed
@@ -130,13 +142,13 @@ struct VirtualTableListItem: View {
                 GlobalController.virtualTable.lastExpandedConnection = connection
             }
         }
-//        .overlay {
-//            if false { // TODO: option in settings
-//                NavigationLink(destination: VirtualTableDetail(tab, platformLabels, vehicleInfo),
-//                               label: { EmptyView() })
-//                    .opacity(0)
-//            }
-//        }
+        //        .overlay {
+        //            if false { // TODO: option in settings
+        //                NavigationLink(destination: VirtualTableDetail(tab, platformLabels, vehicleInfo),
+        //                               label: { EmptyView() })
+        //                    .opacity(0)
+        //            }
+        //        }
     }
 }
 
@@ -147,8 +159,10 @@ struct VirtualTableListItem: View {
             ScrollView {
                 LazyVStack(spacing: .zero) {
                     SwipeViewGroup {
-                        ForEach([Connection.example2, Connection.example, Connection.example3]) { connection in
-                            VirtualTableListItem(connection, [PlatformLabel.example], VehicleInfo.example)
+                        ForEach([Connection.example2, Connection.example, Connection.example3]) {
+                            connection in
+                            VirtualTableListItem(
+                                connection, [PlatformLabel.example], VehicleInfo.example)
                         }
                     }
                 }

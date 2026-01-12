@@ -35,7 +35,7 @@ struct VirtualTableConnectionDetail: View {
                         .frame(minWidth: 180.0, alignment: .trailing)
                     if connection.type == "online" {
                         HStack {
-                            StopIcon(.accent).scaleEffect(1.3)
+                            StopIcon(color: .accent).scaleEffect(1.3)
                             Text(connection.lastStopName)
                         }
                     }

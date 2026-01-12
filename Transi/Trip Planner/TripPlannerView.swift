@@ -22,8 +22,6 @@ struct TripPlannerView: View {
                 Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VStack(spacing: .zero) {
                     TripPlannerSearchInputs(
-                        from: $tripPlannerController.from,
-                        to: $tripPlannerController.to,
                         lastField: $lastField,
                         showStopList: $showStopList
                     )
@@ -35,7 +33,9 @@ struct TripPlannerView: View {
                         .pickerStyle(.segmented)
                         .width(175.0)
                         Spacer()
-                        TripPlannerDateButton($tripPlannerController.arrivalDepartureDate, dateDialog: $dateDialog, customDate: tripPlannerController.arrivalDepartureCustomDate)
+                        TripPlannerDateButton(
+                            $tripPlannerController.arrivalDepartureDate, dateDialog: $dateDialog,
+                            customDate: tripPlannerController.arrivalDepartureCustomDate)
                     }
                     .padding(.horizontal, 24.0)
                     .padding(.top, -10.0)
@@ -43,11 +43,16 @@ struct TripPlannerView: View {
                     ZStack {
                         VStack {
                             if tripPlannerController.trip.journey != nil {
-                                TripPlannerList(tripPlannerController.trip, tripPlannerController.loading, tripPlannerController.loadingMore) { journey in
+                                TripPlannerList(
+                                    tripPlannerController.trip, tripPlannerController.loading,
+                                    tripPlannerController.loadingMore
+                                ) { journey in
                                     tripPlannerController.loadMoreTripsIfNeeded(journey)
                                 }
                             } else {
-                                Image(systemName: "signpost.right.and.left").font(.system(size: 96.0, weight: .light)).foregroundColor(.tertiaryLabel)
+                                Image(systemName: "signpost.right.and.left").font(
+                                    .system(size: 96.0, weight: .light)
+                                ).foregroundColor(.tertiaryLabel)
                                     .padding(.bottom, 2.5)
                                 Text("Plan your first trip.").foregroundColor(.secondaryLabel)
                             }
@@ -61,7 +66,7 @@ struct TripPlannerView: View {
                 .navigationTitle(Text("Trip planner"))
                 .toolbar {
                     Button("Settings") {
-                            openURL(URL(string: UIApplication.openSettingsURLString)!)
+                        openURL(URL(string: UIApplication.openSettingsURLString)!)
                     }
                 }
             }
@@ -71,7 +76,11 @@ struct TripPlannerView: View {
             .sheet(isPresented: $showStopList) {
                 StopListView(stop: self.$stop, isPresented: self.$showStopList)
             }
-            .alert(isPresented: $tripPlannerController.error.isNotNil(), error: tripPlannerController.error) { _ in } message: { error in
+            .alert(
+                isPresented: $tripPlannerController.error.isNotNil(),
+                error: tripPlannerController.error
+            ) { _ in
+            } message: { error in
                 if let message = error.failureReason {
                     Text(message)
                 }
