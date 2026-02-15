@@ -34,8 +34,24 @@ class VirtualTableController: ObservableObject {
     @Published var socketStatus: SocketIOStatus = .notConnected
     @Published var connectionsEmpty = false
     @Published var lastExpandedConnection: Connection? = nil
+    @Published var infoTexts = [String]()
+    @Published var unreadInfoCount = 0
+    private var readInfoTexts: Set<String> {
+        didSet {
+            if let data = try? JSONEncoder().encode(Array(readInfoTexts)) {
+                UserDefaults.standard.set(data, forKey: "readInfoTexts")
+            }
+        }
+    }
 
     init() {
+        if let data = UserDefaults.standard.data(forKey: "readInfoTexts"),
+            let stored = try? JSONDecoder().decode([String].self, from: data)
+        {
+            readInfoTexts = Set(stored)
+        } else {
+            readInfoTexts = []
+        }
         manager = SocketManager(
             socketURL: URL(string: GlobalController.iApiBaseUrl)!,
             config: [
@@ -53,16 +69,18 @@ class VirtualTableController: ObservableObject {
     }
 
     private func startUpdater() {
+        stopUpdater()
         loadedStatus = 0
+        updateConnections()
         Task {
             await self.fetchRegionalLiveDepartures()
         }
-        updater = Timer.publish(every: 10, on: .current, in: .common)
+        updater = Timer.publish(every: 10, on: .main, in: .common)
         updaterSubscription = updater?.autoconnect().sink(receiveValue: { [weak self] _ in
             self?.updateConnections()
         })
 
-        updaterRegionalConnections = Timer.publish(every: 50, on: .current, in: .common)
+        updaterRegionalConnections = Timer.publish(every: 50, on: .main, in: .common)
         updaterRegionalConnectionsSubscription = updaterRegionalConnections?.autoconnect().sink(
             receiveValue: { [weak self] _ in
                 Task {
@@ -199,13 +217,26 @@ class VirtualTableController: ObservableObject {
     }
 
     func connect() {
-        if socket.status == .notConnected || socket.status == .disconnected {
+        if socket.status == .connected {
+            print("Socket already connected, requesting fresh data...")
+            self.socket.emit("tabStart", [self.currentStop.id, "*"] as [Any])
+            self.socket.emit("infoStart")
+            self.startUpdater()
+        } else if socket.status == .connecting {
+            print("Socket is connecting, will request data on connect event...")
+        } else {
             print("Socket not connected, attempting to connect...")
             socket.connect()
         }
     }
 
     func disconnect(reconnect: Bool = false) {
+        if socket.status == .disconnected || socket.status == .notConnected {
+            if reconnect {
+                self.connect()
+            }
+            return
+        }
         self.reconnect = reconnect
         socket.disconnect()
     }
@@ -230,15 +261,11 @@ class VirtualTableController: ObservableObject {
 
         socket.on(clientEvent: .disconnect) { _, _ in
             DispatchQueue.main.async {
-                self.connections = [Connection]()
-                self.internalConnections = [Connection]()
-                self.vehicleInfo = [VehicleInfo]()
                 self.connected = false
+                self.stopUpdater()
                 if self.reconnect {
                     self.reconnect = false
                     self.connect()
-                } else {
-                    self.stopUpdater()
                 }
             }
         }
@@ -307,10 +334,25 @@ class VirtualTableController: ObservableObject {
                 }
             }
         }
+
+        socket.on("iText") { data, _ in
+            if let texts = data.first as? [String] {
+                let filtered = texts.filter { !$0.isEmpty }
+                DispatchQueue.main.async {
+                    self.infoTexts = filtered
+                    self.unreadInfoCount = filtered.filter { !self.readInfoTexts.contains($0) }.count
+                }
+            }
+        }
     }
 
     func stopListeners() {
         socket.removeAllHandlers()
+    }
+
+    func markInfoTextsRead() {
+        readInfoTexts.formUnion(infoTexts)
+        unreadInfoCount = 0
     }
 
     func switchLocationChanging(_ value: Bool) {
@@ -331,6 +373,11 @@ class VirtualTableController: ObservableObject {
                 currentStop.id = stopId
                 if let currentStop = GlobalController.getStopById(stopId) {
                     self.currentStop = currentStop
+                    self.connections = [Connection]()
+                    self.internalConnections = [Connection]()
+                    self.internalRegionalConnections = [Connection]()
+                    self.vehicleInfo = [VehicleInfo]()
+                    self.connectionsEmpty = false
                     disconnect(reconnect: true)
                 }
             }

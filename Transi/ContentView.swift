@@ -124,4 +124,10 @@ class HybridSearchViewController: UINavigationController, UISearchBarDelegate {
         super.viewWillAppear(animated)
         hostingController.navigationController?.navigationBar.prefersLargeTitles = true
     }
+
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        DispatchQueue.main.async {
+            searchBar.searchTextField.selectAll(nil)
+        }
+    }
 }
