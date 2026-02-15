@@ -9,12 +9,27 @@ import SwiftUI
 import SwipeActions
 
 struct VirtualTableList: View {
+    @Environment(\.openURL) var openURL
     @StateObject var virtualTableController = GlobalController.virtualTable
 
     var body: some View {
         ZStack {
             if !virtualTableController.connections.isEmpty {
                 ScrollView {
+                    HStack(alignment: .center) {
+                        Text(virtualTableController.currentStop.name ?? "Loading...")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                        Spacer()
+                        Button {
+                            openURL(URL(string: "transi://map/\(virtualTableController.currentStop.id)")!)
+                        } label: {
+                            Image(systemName: "map")
+                                .font(.title2)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
                     LazyVStack(spacing: .zero) {
                         SwipeViewGroup {
                             ForEach(virtualTableController.connections) { connection in

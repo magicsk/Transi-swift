@@ -9,6 +9,7 @@ import SocketIO
 import SwiftUI
 
 struct VirtualTableView: View {
+    @Environment(\.openURL) var openURL
     @StateObject var virtualTableController = GlobalController.virtualTable
     @State private var showStopList = false
     @State private var showInfoTexts = false
@@ -21,7 +22,7 @@ struct VirtualTableView: View {
                 Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VirtualTableList()
             }
-            .navigationTitle(Text(virtualTableController.currentStop.name ?? "Loading..."))
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     StatusIndicator(status: virtualTableController.socketStatus)
