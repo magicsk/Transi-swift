@@ -16,6 +16,7 @@ struct StopListView: View {
     @Binding var isPresented: Bool
     @Binding var stop: Stop
     @State var searchText = ""
+    @State private var cachedFilteredStops: [Stop]? = nil
 
     let fuse = Fuse()
 
@@ -29,24 +30,27 @@ struct StopListView: View {
         _stop = stop
     }
 
-    var filteredItems: [Stop] {
-        let prompt = isPresented ? searchText : coordinator.searchText
-        if prompt.isEmpty { return stopsListProvider.stops }
-        let pattern = fuse.createPattern(from: prompt.normalize())
-        let scoredStops = stopsListProvider.stops.map { stop -> (Stop) in
-            var newStop: Stop = stop
+    private var displayedItems: [Stop] {
+        cachedFilteredStops ?? stopsListProvider.stops
+    }
+
+    private func performSearch(_ text: String) {
+        guard !text.isEmpty else {
+            cachedFilteredStops = nil
+            return
+        }
+        let pattern = fuse.createPattern(from: text.normalize())
+        let scoredStops = stopsListProvider.stops.map { stop -> Stop in
+            var newStop = stop
             let score = (stop.id < 0) ? -2 : fuse.search(pattern, in: stop.normalizedName)?.score
             newStop.score = score
             return newStop
         }
-
-        let sortedFilteredStops = scoredStops.filter {
+        cachedFilteredStops = scoredStops.filter {
             $0.id < 0 || $0.score != nil
         }.sorted(by: {
             $0.score ?? 0 < $1.score ?? 0
         })
-
-        return sortedFilteredStops
     }
 
     var body: some View {
@@ -60,7 +64,7 @@ struct StopListView: View {
                         .padding(.bottom, -0.1)
                 }
                 ScrollViewReader { _ in
-                    List(filteredItems) { stop in
+                    List(displayedItems) { stop in
                         Label {
                             HStack {
                                 Text(stop.name ?? "Error")
@@ -100,6 +104,18 @@ struct StopListView: View {
                     SearchBar(text: $searchText, placeholder: "Search")
                         .padding(.horizontal, 12.0)
                 }
+            }
+        }
+        .onChange(of: searchText) { newValue in
+            if isPresented { performSearch(newValue) }
+        }
+        .onChange(of: coordinator.searchText) { newValue in
+            if !isPresented { performSearch(newValue) }
+        }
+        .onChange(of: isPresented) { newValue in
+            if !newValue {
+                cachedFilteredStops = nil
+                searchText = ""
             }
         }
     }
