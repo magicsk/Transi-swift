@@ -48,7 +48,7 @@ struct VirtualTableList: View {
                             }
                         }
                     }
-                    .animation(.default, value: virtualTableController.connections)
+                    .animation(.default, value: virtualTableController.connections.map(\.id))
                     .background(.secondarySystemGroupedBackground)
                     .cornerRadius(26.0)
                     .padding(.horizontal, 15.9)

@@ -12,7 +12,6 @@ struct TimetablesView: View {
     @State var category = CategorizedTimetables()
     @State var loading = true
     @State var error = false
-    @State var openUrl = false
     @State var openFromUrl = ""
     @State var urlNavigateDestination: Route = .empty
     @State var navigateInsideFromUrl = false
@@ -90,7 +89,6 @@ struct TimetablesView: View {
         .onOpenURL { url in
             if url.host == "timetable" {
                 if url.pathComponents.endIndex >= 2 {
-                    openUrl = false
                     openFromUrl = url.pathComponents[1]
                     if !category.regionalbuses.isEmpty {
                         let mirror = Mirror(reflecting: category)

@@ -27,8 +27,13 @@ struct Journey: Codable, Hashable {
                 continue
             }
 
-            if timeStringFromDate(lPart.startDeparture) != timeStringFromDate(rPart.startDeparture)
-                || timeStringFromDate(lPart.endArrival) != timeStringFromDate(rPart.endArrival)
+            let lStart = Int(lPart.startDeparture.timeIntervalSinceReferenceDate / 60)
+            let rStart = Int(rPart.startDeparture.timeIntervalSinceReferenceDate / 60)
+            let lEnd = Int(lPart.endArrival.timeIntervalSinceReferenceDate / 60)
+            let rEnd = Int(rPart.endArrival.timeIntervalSinceReferenceDate / 60)
+
+            if lStart != rStart
+                || lEnd != rEnd
                 || lPart.routeShortName != rPart.routeShortName
                 || lPart.startStopName != rPart.startStopName
                 || lPart.endStopName != rPart.endStopName
@@ -45,8 +50,8 @@ struct Journey: Codable, Hashable {
                 if part.routeType == 64 {
                     hasher.combine("walking")
                 } else {
-                    hasher.combine(timeStringFromDate(part.startDeparture))
-                    hasher.combine(timeStringFromDate(part.endArrival))
+                    hasher.combine(Int(part.startDeparture.timeIntervalSinceReferenceDate / 60))
+                    hasher.combine(Int(part.endArrival.timeIntervalSinceReferenceDate / 60))
                     hasher.combine(part.routeShortName)
                     hasher.combine(part.startStopName)
                     hasher.combine(part.endStopName)

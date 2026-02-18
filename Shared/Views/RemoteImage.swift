@@ -27,10 +27,10 @@ class ImageLoader: ObservableObject {
 }
 
 struct RemoteImageView: View {
-    @ObservedObject var imageLoader: ImageLoader
+    @StateObject var imageLoader: ImageLoader
 
     init(url: URL) {
-        imageLoader = ImageLoader(url: url)
+        _imageLoader = StateObject(wrappedValue: ImageLoader(url: url))
     }
 
     var body: some View {

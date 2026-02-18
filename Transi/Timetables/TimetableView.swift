@@ -13,7 +13,11 @@ struct TimetableView: View {
 
     let route: Route
     let timezoneOffset = TimeZone(identifier: "Europe/Bratislava")!.secondsFromGMT()
-    let feedbackGenerator = UIImpactFeedbackGenerator(style: .rigid)
+    private static let feedbackGenerator: UIImpactFeedbackGenerator = {
+        let gen = UIImpactFeedbackGenerator(style: .rigid)
+        gen.prepare()
+        return gen
+    }()
     @State var departures: [Departure] = []
     @State var selectedDeparture = 0.0
     @State var directions: [Direction] = []
@@ -26,7 +30,6 @@ struct TimetableView: View {
 
     init(_ route: Route) {
         self.route = route
-        feedbackGenerator.prepare()
     }
 
     var body: some View {
@@ -135,7 +138,7 @@ struct TimetableView: View {
             }
         }
         .onChange(of: selectedDeparture) { _ in
-            feedbackGenerator.impactOccurred()
+            Self.feedbackGenerator.impactOccurred()
         }
         .onChange(of: [selectedDirection.name, selectedDate.description]) { _ in
             fetchTimetable()

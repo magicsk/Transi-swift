@@ -34,10 +34,14 @@ extension TripPlannerController {
         }
     }
 
+    private static let iApiDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd HH:mm:ss.SSSSSS"
+        f.timeZone = TimeZone(identifier: "Europe/Bratislava")
+        return f
+    }()
+
     func mapIApiToJourneys(_ iJourneys: [IApiJourney]) -> [Journey] {
-        let iApiDateFormatter = DateFormatter()
-        iApiDateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSSSSS"
-        iApiDateFormatter.timeZone = TimeZone(identifier: "Europe/Bratislava")
 
         return iJourneys.compactMap { iJourney -> Journey? in
             let iParts = iJourney.parts
@@ -70,8 +74,8 @@ extension TripPlannerController {
 
                 let routeShortName = mappedLines.indices.contains(index) ? mappedLines[index] : nil
 
-                let startDepDate = iApiDateFormatter.date(from: iPart.departure.date) ?? Date()
-                let endArrDate = iApiDateFormatter.date(from: iPart.arrival.date) ?? Date()
+                let startDepDate = TripPlannerController.iApiDateFormatter.date(from: iPart.departure.date) ?? Date()
+                let endArrDate = TripPlannerController.iApiDateFormatter.date(from: iPart.arrival.date) ?? Date()
 
                 parts.append(
                     Part(

@@ -12,15 +12,14 @@ struct Session: Codable, Hashable {
 }
 
 struct SessionReq: Codable, Hashable {
-    var installation: String = {
+    private static let persistedInstallation: String = {
         let key = "installationUUID"
-        if let existing = UserDefaults.standard.string(forKey: key) {
-            return existing
-        }
+        if let existing = UserDefaults.standard.string(forKey: key) { return existing }
         let newUUID = UUID().uuidString
         UserDefaults.standard.set(newUUID, forKey: key)
         return newUUID
     }()
+    var installation: String = SessionReq.persistedInstallation
     var language = "en"
     var platform = 2
 }

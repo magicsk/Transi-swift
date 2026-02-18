@@ -17,8 +17,6 @@ struct VirtualTableListItem: View {
     var vehicleInfo: VehicleInfo?
     var isLast: Bool
     @State var date = Date()
-    @State var image: CGImage? = nil
-    @State var loadedImage: UIImage? = nil
     @State var expanded: Bool = false
 
     init(_ connection: Connection, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?, isLast: Bool)

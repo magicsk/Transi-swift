@@ -28,8 +28,8 @@ struct MapKitView: UIViewControllerRepresentable {
 class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentationControllerDelegate,
     UISceneDelegate
 {
-    @StateObject var stopListProvider = GlobalController.stopsListProvider
-    @StateObject var appState = GlobalController.appState
+    let stopListProvider = GlobalController.stopsListProvider
+    let appState = GlobalController.appState
     private var tileLightOverlay: MKTileOverlay?
     private var tileDarkOverlay: MKTileOverlay?
     private var sheetViewController: MapBottomSheetView?
@@ -56,7 +56,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         self.changeTab = changeTab
 
         super.init(nibName: nil, bundle: nil)
+        #if DEBUG
         print("map view init")
+        #endif
     }
 
     @available(*, unavailable)
@@ -131,8 +133,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         DispatchQueue.global(qos: .userInitiated).async {
             let points = self.generatePoints()
             if points.isEmpty {
-                sleep(1)
-                self.addPoints()
+                DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 1) {
+                    self.addPoints()
+                }
             } else {
                 DispatchQueue.main.sync {
                     self.mapView.addAnnotations(points)

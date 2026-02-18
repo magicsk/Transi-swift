@@ -167,10 +167,11 @@ class SimpleVirtualTableController: ObservableObject {
                    let connectionsJson = platformObject["tab"] as? [Any]
                 {
                     var connections = [Connection]()
+                    let allLiveActivities = VirtualTableLiveActivityController.listAllTabActivities()
                     for object in connectionsJson {
                         if let tabJson = object as? [String: Any] {
                             if let connection = Connection(json: tabJson, platform: _platform, stopId: _stopId) {
-                                if VirtualTableLiveActivityController.listAllTabActivities().contains(where: { la in
+                                if allLiveActivities.contains(where: { la in
                                     la.connectionId == connection.id
                                 }) {
                                     connections.append(connection)
@@ -178,7 +179,7 @@ class SimpleVirtualTableController: ObservableObject {
                             }
                         }
                     }
-                    let liveActivities = VirtualTableLiveActivityController.listAllTabActivities().filter {
+                    let liveActivities = allLiveActivities.filter {
                         la in la.platform == _platform
                     }
                     for liveActivity in liveActivities {

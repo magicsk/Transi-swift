@@ -10,22 +10,47 @@ import Foundation
 
 class StopsListProvider: ObservableObject {
     @Published var stops = [Stop]()
-    @Published var unmodifiedStops = [Stop]()
+    var unmodifiedStops = [Stop]()
     @Published var fetchError = false
     @Published var fetchLoading = false
 
     static var mapPointsNeeded = false
 
-    let cachedStops = UserDefaults.standard.retrieve(object: [Stop].self, forKey: Stored.stops)
+    private static let stopsFileURL: URL = {
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent("stops.json")
+    }()
+
+    private let cachedStops: [Stop]?
     private let stopsVersion = UserDefaults.standard.string(forKey: Stored.stopsVersion) ?? ""
-    private let jsonEncoder = JSONEncoder()
 
     init() {
-        if cachedStops != nil {
-            stops = cachedStops!
-            unmodifiedStops = cachedStops!
+        cachedStops = Self.loadCachedStops()
+        if let cachedStops = cachedStops {
+            stops = cachedStops
+            unmodifiedStops = cachedStops
         }
         fetchStops()
+    }
+
+    private static func loadCachedStops() -> [Stop]? {
+        if let data = try? Data(contentsOf: stopsFileURL) {
+            return try? JSONDecoder().decode([Stop].self, from: data)
+        }
+        // Migrate from UserDefaults if file cache doesn't exist yet
+        if let stops = UserDefaults.standard.retrieve(object: [Stop].self, forKey: Stored.stops) {
+            saveCachedStops(stops)
+            UserDefaults.standard.removeObject(forKey: Stored.stops)
+            return stops
+        }
+        return nil
+    }
+
+    private static func saveCachedStops(_ stops: [Stop]) {
+        if let data = try? JSONEncoder().encode(stops) {
+            try? data.write(to: stopsFileURL)
+        }
     }
 
     func fetchStops() {
@@ -52,7 +77,10 @@ class StopsListProvider: ObservableObject {
                                         self.fetchLoading = false
                                     }
                                     self.addUtilsToStopList()
-                                    UserDefaults.standard.save(customObject: newStops, forKey: Stored.stops)
+                                    Self.saveCachedStops(newStops)
+                                    if let location = LocationProvider.lastLocation {
+                                        self.sortStops(coordinates: location.coordinate)
+                                    }
                                 case .failure:
                                     DispatchQueue.main.async {
                                         self.fetchError = true

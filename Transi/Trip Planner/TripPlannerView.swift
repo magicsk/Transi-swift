@@ -14,7 +14,11 @@ struct TripPlannerView: View {
     @State private var lastField = ""
     @State private var showStopList = false
     @State private var dateDialog = false
-    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .rigid)
+    private static let feedbackGenerator: UIImpactFeedbackGenerator = {
+        let gen = UIImpactFeedbackGenerator(style: .rigid)
+        gen.prepare()
+        return gen
+    }()
 
     var body: some View {
         NavigationStack {
@@ -94,7 +98,7 @@ struct TripPlannerView: View {
                 tripPlannerController.fetchTrip()
             }
             .onChange(of: tripPlannerController.arrivalDeparture) { _ in
-                feedbackGenerator.impactOccurred()
+                Self.feedbackGenerator.impactOccurred()
                 tripPlannerController.fetchTrip()
             }
         }

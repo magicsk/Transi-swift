@@ -117,7 +117,9 @@ struct GlobalController {
             case .success(let data):
                 sessionToken = data.session
             case .failure(let error):
+                #if DEBUG
                 print(error)
+                #endif
                 // Signal waiters with empty string so they don't hang forever
                 sessionToken = ""
             }

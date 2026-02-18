@@ -13,7 +13,6 @@ struct VirtualTableView: View {
     @StateObject var virtualTableController = GlobalController.virtualTable
     @State private var showStopList = false
     @State private var showInfoTexts = false
-    @State private var stop: Stop = .empty
     @AppStorage(Stored.displayClockOnTable) var displayClock = true
 
     var body: some View {

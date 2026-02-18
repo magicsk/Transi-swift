@@ -11,28 +11,35 @@ let S_USER_AGENT = "ProdProd/204 CFNetwork/3826.600.41 Darwin/24.6.0"
 let G_USER_AGENT =
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
 
+private let sharedJsonDecoder: JSONDecoder = {
+    let decoder = JSONDecoder()
+    decoder.keyDecodingStrategy = .convertFromSnakeCase
+    return decoder
+}()
+
 func fetchData<T: Decodable>(
     request: URLRequest, type: T.Type, completion: @escaping (Result<T, Error>) -> Void
 ) {
     URLSession.shared.dataTask(with: request) { data, _, error in
         if let error = error {
-            completion(.failure(error))
+            DispatchQueue.main.async {
+                completion(.failure(error))
+            }
             return
         }
 
         guard let data = data else {
-            completion(
-                .failure(
-                    NSError(
-                        domain: "fetchData", code: -3, userInfo: ["message": "No data received!"])))
+            DispatchQueue.main.async {
+                completion(
+                    .failure(
+                        NSError(
+                            domain: "fetchData", code: -3, userInfo: ["message": "No data received!"])))
+            }
             return
         }
 
-        let jsonDecoder = JSONDecoder()
-        jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-
         do {
-            let decoded = try jsonDecoder.decode(type, from: data)
+            let decoded = try sharedJsonDecoder.decode(type, from: data)
             DispatchQueue.main.async {
                 completion(.success(decoded))
             }
@@ -40,7 +47,9 @@ func fetchData<T: Decodable>(
             #if DEBUG
             print(error)
             #endif
-            completion(.failure(error))
+            DispatchQueue.main.async {
+                completion(.failure(error))
+            }
         }
     }
     .resume()

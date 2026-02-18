@@ -49,7 +49,7 @@ struct VirtualTableDetail: View {
                     } placeholder: {
                         ProgressView()
                     }
-                    .frame(width: UIScreen.main.bounds.size.width - 44.0).padding(.top, 60.0)
+                    .frame(maxWidth: .infinity).padding(.top, 60.0)
                     Text("\(vehicleInfo!.type) #\(busID)")
                         .font(.system(size: 10.0, weight: .thin))
                         .frame(maxWidth: .infinity, alignment: .trailing)

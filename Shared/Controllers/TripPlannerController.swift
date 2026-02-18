@@ -47,7 +47,9 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                 if source != .initial { self.loadingMore = true } else { self.loading = true }
             }
 
+            #if DEBUG
             print("fetching trip from \(params.fromId) to \(params.toId)")
+            #endif
 
             self.performFetches(
                 requestBody: params.requestBody,
@@ -171,7 +173,9 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                                 }
 
                                 if didChange {
-                                    print("rApi empty, retrying with 8 hours...")
+                                    #if DEBUG
+                                print("rApi empty, retrying with 8 hours...")
+                                #endif
                                     fetchRApi(body: newBody, isRetry: true)
                                     return
                                 }
@@ -180,12 +184,16 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                             rApiResult = data
 
                         case .failure(let err):
+                            #if DEBUG
                             print("R-Api Error: \(err)")
+                            #endif
                         }
                         group.leave()
                     }
                 } catch {
+                    #if DEBUG
                     print("Req Body Encode Error: \(error)")
+                    #endif
                     group.leave()
                 }
             }
@@ -199,7 +207,9 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                 if case .success(let data) = result {
                     iApiResult = data
                 } else if case .failure(let err) = result {
+                    #if DEBUG
                     print("I-Api Error: \(err)")
+                    #endif
                 }
                 group.leave()
             }
@@ -229,10 +239,10 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             }
         }
 
-        let newUnifiedJourneys = mapRApiToJourneys(rJourneys) + mapIApiToJourneys(iJourneys)
+        let mappedIJourneys = mapIApiToJourneys(iJourneys)
+        let newUnifiedJourneys = mapRApiToJourneys(rJourneys) + mappedIJourneys
 
         if !iJourneys.isEmpty {
-            let mappedIJourneys = mapIApiToJourneys(iJourneys)
             if let last = mappedIJourneys.last?.parts?.first?.startDeparture {
                 self.nextIApiSearchDate = last.addingTimeInterval(60)
             }
@@ -280,12 +290,16 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         let lastIJourney = trip.journey?.last(where: { $0.id.hasPrefix("i-") })
 
         if journey.id == lastRJourney?.id {
+            #if DEBUG
             print("fetching more rApi")
+            #endif
             fetchTrip(source: .moreRApi)
         }
 
         if journey.id == lastIJourney?.id {
+            #if DEBUG
             print("fetching more iApi")
+            #endif
             fetchTrip(source: .moreIApi)
         }
     }

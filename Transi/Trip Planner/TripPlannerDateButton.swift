@@ -11,18 +11,21 @@ struct TripPlannerDateButton: View {
     @Binding private var date: Date
     @Binding private var dateDialog: Bool
     private let customDate: Bool
-    private let formatter = DateFormatter()
+    private static let formatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "d MMM H:mm"
+        return f
+    }()
 
     init(_ date: Binding<Date>, dateDialog: Binding<Bool>, customDate: Bool) {
         _date = date
         _dateDialog = dateDialog
         self.customDate = customDate
-        formatter.dateFormat = "d MMM H:mm"
     }
 
     var body: some View {
         Button(action: {dateDialog = true}) {
-            Text(customDate ? formatter.string(from: date) : "now")
+            Text(customDate ? Self.formatter.string(from: date) : "now")
                 .padding(.vertical, 6.0)
                 .frame(maxWidth: .infinity)
                 .background(.secondarySystemGroupedBackground)
