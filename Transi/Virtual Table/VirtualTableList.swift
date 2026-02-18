@@ -36,10 +36,12 @@ struct VirtualTableList: View {
                                 let vehicleInfo = virtualTableController.vehicleInfo.first(where: {
                                     $0.issi == connection.busID
                                 })
+                                let isLast = virtualTableController.connections.last?.id == connection.id
                                 VirtualTableListItem(
                                     connection,
                                     virtualTableController.currentStop.platformLabels,
-                                    vehicleInfo
+                                    vehicleInfo,
+                                    isLast: isLast
                                 ).id(connection.id)
                             }
                         }

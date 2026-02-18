@@ -10,22 +10,23 @@ import SwiftUI
 import SwipeActions
 
 struct VirtualTableListItem: View {
-    @StateObject var virtualTableController = GlobalController.virtualTable
     @Environment(\.openURL) private var openURL
 
     var connection: Connection
     var platformLabels: [PlatformLabel]?
     var vehicleInfo: VehicleInfo?
+    var isLast: Bool
     @State var date = Date()
     @State var image: CGImage? = nil
     @State var loadedImage: UIImage? = nil
     @State var expanded: Bool = false
 
-    init(_ connection: Connection, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?)
+    init(_ connection: Connection, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?, isLast: Bool)
     {
         self.connection = connection
         self.platformLabels = platformLabels
         self.vehicleInfo = vehicleInfo
+        self.isLast = isLast
     }
 
     var body: some View {
@@ -88,7 +89,7 @@ struct VirtualTableListItem: View {
                 }
                 .padding(.bottom, -1.5)
                 Divider().padding(.leading, expanded ? 0.0 : 65.0).opacity(
-                    virtualTableController.connections.last?.id == connection.id ? 0.0 : 1.0)
+                    isLast ? 0.0 : 1.0)
             }
         } leadingActions: { context in
             SwipeAction(systemImage: "bell.fill") {
@@ -162,7 +163,7 @@ struct VirtualTableListItem: View {
                         ForEach([Connection.example2, Connection.example, Connection.example3]) {
                             connection in
                             VirtualTableListItem(
-                                connection, [PlatformLabel.example], VehicleInfo.example)
+                                connection, [PlatformLabel.example], VehicleInfo.example, isLast: false)
                         }
                     }
                 }
