@@ -76,12 +76,17 @@ class StopsListProvider: ObservableObject {
     }
 
     func sortStops(coordinates: CLLocationCoordinate2D) {
-        if stops.count > 0 {
+        guard !unmodifiedStops.isEmpty else { return }
+        DispatchQueue.global(qos: .userInitiated).async { [self] in
+            let sorted = self.unmodifiedStops.sorted(by: {
+                $0.distance(to: coordinates) < $1.distance(to: coordinates)
+            })
             DispatchQueue.main.async {
-                self.stops = self.unmodifiedStops.sorted(by: { $0.distance(to: coordinates) < $1.distance(to: coordinates) })
+                self.stops = sorted
                 self.addUtilsToStopList()
                 if GlobalController.virtualTable.changeLocation {
-                    GlobalController.virtualTable.changeStop(GlobalController.getNearestStopId(), switchOnly: true)
+                    GlobalController.virtualTable.changeStop(
+                        GlobalController.getNearestStopId(), switchOnly: true)
                 }
             }
         }
