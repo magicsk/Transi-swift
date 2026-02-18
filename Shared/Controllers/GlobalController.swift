@@ -24,7 +24,30 @@ struct GlobalController {
     static let virtualTable = VirtualTableController()
     static let tripPlanner = TripPlannerController()
 
-    static var sessionToken = ""
+    private static let tokenLock = NSLock()
+    private static var _sessionToken = ""
+    private static var tokenWaiters = [DispatchSemaphore]()
+    private static var isTokenFetchInFlight = false
+
+    static var sessionToken: String {
+        get {
+            tokenLock.lock()
+            defer { tokenLock.unlock() }
+            return _sessionToken
+        }
+        set {
+            tokenLock.lock()
+            _sessionToken = newValue
+            let waiters = tokenWaiters
+            tokenWaiters.removeAll()
+            isTokenFetchInFlight = false
+            tokenLock.unlock()
+            for sem in waiters {
+                sem.signal()
+            }
+        }
+    }
+
     static var shouldRunInBackground = false
     var sessionTokenError = false
 
@@ -78,6 +101,14 @@ struct GlobalController {
     }
 
     private static func fetchSessionToken() {
+        tokenLock.lock()
+        if isTokenFetchInFlight {
+            tokenLock.unlock()
+            return
+        }
+        isTokenFetchInFlight = true
+        tokenLock.unlock()
+
         let sessionRequestBody = SessionReq()
         let jsonBody = try! JSONEncoder().encode(sessionRequestBody)
 
@@ -87,6 +118,8 @@ struct GlobalController {
                 sessionToken = data.session
             case .failure(let error):
                 print(error)
+                // Signal waiters with empty string so they don't hang forever
+                sessionToken = ""
             }
         }
     }
@@ -122,16 +155,19 @@ struct GlobalController {
         }
     }
 
-    static func getSessionToken(_ retry: Int = 0) -> String {
-        if sessionToken != "" {
-            return sessionToken
+    static func getSessionToken() -> String {
+        tokenLock.lock()
+        if !_sessionToken.isEmpty {
+            tokenLock.unlock()
+            return _sessionToken
         }
-        if retry > 5 {
-            return ""
-        }
+        let sem = DispatchSemaphore(value: 0)
+        tokenWaiters.append(sem)
+        tokenLock.unlock()
+
         fetchSessionToken()
-        sleep(1)
-        return getSessionToken(retry + 1)
+        _ = sem.wait(timeout: .now() + 10)
+        return sessionToken
     }
 
     static func getNearestStopId() -> Int {

@@ -121,7 +121,9 @@ class VirtualTableController: ObservableObject {
     private func fetchRegionalLiveDepartures() async {
         guard let stationId = currentStop.stationId else {
             print("Current stop has no stationId. Cannot fetch regional departures.")
-            loadedStatus += 1
+            connectionsProcessingQueue.async { [weak self] in
+                self?.loadedStatus += 1
+            }
             return
         }
 
@@ -137,7 +139,8 @@ class VirtualTableController: ObservableObject {
         fetchBApi(
             endpoint: "/mobile/v1/station/\(stationId)/timetable/\(dateString)/\(minutes)/1",
             type: RegionalConnectionsResponse.self
-        ) { result in
+        ) { [weak self] result in
+            guard let self = self else { return }
 
             switch result {
             case .success(let response):
@@ -149,12 +152,18 @@ class VirtualTableController: ObservableObject {
                         || connection.type != "online"
                 }
 
-                self.internalRegionalConnections = newRegionalConnections
-                self.sortAndPublishConnections()
+                self.connectionsProcessingQueue.async { [weak self] in
+                    guard let self = self else { return }
+                    self.internalRegionalConnections = newRegionalConnections
+                    self.loadedStatus += 1
+                    self.sortAndPublishConnections()
+                }
             case .failure(let err):
                 print("Error fetching or decoding regional departures. \(err)")
+                self.connectionsProcessingQueue.async { [weak self] in
+                    self?.loadedStatus += 1
+                }
             }
-            self.loadedStatus += 1
         }
     }
 
@@ -166,7 +175,7 @@ class VirtualTableController: ObservableObject {
     }
 
     private func sortAndPublishConnections() {
-        DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+        connectionsProcessingQueue.async { [weak self] in
             guard let self = self else { return }
             var connectionsForPublish: [Connection] = []
             var regionalConnectionsToRemove: [String] = []
@@ -198,16 +207,19 @@ class VirtualTableController: ObservableObject {
                 }
             }
 
-            DispatchQueue.main.async {
+            let isEmpty = connectionsForPublish.isEmpty && self.internalConnections.isEmpty
+                && self.internalRegionalConnections.isEmpty
+            let currentLoadedStatus = self.loadedStatus
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 self.connections = connectionsForPublish
                 print("connections", self.connections)
                 print("socket.status", self.socket.status)
                 if self.socket.status == .connected {
                     self.socketStatus = .connected
-                    if self.loadedStatus > 1 {
-                        self.connectionsEmpty =
-                            self.connections.isEmpty && self.internalConnections.isEmpty
-                            && self.internalRegionalConnections.isEmpty
+                    if currentLoadedStatus > 1 {
+                        self.connectionsEmpty = isEmpty
                     }
                 } else {
                     self.disconnect(reconnect: true)
@@ -242,9 +254,11 @@ class VirtualTableController: ObservableObject {
     }
 
     func startListeners() {
-        socket.on(clientEvent: .statusChange) { _, _ in
+        socket.on(clientEvent: .statusChange) { [weak self] _, _ in
+            guard let self = self else { return }
             let connectionStatus = self.socket.status
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 print(connectionStatus.description)
                 if connectionStatus != .connected {
                     self.socketStatus = connectionStatus
@@ -252,15 +266,18 @@ class VirtualTableController: ObservableObject {
             }
         }
 
-        socket.on(clientEvent: .connect) { _, _ in
+        socket.on(clientEvent: .connect) { [weak self] _, _ in
+            guard let self = self else { return }
             print("connect")
-            DispatchQueue.main.async {
-                self.startUpdater()
+            DispatchQueue.main.async { [weak self] in
+                self?.startUpdater()
             }
         }
 
-        socket.on(clientEvent: .disconnect) { _, _ in
-            DispatchQueue.main.async {
+        socket.on(clientEvent: .disconnect) { [weak self] _, _ in
+            guard let self = self else { return }
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 self.connected = false
                 self.stopUpdater()
                 if self.reconnect {
@@ -270,24 +287,27 @@ class VirtualTableController: ObservableObject {
             }
         }
 
-        socket.on("cack") { _, _ in
+        socket.on("cack") { [weak self] _, _ in
+            guard let self = self else { return }
             print("cack")
             self.connected = true
             self.socket.emit("tabStart", [self.currentStop.id, "*"] as [Any])
             self.socket.emit("infoStart")
         }
 
-        socket.on("tabs") { data, _ in
+        socket.on("tabs") { [weak self] data, _ in
+            guard let self = self else { return }
             print("tabs")
-            self.connectionsProcessingQueue.async {
+            self.connectionsProcessingQueue.async { [weak self] in
+                guard let self = self else { return }
                 guard let platformArray = data.first as? [[String: Any]] else {
                     print(
                         "Error: Could not cast incoming data to the expected [[String: Any]] structure."
                     )
                     self.loadedStatus += 1
-                    DispatchQueue.main.async {
-                        self.connections = [Connection]()
-                        self.internalConnections = [Connection]()
+                    self.internalConnections = [Connection]()
+                    DispatchQueue.main.async { [weak self] in
+                        self?.connections = [Connection]()
                     }
                     return
                 }
@@ -327,7 +347,8 @@ class VirtualTableController: ObservableObject {
             }
         }
 
-        socket.on("vInfo") { data, _ in
+        socket.on("vInfo") { [weak self] data, _ in
+            guard let self = self else { return }
             if let vehicleInfoJson = data[0] as? [String: Any] {
                 if let newVehicleInfo = VehicleInfo(json: vehicleInfoJson) {
                     self.vehicleInfo.append(newVehicleInfo)
@@ -335,10 +356,12 @@ class VirtualTableController: ObservableObject {
             }
         }
 
-        socket.on("iText") { data, _ in
+        socket.on("iText") { [weak self] data, _ in
+            guard let self = self else { return }
             if let texts = data.first as? [String] {
                 let filtered = texts.filter { !$0.isEmpty }
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
                     self.infoTexts = filtered
                     self.unreadInfoCount = filtered.filter { !self.readInfoTexts.contains($0) }.count
                 }
@@ -374,10 +397,12 @@ class VirtualTableController: ObservableObject {
                 if let currentStop = GlobalController.getStopById(stopId) {
                     self.currentStop = currentStop
                     self.connections = [Connection]()
-                    self.internalConnections = [Connection]()
-                    self.internalRegionalConnections = [Connection]()
                     self.vehicleInfo = [VehicleInfo]()
                     self.connectionsEmpty = false
+                    connectionsProcessingQueue.async { [weak self] in
+                        self?.internalConnections = [Connection]()
+                        self?.internalRegionalConnections = [Connection]()
+                    }
                     disconnect(reconnect: true)
                 }
             }

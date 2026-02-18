@@ -98,23 +98,29 @@ class SimpleVirtualTableController: ObservableObject {
 
     func disconnect(reconnect: Bool = false) {
         self.reconnect = reconnect
+        if !reconnect {
+            stopListeners()
+        }
         socket.disconnect()
     }
 
     func startListeners() {
-        socket.on(clientEvent: .statusChange) { _, _ in
+        socket.on(clientEvent: .statusChange) { [weak self] _, _ in
+            guard let self = self else { return }
             let connectionStatus = self.socket.status.description
             if connectionStatus != "connected" {
                 self.socketStatus = self.socket.status.description
             }
         }
 
-        socket.on(clientEvent: .connect) { _, _ in
+        socket.on(clientEvent: .connect) { [weak self] _, _ in
+            guard let self = self else { return }
             self.connected = true
             self.startUpdater()
         }
 
-        socket.on(clientEvent: .disconnect) { _, _ in
+        socket.on(clientEvent: .disconnect) { [weak self] _, _ in
+            guard let self = self else { return }
             self.connections = [Connection]()
             self.vehicleInfo = [VehicleInfo]()
             self.connected = false
@@ -126,16 +132,19 @@ class SimpleVirtualTableController: ObservableObject {
             }
         }
 
-        socket.on("cack") { _, _ in
+        socket.on("cack") { [weak self] _, _ in
+            guard let self = self else { return }
             print("cack")
             self.socket.emit("tabStart", [self.currentStop, "*"] as [Any])
             self.socket.emit("infoStart")
         }
 
-        socket.on("tabs") { data, _ in
+        socket.on("tabs") { [weak self] data, _ in
+            guard let self = self else { return }
             guard let platformArray = data.first as? [[String: Any]] else {
                 print("Error: Could not cast incoming data to the expected [[String: Any]] structure.")
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
                     self.connections = [Connection]()
                     self.socketStatus = "error"
                 }
@@ -167,7 +176,8 @@ class SimpleVirtualTableController: ObservableObject {
                     for liveActivity in liveActivities {
                         if let connection = connections.first(where: { t in t.id == liveActivity.connectionId })
                         {
-                            Task {
+                            Task { [weak self] in
+                                guard let self = self else { return }
                                 await VirtualTableLiveActivityController.updateActivity(
                                     id: liveActivity.id,
                                     connection: connection,
@@ -187,7 +197,8 @@ class SimpleVirtualTableController: ObservableObject {
             self.connections = newConnections
             self.socketStatus = "connected"
         }
-        socket.on("vInfo") { data, _ in
+        socket.on("vInfo") { [weak self] data, _ in
+            guard let self = self else { return }
             if let vehicleInfoJson = data[0] as? [String: Any] {
                 if let newVehicleInfo = VehicleInfo(json: vehicleInfoJson) {
                     self.vehicleInfo.append(newVehicleInfo)
