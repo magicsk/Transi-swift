@@ -120,16 +120,16 @@ class VirtualTableController: ObservableObject {
 
     private func fetchRegionalLiveDepartures() async {
         guard let stationId = currentStop.stationId else {
+            #if DEBUG
             print("Current stop has no stationId. Cannot fetch regional departures.")
+            #endif
             connectionsProcessingQueue.async { [weak self] in
                 self?.loadedStatus += 1
             }
             return
         }
 
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMdd"
-        let dateString = dateFormatter.string(from: Date())
+        let dateString = actualDateString()
 
         let calendar = Calendar.current
         let now = Date()
@@ -159,7 +159,9 @@ class VirtualTableController: ObservableObject {
                     self.sortAndPublishConnections()
                 }
             case .failure(let err):
+                #if DEBUG
                 print("Error fetching or decoding regional departures. \(err)")
+                #endif
                 self.connectionsProcessingQueue.async { [weak self] in
                     self?.loadedStatus += 1
                 }
@@ -214,8 +216,6 @@ class VirtualTableController: ObservableObject {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.connections = connectionsForPublish
-                print("connections", self.connections)
-                print("socket.status", self.socket.status)
                 if self.socket.status == .connected {
                     self.socketStatus = .connected
                     if currentLoadedStatus > 1 {
@@ -230,14 +230,20 @@ class VirtualTableController: ObservableObject {
 
     func connect() {
         if socket.status == .connected {
+            #if DEBUG
             print("Socket already connected, requesting fresh data...")
+            #endif
             self.socket.emit("tabStart", [self.currentStop.id, "*"] as [Any])
             self.socket.emit("infoStart")
             self.startUpdater()
         } else if socket.status == .connecting {
+            #if DEBUG
             print("Socket is connecting, will request data on connect event...")
+            #endif
         } else {
+            #if DEBUG
             print("Socket not connected, attempting to connect...")
+            #endif
             socket.connect()
         }
     }
@@ -259,7 +265,9 @@ class VirtualTableController: ObservableObject {
             let connectionStatus = self.socket.status
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
+                #if DEBUG
                 print(connectionStatus.description)
+                #endif
                 if connectionStatus != .connected {
                     self.socketStatus = connectionStatus
                 }
@@ -268,7 +276,9 @@ class VirtualTableController: ObservableObject {
 
         socket.on(clientEvent: .connect) { [weak self] _, _ in
             guard let self = self else { return }
+            #if DEBUG
             print("connect")
+            #endif
             DispatchQueue.main.async { [weak self] in
                 self?.startUpdater()
             }
@@ -289,7 +299,9 @@ class VirtualTableController: ObservableObject {
 
         socket.on("cack") { [weak self] _, _ in
             guard let self = self else { return }
+            #if DEBUG
             print("cack")
+            #endif
             self.connected = true
             self.socket.emit("tabStart", [self.currentStop.id, "*"] as [Any])
             self.socket.emit("infoStart")
@@ -297,13 +309,15 @@ class VirtualTableController: ObservableObject {
 
         socket.on("tabs") { [weak self] data, _ in
             guard let self = self else { return }
+            #if DEBUG
             print("tabs")
+            #endif
             self.connectionsProcessingQueue.async { [weak self] in
                 guard let self = self else { return }
                 guard let platformArray = data.first as? [[String: Any]] else {
-                    print(
-                        "Error: Could not cast incoming data to the expected [[String: Any]] structure."
-                    )
+                    #if DEBUG
+                    print("Error: Could not cast incoming data to the expected [[String: Any]] structure.")
+                    #endif
                     self.loadedStatus += 1
                     self.internalConnections = [Connection]()
                     DispatchQueue.main.async { [weak self] in
@@ -351,7 +365,15 @@ class VirtualTableController: ObservableObject {
             guard let self = self else { return }
             if let vehicleInfoJson = data[0] as? [String: Any] {
                 if let newVehicleInfo = VehicleInfo(json: vehicleInfoJson) {
-                    self.vehicleInfo.append(newVehicleInfo)
+                    DispatchQueue.main.async {
+                        if let index = self.vehicleInfo.firstIndex(where: { $0.issi == newVehicleInfo.issi }) {
+                            if self.vehicleInfo[index] != newVehicleInfo {
+                                self.vehicleInfo[index] = newVehicleInfo
+                            }
+                        } else {
+                            self.vehicleInfo.append(newVehicleInfo)
+                        }
+                    }
                 }
             }
         }

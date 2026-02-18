@@ -37,7 +37,9 @@ func fetchData<T: Decodable>(
                 completion(.success(decoded))
             }
         } catch {
+            #if DEBUG
             print(error)
+            #endif
             completion(.failure(error))
         }
     }
@@ -96,7 +98,9 @@ func fetchRApiPost<T: Decodable>(
 func fetchIApi<T: Decodable>(
     endpoint: String, type: T.Type, completion: @escaping (Result<T, Error>) -> Void
 ) {
+    #if DEBUG
     print(endpoint)
+    #endif
     var request = URLRequest(url: URL(string: "\(GlobalController.iApiBaseUrl)\(endpoint)")!)
     request.setValue(G_USER_AGENT, forHTTPHeaderField: "User-Agent")
 

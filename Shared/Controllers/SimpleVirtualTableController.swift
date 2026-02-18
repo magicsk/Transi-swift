@@ -43,7 +43,9 @@ class SimpleVirtualTableController: ObservableObject {
     }
 
     deinit {
+        #if DEBUG
         print("\(currentStop) is being deinitialized")
+        #endif
     }
 
     private func startUpdater() {
@@ -87,7 +89,9 @@ class SimpleVirtualTableController: ObservableObject {
     }
 
     func connect() {
+        #if DEBUG
         print("atempting to connect... \(currentStop)")
+        #endif
         disconnect()
         // print(manager.engine?.connected)
         if manager.engine?.connected != true {
@@ -134,7 +138,9 @@ class SimpleVirtualTableController: ObservableObject {
 
         socket.on("cack") { [weak self] _, _ in
             guard let self = self else { return }
+            #if DEBUG
             print("cack")
+            #endif
             self.socket.emit("tabStart", [self.currentStop, "*"] as [Any])
             self.socket.emit("infoStart")
         }
@@ -142,7 +148,9 @@ class SimpleVirtualTableController: ObservableObject {
         socket.on("tabs") { [weak self] data, _ in
             guard let self = self else { return }
             guard let platformArray = data.first as? [[String: Any]] else {
+                #if DEBUG
                 print("Error: Could not cast incoming data to the expected [[String: Any]] structure.")
+                #endif
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
                     self.connections = [Connection]()
@@ -201,7 +209,11 @@ class SimpleVirtualTableController: ObservableObject {
             guard let self = self else { return }
             if let vehicleInfoJson = data[0] as? [String: Any] {
                 if let newVehicleInfo = VehicleInfo(json: vehicleInfoJson) {
-                    self.vehicleInfo.append(newVehicleInfo)
+                    if let index = self.vehicleInfo.firstIndex(where: { $0.issi == newVehicleInfo.issi }) {
+                        self.vehicleInfo[index] = newVehicleInfo
+                    } else {
+                        self.vehicleInfo.append(newVehicleInfo)
+                    }
                 }
             }
         }

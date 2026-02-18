@@ -12,6 +12,10 @@ struct VirtualTableList: View {
     @Environment(\.openURL) var openURL
     @StateObject var virtualTableController = GlobalController.virtualTable
 
+    private var vehicleInfoByIssi: [String: VehicleInfo] {
+        Dictionary(uniqueKeysWithValues: virtualTableController.vehicleInfo.map { ($0.issi, $0) })
+    }
+
     var body: some View {
         ZStack {
             if !virtualTableController.connections.isEmpty {
@@ -33,9 +37,7 @@ struct VirtualTableList: View {
                     LazyVStack(spacing: .zero) {
                         SwipeViewGroup {
                             ForEach(virtualTableController.connections) { connection in
-                                let vehicleInfo = virtualTableController.vehicleInfo.first(where: {
-                                    $0.issi == connection.busID
-                                })
+                                let vehicleInfo = vehicleInfoByIssi[connection.busID]
                                 let isLast = virtualTableController.connections.last?.id == connection.id
                                 VirtualTableListItem(
                                     connection,

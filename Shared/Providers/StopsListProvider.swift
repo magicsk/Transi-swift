@@ -32,11 +32,17 @@ class StopsListProvider: ObservableObject {
         fetchMagicApi(endpoint: "/stops?v", type: StopsVersion.self) { stopsVersionResult in
             switch stopsVersionResult {
                 case .success(let stopsVersion):
+                    #if DEBUG
                     print(stopsVersion.version)
+                    #endif
                     if self.stopsVersion == stopsVersion.version, self.cachedStops != nil {
+                        #if DEBUG
                         print("using cached stops json")
+                        #endif
                     } else {
+                        #if DEBUG
                         print("getting new stops json")
+                        #endif
                         fetchMagicApi(endpoint: "/stops", type: [Stop].self) { stopsResult in
                             switch stopsResult {
                                 case .success(let newStops):

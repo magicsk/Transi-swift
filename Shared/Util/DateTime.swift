@@ -7,25 +7,33 @@
 
 import Foundation
 
-func dateFromUtc(_ isoString: String?) -> Date {
-    if isoString == nil {
-        return Date()
-    } else {
-        let isoDateFormatter = ISO8601DateFormatter()
-        isoDateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        isoDateFormatter.formatOptions = [
-            .withFullDate,
-            .withFullTime,
-            .withDashSeparatorInDate,
-            .withFractionalSeconds,
-        ]
+private let clockFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm:ss"
+    return formatter
+}()
 
-        if let date = isoDateFormatter.date(from: isoString!) {
-            return date
-        } else {
-            return Date()
-        }
-    }
+private let dateDayFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyyMMdd"
+    return formatter
+}()
+
+private let isoDateFormatter: ISO8601DateFormatter = {
+    let formatter = ISO8601DateFormatter()
+    formatter.timeZone = TimeZone(secondsFromGMT: 0)
+    formatter.formatOptions = [
+        .withFullDate,
+        .withFullTime,
+        .withDashSeparatorInDate,
+        .withFractionalSeconds,
+    ]
+    return formatter
+}()
+
+func dateFromUtc(_ isoString: String?) -> Date {
+    guard let isoString = isoString else { return Date() }
+    return isoDateFormatter.date(from: isoString) ?? Date()
 }
 
 func timeStringFromDate(_ date: Date) -> String {
@@ -42,13 +50,9 @@ func timeDiffFromDates(_ from: Date, _ to: Date) -> String {
 }
 
 func clockStringFromDate(_ time: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm:ss"
-    return formatter.string(from: time)
+    return clockFormatter.string(from: time)
 }
 
 func actualDateString() -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyyMMdd"
-    return formatter.string(from: Date.now)
+    return dateDayFormatter.string(from: Date.now)
 }

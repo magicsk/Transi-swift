@@ -26,7 +26,9 @@ class LocationProvider: NSObject, CLLocationManagerDelegate {
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
+        #if DEBUG
         print("got new location")
+        #endif
         GlobalController.stopsListProvider.sortStops(coordinates: location.coordinate)
         LocationProvider.lastLocation = location
         if GlobalController.tripPlanner.from == .empty { GlobalController.tripPlanner.from = .actualLocation }
