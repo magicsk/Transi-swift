@@ -76,7 +76,7 @@ class StopsListProvider: ObservableObject {
                                         self.unmodifiedStops = newStops
                                         self.fetchLoading = false
                                     }
-                                    self.addUtilsToStopList()
+                                    self.updateActualLocationEntry()
                                     Self.saveCachedStops(newStops)
                                     if let location = LocationProvider.lastLocation {
                                         self.sortStops(coordinates: location.coordinate)
@@ -91,6 +91,9 @@ class StopsListProvider: ObservableObject {
                         UserDefaults.standard.set(stopsVersion.version, forKey: Stored.stopsVersion)
                     }
                     GlobalController.locationProvider.startUpdatingLocation()
+                    if !LocationProvider.isLocationAvailable {
+                        self.setDefaultStopIfNeeded()
+                    }
 
                 case .failure:
                     DispatchQueue.main.async {
@@ -101,10 +104,22 @@ class StopsListProvider: ObservableObject {
         }
     }
 
-    private func addUtilsToStopList() {
+    func updateActualLocationEntry() {
         DispatchQueue.main.async {
-            if self.stops.first?.id != Stop.actualLocation.id {
-                self.stops.insert(Stop.actualLocation, at: 0)
+            let hasIt = self.stops.first?.id == Stop.actualLocation.id
+            if LocationProvider.isLocationAvailable {
+                if !hasIt { self.stops.insert(Stop.actualLocation, at: 0) }
+            } else {
+                if hasIt { self.stops.removeFirst() }
+            }
+        }
+    }
+
+    func setDefaultStopIfNeeded() {
+        DispatchQueue.main.async {
+            if GlobalController.virtualTable.currentStop.id == Stop.empty.id {
+                let firstStopId = GlobalController.getNearestStopId()
+                GlobalController.virtualTable.changeStop(firstStopId, switchOnly: true)
             }
         }
     }
@@ -117,7 +132,7 @@ class StopsListProvider: ObservableObject {
             })
             DispatchQueue.main.async {
                 self.stops = sorted
-                self.addUtilsToStopList()
+                self.updateActualLocationEntry()
                 if GlobalController.virtualTable.changeLocation {
                     GlobalController.virtualTable.changeStop(
                         GlobalController.getNearestStopId(), switchOnly: true)

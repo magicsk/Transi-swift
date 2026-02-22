@@ -11,6 +11,7 @@ import Foundation
 class LocationProvider: NSObject, CLLocationManagerDelegate {
     public let locationManager = CLLocationManager()
     static var lastLocation: CLLocation? = nil
+    static var isLocationAvailable: Bool = false
 
     private var searchTimer: Timer?
 
@@ -22,6 +23,23 @@ class LocationProvider: NSObject, CLLocationManagerDelegate {
         locationManager.distanceFilter = 50.0
         locationManager.showsBackgroundLocationIndicator = false
         locationManager.allowsBackgroundLocationUpdates = true
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
+        let available = (status == .authorizedWhenInUse || status == .authorizedAlways)
+        LocationProvider.isLocationAvailable = available
+
+        if status == .notDetermined { return }
+
+        DispatchQueue.main.async {
+            GlobalController.stopsListProvider.updateActualLocationEntry()
+            if available {
+                manager.startUpdatingLocation()
+            } else {
+                GlobalController.stopsListProvider.setDefaultStopIfNeeded()
+            }
+        }
     }
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {

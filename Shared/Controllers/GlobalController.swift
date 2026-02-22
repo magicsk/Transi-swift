@@ -72,6 +72,9 @@ struct GlobalController {
             case .active:
                 locationProvider.startUpdatingLocation()
                 virtualTable.connect()
+                if !LocationProvider.isLocationAvailable {
+                    stopsListProvider.setDefaultStopIfNeeded()
+                }
             default:
                 break
         }
