@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct VirtualTableView: View {
-    @Environment(\.openURL) var openURL
     @StateObject var virtualTableController = GlobalController.virtualTable
     @State private var showInfoTexts = false
     @AppStorage(Stored.displayClockOnTable) var displayClock = true
@@ -34,7 +33,7 @@ struct VirtualTableView: View {
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        HStack(spacing: 8) {
+                        HStack {
                             Button {
                                 virtualTableController.markInfoTextsRead()
                                 showInfoTexts = true
@@ -48,7 +47,7 @@ struct VirtualTableView: View {
                             Divider()
                                 .frame(height: 16)
                             Button {
-                                openURL(URL(string: "transi://map/\(virtualTableController.currentStop.id)")!)
+                                GlobalController.appState.pendingNavigation = .map(stopId: virtualTableController.currentStop.id)
                             } label: {
                                 Image(systemName: "map")
                             }

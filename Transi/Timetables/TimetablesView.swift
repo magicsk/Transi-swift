@@ -17,12 +17,12 @@ struct TimetablesView: View {
     @State var navigateInsideFromUrl = false
 
     let columns = [
-        GridItem(.flexible())
+        GridItem(.flexible()),
     ]
 
     var body: some View {
         LoadingOverlay($loading, error: $error, errorText: TimetableError.plural) {
-            //TODO: change to NavigationSplitView
+            // TODO: change to NavigationSplitView
             NavigationStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 5.0) {
@@ -30,91 +30,90 @@ struct TimetablesView: View {
                         WrappingHStack(category.trams) { route in
                             NavigationLink(destination: TimetableView(route)) {
                                 LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0)
+                                    .vertical, 5.0
+                                )
                             }
                         }
                         Text("Trolleybuses").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.trolleybuses) { route in
                             NavigationLink(destination: TimetableView(route)) {
                                 LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0)
+                                    .vertical, 5.0
+                                )
                             }
                         }
                         Text("Buses").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.buses) { route in
                             NavigationLink(destination: TimetableView(route)) {
                                 LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0)
+                                    .vertical, 5.0
+                                )
                             }
                         }
                         Text("Night lines").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.nightlines) { route in
                             NavigationLink(destination: TimetableView(route)) {
                                 LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0)
+                                    .vertical, 5.0
+                                )
                             }
                         }
                         Text("Trains").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.trains) { route in
                             NavigationLink(destination: TimetableView(route)) {
                                 LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0)
+                                    .vertical, 5.0
+                                )
                             }
                         }
                         Text("Regional Buses").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.regionalbuses) { route in
                             NavigationLink(destination: TimetableView(route)) {
                                 LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0)
+                                    .vertical, 5.0
+                                )
                             }
                         }
                     }
                     .padding(.bottom, 10.0)
                     .padding(.horizontal, 24.0)
                 }
+                .navigationTitle("Timetables")
                 .navigationDestination(isPresented: $navigateInsideFromUrl) {
                     TimetableView(urlNavigateDestination)
                 }
             }
         } retry: {
             fetchTimetables()
-        } cancel: {
-        }
-        .paddingTop(80.0)
-        .overlayBackground(Color.systemBackground)
-        .navigationTitle(Text("Timetables"))
-        .onAppear {
-            fetchTimetables()
-        }
-        .onOpenURL { url in
-            if url.host == "timetable" {
-                if url.pathComponents.endIndex >= 2 {
-                    openFromUrl = url.pathComponents[1]
-                    if !category.regionalbuses.isEmpty {
-                        let mirror = Mirror(reflecting: category)
-                        var foundRoute: Route? = nil
-                        for (_, attr) in mirror.children.enumerated() {
-                            if let routes = attr.value as! [Route]? {
-                                let route = routes.first(where: { route in
-                                    route.shortName == openFromUrl
-                                })
-                                if route != nil {
-                                    foundRoute = route
-                                    break
-                                }
+        } cancel: {}
+            .paddingTop(100.0)
+            .overlayBackground(Color.systemBackground)
+            .onAppear {
+                fetchTimetables()
+            }
+            .onReceive(GlobalController.appState.$pendingTimetableLine.compactMap { $0 }) { line in
+                GlobalController.appState.pendingTimetableLine = nil
+                openFromUrl = line
+                if !category.regionalbuses.isEmpty {
+                    let mirror = Mirror(reflecting: category)
+                    var foundRoute: Route? = nil
+                    for (_, attr) in mirror.children.enumerated() {
+                        if let routes = attr.value as? [Route] {
+                            if let route = routes.first(where: { $0.shortName == line }) {
+                                foundRoute = route
+                                break
                             }
                         }
-                        if let route = foundRoute {
-                            navigateInsideFromUrl = false
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
-                                urlNavigateDestination = route
-                                navigateInsideFromUrl = true
-                            }
+                    }
+                    if let route = foundRoute {
+                        navigateInsideFromUrl = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+                            urlNavigateDestination = route
+                            navigateInsideFromUrl = true
                         }
                     }
                 }
             }
-        }
     }
 
     func fetchTimetables() {
@@ -124,9 +123,9 @@ struct TimetablesView: View {
             DispatchQueue.global(qos: .userInitiated).async { [self] in
                 fetchBApi(endpoint: "/mobile/v1/route/12/", type: Timetables.self) { result in
                     switch result {
-                    case .success(let timetables):
+                    case let .success(timetables):
                         category.clear()
-                        timetables.routes.forEach { route in
+                        for route in timetables.routes {
                             switch route.routeType {
                             case 0:
                                 category.trams.append(route)

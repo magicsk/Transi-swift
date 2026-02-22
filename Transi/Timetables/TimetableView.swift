@@ -114,12 +114,11 @@ struct TimetableView: View {
         }
         .paddingTop(100.0)
         .overlayBackground(Color.clear)
-        .navigationTitle("Line \(route.shortName)")
+        .navigationTitle(route.shortName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 HStack {
-                    Text("Line")
                     LineText(route.shortName, 18.5)
                 }.frame(width: 100)
             }

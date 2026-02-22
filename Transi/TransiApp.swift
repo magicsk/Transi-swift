@@ -21,24 +21,40 @@ struct TransiApp: App {
         WindowGroup {
             ContentView(selectedIndex: $selection)
                 .ignoresSafeArea()
+                .onReceive(GlobalController.appState.$pendingNavigation.compactMap { $0 }) { dest in
+                    GlobalController.appState.pendingNavigation = nil
+                    switch dest {
+                    case .trip:
+                        selection = 0
+                    case .table(let stopId, let expandConnection):
+                        selection = 1
+                        if let exp = expandConnection {
+                            GlobalController.virtualTable.changeStop(stopId, expandConnection: exp)
+                        } else {
+                            GlobalController.virtualTable.changeStop(stopId)
+                        }
+                    case .timetable(let line):
+                        selection = 2
+                        GlobalController.appState.pendingTimetableLine = line
+                    case .map(let stopId):
+                        selection = 3
+                        GlobalController.appState.openedURL = URL(string: "transi://map/\(stopId)")
+                    }
+                }
                 .onOpenURL { url in
-                    print(url)
                     switch url.host {
                     case "trip":
-                        selection = 0
+                        GlobalController.appState.pendingNavigation = .trip
                     case "table":
-                        selection = 1
-                        if url.pathComponents.endIndex >= 2 {
-                            if let stopId = Int(url.pathComponents[1]) {
-                                if url.pathComponents.endIndex >= 3 {
-                                    GlobalController.virtualTable.changeStop(stopId, expandConnection: url.pathComponents[2])
-                                } else {
-                                    GlobalController.virtualTable.changeStop(stopId)
-                                }
-                            }
+                        if url.pathComponents.endIndex >= 2, let stopId = Int(url.pathComponents[1]) {
+                            let expandConnection = url.pathComponents.endIndex >= 3 ? url.pathComponents[2] : nil
+                            GlobalController.appState.pendingNavigation = .table(stopId: stopId, expandConnection: expandConnection)
+                        } else {
+                            selection = 1
                         }
                     case "timetable":
-                        selection = 2
+                        let line = url.pathComponents.endIndex >= 2 ? url.pathComponents[1] : nil
+                        GlobalController.appState.pendingNavigation = .timetable(line: line)
                     case "map":
                         selection = 3
                         GlobalController.appState.openedURL = url

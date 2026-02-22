@@ -10,8 +10,6 @@ import SwiftUI
 import SwipeActions
 
 struct VirtualTableListItem: View {
-    @Environment(\.openURL) private var openURL
-
     var connection: Connection
     var platformLabels: [PlatformLabel]?
     var vehicleInfo: VehicleInfo?
@@ -113,7 +111,7 @@ struct VirtualTableListItem: View {
             .background(.systemYellow)
             .foregroundStyle(.white)
             SwipeAction(systemImage: "calendar") {
-                openURL(URL(string: "transi://timetable/\(connection.line)")!)
+                GlobalController.appState.pendingNavigation = .timetable(line: connection.line)
                 context.state.wrappedValue = .closed
             }
             .background(.systemGreen)
@@ -122,7 +120,7 @@ struct VirtualTableListItem: View {
                 if let stopId = GlobalController.stopsListProvider.getStopIdFromName(
                     connection.lastStopName)
                 {
-                    openURL(URL(string: "transi://map/\(stopId)")!)
+                    GlobalController.appState.pendingNavigation = .map(stopId: stopId)
                 }
                 context.state.wrappedValue = .closed
             }
