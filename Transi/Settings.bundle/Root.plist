@@ -24,7 +24,7 @@
 			<key>Key</key>
 			<string>display_socket_status</string>
 			<key>DefaultValue</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>Type</key>
