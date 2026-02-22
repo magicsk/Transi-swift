@@ -17,7 +17,7 @@ private let sharedJsonDecoder: JSONDecoder = {
     return decoder
 }()
 
-func fetchData<T: Decodable>(
+func fetchData<T: Decodable & Sendable>(
     request: URLRequest, type: T.Type, completion: @escaping (Result<T, Error>) -> Void
 ) {
     URLSession.shared.dataTask(with: request) { data, _, error in
@@ -55,14 +55,14 @@ func fetchData<T: Decodable>(
     .resume()
 }
 
-func fetchMagicApi<T: Decodable>(
+func fetchMagicApi<T: Decodable & Sendable>(
     endpoint: String, type: T.Type, completion: @escaping (Result<T, Error>) -> Void
 ) {
     let request = URLRequest(url: URL(string: "\(GlobalController.magicApiBaseUrl)\(endpoint)")!)
     fetchData(request: request, type: type, completion: completion)
 }
 
-func fetchBApiPost<T: Decodable>(
+func fetchBApiPost<T: Decodable & Sendable>(
     endpoint: String, jsonBody: Data, type: T.Type, completion: @escaping (Result<T, Error>) -> Void
 ) {
     var request = URLRequest(url: URL(string: "\(GlobalController.bApiBaseUrl)\(endpoint)")!)
@@ -76,7 +76,7 @@ func fetchBApiPost<T: Decodable>(
     fetchData(request: request, type: type, completion: completion)
 }
 
-func fetchBApi<T: Decodable>(
+func fetchBApi<T: Decodable & Sendable>(
     endpoint: String, type: T.Type, completion: @escaping (Result<T, Error>) -> Void
 ) {
     // print(endpoint)
@@ -88,7 +88,7 @@ func fetchBApi<T: Decodable>(
     fetchData(request: request, type: type, completion: completion)
 }
 
-func fetchRApiPost<T: Decodable>(
+func fetchRApiPost<T: Decodable & Sendable>(
     endpoint: String, jsonBody: Data, type: T.Type, completion: @escaping (Result<T, Error>) -> Void
 ) {
     // print(endpoint, String(data: jsonBody, encoding: .utf8) ?? "")
@@ -104,7 +104,7 @@ func fetchRApiPost<T: Decodable>(
     fetchData(request: request, type: type, completion: completion)
 }
 
-func fetchIApi<T: Decodable>(
+func fetchIApi<T: Decodable & Sendable>(
     endpoint: String, type: T.Type, completion: @escaping (Result<T, Error>) -> Void
 ) {
     #if DEBUG

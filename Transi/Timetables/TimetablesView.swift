@@ -70,9 +70,8 @@ struct TimetablesView: View {
                         }
                     }
                     .padding(.bottom, 10.0)
-                    .padding(.horizontal, 12.0)
+                    .padding(.horizontal, 24.0)
                 }
-                .navigationTitle(Text("Timetables"))
                 .navigationDestination(isPresented: $navigateInsideFromUrl) {
                     TimetableView(urlNavigateDestination)
                 }
@@ -83,6 +82,7 @@ struct TimetablesView: View {
         }
         .paddingTop(80.0)
         .overlayBackground(Color.systemBackground)
+        .navigationTitle(Text("Timetables"))
         .onAppear {
             fetchTimetables()
         }

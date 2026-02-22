@@ -46,7 +46,7 @@ struct MapBottomSheetView: View {
                                 .cornerRadius(1000)
                         }
                     }
-                    .padding(.top, 14.0)
+                    .padding(.top, 24.0)
                     .padding(.horizontal, 20.0)
                     Spacer()
                     VirtualTableList()
