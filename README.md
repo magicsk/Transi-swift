@@ -24,33 +24,18 @@ Native iOS app in SwiftUI with a list of virtual tables,
 trip planner and timetables for MHD in Bratislava.
 
 <p>
- <picture>
-     <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/95ba7e86-fb9a-4319-a158-bd90d7920125" />
-     <img width="200" src="https://github.com/magicsk/Transi-swift/assets/49265057/b069a517-8c27-43a2-a6ef-f59a40fa676b" />
- </picture>
-
-
- <!-- <picture>
-     <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/dd9a5534-fefe-49db-b7f3-ad2814ec8763" />
-     <img width="200" src="https://github.com/magicsk/Transi-swift/assets/49265057/a1169866-acf6-4e6d-8327-f929e101960e" />
- </picture> -->
-
- 
- <picture>
-     <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/62ddc316-0011-4b2d-a6a8-30deeff280e7" />
-     <img width="200" src="https://github.com/magicsk/Transi-swift/assets/49265057/dbd1641f-a353-41d3-8456-ecc6eeae9433" />
- </picture>
-
- 
- <!-- <picture>
-     <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/62967629-93ad-4a12-894d-a08348702e97" />
-     <img width="200" src="https://github.com/magicsk/Transi-swift/assets/49265057/49265057/d2738a50-7e00-4d31-aa04-0a974d898c8e" />
- </picture> -->
- 
- <picture>
-     <source width="200" media="(prefers-color-scheme: dark)" srcset="https://github.com/magicsk/Transi-swift/assets/49265057/235a329a-4123-46d2-96b2-dc759476115c" />
-     <img width="200" src="https://github.com/magicsk/Transi-swift/assets/49265057/735ed921-a550-4108-919d-1de55e9fc86a" />
- </picture>
+<picture>
+     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/313ce4e8-3258-423c-bfc8-34d4a6f6bbac" />
+     <img width="200" src="https://github.com/user-attachments/assets/1436faee-3047-4781-af11-4387d8e603a1" />
+</picture>
+<picture>
+     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/919d1ae8-73cb-463e-a93f-07d0559e9545" />
+     <img width="200" src="https://github.com/user-attachments/assets/9396b29d-9df9-49c9-850b-a89ae49be973" />
+</picture>
+<picture>
+     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/77504213-b88e-498c-b6cf-4d7b02df8ad1" />
+     <img width="200" src="https://github.com/user-attachments/assets/b3b46120-c95c-4edf-8f81-98dd3d2c25a3" />
+</picture>
 </p>
 
 ## Features
@@ -64,8 +49,12 @@ trip planner and timetables for MHD in Bratislava.
 - Sharing
 
 ### Planned and in-progress
-- Apple watch app
-- Macos app
+- Offline timetables
+- Offline trip planner
+- MacOS support
+- ~~Apple watch app~~
+
+### More screenshots info on [transi.eu](transi.eu)
 
 ## Download
 
