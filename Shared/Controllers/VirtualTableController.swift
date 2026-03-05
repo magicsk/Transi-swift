@@ -56,7 +56,7 @@ class VirtualTableController: ObservableObject {
             socketURL: URL(string: GlobalController.iApiBaseUrl)!,
             config: [
                 .path("/rt/sio2"),
-                .version(.two),
+                .version(.three),
                 .log(false),
                 .reconnects(true),
                 .reconnectAttempts(-1),

@@ -15,7 +15,7 @@ class SimpleVirtualTableController: ObservableObject {
         socketURL: URL(string: GlobalController.iApiBaseUrl)!,
         config: [
             .path("/rt/sio2/"),
-            .version(.two), .forceWebsockets(true),
+            .version(.three),
             .log(false),
             .reconnectAttempts(-1),
             .reconnectWaitMax(1),
