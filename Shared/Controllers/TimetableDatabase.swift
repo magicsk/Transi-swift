@@ -762,10 +762,11 @@ class TimetableDatabase: ObservableObject {
                     }
                 }
             }
-            journeys.sort { ($0.parts?.first?.startDeparture ?? Date()) < ($1.parts?.first?.startDeparture ?? Date()) }
+            var uniqueJourneys = Array(Set(journeys))
+            uniqueJourneys.sort { ($0.parts?.first?.startDeparture ?? Date()) < ($1.parts?.first?.startDeparture ?? Date()) }
             
             DispatchQueue.main.async {
-                completion(Array(Set(journeys)).prefix(10).map { $0 })
+                completion(uniqueJourneys.prefix(10).map { $0 })
             }
         }
     }
