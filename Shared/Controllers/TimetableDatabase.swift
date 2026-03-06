@@ -702,11 +702,14 @@ class TimetableDatabase: ObservableObject {
                         if tStop.feed != fStop.feed { continue }
                         
                         let transferQuery = scheduleDb.query("""
-                            SELECT st1.stop_id, st1.departure_time as transfer_arr, st2.departure_time as transfer_dep,
+                            SELECT st1.stop_id as arr_stop_id, st2.stop_id as dep_stop_id,
+                                   st1.departure_time as transfer_arr, st2.departure_time as transfer_dep,
                                    st2.trip_id as dest_trip_id, st3.departure_time as dest_arr,
                                    r2.route_short_name as dest_route_short_name, r2.route_type as dest_route_type, t2.trip_headsign as dest_headsign
                             FROM stop_times st1
-                            JOIN stop_times st2 ON st1.stop_id = st2.stop_id AND st1.feed = st2.feed
+                            JOIN base.stops s1 ON st1.stop_id = s1.stop_id AND st1.feed = s1.feed
+                            JOIN base.stops s2 ON s1.stop_name = s2.stop_name AND s1.feed = s2.feed
+                            JOIN stop_times st2 ON s2.stop_id = st2.stop_id AND st2.feed = s2.feed
                             JOIN stop_times st3 ON st2.trip_id = st3.trip_id AND st2.feed = st3.feed
                             JOIN trips t2 ON st2.trip_id = t2.trip_id AND st2.feed = t2.feed
                             JOIN base.routes r2 ON t2.route_id = r2.route_id AND t2.feed = r2.feed
@@ -720,7 +723,8 @@ class TimetableDatabase: ObservableObject {
                         """, params: [tripId, fStop.feed, fSeq, tStop.id] + serviceIds.sorted())
                         
                         if let transfer = transferQuery.first,
-                           let transferStopId = transfer["stop_id"] as? String,
+                           let transferArrStopId = transfer["arr_stop_id"] as? String,
+                           let transferDepStopId = transfer["dep_stop_id"] as? String,
                            let transferArr = transfer["transfer_arr"] as? Int,
                            let transferDep = transfer["transfer_dep"] as? Int,
                            let destTripId = transfer["dest_trip_id"] as? String,
@@ -730,14 +734,15 @@ class TimetableDatabase: ObservableObject {
                            let destHeadsign = transfer["dest_headsign"] as? String {
                            
                            let fromDetails = self.getStopDetails(stopId: fStop.id, feed: fStop.feed, baseDb: baseDb)
-                           let transferDetails = self.getStopDetails(stopId: transferStopId, feed: fStop.feed, baseDb: baseDb)
+                           let transferArrDetails = self.getStopDetails(stopId: transferArrStopId, feed: fStop.feed, baseDb: baseDb)
+                           let transferDepDetails = self.getStopDetails(stopId: transferDepStopId, feed: fStop.feed, baseDb: baseDb)
                            let toDetails = self.getStopDetails(stopId: tStop.id, feed: tStop.feed, baseDb: baseDb)
                            
                            let part1 = Part(
                                startStopName: fromDetails.name,
-                               endStopName: transferDetails.name,
+                               endStopName: transferArrDetails.name,
                                startStopCode: fromDetails.platform,
-                               endStopCode: transferDetails.platform,
+                               endStopCode: transferArrDetails.platform,
                                startDeparture: startOfDay.addingTimeInterval(TimeInterval(fDep)),
                                endArrival: startOfDay.addingTimeInterval(TimeInterval(transferArr)),
                                routeType: fRouteType,
@@ -745,10 +750,27 @@ class TimetableDatabase: ObservableObject {
                                routeShortName: fRouteShortName
                            )
                            
+                           var journeyParts = [part1]
+                           
+                           if transferArrStopId != transferDepStopId {
+                               let walkPart = Part(
+                                   startStopName: transferArrDetails.name,
+                                   endStopName: transferDepDetails.name,
+                                   startStopCode: transferArrDetails.platform,
+                                   endStopCode: transferDepDetails.platform,
+                                   startDeparture: startOfDay.addingTimeInterval(TimeInterval(transferArr)),
+                                   endArrival: startOfDay.addingTimeInterval(TimeInterval(transferDep)),
+                                   routeType: 64, // Walk
+                                   tripHeadsign: "Walk to platform",
+                                   routeShortName: nil
+                               )
+                               journeyParts.append(walkPart)
+                           }
+                           
                            let part2 = Part(
-                               startStopName: transferDetails.name,
+                               startStopName: transferDepDetails.name,
                                endStopName: toDetails.name,
-                               startStopCode: transferDetails.platform,
+                               startStopCode: transferDepDetails.platform,
                                endStopCode: toDetails.platform,
                                startDeparture: startOfDay.addingTimeInterval(TimeInterval(transferDep)),
                                endArrival: startOfDay.addingTimeInterval(TimeInterval(destArr)),
@@ -757,7 +779,8 @@ class TimetableDatabase: ObservableObject {
                                routeShortName: destRouteShortName
                            )
                            
-                           journeys.append(Journey(id: "offline-transfer-\(tripId)-\(destTripId)", parts: [part1, part2]))
+                           journeyParts.append(part2)
+                           journeys.append(Journey(id: "offline-transfer-\(tripId)-\(destTripId)", parts: journeyParts))
                         }
                     }
                 }
