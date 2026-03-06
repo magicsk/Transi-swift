@@ -577,7 +577,7 @@ class TimetableDatabase: ObservableObject {
 
     // MARK: - Trip Planner Queries
 
-    func queryOfflineTrip(fromId: Int, toId: Int, date: Date, arrivalDeparture: ArrivalDeparture, completion: @escaping ([Journey]) -> Void) {
+    func queryOfflineTrip(fromName: String, toName: String, date: Date, arrivalDeparture: ArrivalDeparture, completion: @escaping ([Journey]) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self, let scheduleDb = self.scheduleDb, let baseDb = self.baseDb else {
                 DispatchQueue.main.async { completion([]) }
@@ -585,8 +585,8 @@ class TimetableDatabase: ObservableObject {
             }
 
             // 1. Convert stop RowIDs to GTFS stop_ids/feeds
-            let fromStops = self.getGtfsStops(rowId: fromId, baseDb: baseDb)
-            let toStops = self.getGtfsStops(rowId: toId, baseDb: baseDb)
+            let fromStops = self.getGtfsStops(name: fromName, baseDb: baseDb)
+            let toStops = self.getGtfsStops(name: toName, baseDb: baseDb)
             
             guard !fromStops.isEmpty, !toStops.isEmpty else {
                 DispatchQueue.main.async { completion([]) }
@@ -649,14 +649,14 @@ class TimetableDatabase: ObservableObject {
                         if let row = destRow.first,
                            let tArr = row["arrival_time"] as? Int {
                             
-                            let fromStopName = self.getStopName(stopId: fStop.id, feed: fStop.feed, baseDb: baseDb)
-                            let toStopName = self.getStopName(stopId: tStop.id, feed: tStop.feed, baseDb: baseDb)
+                            let fromDetails = self.getStopDetails(stopId: fStop.id, feed: fStop.feed, baseDb: baseDb)
+                            let toDetails = self.getStopDetails(stopId: tStop.id, feed: tStop.feed, baseDb: baseDb)
                             
                             let part = Part(
-                                startStopName: fromStopName,
-                                endStopName: toStopName,
-                                startStopCode: fStop.id,
-                                endStopCode: tStop.id,
+                                startStopName: fromDetails.name,
+                                endStopName: toDetails.name,
+                                startStopCode: fromDetails.platform,
+                                endStopCode: toDetails.platform,
                                 startDeparture: startOfDay.addingTimeInterval(TimeInterval(fDep)),
                                 endArrival: startOfDay.addingTimeInterval(TimeInterval(tArr)),
                                 routeType: routeType,
@@ -688,26 +688,19 @@ class TimetableDatabase: ObservableObject {
         let feed: String
     }
 
-    private func getGtfsStops(rowId: Int, baseDb: SQLiteDatabase) -> [GtfsStop] {
-        // Find all gtfs stop_ids associated with this station_id (rowid)
-        let rows = baseDb.query("SELECT stop_id, feed FROM stops WHERE station_id = (SELECT station_id FROM stops WHERE rowid = ?)", params: [rowId])
-        if rows.isEmpty {
-             // Fallback to the rowid itself if station_id is not used as a grouping
-             let single = baseDb.query("SELECT stop_id, feed FROM stops WHERE rowid = ?", params: [rowId])
-             return single.compactMap { row in
-                guard let id = row["stop_id"] as? String, let feed = row["feed"] as? String else { return nil }
-                return GtfsStop(id: id, feed: feed)
-             }
-        }
+    private func getGtfsStops(name: String, baseDb: SQLiteDatabase) -> [GtfsStop] {
+        let rows = baseDb.query("SELECT stop_id, feed FROM stops WHERE stop_name = ?", params: [name])
         return rows.compactMap { row in
             guard let id = row["stop_id"] as? String, let feed = row["feed"] as? String else { return nil }
             return GtfsStop(id: id, feed: feed)
         }
     }
     
-    private func getStopName(stopId: String, feed: String, baseDb: SQLiteDatabase) -> String {
-        let row = baseDb.query("SELECT stop_name FROM stops WHERE stop_id = ? AND feed = ?", params: [stopId, feed])
-        return row.first?["stop_name"] as? String ?? stopId
+    private func getStopDetails(stopId: String, feed: String, baseDb: SQLiteDatabase) -> (name: String, platform: String?) {
+        let row = baseDb.query("SELECT stop_name, platform_code FROM stops WHERE stop_id = ? AND feed = ?", params: [stopId, feed])
+        let name = row.first?["stop_name"] as? String ?? stopId
+        let platform = row.first?["platform_code"] as? String
+        return (name, platform)
     }
 
     private func dayOfWeekColumn(for date: Date) -> String {
