@@ -647,10 +647,12 @@ class TimetableDatabase: ObservableObject {
                         """, params: [tripId, fStop.feed, tStop.id, fSeq])
                         
                         if let row = destRow.first,
-                           let tArr = row["arrival_time"] as? Int {
+                           let tArr = row["arrival_time"] as? Int,
+                           let tSeq = row["stop_sequence"] as? Int {
                             
                             let fromDetails = self.getStopDetails(stopId: fStop.id, feed: fStop.feed, baseDb: baseDb)
                             let toDetails = self.getStopDetails(stopId: tStop.id, feed: tStop.feed, baseDb: baseDb)
+                            let zones = self.getZonesForTrip(tripId: tripId, feed: fStop.feed, startSeq: fSeq, endSeq: tSeq, scheduleDb: scheduleDb)
                             
                             let part = Part(
                                 startStopName: fromDetails.name,
@@ -664,7 +666,7 @@ class TimetableDatabase: ObservableObject {
                                 routeShortName: routeShortName
                             )
                             
-                            journeys.append(Journey(id: "offline-\(tripId)", parts: [part]))
+                            journeys.append(Journey(id: "offline-\(tripId)", parts: [part], zones: zones))
                         }
                     }
                 }
@@ -705,6 +707,7 @@ class TimetableDatabase: ObservableObject {
                             SELECT st1.stop_id as arr_stop_id, st2.stop_id as dep_stop_id,
                                    st1.departure_time as transfer_arr, st2.departure_time as transfer_dep,
                                    st2.trip_id as dest_trip_id, st3.departure_time as dest_arr,
+                                   st1.stop_sequence as transfer_arr_seq, st2.stop_sequence as transfer_dep_seq, st3.stop_sequence as dest_seq,
                                    r2.route_short_name as dest_route_short_name, r2.route_type as dest_route_type, t2.trip_headsign as dest_headsign
                             FROM stop_times st1
                             JOIN base.stops s1 ON st1.stop_id = s1.stop_id AND st1.feed = s1.feed
@@ -729,6 +732,9 @@ class TimetableDatabase: ObservableObject {
                            let transferDep = transfer["transfer_dep"] as? Int,
                            let destTripId = transfer["dest_trip_id"] as? String,
                            let destArr = transfer["dest_arr"] as? Int,
+                           let transferArrSeq = transfer["transfer_arr_seq"] as? Int,
+                           let transferDepSeq = transfer["transfer_dep_seq"] as? Int,
+                           let destSeq = transfer["dest_seq"] as? Int,
                            let destRouteShortName = transfer["dest_route_short_name"] as? String,
                            let destRouteType = transfer["dest_route_type"] as? Int,
                            let destHeadsign = transfer["dest_headsign"] as? String {
@@ -780,7 +786,12 @@ class TimetableDatabase: ObservableObject {
                            )
                            
                            journeyParts.append(part2)
-                           journeys.append(Journey(id: "offline-transfer-\(tripId)-\(destTripId)", parts: journeyParts))
+                           
+                           let zones1 = self.getZonesForTrip(tripId: tripId, feed: fStop.feed, startSeq: fSeq, endSeq: transferArrSeq, scheduleDb: scheduleDb)
+                           let zones2 = self.getZonesForTrip(tripId: destTripId, feed: fStop.feed, startSeq: transferDepSeq, endSeq: destSeq, scheduleDb: scheduleDb)
+                           let allZones = Array(Set(zones1 + zones2)).sorted()
+                           
+                           journeys.append(Journey(id: "offline-transfer-\(tripId)-\(destTripId)", parts: journeyParts, zones: allZones))
                         }
                     }
                 }
@@ -797,6 +808,19 @@ class TimetableDatabase: ObservableObject {
     private struct GtfsStop {
         let id: String
         let feed: String
+    }
+
+    private func getZonesForTrip(tripId: String, feed: String, startSeq: Int, endSeq: Int, scheduleDb: SQLiteDatabase) -> [String] {
+        let rows = scheduleDb.query("""
+            SELECT DISTINCT s.zone_id 
+            FROM stop_times st
+            JOIN base.stops s ON st.stop_id = s.stop_id AND st.feed = s.feed
+            WHERE st.trip_id = ? AND st.feed = ? 
+              AND st.stop_sequence >= ? AND st.stop_sequence <= ?
+              AND s.zone_id IS NOT NULL AND s.zone_id != ''
+        """, params: [tripId, feed, startSeq, endSeq])
+        
+        return rows.compactMap { $0["zone_id"] as? String }
     }
 
     private func getGtfsStops(name: String, baseDb: SQLiteDatabase) -> [GtfsStop] {
