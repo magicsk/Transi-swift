@@ -688,7 +688,7 @@ class TimetableDatabase: ObservableObject {
                     JOIN base.routes r ON t.route_id = r.route_id AND t.feed = r.feed
                     WHERE st.stop_id = ? AND st.feed = ? AND st.departure_time >= ? * 60
                     AND t.service_id IN (\(placeholders))
-                    ORDER BY st.departure_time ASC LIMIT 30
+                    ORDER BY st.departure_time ASC LIMIT 300
                 """, params: params)
                 
                 for tripRow in tripsAtFrom {
@@ -720,10 +720,11 @@ class TimetableDatabase: ObservableObject {
                               AND st3.stop_id = ? AND st2.stop_sequence < st3.stop_sequence
                               AND st1.departure_time <= st2.departure_time
                               AND st2.departure_time - st1.departure_time < 1800
+                              AND st2.trip_id != ?
                               AND t2.service_id IN (\(placeholders))
                             ORDER BY st3.departure_time ASC
                             LIMIT 1
-                        """, params: [tripId, fStop.feed, fSeq, tStop.id] + serviceIds.sorted())
+                        """, params: [tripId, fStop.feed, fSeq, tStop.id, tripId] + serviceIds.sorted())
                         
                         if let transfer = transferQuery.first,
                            let transferArrStopId = transfer["arr_stop_id"] as? String,
@@ -824,7 +825,23 @@ class TimetableDatabase: ObservableObject {
     }
 
     private func getGtfsStops(name: String, baseDb: SQLiteDatabase) -> [GtfsStop] {
-        let rows = baseDb.query("SELECT stop_id, feed FROM stops WHERE stop_name = ?", params: [name])
+        var searchName = name
+        if name == "Autobusová stanica" {
+            searchName = "Bratislava, AS"
+        }
+        
+        var rows = baseDb.query("SELECT stop_id, feed FROM stops WHERE stop_name = ?", params: [searchName])
+        
+        if rows.isEmpty {
+            let parts = name.split(separator: ",")
+            if parts.count > 1 {
+                let cleanName = parts[1].trimmingCharacters(in: .whitespaces)
+                rows = baseDb.query("SELECT stop_id, feed FROM stops WHERE stop_name LIKE ?", params: ["%" + cleanName + "%"])
+            } else {
+                rows = baseDb.query("SELECT stop_id, feed FROM stops WHERE stop_name LIKE ?", params: ["%" + name + "%"])
+            }
+        }
+        
         return rows.compactMap { row in
             guard let id = row["stop_id"] as? String, let feed = row["feed"] as? String else { return nil }
             return GtfsStop(id: id, feed: feed)
