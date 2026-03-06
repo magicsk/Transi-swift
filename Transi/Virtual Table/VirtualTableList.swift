@@ -7,10 +7,10 @@
 
 import SocketIO
 import SwiftUI
-import SwipeActions
 
 struct VirtualTableList: View {
     @StateObject var virtualTableController = GlobalController.virtualTable
+    @AppStorage(Stored.displaySocketStatus) var displaySocketStatus = true
 
     private var vehicleInfoByIssi: [String: VehicleInfo] {
         Dictionary(uniqueKeysWithValues: virtualTableController.vehicleInfo.map { ($0.issi, $0) })
@@ -19,28 +19,23 @@ struct VirtualTableList: View {
     var body: some View {
         ZStack {
             if !virtualTableController.connections.isEmpty {
-                ScrollView {
+                if displaySocketStatus {
                     ConnectionStatusBar(status: virtualTableController.socketStatus)
-                    LazyVStack(spacing: .zero) {
-                        SwipeViewGroup {
-                            ForEach(virtualTableController.connections) { connection in
-                                let vehicleInfo = vehicleInfoByIssi[connection.busID]
-                                let isLast = virtualTableController.connections.last?.id == connection.id
-                                VirtualTableListItem(
-                                    connection,
-                                    virtualTableController.currentStop.platformLabels,
-                                    vehicleInfo,
-                                    isLast: isLast
-                                ).id(connection.id)
-                            }
-                        }
-                    }
-                    .animation(.default, value: virtualTableController.connections.map(\.id))
-                    .background(.secondarySystemGroupedBackground)
-                    .cornerRadius(26.0)
-                    .padding(.horizontal, 15.9)
-                    Spacer().padding(.bottom, 60.0)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
                 }
+                List(virtualTableController.connections) { connection in
+                            let vehicleInfo = vehicleInfoByIssi[connection.busID]
+                            let isLast = virtualTableController.connections.last?.id == connection.id
+                            VirtualTableListItem(
+                                connection,
+                                virtualTableController.currentStop.platformLabels,
+                                vehicleInfo,
+                                isLast: isLast
+                            ).id(connection.id)
+                }
+                .listStyle(.insetGrouped)
+                .animation(.default, value: virtualTableController.connections.map(\.id))
                 .refreshable {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         virtualTableController.disconnect(reconnect: true)

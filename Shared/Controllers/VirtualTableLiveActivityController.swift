@@ -126,8 +126,15 @@ enum VirtualTableLiveActivityController {
         let departureTimeRemainingRaw = Int(connection.departureTimeRaw - Date().timeIntervalSince1970)
         let liveActivitySounds = UserDefaults.standard.bool(forKey: Stored.liveActivitiesSounds)
 
-        let isNew = oldConnection?.lastStopName != connection.lastStopName || oldConnection?.delayText != connection.delayText || oldConnection?.departureTimeRemaining != connection.departureTimeRemaining
-        if departureTimeRemainingRaw < 200, isNew {
+        let notifyOnTimeChange = UserDefaults.standard.bool(forKey: Stored.notifyOnTimeChange)
+        let notifyOnDelayChange = UserDefaults.standard.bool(forKey: Stored.notifyOnDelayChange)
+        let notifyOnPositionChange = UserDefaults.standard.bool(forKey: Stored.notifyOnPositionChange)
+        let liveActivityThreshold = UserDefaults.standard.integer(forKey: Stored.liveActivityThreshold)
+
+        let isNew = (notifyOnTimeChange && oldConnection?.departureTimeRemaining != connection.departureTimeRemaining)
+            || (notifyOnDelayChange && oldConnection?.delayText != connection.delayText)
+            || (notifyOnPositionChange && oldConnection?.lastStopName != connection.lastStopName)
+        if departureTimeRemainingRaw < liveActivityThreshold, isNew {
             let vehicleText = vehicleInfo != nil ? "\n\(vehicleInfo!.type) #\(String(connection.busID.dropFirst(2)))" : ""
             alertConfig = AlertConfiguration(
                 title: "\(connection.line) ▶ \(connection.headsign) in \(connection.departureTimeRemaining)",
