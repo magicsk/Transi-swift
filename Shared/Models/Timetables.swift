@@ -38,7 +38,17 @@ struct Route: Codable, Hashable, Identifiable {
     var routeType: Int
     var color: String?
     var textColor: String?
-    
+
+    init(routeId: Int, shortName: String, longName: String, description: String? = nil, routeType: Int, color: String? = nil, textColor: String? = nil) {
+        self.routeId = routeId
+        self.shortName = shortName
+        self.longName = longName
+        self.description = description
+        self.routeType = routeType
+        self.color = color
+        self.textColor = textColor
+    }
+
     static let empty = Route(routeId: 0, shortName: "", longName: "", routeType: 0)
 }
 
@@ -52,6 +62,11 @@ struct Direction: Codable, Hashable, Identifiable {
     var name: String { direction }
     private var directionId: Int
     private var direction: String
+
+    init(directionId: Int, direction: String) {
+        self.directionId = directionId
+        self.direction = direction
+    }
 
     static let initial = Direction(directionId: 0, direction: "Error")
 }
@@ -73,6 +88,16 @@ struct Departure: Codable, Hashable, Identifiable {
     var externalId: String
     var directionDepartures: [DirectionDeparture]
 
+    init(tripId: Int, tripFlags: Int, tripHeadsign: String, departure: Int, routeType: Int, externalId: String, directionDepartures: [DirectionDeparture]) {
+        self.tripId = tripId
+        self.tripFlags = tripFlags
+        self.tripHeadsign = tripHeadsign
+        self.departure = departure
+        self.routeType = routeType
+        self.externalId = externalId
+        self.directionDepartures = directionDepartures
+    }
+
     static let initial = Departure(tripId: 0, tripFlags: 0, tripHeadsign: "Error", departure: 0, routeType: 0, externalId: "", directionDepartures: [])
 }
 
@@ -84,6 +109,14 @@ struct DirectionDeparture: Codable, Hashable, Identifiable {
     var departure: Int
     var stopId: Int?
     var stopCode: String?
+
+    init(stationId: Int, stationName: String, departure: Int, stopId: Int? = nil, stopCode: String? = nil) {
+        self.stationId = stationId
+        self.stationName = stationName
+        self.departure = departure
+        self.stopId = stopId
+        self.stopCode = stopCode
+    }
 }
 
 struct TimetableDetails: Codable, Hashable {
