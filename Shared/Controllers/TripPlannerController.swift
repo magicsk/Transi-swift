@@ -38,6 +38,11 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func fetchTrip(source: FetchSource = .initial) {
+        if source == .initial && UserDefaults.standard.bool(forKey: Stored.offlineTripPlanner) && GlobalController.timetableDatabase.isReady {
+            fetchOfflineTrip()
+            return
+        }
+
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
 
@@ -61,6 +66,35 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                     iResult: iResult,
                     source: source
                 )
+            }
+        }
+    }
+
+    func fetchOfflineTrip() {
+        self.loading = true
+        self.error = nil // Clear error on new search
+        let initialSearchDate = self.arrivalDepartureCustomDate ? self.arrivalDepartureDate : Date()
+
+        GlobalController.timetableDatabase.queryOfflineTrip(
+            fromName: from.name ?? "",
+            toName: to.name ?? "",
+            date: initialSearchDate,
+            arrivalDeparture: arrivalDeparture
+        ) { [weak self] journeys in
+            guard let self = self else { return }
+
+            DispatchQueue.main.async {
+                self.loading = false
+                if journeys.isEmpty {
+                    self.error = .noJourneys
+                } else {
+                    self.error = nil // Clear any previous errors
+                    let timestamp = Date().timeIntervalSince1970
+                    let newTrip = Trip(journey: journeys)
+                    self.trip = newTrip
+                    UserDefaults.standard.save(customObject: newTrip, forKey: Stored.trip)
+                    UserDefaults.standard.setValue(timestamp, forKey: Stored.tripSearchTimestamp)
+                }
             }
         }
     }
