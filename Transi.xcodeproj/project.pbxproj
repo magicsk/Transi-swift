@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DAA2CD08BD4588BC2DF3A2FE /* TimetableManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1D343E9BA7330709940737 /* TimetableManifest.swift */; };
+		DAE6A3FAB566B3F8D5A243FC /* SQLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA85A3A8B28DBCC43872EACA /* SQLite.swift */; };
+		DA87394F8A900FB8EE491E85 /* Gzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAE669B06984E562AF846DE /* Gzip.swift */; };
+		DA941C49EDC50A005B9B654A /* TimetableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFC0A95B266F008A6B94431 /* TimetableDatabase.swift */; };
+		DAE746486B0815B721293408 /* TimetableDownloadBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */; };
+		DA74F9EA5264354744462CFD /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DA15FBBD3CE82E468F9A2F02 /* libz.tbd */; };
 		DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */; };
 		DA09CC782F032B81006E4FB9 /* MarqueeText in Frameworks */ = {isa = PBXBuildFile; productRef = DA09CC772F032B81006E4FB9 /* MarqueeText */; };
 		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
@@ -16,7 +22,7 @@
 		DA1F2E6F2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */; };
 		DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7802B02951F00BC8428 /* SwiftUIX */; };
 		DA23A7862B02957700BC8428 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7852B02957700BC8428 /* SocketIO */; };
-		DA3059542E9012D20055A692 /* DisclosureGroupStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3059532E9012C10055A692 /* DisclosureGroupStyle.swift */; };
+
 		DA3059562E9043440055A692 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = DA3059552E9043440055A692 /* SwiftUIIntrospect */; };
 		DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DB2B1E7CB20006F41E /* Errors.swift */; };
 		DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */; };
@@ -81,7 +87,7 @@
 		DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */; };
 		DAAA8A4E2B8285E9006A1EC8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A4D2B8285E9006A1EC8 /* LoadingView.swift */; };
 		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
-		DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = DAB0094B2B2E61A0009DF2CD /* Settings.bundle */; };
+		DA8D2C042F4FA34200BA4245 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D2C032F4FA34200BA4245 /* SettingsView.swift */; };
 		DAB0094E2B2E71BF009DF2CD /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094D2B2E71BF009DF2CD /* View.swift */; };
 		DAB009502B2E7383009DF2CD /* Stored.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094F2B2E7383009DF2CD /* Stored.swift */; };
 		DAB40A892BEFD58D0067F972 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAE77C3F2B88DE8C008F3185 /* WidgetKit.framework */; };
@@ -177,6 +183,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DA1D343E9BA7330709940737 /* TimetableManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableManifest.swift; sourceTree = "<group>"; };
+		DA85A3A8B28DBCC43872EACA /* SQLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLite.swift; sourceTree = "<group>"; };
+		DAAE669B06984E562AF846DE /* Gzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gzip.swift; sourceTree = "<group>"; };
+		DAFC0A95B266F008A6B94431 /* TimetableDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDatabase.swift; sourceTree = "<group>"; };
+		DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDownloadBanner.swift; sourceTree = "<group>"; };
+		DA15FBBD3CE82E468F9A2F02 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDatePicker.swift; sourceTree = "<group>"; };
 		DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableView.swift; sourceTree = "<group>"; };
 		DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerView.swift; sourceTree = "<group>"; };
@@ -185,7 +197,7 @@
 		DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveViewLarge.swift; sourceTree = "<group>"; };
 		DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityDynamicIsland.swift; sourceTree = "<group>"; };
 		DA269E0F298960EF00F42107 /* VirtualTableList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableList.swift; sourceTree = "<group>"; };
-		DA3059532E9012C10055A692 /* DisclosureGroupStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisclosureGroupStyle.swift; sourceTree = "<group>"; };
+
 		DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableDetail.swift; sourceTree = "<group>"; };
 		DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableListItem.swift; sourceTree = "<group>"; };
 		DA3F83DB2B1E7CB20006F41E /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
@@ -224,7 +236,8 @@
 		DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicator.swift; sourceTree = "<group>"; };
 		DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fetch.swift; sourceTree = "<group>"; };
 		DAAA8A4D2B8285E9006A1EC8 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
-		DAB0094B2B2E61A0009DF2CD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		DA8D2C032F4FA34200BA4245 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		DA8D2C052F4FA34200BA4245 /* Settings */ = {isa = PBXGroup; children = (DA8D2C032F4FA34200BA4245 /* SettingsView.swift */,); path = Settings; sourceTree = "<group>"; };
 		DAB0094D2B2E71BF009DF2CD /* View.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		DAB0094F2B2E7383009DF2CD /* Stored.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stored.swift; sourceTree = "<group>"; };
 		DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopsListProvider.swift; sourceTree = "<group>"; };
@@ -274,6 +287,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA74F9EA5264354744462CFD /* libz.tbd in Frameworks */,
 				DA09CC782F032B81006E4FB9 /* MarqueeText in Frameworks */,
 				DA3059562E9043440055A692 /* SwiftUIIntrospect in Frameworks */,
 				DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */,
@@ -327,6 +341,7 @@
 				DA10FA412A0939CA005D7E49 /* TimetablesView.swift */,
 				DAB4CE1E2B30BD7200ECF6F4 /* TimetableView.swift */,
 				DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */,
+				DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */,
 			);
 			path = Timetables;
 			sourceTree = "<group>";
@@ -376,6 +391,8 @@
 				DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */,
 				DA3F83DB2B1E7CB20006F41E /* Errors.swift */,
 				DA855B762AF68BED00372C31 /* Util.swift */,
+				DA85A3A8B28DBCC43872EACA /* SQLite.swift */,
+				DAAE669B06984E562AF846DE /* Gzip.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -424,7 +441,7 @@
 				DACFD5D72EAD28DE009720B5 /* ContentView.swift */,
 				DAA817CD2974387C00E2FBB7 /* Transi.entitlements */,
 				DAA817CE2974387C00E2FBB7 /* Preview Content */,
-				DAB0094B2B2E61A0009DF2CD /* Settings.bundle */,
+				DA8D2C052F4FA34200BA4245 /* Settings */,
 			);
 			path = Transi;
 			sourceTree = "<group>";
@@ -447,6 +464,7 @@
 				DAEF77B029744893008D66DE /* Stops.swift */,
 				DAA817F729743B4B00E2FBB7 /* Table.swift */,
 				DAE714E12B2FAF650059B8A1 /* Timetables.swift */,
+				DA1D343E9BA7330709940737 /* TimetableManifest.swift */,
 				DABD03272A0AF7B800FD2C4B /* Trip.swift */,
 				DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */,
 				DAB0094F2B2E7383009DF2CD /* Stored.swift */,
@@ -486,7 +504,6 @@
 				DA737DE52B90D20E0093FAC6 /* RemoteImage.swift */,
 				DAB981672B926ED90052376C /* VirtualTableConnectionDetail.swift */,
 				DAA552372B9D28E900C750BC /* SearchBar.swift */,
-				DA3059532E9012C10055A692 /* DisclosureGroupStyle.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -500,6 +517,7 @@
 				DAD294B82BA38C9900875B3A /* SimpleVirtualTableController.swift */,
 				DAC95A0E2B77A948005E93C7 /* TripPlannerController.swift */,
 				DAE77C562B8A5C9B008F3185 /* VirtualTableLiveActivityController.swift */,
+				DAFC0A95B266F008A6B94431 /* TimetableDatabase.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -534,6 +552,7 @@
 		DAD0CEB229CB9E1D00A43CC6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DA15FBBD3CE82E468F9A2F02 /* libz.tbd */,
 				DAE77C3F2B88DE8C008F3185 /* WidgetKit.framework */,
 				DAE77C412B88DE8C008F3185 /* SwiftUI.framework */,
 			);
@@ -687,7 +706,6 @@
 			files = (
 				DA737DEF2B9116840093FAC6 /* Vehicles.xcassets in Resources */,
 				DACFD5E22EB0E928009720B5 /* AppIcon.icon in Resources */,
-				DAB0094C2B2E61A0009DF2CD /* Settings.bundle in Resources */,
 				DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -719,6 +737,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAA2CD08BD4588BC2DF3A2FE /* TimetableManifest.swift in Sources */,
+				DAE6A3FAB566B3F8D5A243FC /* SQLite.swift in Sources */,
+				DA87394F8A900FB8EE491E85 /* Gzip.swift in Sources */,
+				DA941C49EDC50A005B9B654A /* TimetableDatabase.swift in Sources */,
+				DAE746486B0815B721293408 /* TimetableDownloadBanner.swift in Sources */,
 				DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */,
 				DAAA8A4A2B8242D7006A1EC8 /* LoadingIndicator.swift in Sources */,
 				DA76B57C2ECE4B620074F4E2 /* ApiModels.swift in Sources */,
@@ -766,7 +789,6 @@
 				DA4DDA6D2B8D5C0F00E8DFCA /* RemainingTime.swift in Sources */,
 				DAB467F92B7A5C9200B45A1C /* MapBottomSheetView.swift in Sources */,
 				DAC95A0B2B77A92F005E93C7 /* GlobalController.swift in Sources */,
-				DA3059542E9012D20055A692 /* DisclosureGroupStyle.swift in Sources */,
 				DAEF77B32974680B008D66DE /* StopListView.swift in Sources */,
 				DAB009502B2E7383009DF2CD /* Stored.swift in Sources */,
 				DA500BF42A1140D700630226 /* TripPlannerTransitListItem.swift in Sources */,
@@ -791,6 +813,7 @@
 				DAEF77B129744893008D66DE /* Stops.swift in Sources */,
 				DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */,
 				DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */,
+				DA8D2C042F4FA34200BA4245 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

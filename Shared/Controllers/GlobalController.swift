@@ -9,7 +9,11 @@ import CoreLocation
 import SwiftUI
 
 struct GlobalController {
-    static let magicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
+    private static let _defaultMagicApiBaseUrl = (Bundle.main.infoDictionary?["MAGIC_API_URL"] as? String)!
+    static var magicApiBaseUrl: String {
+        let override = UserDefaults.standard.string(forKey: Stored.magicApiUrlOverride) ?? ""
+        return override.isEmpty ? _defaultMagicApiBaseUrl : override
+    }
     static let iApiBaseUrl = (Bundle.main.infoDictionary?["I_API_URL"] as? String)!
     static let bApiBaseUrl = (Bundle.main.infoDictionary?["B_API_URL"] as? String)!
     static let rApiBaseUrl = (Bundle.main.infoDictionary?["R_API_URL"] as? String)!
@@ -23,6 +27,7 @@ struct GlobalController {
     static let stopsListProvider = StopsListProvider()
     static let virtualTable = VirtualTableController()
     static let tripPlanner = TripPlannerController()
+    static let timetableDatabase = TimetableDatabase()
 
     private static let tokenLock = NSLock()
     private static var _sessionToken = ""
@@ -56,6 +61,10 @@ struct GlobalController {
         registerUserDefaults()
         fetchSessionToken()
         VirtualTableLiveActivityController.activateExistingActitivites()
+        if timetableDatabase.isOfflineEnabled {
+            _ = timetableDatabase.openDatabases()
+            timetableDatabase.checkAndUpdate()
+        }
     }
 
     static func scenePhaseChange(_ phase: ScenePhase) {
@@ -74,6 +83,10 @@ struct GlobalController {
                 virtualTable.connect()
                 if !LocationProvider.isLocationAvailable {
                     stopsListProvider.setDefaultStopIfNeeded()
+                }
+                if timetableDatabase.isOfflineEnabled && !timetableDatabase.isReady {
+                    _ = timetableDatabase.openDatabases()
+                    timetableDatabase.checkAndUpdate()
                 }
             default:
                 break
@@ -100,7 +113,21 @@ struct GlobalController {
     }
 
     private static func registerUserDefaults() {
-        UserDefaults.standard.register(defaults: [Stored.tripSaveDuration: -1, Stored.tripMaxTransfers: 3, Stored.tripMaxWalkDuration: 15, Stored.liveActivitiesSounds: true])
+        UserDefaults.standard.register(defaults: [
+            Stored.tripSaveDuration: -1,
+            Stored.tripMaxTransfers: 3,
+            Stored.tripMaxWalkDuration: 15,
+            Stored.liveActivitiesSounds: true,
+            Stored.offlineTimetables: false,
+            Stored.displayClockOnTable: true,
+            Stored.displaySocketStatus: true,
+            Stored.defaultStopId: -1,
+            Stored.liveActivityThreshold: 200,
+            Stored.notifyOnTimeChange: true,
+            Stored.notifyOnDelayChange: true,
+            Stored.notifyOnPositionChange: true,
+            Stored.offlineTripPlanner: false,
+        ])
     }
 
     private static func fetchSessionToken() {
