@@ -9,6 +9,7 @@ import SwiftUI
 import WrappingHStack
 
 struct TimetablesView: View {
+    @ObservedObject var timetableDb = GlobalController.timetableDatabase
     @State var category = CategorizedTimetables()
     @State var loading = true
     @State var error = false
@@ -25,6 +26,10 @@ struct TimetablesView: View {
             // TODO: change to NavigationSplitView
             NavigationStack {
                 ScrollView {
+                    if timetableDb.isOfflineEnabled && !timetableDb.isReady {
+                        TimetableDownloadBanner()
+                            .padding(.bottom, 5)
+                    }
                     VStack(alignment: .leading, spacing: 5.0) {
                         Text("Trams").font(.system(size: 24.0, weight: .semibold))
                         WrappingHStack(category.trams) { route in
@@ -117,51 +122,19 @@ struct TimetablesView: View {
     }
 
     func fetchTimetables() {
-        var foundRoute: Route? = nil
-        if category.regionalbuses.isEmpty {
-            loading = true
+        guard category.regionalbuses.isEmpty else { return }
+        loading = true
+
+        if timetableDb.isOfflineEnabled && timetableDb.isReady {
+            timetableDb.queryRoutes { routes in
+                categorizeRoutes(routes)
+            }
+        } else {
             DispatchQueue.global(qos: .userInitiated).async { [self] in
                 fetchBApi(endpoint: "/mobile/v1/route/12/", type: Timetables.self) { result in
                     switch result {
                     case let .success(timetables):
-                        category.clear()
-                        for route in timetables.routes {
-                            switch route.routeType {
-                            case 0:
-                                category.trams.append(route)
-
-                            case 2:
-                                category.trains.append(route)
-
-                            case 3:
-                                if route.shortName.starts(with: "N") {
-                                    category.nightlines.append(route)
-                                } else {
-                                    category.buses.append(route)
-                                }
-
-                            case 50:
-                                if route.shortName.starts(with: "N") {
-                                    category.nightlines.append(route)
-                                } else {
-                                    category.trolleybuses.append(route)
-                                }
-
-                            default:
-                                category.regionalbuses.append(route)
-                            }
-
-                            if openFromUrl != "", route.shortName == openFromUrl {
-                                foundRoute = route
-                            }
-                        }
-                        DispatchQueue.main.async {
-                            loading = false
-                            if let route = foundRoute {
-                                urlNavigateDestination = route
-                                navigateInsideFromUrl = true
-                            }
-                        }
+                        categorizeRoutes(timetables.routes)
                     case .failure:
                         DispatchQueue.main.async {
                             loading = false
@@ -170,6 +143,46 @@ struct TimetablesView: View {
                     }
                 }
             }
+        }
+    }
+
+    private func categorizeRoutes(_ routes: [Route]) {
+        var foundRoute: Route? = nil
+        category.clear()
+        for route in routes {
+            switch route.routeType {
+            case 0:
+                category.trams.append(route)
+
+            case 2, 100 ... 199:
+                category.trains.append(route)
+
+            case 3:
+                if route.shortName.starts(with: "N") {
+                    category.nightlines.append(route)
+                } else {
+                    category.buses.append(route)
+                }
+
+            case 11, 800, 50:
+                if route.shortName.starts(with: "N") {
+                    category.nightlines.append(route)
+                } else {
+                    category.trolleybuses.append(route)
+                }
+
+            default:
+                category.regionalbuses.append(route)
+            }
+
+            if openFromUrl != "", route.shortName == openFromUrl {
+                foundRoute = route
+            }
+        }
+        loading = false
+        if let route = foundRoute {
+            urlNavigateDestination = route
+            navigateInsideFromUrl = true
         }
     }
 }

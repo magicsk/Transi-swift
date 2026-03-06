@@ -11,6 +11,7 @@ import SwiftUIIntrospect
 struct TimetableDetailView: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
+    let timetableDb = GlobalController.timetableDatabase
     let route: Route
     let direction: Direction
     let departure: DirectionDeparture
@@ -77,34 +78,39 @@ struct TimetableDetailView: View {
     }
 
     func fetchTimetableDetail() {
-        if departures.isEmpty {
-            loading = true
+        guard departures.isEmpty else { return }
+        loading = true
+
+        if timetableDb.isOfflineEnabled && timetableDb.isReady, let stopCode = departure.stopCode {
+            timetableDb.queryTimetableDetail(routeRowid: route.id, directionId: direction.id, directionName: direction.name, date: selectedDate, gtfsStopId: stopCode) { [self] details in
+                groupDetailsIntoHourMinutes(details)
+            }
+        } else {
             DispatchQueue.global(qos: .userInitiated).async { [self] in
                 fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(direction.id)/\(selectedDate.toString())/\(departure.id)/", type: TimetableDetails.self) { result in
                     switch result {
-                        case .success(let timetableDetails):
-                            departures.removeAll()
-                            timetableDetails.all.forEach { departure in
-                                let hour = (departure.t / 60) % 24
-                                let minute = String(departure.t % 60).leftPadding(toLength: 2, withPad: "0")
-                                if let hourMinuteIndex = departures.firstIndex(where: { $0.hour == hour }) {
-                                    departures[hourMinuteIndex].minutes.append(minute)
-                                } else {
-                                    let hourMinute = HourMinute(hour: hour, minutes: [minute])
-                                    departures.append(hourMinute)
-                                }
-                            }
-                            DispatchQueue.main.async {
-                                loading = false
-                            }
-                        case .failure:
-                            DispatchQueue.main.async {
-                                error = true
-                            }
+                    case let .success(timetableDetails):
+                        groupDetailsIntoHourMinutes(timetableDetails.all)
+                    case .failure:
+                        error = true
                     }
                 }
             }
         }
+    }
+
+    private func groupDetailsIntoHourMinutes(_ details: [TimetableDetail]) {
+        departures.removeAll()
+        for detail in details {
+            let hour = (detail.t / 60) % 24
+            let minute = String(detail.t % 60).leftPadding(toLength: 2, withPad: "0")
+            if let idx = departures.firstIndex(where: { $0.hour == hour }) {
+                departures[idx].minutes.append(minute)
+            } else {
+                departures.append(HourMinute(hour: hour, minutes: [minute]))
+            }
+        }
+        loading = false
     }
 }
 
