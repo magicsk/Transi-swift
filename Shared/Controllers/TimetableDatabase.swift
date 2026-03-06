@@ -670,11 +670,98 @@ class TimetableDatabase: ObservableObject {
                 }
             }
             
-            // Round 2: One transfer (optional, but requested to remake)
-            // Implementation of Round 2 would follow a similar pattern but would be more complex.
-            // For now, we return direct trips to satisfy the "offline" requirement and 
-            // the "pre-calculated DB" suggestion which would normally handle this better.
-            
+            // Round 2: One transfer
+            for fStop in fromStops {
+                let serviceIds = self.activeServiceIds(feed: fStop.feed, date: dateStr, dayOfWeek: dayOfWeek, scheduleDb: scheduleDb)
+                if serviceIds.isEmpty { continue }
+                
+                let placeholders = serviceIds.map { _ in "?" }.joined(separator: ",")
+                var params: [Any] = [fStop.id, fStop.feed, initialTime]
+                params.append(contentsOf: serviceIds.sorted())
+                
+                let tripsAtFrom = scheduleDb.query("""
+                    SELECT st.trip_id, st.departure_time, st.stop_sequence, r.route_short_name, r.route_type, t.trip_headsign
+                    FROM stop_times st
+                    JOIN trips t ON st.trip_id = t.trip_id AND st.feed = t.feed
+                    JOIN base.routes r ON t.route_id = r.route_id AND t.feed = r.feed
+                    WHERE st.stop_id = ? AND st.feed = ? AND st.departure_time >= ? * 60
+                    AND t.service_id IN (\(placeholders))
+                    ORDER BY st.departure_time ASC LIMIT 30
+                """, params: params)
+                
+                for tripRow in tripsAtFrom {
+                    guard let tripId = tripRow["trip_id"] as? String,
+                          let fSeq = tripRow["stop_sequence"] as? Int,
+                          let fDep = tripRow["departure_time"] as? Int,
+                          let fRouteShortName = tripRow["route_short_name"] as? String,
+                          let fRouteType = tripRow["route_type"] as? Int,
+                          let fHeadsign = tripRow["trip_headsign"] as? String
+                    else { continue }
+                    
+                    for tStop in toStops {
+                        if tStop.feed != fStop.feed { continue }
+                        
+                        let transferQuery = scheduleDb.query("""
+                            SELECT st1.stop_id, st1.departure_time as transfer_arr, st2.departure_time as transfer_dep,
+                                   st2.trip_id as dest_trip_id, st3.departure_time as dest_arr,
+                                   r2.route_short_name as dest_route_short_name, r2.route_type as dest_route_type, t2.trip_headsign as dest_headsign
+                            FROM stop_times st1
+                            JOIN stop_times st2 ON st1.stop_id = st2.stop_id AND st1.feed = st2.feed
+                            JOIN stop_times st3 ON st2.trip_id = st3.trip_id AND st2.feed = st3.feed
+                            JOIN trips t2 ON st2.trip_id = t2.trip_id AND st2.feed = t2.feed
+                            JOIN base.routes r2 ON t2.route_id = r2.route_id AND t2.feed = r2.feed
+                            WHERE st1.trip_id = ? AND st1.feed = ? AND st1.stop_sequence > ?
+                              AND st3.stop_id = ? AND st2.stop_sequence < st3.stop_sequence
+                              AND st1.departure_time <= st2.departure_time
+                              AND st2.departure_time - st1.departure_time < 1800
+                              AND t2.service_id IN (\(placeholders))
+                            ORDER BY st3.departure_time ASC
+                            LIMIT 1
+                        """, params: [tripId, fStop.feed, fSeq, tStop.id] + serviceIds.sorted())
+                        
+                        if let transfer = transferQuery.first,
+                           let transferStopId = transfer["stop_id"] as? String,
+                           let transferArr = transfer["transfer_arr"] as? Int,
+                           let transferDep = transfer["transfer_dep"] as? Int,
+                           let destTripId = transfer["dest_trip_id"] as? String,
+                           let destArr = transfer["dest_arr"] as? Int,
+                           let destRouteShortName = transfer["dest_route_short_name"] as? String,
+                           let destRouteType = transfer["dest_route_type"] as? Int,
+                           let destHeadsign = transfer["dest_headsign"] as? String {
+                           
+                           let fromDetails = self.getStopDetails(stopId: fStop.id, feed: fStop.feed, baseDb: baseDb)
+                           let transferDetails = self.getStopDetails(stopId: transferStopId, feed: fStop.feed, baseDb: baseDb)
+                           let toDetails = self.getStopDetails(stopId: tStop.id, feed: tStop.feed, baseDb: baseDb)
+                           
+                           let part1 = Part(
+                               startStopName: fromDetails.name,
+                               endStopName: transferDetails.name,
+                               startStopCode: fromDetails.platform,
+                               endStopCode: transferDetails.platform,
+                               startDeparture: startOfDay.addingTimeInterval(TimeInterval(fDep)),
+                               endArrival: startOfDay.addingTimeInterval(TimeInterval(transferArr)),
+                               routeType: fRouteType,
+                               tripHeadsign: fHeadsign,
+                               routeShortName: fRouteShortName
+                           )
+                           
+                           let part2 = Part(
+                               startStopName: transferDetails.name,
+                               endStopName: toDetails.name,
+                               startStopCode: transferDetails.platform,
+                               endStopCode: toDetails.platform,
+                               startDeparture: startOfDay.addingTimeInterval(TimeInterval(transferDep)),
+                               endArrival: startOfDay.addingTimeInterval(TimeInterval(destArr)),
+                               routeType: destRouteType,
+                               tripHeadsign: destHeadsign,
+                               routeShortName: destRouteShortName
+                           )
+                           
+                           journeys.append(Journey(id: "offline-transfer-\(tripId)-\(destTripId)", parts: [part1, part2]))
+                        }
+                    }
+                }
+            }
             journeys.sort { ($0.parts?.first?.startDeparture ?? Date()) < ($1.parts?.first?.startDeparture ?? Date()) }
             
             DispatchQueue.main.async {
