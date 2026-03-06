@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct TripPlannerView: View {
-    @Environment(\.openURL) var openURL
     @StateObject var tripPlannerController = GlobalController.tripPlanner
+    @State private var showSettings = false
     @State private var stop: Stop = .example
     @State private var lastField = ""
     @State private var showStopList = false
@@ -69,10 +69,15 @@ struct TripPlannerView: View {
                 .padding(.top, -16.0)
                 .navigationTitle(Text("Trip planner"))
                 .toolbar {
-                    Button("Settings") {
-                        openURL(URL(string: UIApplication.openSettingsURLString)!)
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
                     }
                 }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
             }
             .sheet(isPresented: $dateDialog) {
                 TripPlannerDatePicker($dateDialog)

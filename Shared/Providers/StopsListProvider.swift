@@ -118,8 +118,9 @@ class StopsListProvider: ObservableObject {
     func setDefaultStopIfNeeded() {
         DispatchQueue.main.async {
             if GlobalController.virtualTable.currentStop.id == Stop.empty.id {
-                let firstStopId = GlobalController.getNearestStopId()
-                GlobalController.virtualTable.changeStop(firstStopId, switchOnly: true)
+                let defaultStopId = UserDefaults.standard.integer(forKey: Stored.defaultStopId)
+                let stopId = defaultStopId > 0 ? defaultStopId : GlobalController.getNearestStopId()
+                GlobalController.virtualTable.changeStop(stopId, switchOnly: true)
             }
         }
     }
@@ -134,8 +135,10 @@ class StopsListProvider: ObservableObject {
                 self.stops = sorted
                 self.updateActualLocationEntry()
                 if GlobalController.virtualTable.changeLocation {
-                    GlobalController.virtualTable.changeStop(
-                        GlobalController.getNearestStopId(), switchOnly: true)
+                    let defaultStopId = UserDefaults.standard.integer(forKey: Stored.defaultStopId)
+                    let isFirstSort = GlobalController.virtualTable.currentStop.id == Stop.empty.id
+                    let stopId = (isFirstSort && defaultStopId > 0) ? defaultStopId : GlobalController.getNearestStopId()
+                    GlobalController.virtualTable.changeStop(stopId, switchOnly: true)
                 }
             }
         }
