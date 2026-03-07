@@ -91,7 +91,7 @@ class TimetableDatabase: ObservableObject {
 
     // MARK: - Download & Update
 
-    func checkAndUpdate() {
+    func checkAndUpdate() { print("--- checkAndUpdate CALLED ---")
         DispatchQueue.main.async {
             self.downloadState = .checking
         }
@@ -553,7 +553,7 @@ class TimetableDatabase: ObservableObject {
             }
     }
 
-    private func activeServiceIds(feed: String, date: String, dayOfWeek: String, scheduleDb: SQLiteDatabase) -> Set<String> {
+    func activeServiceIds(feed: String, date: String, dayOfWeek: String, scheduleDb: SQLiteDatabase) -> Set<String> {
         let calendarRows = scheduleDb.query("""
             SELECT service_id FROM calendar
             WHERE feed = ? AND start_date <= ? AND end_date >= ? AND \(dayOfWeek) = 1
@@ -591,8 +591,8 @@ class TimetableDatabase: ObservableObject {
                 serviceIds.formUnion(self.activeServiceIds(feed: feed, date: dateStr, dayOfWeek: dayOfWeek, scheduleDb: scheduleDb))
             }
             
-            let engine = OfflineRoutingEngine(scheduleDb: scheduleDb, baseDb: baseDb)
-            let journeys = engine.planTrip(fromName: fromName, toName: toName, date: date, maxTransfers: maxTransfers, maxWalkDuration: maxWalkDuration, activeServiceIds: Array(Set(serviceIds)))
+            print("EXECUTING NEW BFS ENGINE"); let engine = OfflineRoutingEngine(scheduleDb: scheduleDb, baseDb: baseDb, timetableDb: self)
+            let journeys = engine.planTrip(fromName: fromName, toName: toName, date: date, maxTransfers: maxTransfers, maxWalkDuration: maxWalkDuration)
             
             DispatchQueue.main.async {
                 completion(journeys)
@@ -660,7 +660,7 @@ class TimetableDatabase: ObservableObject {
         return (name, platform)
     }
 
-    private func dayOfWeekColumn(for date: Date) -> String {
+    func dayOfWeekColumn(for date: Date) -> String {
         let weekday = Calendar(identifier: .gregorian).component(.weekday, from: date)
         switch weekday {
         case 1: return "sunday"
@@ -675,16 +675,15 @@ class TimetableDatabase: ObservableObject {
     }
 }
 
-
-
-
 class OfflineRoutingEngine {
     let scheduleDb: SQLiteDatabase
     let baseDb: SQLiteDatabase
+    let timetableDb: TimetableDatabase
     
-    init(scheduleDb: SQLiteDatabase, baseDb: SQLiteDatabase) {
+    init(scheduleDb: SQLiteDatabase, baseDb: SQLiteDatabase, timetableDb: TimetableDatabase) {
         self.scheduleDb = scheduleDb
         self.baseDb = baseDb
+        self.timetableDb = timetableDb
     }
 
     struct StopInfo: Hashable {
@@ -760,69 +759,34 @@ class OfflineRoutingEngine {
         let stopId: String
         let time: Int
         let parts: [Part]
-        let zones: [String]
+        let zones: Set<String>
+        let transitLegs: Int
         let lastTripId: String?
     }
 
-    func planTrip(fromName: String, toName: String, date: Date, maxTransfers: Int, maxWalkDuration: Int, activeServiceIds: [String]) -> [Journey] {
+    func planTrip(fromName: String, toName: String, date: Date, maxTransfers: Int, maxWalkDuration: Int) -> [Journey] {
         let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let logFile = docDir.appendingPathComponent("routing_log.txt")
-        var logStr = """
---- PLAN TRIP START ---
-From: \(fromName), To: \(toName)
-Max Transfers: \(maxTransfers), Max Walk: \(maxWalkDuration)
-"""
         
         let fromStops = getStops(name: fromName)
         let toStops = getStops(name: toName)
         
+        let calendar = Calendar.current
+        let startOfSearchDay = calendar.startOfDay(for: date)
+        let initialTimeInSeconds = Int(date.timeIntervalSince(startOfSearchDay))
+        
+        var logStr = "--- PLAN TRIP START ---\n"
+        logStr += "From: \(fromName), To: \(toName)\n"
+        logStr += "Initial Time: \(initialTimeInSeconds)\n"
+        
         if fromStops.isEmpty || toStops.isEmpty { 
-            logStr += "Missing stops! fromStops: \(fromStops.count), toStops: \(toStops.count)\n"
+            logStr += "Missing stops!\n"
             try? logStr.write(to: logFile, atomically: true, encoding: .utf8)
             return [] 
         }
         
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: date)
-        let initialTimeInSeconds = Int(date.timeIntervalSince(startOfDay))
-        let initialTime = initialTimeInSeconds / 60
-        
         var journeys = [Journey]()
         let toStopIds = Set(toStops.map { $0.id })
-        
-        // 1. Pre-fetch trips in a 6 hour window
-        let maxSearchWindow = 360 
-        let placeholders = activeServiceIds.map { _ in "?" }.joined(separator: ",")
-        var params: [Any] = [initialTime * 60, (initialTime + maxSearchWindow) * 60]
-        params.append(contentsOf: activeServiceIds)
-        
-        let q = """
-            SELECT st.trip_id, st.stop_id, st.departure_time, st.departure_time as arrival_time, st.stop_sequence, 
-                   r.route_short_name, r.route_type, t.trip_headsign, st.feed
-            FROM stop_times st
-            JOIN trips t ON st.trip_id = t.trip_id AND st.feed = t.feed
-            JOIN base.routes r ON t.route_id = r.route_id AND t.feed = r.feed
-            WHERE st.departure_time >= ? AND st.departure_time <= ?
-            AND t.service_id IN (\(placeholders))
-            ORDER BY st.trip_id, st.stop_sequence ASC
-"""
-        
-        let rows = scheduleDb.query(q, params: params)
-        var tripsDict = [String: MemTrip]()
-        for row in rows {
-            guard let tripId = row["trip_id"] as? String,
-                  let stopId = row["stop_id"] as? String,
-                  let dep = row["departure_time"] as? Int,
-                  let arr = row["arrival_time"] as? Int,
-                  let seq = row["stop_sequence"] as? Int,
-                  let rShort = row["route_short_name"] as? String,
-                  let rType = row["route_type"] as? Int,
-                  let headsign = row["trip_headsign"] as? String,
-                  let feed = row["feed"] as? String else { continue }
-            let st = MemStopTime(stopId: stopId, arrival: arr, departure: dep, seq: seq)
-            if tripsDict[tripId] != nil { tripsDict[tripId]!.stopTimes.append(st) }
-            else { tripsDict[tripId] = MemTrip(id: tripId, feed: feed, routeShortName: rShort, routeType: rType, headsign: headsign, stopTimes: [st]) }
-        }
         
         let allStopsRows = baseDb.query("SELECT stop_id, stop_name, stop_lat, stop_lon, platform_code, feed, zone_id FROM stops")
         var allStops = [String: StopInfo]()
@@ -835,84 +799,134 @@ Max Transfers: \(maxTransfers), Max Walk: \(maxWalkDuration)
             stopsByName[info.normalizedName, default: []].append(info)
             if let z = row["zone_id"] as? String, !z.isEmpty { zonesByStop[id] = z }
         }
-        
-        logStr += "Loaded \(tripsDict.count) trips, \(allStops.count) stops.\n"
-        
-        var tripsByStop = [String: [(tripId: String, seq: Int, dep: Int)]]()
-        for (tId, trip) in tripsDict {
-            for st in trip.stopTimes {
-                tripsByStop[st.stopId, default: []].append((tripId: tId, seq: st.seq, dep: st.departure))
-            }
-        }
-        
-        var bestArr = [String: Int]()
-        var activeStates = [GraphState]()
-        for fs in fromStops {
-            activeStates.append(GraphState(stopId: fs.id, time: initialTime * 60, parts: [], zones: [], lastTripId: nil))
-            bestArr[fs.id] = initialTime * 60
-        }
-        
-        let maxLegs = min(maxTransfers + 1, 6)
-        for leg in 1...maxLegs {
-            if activeStates.isEmpty { break }
-            var nextStates = [GraphState]()
+
+        var foundJourneys = [Journey]()
+        var currentDayOffset = 0
+        while foundJourneys.count < 5 && currentDayOffset < 2 {
+            let evalDay = startOfSearchDay.addingTimeInterval(TimeInterval(currentDayOffset * 86400))
+            let dateStr = evalDay.toString()
+            let dayOfWeek = timetableDb.dayOfWeekColumn(for: evalDay)
             
-            for state in activeStates {
-                guard let currStopData = allStops[state.stopId] else { continue }
-                
-                var originsToEval = [(id: String, time: Int, part: Part?)]()
-                originsToEval.append((id: state.stopId, time: state.time, part: nil))
-                
-                // Platform transfers (same normalized name)
-                // Only evaluate walks if we are already mid-journey (don't walk at the very start)
-                if !state.parts.isEmpty {
-                    for target in stopsByName[currStopData.normalizedName] ?? [] {
-                        if target.id == state.stopId { continue }
-                        let walkPart = Part(startStopName: currStopData.name, endStopName: target.name, startStopCode: currStopData.platform, endStopCode: target.platform, startDeparture: startOfDay.addingTimeInterval(TimeInterval(state.time)), endArrival: startOfDay.addingTimeInterval(TimeInterval(state.time + 60)), routeType: 64, tripHeadsign: "Walk to platform", routeShortName: nil)
-                        originsToEval.append((id: target.id, time: state.time + 60, part: walkPart))
-                    }
+            var sids = Set<String>()
+            for feed in ["city", "regional", "trains"] {
+                sids.formUnion(timetableDb.activeServiceIds(feed: feed, date: dateStr, dayOfWeek: dayOfWeek, scheduleDb: scheduleDb))
+            }
+            
+            logStr += "Day \(currentDayOffset), Service IDs: \(sids.count)\n"
+            if sids.isEmpty { currentDayOffset += 1; continue }
+            
+            let placeholders = sids.map { _ in "?" }.joined(separator: ",")
+            var params: [Any] = []
+            params.append(contentsOf: Array(sids))
+            
+            let q = """
+                SELECT st.trip_id, st.stop_id, st.departure_time, st.departure_time as arrival_time, st.stop_sequence, 
+                       r.route_short_name, r.route_type, t.trip_headsign, st.feed
+                FROM stop_times st
+                JOIN trips t ON st.trip_id = t.trip_id AND st.feed = t.feed
+                JOIN base.routes r ON t.route_id = r.route_id AND t.feed = r.feed
+                WHERE t.service_id IN (\(placeholders))
+"""
+            let rows = scheduleDb.query(q, params: params)
+            var tripsDict = [String: MemTrip]()
+            for row in rows {
+                guard let tId = row["trip_id"] as? String, let sId = row["stop_id"] as? String, let dep = row["departure_time"] as? Int, let arr = row["arrival_time"] as? Int, let seq = row["stop_sequence"] as? Int, let rS = row["route_short_name"] as? String, let rT = row["route_type"] as? Int, let h = row["trip_headsign"] as? String, let f = row["feed"] as? String else { continue }
+                let adjustedDep = dep + (currentDayOffset * 86400)
+                let adjustedArr = arr + (currentDayOffset * 86400)
+                let st = MemStopTime(stopId: sId, arrival: adjustedArr, departure: adjustedDep, seq: seq)
+                if tripsDict[tId] != nil { tripsDict[tId]!.stopTimes.append(st) }
+                else { tripsDict[tId] = MemTrip(id: tId, feed: f, routeShortName: rS, routeType: rT, headsign: h, stopTimes: [st]) }
+            }
+            
+            var tripsByStop = [String: [(tripId: String, seq: Int, dep: Int, stopId: String)]]()
+            for (tId, trip) in tripsDict {
+                for st in trip.stopTimes {
+                    tripsByStop[st.stopId, default: []].append((tripId: tId, seq: st.seq, dep: st.departure, stopId: st.stopId))
                 }
+            }
+            
+            let dayStartTime = (currentDayOffset == 0) ? initialTimeInSeconds : (currentDayOffset * 86400)
+            
+            var startTripsAtOrigin = [(tripId: String, seq: Int, dep: Int, stopId: String)]()
+            for fs in fromStops {
+                startTripsAtOrigin.append(contentsOf: tripsByStop[fs.id] ?? [])
+            }
+            startTripsAtOrigin = startTripsAtOrigin.filter { $0.dep >= dayStartTime }.sorted { $0.dep < $1.dep }
+            
+            logStr += "Found \(startTripsAtOrigin.count) starting trips at origin.\n"
+            
+            let startTripCandidates = startTripsAtOrigin.prefix(20)
+            
+            for startCandidate in startTripCandidates {
+                var bestArrLocal = [String: Int]()
+                var journeysForThisStart = [Journey]()
+                var activeStates = [GraphState(stopId: startCandidate.stopId, time: startCandidate.dep, parts: [], zones: [], transitLegs: 0, lastTripId: nil)]
                 
-                for origin in originsToEval {
-                    let passingTrips = tripsByStop[origin.id] ?? []
-                    for pt in passingTrips {
-                        if pt.tripId == state.lastTripId { continue }
-                        if pt.dep < origin.time || pt.dep > origin.time + 7200 { continue }
+                let maxLegs = 6
+                for leg in 1...maxLegs {
+                    if activeStates.isEmpty { break }
+                    var nextStates = [GraphState]()
+                    for state in activeStates {
+                        guard let currStopData = allStops[state.stopId] else { continue }
+                        var origins = [(id: String, time: Int, part: Part?)]()
+                        origins.append((id: state.stopId, time: state.time, part: nil))
+                        if !state.parts.isEmpty {
+                            for target in stopsByName[currStopData.normalizedName] ?? [] {
+                                if target.id == state.stopId { continue }
+                                let walkPart = Part(startStopName: currStopData.name, endStopName: target.name, startStopCode: currStopData.platform, endStopCode: target.platform, startDeparture: startOfSearchDay.addingTimeInterval(TimeInterval(state.time)), endArrival: startOfSearchDay.addingTimeInterval(TimeInterval(state.time + 60)), routeType: 64, tripHeadsign: "Walk to platform", routeShortName: nil)
+                                origins.append((id: target.id, time: state.time + 60, part: walkPart))
+                            }
+                        }
                         
-                        guard let trip = tripsDict[pt.tripId] else { continue }
-                        for st in trip.stopTimes where st.seq > pt.seq {
-                            if st.arrival < (bestArr[st.stopId] ?? 1000000) {
-                                bestArr[st.stopId] = st.arrival
-                                
-                                var newParts = state.parts
-                                if let wp = origin.part { newParts.append(wp) }
-                                
-                                let p = Part(startStopName: allStops[origin.id]?.name ?? origin.id, endStopName: allStops[st.stopId]?.name ?? st.stopId, startStopCode: allStops[origin.id]?.platform, endStopCode: allStops[st.stopId]?.platform, startDeparture: startOfDay.addingTimeInterval(TimeInterval(pt.dep)), endArrival: startOfDay.addingTimeInterval(TimeInterval(st.arrival)), routeType: trip.routeType, tripHeadsign: trip.headsign, routeShortName: trip.routeShortName)
-                                newParts.append(p)
-                                
-                                var newZones = Set(state.zones)
-                                for tst in trip.stopTimes where tst.seq >= pt.seq && tst.seq <= st.seq {
-                                    if let z = zonesByStop[tst.stopId] { newZones.insert(z) }
-                                }
-                                
-                                if toStopIds.contains(st.stopId) {
-                                    journeys.append(Journey(id: UUID().uuidString, parts: newParts, zones: Array(newZones).sorted()))
-                                } else {
-                                    nextStates.append(GraphState(stopId: st.stopId, time: st.arrival, parts: newParts, zones: Array(newZones).sorted(), lastTripId: pt.tripId))
+                        for origin in origins {
+                            let passingTrips = tripsByStop[origin.id] ?? []
+                            for pt in passingTrips {
+                                if pt.tripId == state.lastTripId { continue }
+                                if pt.dep < origin.time || pt.dep > origin.time + 14400 { continue }
+                                guard let trip = tripsDict[pt.tripId] else { continue }
+                                for st in trip.stopTimes where st.seq > pt.seq {
+                                    if st.arrival < (bestArrLocal[st.stopId] ?? 2000000) {
+                                        bestArrLocal[st.stopId] = st.arrival
+                                        var nParts = state.parts
+                                        if let wp = origin.part { nParts.append(wp) }
+                                        let p = Part(startStopName: allStops[origin.id]?.name ?? origin.id, endStopName: allStops[st.stopId]?.name ?? st.stopId, startStopCode: allStops[origin.id]?.platform, endStopCode: allStops[st.stopId]?.platform, startDeparture: startOfSearchDay.addingTimeInterval(TimeInterval(pt.dep)), endArrival: startOfSearchDay.addingTimeInterval(TimeInterval(st.arrival)), routeType: trip.routeType, tripHeadsign: trip.headsign, routeShortName: trip.routeShortName)
+                                        nParts.append(p)
+                                        var nZones = state.zones
+                                        for tst in trip.stopTimes where tst.seq >= pt.seq && tst.seq <= st.seq {
+                                            if let z = zonesByStop[tst.stopId] { nZones.insert(z) }
+                                        }
+                                        if toStopIds.contains(st.stopId) {
+                                            journeysForThisStart.append(Journey(id: UUID().uuidString, parts: nParts, zones: Array(nZones).sorted()))
+                                        } else if leg < maxLegs {
+                                            nextStates.append(GraphState(stopId: st.stopId, time: st.arrival, parts: nParts, zones: nZones, transitLegs: leg, lastTripId: pt.tripId))
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+                    activeStates = nextStates
+                    if !journeysForThisStart.isEmpty { break }
                 }
+                if let best = journeysForThisStart.sorted(by: { ($0.parts?.last?.endArrival ?? Date()) < ($1.parts?.last?.endArrival ?? Date()) }).first {
+                    journeys.append(best)
+                }
+                if journeys.count >= 5 { break }
             }
-            activeStates = nextStates
-            logStr += "Leg \(leg) done, found \(journeys.count) journeys so far.\n"
+            currentDayOffset += 1
         }
         
-        var unique = Array(Set(journeys))
-        unique.sort { ($0.parts?.first?.startDeparture ?? Date()) < ($1.parts?.first?.startDeparture ?? Date()) }
-        logStr += "Found \(unique.count) final journeys.\n"
+        journeys.sort { ($0.parts?.first?.startDeparture ?? Date()) < ($1.parts?.first?.startDeparture ?? Date()) }
+        logStr += "Found \(journeys.count) final journeys.\n"
         try? logStr.write(to: logFile, atomically: true, encoding: .utf8)
-        return Array(unique.prefix(15))
+        return Array(unique(journeys).prefix(10))
+    }
+    
+    private func unique(_ journeys: [Journey]) -> [Journey] {
+        var result = [Journey]()
+        for j in journeys {
+            if !result.contains(where: { $0 == j }) { result.append(j) }
+        }
+        return result
     }
 }
