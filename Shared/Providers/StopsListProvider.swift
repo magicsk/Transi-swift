@@ -149,4 +149,8 @@ class StopsListProvider: ObservableObject {
             stop.name == stopName
         })?.id
     }
+
+    func getStopFromName(_ stopName: String) -> Stop? {
+        return stops.first(where: { $0.name == stopName })
+    }
 }

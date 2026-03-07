@@ -5,16 +5,26 @@
 //  Created by magic_sk on 09/05/2023.
 //
 
+import AppIntents
 import Foundation
 
 struct Trip: Codable, Hashable {
     var journey: [Journey]?
 }
 
-struct Journey: Codable, Hashable {
+struct Journey: Codable, Hashable, AppEntity {
+    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Journey"
+    static var defaultQuery = JourneyQuery()
+
     var id: String
     var parts: [Part]?
     var zones: [String]?
+
+    var displayRepresentation: DisplayRepresentation {
+        let start = parts?.first?.startStopName ?? "Start"
+        let end = parts?.last?.endStopName ?? "End"
+        return DisplayRepresentation(title: "\(start) to \(end)", subtitle: "\(parts?.count ?? 0) parts")
+    }
 
     static func == (lhs: Journey, rhs: Journey) -> Bool {
         guard let lParts = lhs.parts, let rParts = rhs.parts, lParts.count == rParts.count else {
@@ -60,6 +70,12 @@ struct Journey: Codable, Hashable {
         } else {
             hasher.combine("no_parts")
         }
+    }
+}
+
+struct JourneyQuery: EntityQuery {
+    func entities(for identifiers: [String]) async throws -> [Journey] {
+        return [] // Placeholder
     }
 }
 

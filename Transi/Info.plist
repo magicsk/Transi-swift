@@ -19,7 +19,12 @@
 			<array>
 				<string>transi</string>
 			</array>
-		</dict>
+			<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+</dict>
 	</array>
 	<key>I_API_URL</key>
 	<string>$(I_API_URL)</string>
@@ -37,5 +42,10 @@
 	<array>
 		<string>location</string>
 	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

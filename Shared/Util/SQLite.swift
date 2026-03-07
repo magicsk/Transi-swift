@@ -30,7 +30,12 @@ class SQLiteDatabase {
 
     func query(_ sql: String, params: [Any] = []) -> [[String: Any]] {
         var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [] }
+        let status = sqlite3_prepare_v2(db, sql, -1, &stmt, nil)
+        if status != SQLITE_OK {
+            let errmsg = String(cString: sqlite3_errmsg(db))
+            print("SQLite Prepare Error: \(errmsg) for SQL: \(sql)")
+            return []
+        }
         defer { sqlite3_finalize(stmt) }
 
         for (i, param) in params.enumerated() {

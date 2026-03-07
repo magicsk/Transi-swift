@@ -71,15 +71,19 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func fetchOfflineTrip() {
-        self.loading = true
-        self.error = nil // Clear error on new search
+        DispatchQueue.main.async {
+            self.loading = true
+            self.error = nil // Clear error on new search
+        }
         let initialSearchDate = self.arrivalDepartureCustomDate ? self.arrivalDepartureDate : Date()
 
         GlobalController.timetableDatabase.queryOfflineTrip(
             fromName: from.name ?? "",
             toName: to.name ?? "",
             date: initialSearchDate,
-            arrivalDeparture: arrivalDeparture
+            arrivalDeparture: arrivalDeparture,
+            maxTransfers: UserDefaults.standard.integer(forKey: Stored.tripMaxTransfers),
+            maxWalkDuration: UserDefaults.standard.integer(forKey: Stored.tripMaxWalkDuration)
         ) { [weak self] journeys in
             guard let self = self else { return }
 

@@ -157,10 +157,12 @@ struct SettingsView: View {
                 Text("Forever").tag(-1)
             }
             Toggle("Offline trip planner", isOn: $offlineTripPlanner)
-                .disabled(true)
-            Text("Coming soon")
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .onChange(of: offlineTripPlanner) { enabled in
+                    if enabled {
+                        _ = timetableDatabase.openDatabases()
+                        timetableDatabase.checkAndUpdate()
+                    }
+                }
         }
     }
     // MARK: - Developer
