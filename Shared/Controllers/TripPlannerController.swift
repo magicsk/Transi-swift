@@ -171,9 +171,35 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         }
         let initialSearchDate = arrivalDepartureDate
 
+        // Resolve "Actual location" (id=-1) to the nearest known stop's name so the
+        // offline engine can find a matching GTFS stop. Mirrors what the online path
+        // does via getNearestStationId / getNearestStopId.
+        let resolvedFromName: String
+        if from.id == -1 {
+            let nearestId = GlobalController.getNearestStopId()
+            resolvedFromName = GlobalController.getStopById(nearestId)?.name ?? ""
+        } else {
+            resolvedFromName = from.name ?? ""
+        }
+        let resolvedToName: String
+        if to.id == -1 {
+            let nearestId = GlobalController.getNearestStopId()
+            resolvedToName = GlobalController.getStopById(nearestId)?.name ?? ""
+        } else {
+            resolvedToName = to.name ?? ""
+        }
+
+        if resolvedFromName.isEmpty || resolvedToName.isEmpty {
+            DispatchQueue.main.async {
+                self.loading = false
+                self.error = .noJourneys
+            }
+            return
+        }
+
         GlobalController.timetableDatabase.queryOfflineTrip(
-            fromName: from.name ?? "",
-            toName: to.name ?? "",
+            fromName: resolvedFromName,
+            toName: resolvedToName,
             date: initialSearchDate,
             arrivalDeparture: arrivalDeparture,
             maxTransfers: UserDefaults.standard.integer(forKey: Stored.tripMaxTransfers),

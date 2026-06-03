@@ -16,7 +16,6 @@ struct TimetableManifest: Codable {
 struct TimetableDatabases: Codable {
     var base: TimetableDatabaseInfo
     var schedule: TimetableDatabaseInfo
-    var planner: TimetableDatabaseInfo?
 }
 
 struct TimetableDatabaseInfo: Codable {

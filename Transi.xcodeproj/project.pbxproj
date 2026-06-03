@@ -14,6 +14,7 @@
 		DAE6A3FAB566B3F8D5A243FC /* SQLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA85A3A8B28DBCC43872EACA /* SQLite.swift */; };
 		DA87394F8A900FB8EE491E85 /* Gzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAE669B06984E562AF846DE /* Gzip.swift */; };
 		DA941C49EDC50A005B9B654A /* TimetableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFC0A95B266F008A6B94431 /* TimetableDatabase.swift */; };
+		DA0FF11E0EE0000000000001 /* OfflineRoutingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE0000000000002 /* OfflineRoutingEngine.swift */; };
 		DAE746486B0815B721293408 /* TimetableDownloadBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */; };
 		DA74F9EA5264354744462CFD /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DA15FBBD3CE82E468F9A2F02 /* libz.tbd */; };
 		DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */; };
@@ -208,6 +209,7 @@
 		DA85A3A8B28DBCC43872EACA /* SQLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLite.swift; sourceTree = "<group>"; };
 		DAAE669B06984E562AF846DE /* Gzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gzip.swift; sourceTree = "<group>"; };
 		DAFC0A95B266F008A6B94431 /* TimetableDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDatabase.swift; sourceTree = "<group>"; };
+		DA0FF11E0EE0000000000002 /* OfflineRoutingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineRoutingEngine.swift; sourceTree = "<group>"; };
 		DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDownloadBanner.swift; sourceTree = "<group>"; };
 		DA15FBBD3CE82E468F9A2F02 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDatePicker.swift; sourceTree = "<group>"; };
@@ -565,6 +567,7 @@
 				DAC95A0E2B77A948005E93C7 /* TripPlannerController.swift */,
 				DAE77C562B8A5C9B008F3185 /* VirtualTableLiveActivityController.swift */,
 				DAFC0A95B266F008A6B94431 /* TimetableDatabase.swift */,
+				DA0FF11E0EE0000000000002 /* OfflineRoutingEngine.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -806,6 +809,7 @@
 				DAE6A3FAB566B3F8D5A243FC /* SQLite.swift in Sources */,
 				DA87394F8A900FB8EE491E85 /* Gzip.swift in Sources */,
 				DA941C49EDC50A005B9B654A /* TimetableDatabase.swift in Sources */,
+				DA0FF11E0EE0000000000001 /* OfflineRoutingEngine.swift in Sources */,
 				DAE746486B0815B721293408 /* TimetableDownloadBanner.swift in Sources */,
 				DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */,
 				DAAA8A4A2B8242D7006A1EC8 /* LoadingIndicator.swift in Sources */,
