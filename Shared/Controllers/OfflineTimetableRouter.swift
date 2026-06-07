@@ -4,8 +4,9 @@ final class OfflineTimetableRouter {
     private typealias FrontierEntry = (index: Int, label: OfflineRoutingLabel)
 
     private let maxCandidatesPerStopPerRound = 3
-    private let maxReturnedCandidates = 8
-    private let maxBoardingsPerStopExpansion = 50
+    private let maxReturnedCandidates = 40
+    private let maxScannedStopTimesPerExpansion = 80
+    private let maxWalkOriginsPerExpansion = 12
 
     private let context: OfflineRoutingContext
 
@@ -58,7 +59,7 @@ final class OfflineTimetableRouter {
                 candidates: &candidates
             )
             frontier = expanded
-            if frontier.isEmpty || candidates.count >= maxReturnedCandidates { break }
+            if frontier.isEmpty { break }
         }
 
         return Array(candidates.sorted(by: departureSort).prefix(maxReturnedCandidates))
@@ -74,16 +75,15 @@ final class OfflineTimetableRouter {
     ) -> [FrontierEntry] {
         var next = [FrontierEntry]()
         for entry in frontier {
-            if candidates.count >= maxReturnedCandidates { return next }
             let origins = walkingOrigins(from: entry.label)
             for origin in origins {
-                if candidates.count >= maxReturnedCandidates { return next }
-                var expandedBoardings = 0
+                var scannedStopTimes = 0
                 var boardingsByLine = [String: Int]()
                 for stopTime in departingStopTimes(from: origin.stopId, atOrAfter: origin.time) {
-                    if candidates.count >= maxReturnedCandidates || expandedBoardings >= maxBoardingsPerStopExpansion {
+                    if scannedStopTimes >= maxScannedStopTimesPerExpansion {
                         break
                     }
+                    scannedStopTimes += 1
                     if stopTime.tripKey == entry.label.tripKey {
                         continue
                     }
@@ -96,9 +96,7 @@ final class OfflineTimetableRouter {
                         continue
                     }
                     boardingsByLine[trip.routeShortName] = lineBoardings + 1
-                    expandedBoardings += 1
                     for alight in trip.stopTimes[(boardIndex + 1)...] {
-                        if candidates.count >= maxReturnedCandidates { return next }
                         let newLabel = OfflineRoutingLabel(
                             stopId: alight.stopId,
                             time: alight.arrival,
@@ -168,7 +166,7 @@ final class OfflineTimetableRouter {
                 walkLink: nil
             )
         ]
-        for link in context.walkLinksByStopId[label.stopId] ?? [] {
+        for link in (context.walkLinksByStopId[label.stopId] ?? []).prefix(maxWalkOriginsPerExpansion) {
             result.append(WalkOrigin(
                 stopId: link.toStopId,
                 time: label.time + link.seconds,

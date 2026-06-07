@@ -29,7 +29,6 @@ class OfflineRoutingEngine {
         let originFeeds = Set(endpointFromStops.map(\.feed))
         let feedMatchedToStops = directToStops.filter { originFeeds.contains($0.feed) }
         let endpointToStops = feedMatchedToStops.isEmpty ? directToStops : feedMatchedToStops
-        let destinationEndpointFeeds = Set(endpointToStops.map(\.feed))
         let originStopIds = Set((endpointFromStops.isEmpty ? fromStops : endpointFromStops).map(\.id))
         let destinationStopIds = Set((endpointToStops.isEmpty ? toStops : endpointToStops).map(\.id))
 
@@ -44,7 +43,6 @@ class OfflineRoutingEngine {
         }
         let seconds = max(0, Int(date.timeIntervalSince(context.dayStart)))
         let router = OfflineTimetableRouter(context: context)
-        let routeMaxTransfers = originFeeds == Set(["trains"]) && destinationEndpointFeeds == Set(["trains"]) ? 0 : maxTransfers
         let candidates: [OfflineJourneyCandidate]
 
         switch arrivalDeparture {
@@ -53,14 +51,14 @@ class OfflineRoutingEngine {
                 originStopIds: originStopIds,
                 destinationStopIds: destinationStopIds,
                 departureSeconds: seconds,
-                maxTransfers: routeMaxTransfers
+                maxTransfers: maxTransfers
             )
         case .arrival:
             candidates = router.routeArrival(
                 originStopIds: originStopIds,
                 destinationStopIds: destinationStopIds,
                 arrivalSeconds: seconds,
-                maxTransfers: routeMaxTransfers
+                maxTransfers: maxTransfers
             )
         }
 
