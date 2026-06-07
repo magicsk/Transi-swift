@@ -112,7 +112,8 @@ struct OfflineRoutingContext {
 
         return Dictionary(uniqueKeysWithValues: grouped.map { key, value in
             let sorted = value.stopTimes.sorted(by: tripStopTimeSort)
-            return (key, OfflineTrip(key: key, id: value.id, feed: value.feed, routeShortName: value.route, routeType: value.type, headsign: value.headsign, serviceId: value.service, stopTimes: sorted))
+            let boardingCapKey = "\(value.feed)|\(value.route)|\(value.headsign)"
+            return (key, OfflineTrip(key: key, id: value.id, feed: value.feed, routeShortName: value.route, boardingCapKey: boardingCapKey, routeType: value.type, headsign: value.headsign, serviceId: value.service, stopTimes: sorted))
         })
     }
 

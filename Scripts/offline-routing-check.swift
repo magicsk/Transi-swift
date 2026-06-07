@@ -46,6 +46,9 @@ let cases: [CheckCase] = [
     CheckCase(label: "long_suburban", from: "Most SNP", to: "Senec, Žel. stanica", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 4, maxMs: 5000, requiredLines: ["S60", "620"]),
     CheckCase(label: "late_short", from: "Hronská", to: "Most SNP", iso: "2026-06-02T23:30:00+02:00", mode: .departure, minJourneys: 3, maxMs: 5000, requiredLines: ["N70"]),
     CheckCase(label: "arrival_city", from: "Hronská", to: "Most SNP", iso: "2026-06-02T08:40:00+02:00", mode: .arrival, minJourneys: 3, maxMs: 5000, requiredLines: ["70"]),
+    CheckCase(label: "overnight_departure", from: "Hronská", to: "Most SNP", iso: "2026-06-03T00:30:00+02:00", mode: .departure, minJourneys: 1, maxMs: 5000, requiredLines: ["N70"]),
+    CheckCase(label: "overnight_arrival", from: "Hronská", to: "Most SNP", iso: "2026-06-03T00:45:00+02:00", mode: .arrival, minJourneys: 1, maxMs: 5000, requiredLines: ["N70"]),
+    CheckCase(label: "early_morning_departure", from: "Hronská", to: "Most SNP", iso: "2026-06-03T04:59:00+02:00", mode: .departure, minJourneys: 1, maxMs: 5000, requiredLines: ["72"]),
 ]
 
 @main

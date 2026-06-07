@@ -29,6 +29,7 @@ struct OfflineTrip {
     let id: String
     let feed: String
     let routeShortName: String
+    let boardingCapKey: String
     let routeType: Int
     let headsign: String
     let serviceId: String

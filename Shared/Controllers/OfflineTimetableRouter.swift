@@ -6,7 +6,7 @@ final class OfflineTimetableRouter {
     private let maxCandidatesPerStopPerRound = 4
     private let maxReturnedCandidates = 60
     private let maxBoardingsPerStopExpansion = 80
-    private let maxScannedStopTimesPerExpansion = 80
+    private let maxScannedStopTimesPerExpansion = 70
     private let maxWalkOriginsPerExpansion = 20
     private let maxBoardingsPerLineExpansion = 3
 
@@ -22,9 +22,12 @@ final class OfflineTimetableRouter {
         originStopIds: Set<String>,
         destinationStopIds: Set<String>,
         departureSeconds: Int,
-        maxTransfers: Int
+        maxTransfers: Int,
+        finalDestinationStopIds: Set<String>? = nil,
+        terminalWalkLinksByStopId: [String: [OfflineWalkLink]] = [:]
     ) -> [OfflineJourneyCandidate] {
-        guard !originStopIds.isEmpty, !destinationStopIds.isEmpty else { return [] }
+        let terminalDestinationStopIds = finalDestinationStopIds ?? destinationStopIds
+        guard !originStopIds.isEmpty, !terminalDestinationStopIds.isEmpty else { return [] }
 
         let transferLimit = max(0, maxTransfers)
         var labels = [OfflineRoutingLabel]()
@@ -60,6 +63,8 @@ final class OfflineTimetableRouter {
                 labels: &labels,
                 bestByRound: &bestByRound,
                 destinationStopIds: destinationStopIds,
+                finalDestinationStopIds: terminalDestinationStopIds,
+                terminalWalkLinksByStopId: terminalWalkLinksByStopId,
                 candidates: &candidates
             )
             frontier = expanded
@@ -73,16 +78,19 @@ final class OfflineTimetableRouter {
         originStopIds: Set<String>,
         destinationStopIds: Set<String>,
         arrivalSeconds: Int,
-        maxTransfers: Int
+        maxTransfers: Int,
+        finalDestinationStopIds: Set<String>? = nil,
+        earliestArrivalSeconds: Int? = nil
     ) -> [OfflineJourneyCandidate] {
-        guard !originStopIds.isEmpty, !destinationStopIds.isEmpty else { return [] }
+        let terminalDestinationStopIds = finalDestinationStopIds ?? destinationStopIds
+        guard !originStopIds.isEmpty, !destinationStopIds.isEmpty, !terminalDestinationStopIds.isEmpty else { return [] }
 
         let transferLimit = max(0, maxTransfers)
         var labels = [OfflineRoutingLabel]()
         var bestByRound = Array(repeating: [String: [FrontierEntry]](), count: transferLimit + 2)
         var frontier = [FrontierEntry]()
 
-        for stopId in destinationStopIds.sorted() {
+        for stopId in terminalDestinationStopIds.sorted() {
             let label = OfflineRoutingLabel(
                 stopId: stopId,
                 time: arrivalSeconds,
@@ -111,6 +119,8 @@ final class OfflineTimetableRouter {
                 labels: &labels,
                 bestByRound: &bestByRound,
                 originStopIds: originStopIds,
+                destinationStopIds: destinationStopIds,
+                earliestArrivalSeconds: earliestArrivalSeconds,
                 candidates: &candidates
             )
             frontier = expanded
@@ -144,6 +154,8 @@ final class OfflineTimetableRouter {
         labels: inout [OfflineRoutingLabel],
         bestByRound: inout [[String: [FrontierEntry]]],
         destinationStopIds: Set<String>,
+        finalDestinationStopIds: Set<String>,
+        terminalWalkLinksByStopId: [String: [OfflineWalkLink]],
         candidates: inout [OfflineJourneyCandidate]
     ) -> [FrontierEntry] {
         var next = [FrontierEntry]()
@@ -165,11 +177,12 @@ final class OfflineTimetableRouter {
                           let boardIndex = stopTimeIndex(in: trip, matching: stopTime) else {
                         continue
                     }
-                    let lineBoardings = boardingsByLine[trip.routeShortName, default: 0]
+                    let capKey = trip.boardingCapKey
+                    let lineBoardings = boardingsByLine[capKey, default: 0]
                     if lineBoardings >= maxBoardingsPerLineExpansion {
                         continue
                     }
-                    boardingsByLine[trip.routeShortName] = lineBoardings + 1
+                    boardingsByLine[capKey] = lineBoardings + 1
                     boardings += 1
                     for alight in trip.stopTimes[(boardIndex + 1)...] {
                         let newLabel = OfflineRoutingLabel(
@@ -188,11 +201,37 @@ final class OfflineTimetableRouter {
                         let nextRound = min(round + 1, bestByRound.count - 1)
                         let newIndex = labels.count
                         let newEntry = (index: newIndex, label: newLabel)
-                        if destinationStopIds.contains(alight.stopId) {
+                        if finalDestinationStopIds.contains(alight.stopId) {
                             labels.append(newLabel)
                             if let candidate = buildCandidate(terminal: newLabel, allLabels: labels) {
                                 appendDepartureCandidate(candidate, to: &candidates)
                             }
+                            continue
+                        }
+                        if let terminalWalkLinks = terminalWalkLinksByStopId[alight.stopId] {
+                            labels.append(newLabel)
+                            for link in terminalWalkLinks {
+                                let terminalLabel = OfflineRoutingLabel(
+                                    stopId: link.toStopId,
+                                    time: alight.arrival + link.seconds,
+                                    transfers: round,
+                                    walkSeconds: newLabel.walkSeconds + link.seconds,
+                                    previousIndex: newIndex,
+                                    tripKey: nil,
+                                    boardStopId: nil,
+                                    alightStopId: nil,
+                                    boardTime: nil,
+                                    alightTime: nil,
+                                    walkLink: link
+                                )
+                                labels.append(terminalLabel)
+                                if let candidate = buildCandidate(terminal: terminalLabel, allLabels: labels) {
+                                    appendDepartureCandidate(candidate, to: &candidates)
+                                }
+                            }
+                            continue
+                        }
+                        if destinationStopIds.contains(alight.stopId) {
                             continue
                         }
                         guard let removedEntries = admit(newEntry, into: &bestByRound, round: nextRound) else {
@@ -215,11 +254,19 @@ final class OfflineTimetableRouter {
         labels: inout [OfflineRoutingLabel],
         bestByRound: inout [[String: [FrontierEntry]]],
         originStopIds: Set<String>,
+        destinationStopIds: Set<String>,
+        earliestArrivalSeconds: Int?,
         candidates: inout [OfflineJourneyCandidate]
     ) -> [FrontierEntry] {
         var next = [FrontierEntry]()
         for entry in frontier {
-            let destinations = reverseWalkingDestinations(from: entry.label)
+            let isInitialDestinationExpansion = entry.label.previousIndex == nil
+            let finalDestinationCandidates = isInitialDestinationExpansion ? destinationStopIds : nil
+            let destinations = reverseWalkingDestinations(
+                from: entry.label,
+                limitedTo: finalDestinationCandidates
+            )
+            let lowerArrivalBound = isInitialDestinationExpansion ? earliestArrivalSeconds : nil
             for destination in destinations {
                 if originStopIds.contains(destination.stopId), let walkLink = destination.walkLink {
                     let terminalLabel = OfflineRoutingLabel(
@@ -245,6 +292,9 @@ final class OfflineTimetableRouter {
                 var boardings = 0
                 var boardingsByLine = [String: Int]()
                 for stopTime in arrivingStopTimes(to: destination.stopId, atOrBefore: destination.time) {
+                    if let lowerArrivalBound, stopTime.arrival < lowerArrivalBound {
+                        break
+                    }
                     if scannedStopTimes >= maxScannedStopTimesPerExpansion || boardings >= maxBoardingsPerStopExpansion {
                         break
                     }
@@ -255,7 +305,8 @@ final class OfflineTimetableRouter {
                     guard let trip = context.tripsByKey[stopTime.tripKey] else {
                         continue
                     }
-                    let lineBoardings = boardingsByLine[trip.routeShortName, default: 0]
+                    let capKey = trip.boardingCapKey
+                    let lineBoardings = boardingsByLine[capKey, default: 0]
                     if lineBoardings >= maxBoardingsPerLineExpansion {
                         continue
                     }
@@ -263,7 +314,7 @@ final class OfflineTimetableRouter {
                           alightIndex > trip.stopTimes.startIndex else {
                         continue
                     }
-                    boardingsByLine[trip.routeShortName] = lineBoardings + 1
+                    boardingsByLine[capKey] = lineBoardings + 1
                     boardings += 1
                     for board in trip.stopTimes[..<alightIndex].reversed() {
                         let newLabel = OfflineRoutingLabel(
@@ -405,16 +456,23 @@ final class OfflineTimetableRouter {
         return result
     }
 
-    private func reverseWalkingDestinations(from label: OfflineRoutingLabel) -> [WalkOrigin] {
-        var result = [
-            WalkOrigin(
+    private func reverseWalkingDestinations(
+        from label: OfflineRoutingLabel,
+        limitedTo allowedStopIds: Set<String>? = nil
+    ) -> [WalkOrigin] {
+        var result = [WalkOrigin]()
+        if allowedStopIds?.contains(label.stopId) != false {
+            result.append(WalkOrigin(
                 stopId: label.stopId,
                 time: label.time,
                 walkSeconds: label.walkSeconds,
                 walkLink: nil
-            )
-        ]
-        for link in (reverseWalkLinksByStopId[label.stopId] ?? []).prefix(maxWalkOriginsPerExpansion) {
+            ))
+        }
+        let links = (reverseWalkLinksByStopId[label.stopId] ?? [])
+            .filter { allowedStopIds?.contains($0.fromStopId) != false }
+            .prefix(maxWalkOriginsPerExpansion)
+        for link in links {
             result.append(WalkOrigin(
                 stopId: link.fromStopId,
                 time: label.time - link.seconds,

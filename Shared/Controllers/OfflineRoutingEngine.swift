@@ -2,6 +2,11 @@ import Foundation
 
 class OfflineRoutingEngine {
     private static let overnightSearchThresholdSeconds = 21 * 60 * 60
+    private static let earlyMorningSearchThresholdSeconds = 5 * 60 * 60
+    private static let currentServiceDayPriorityThresholdSeconds = 4 * 60 * 60
+    private static let previousServiceDayOnlyThresholdSeconds = 2 * 60 * 60
+    private static let minimumEarlyMorningCandidateCount = 8
+    private static let secondsPerDay = 24 * 60 * 60
 
     let scheduleDb: SQLiteDatabase
     let baseDb: SQLiteDatabase
@@ -25,73 +30,117 @@ class OfflineRoutingEngine {
         guard !fromStops.isEmpty, !toStops.isEmpty else { return [] }
         let directFromStops = resolver.resolveStops(named: fromName, maxWalkDuration: 0)
         let directToStops = resolver.resolveStops(named: toName, maxWalkDuration: 0)
-        let context = OfflineRoutingContext.build(
-            scheduleDb: scheduleDb,
-            baseDb: baseDb,
-            date: date,
-            maxWalkDuration: maxWalkDuration
-        )
-        let originStopIds = endpointStopIds(
+        let originStopIds = endpointAnchorStopIds(
             directStops: directFromStops,
-            resolvedStops: fromStops,
-            context: context
+            resolvedStops: fromStops
         )
-        let destinationStopIds = endpointStopIds(
+        let destinationStopIds = endpointAnchorStopIds(
             directStops: directToStops,
-            resolvedStops: toStops,
-            context: context
+            resolvedStops: toStops
         )
-        let hasMainDestinationStopTimes = destinationStopIds.contains { context.stopTimesByStopId[$0]?.isEmpty == false }
-        guard hasMainDestinationStopTimes || arrivalDeparture == .departure else {
-            return []
-        }
         let seconds = localServiceDaySeconds(for: date)
-        let router = OfflineTimetableRouter(context: context)
-        var candidates: [OfflineJourneyCandidate]
+        var candidates = [OfflineJourneyCandidate]()
+        let searches = serviceDaySearches(for: date, seconds: seconds)
 
-        switch arrivalDeparture {
-        case .departure:
-            candidates = router.routeDeparture(
-                originStopIds: originStopIds,
-                destinationStopIds: destinationStopIds,
-                departureSeconds: seconds,
-                maxTransfers: maxTransfers
+        for search in searches {
+            let context = OfflineRoutingContext.build(
+                scheduleDb: scheduleDb,
+                baseDb: baseDb,
+                date: search.serviceDate,
+                maxWalkDuration: maxWalkDuration
             )
-        case .arrival:
-            candidates = router.routeArrival(
-                originStopIds: originStopIds,
-                destinationStopIds: destinationStopIds,
-                arrivalSeconds: seconds,
-                maxTransfers: maxTransfers
+            let routeOriginStopIds = endpointCandidateStopIds(
+                directStops: directFromStops,
+                resolvedStops: fromStops,
+                context: context
             )
+            let originNeedsAnchorWalk = endpointNeedsAnchorWalk(
+                directStops: directFromStops,
+                resolvedStops: fromStops,
+                context: context
+            )
+            let routeDestinationStopIds = endpointCandidateStopIds(
+                directStops: arrivalDeparture == .arrival ? [] : directToStops,
+                resolvedStops: toStops,
+                context: context
+            )
+            candidates.append(contentsOf: route(
+                context: context,
+                originStopIds: originNeedsAnchorWalk ? originStopIds : routeOriginStopIds,
+                destinationStopIds: destinationStopIds,
+                routeDestinationStopIds: routeDestinationStopIds,
+                terminalWalkLinksByStopId: terminalWalkLinksByStopId(
+                    context: context,
+                    destinationStopIds: destinationStopIds,
+                    resolvedStops: toStops
+                ),
+                seconds: search.seconds,
+                isPreviousServiceDay: search.isPreviousServiceDay,
+                arrivalDeparture: arrivalDeparture,
+                maxTransfers: maxTransfers
+            ))
+            let validCandidateCount = filter(candidates, for: arrivalDeparture, requestedDate: date).count
+            if search.isPreviousServiceDay && shouldUsePreviousServiceDayOnly(
+                seconds: seconds,
+                candidateCount: validCandidateCount
+            ) {
+                break
+            }
+            if !search.isPreviousServiceDay && shouldUseCurrentServiceDayOnly(
+                seconds: seconds,
+                candidateCount: validCandidateCount
+            ) {
+                break
+            }
         }
 
         if arrivalDeparture == .departure {
-            candidates = candidates.filter { candidate in
-                guard let departure = candidate.parts.first?.startDeparture else { return false }
-                return departure >= date
-            }
-            if shouldSearchNextServiceDay(departureSeconds: seconds, candidateCount: candidates.count) {
-                let nextDate = nextServiceDate(after: context.dayStart)
+            let validCandidateCount = filter(candidates, for: arrivalDeparture, requestedDate: date).count
+            if shouldSearchNextServiceDay(departureSeconds: seconds, candidateCount: validCandidateCount) {
+                let nextDate = nextServiceDate(after: Self.bratislavaCalendar.startOfDay(for: date))
                 let nextContext = OfflineRoutingContext.build(
                     scheduleDb: scheduleDb,
                     baseDb: baseDb,
                     date: nextDate,
                     maxWalkDuration: maxWalkDuration
                 )
-                let nextRouter = OfflineTimetableRouter(context: nextContext)
-                candidates.append(contentsOf: nextRouter.routeDeparture(
-                    originStopIds: originStopIds,
+                let nextRouteOriginStopIds = endpointCandidateStopIds(
+                    directStops: directFromStops,
+                    resolvedStops: fromStops,
+                    context: nextContext
+                )
+                let nextOriginNeedsAnchorWalk = endpointNeedsAnchorWalk(
+                    directStops: directFromStops,
+                    resolvedStops: fromStops,
+                    context: nextContext
+                )
+                let nextRouteDestinationStopIds = endpointCandidateStopIds(
+                    directStops: directToStops,
+                    resolvedStops: toStops,
+                    context: nextContext
+                )
+                candidates.append(contentsOf: route(
+                    context: nextContext,
+                    originStopIds: nextOriginNeedsAnchorWalk ? originStopIds : nextRouteOriginStopIds,
                     destinationStopIds: destinationStopIds,
-                    departureSeconds: 0,
+                    routeDestinationStopIds: nextRouteDestinationStopIds,
+                    terminalWalkLinksByStopId: terminalWalkLinksByStopId(
+                        context: nextContext,
+                        destinationStopIds: destinationStopIds,
+                        resolvedStops: toStops
+                    ),
+                    seconds: 0,
+                    isPreviousServiceDay: false,
+                    arrivalDeparture: arrivalDeparture,
                     maxTransfers: maxTransfers
                 ))
-                candidates = candidates.filter { candidate in
-                    guard let departure = candidate.parts.first?.startDeparture else { return false }
-                    return departure >= date
-                }
             }
         }
+
+        candidates = normalize(
+            filter(candidates, for: arrivalDeparture, requestedDate: date),
+            relativeTo: Self.bratislavaCalendar.startOfDay(for: date)
+        )
 
         return OfflineJourneyGrouper()
             .group(candidates, mode: arrivalDeparture)
@@ -104,7 +153,15 @@ class OfflineRoutingEngine {
             }
     }
 
-    private func endpointStopIds(
+    private func endpointAnchorStopIds(
+        directStops: [OfflineStop],
+        resolvedStops: [OfflineStop]
+    ) -> Set<String> {
+        let preferredStops = directStops.isEmpty ? resolvedStops : directStops
+        return Set(preferredStops.map(\.id))
+    }
+
+    private func endpointCandidateStopIds(
         directStops: [OfflineStop],
         resolvedStops: [OfflineStop],
         context: OfflineRoutingContext
@@ -123,16 +180,171 @@ class OfflineRoutingEngine {
         return Set(preferredStops.map(\.id))
     }
 
+    private func terminalWalkLinksByStopId(
+        context: OfflineRoutingContext,
+        destinationStopIds: Set<String>,
+        resolvedStops: [OfflineStop]
+    ) -> [String: [OfflineWalkLink]] {
+        let links = resolvedStops
+            .flatMap { context.walkLinksByStopId[$0.id] ?? [] }
+            .filter { destinationStopIds.contains($0.toStopId) }
+            .sorted { lhs, rhs in
+                if lhs.seconds != rhs.seconds { return lhs.seconds < rhs.seconds }
+                if lhs.fromStopId != rhs.fromStopId { return lhs.fromStopId < rhs.fromStopId }
+                return lhs.toStopId < rhs.toStopId
+            }
+            .prefix(20)
+
+        var result = [String: [OfflineWalkLink]]()
+        for link in links {
+            result[link.fromStopId, default: []].append(link)
+        }
+        return result
+    }
+
+    private func endpointNeedsAnchorWalk(
+        directStops: [OfflineStop],
+        resolvedStops: [OfflineStop],
+        context: OfflineRoutingContext
+    ) -> Bool {
+        let preferredStops = directStops.isEmpty ? resolvedStops : directStops
+        let hasActivePreferredStop = preferredStops.contains { hasActiveStopTimes($0.id, in: context) }
+        let hasActiveResolvedStop = resolvedStops.contains { hasActiveStopTimes($0.id, in: context) }
+        return !hasActivePreferredStop && hasActiveResolvedStop
+    }
+
     private func hasActiveStopTimes(_ stopId: String, in context: OfflineRoutingContext) -> Bool {
         context.stopTimesByStopId[stopId]?.isEmpty == false
+    }
+
+    private struct ServiceDaySearch {
+        let serviceDate: Date
+        let seconds: Int
+        let isPreviousServiceDay: Bool
+    }
+
+    private func serviceDaySearches(for date: Date, seconds: Int) -> [ServiceDaySearch] {
+        let dayStart = Self.bratislavaCalendar.startOfDay(for: date)
+        var searches = [
+            ServiceDaySearch(serviceDate: dayStart, seconds: seconds, isPreviousServiceDay: false)
+        ]
+        if shouldSearchPreviousServiceDay(seconds: seconds) {
+            let previousSearch = ServiceDaySearch(
+                serviceDate: previousServiceDate(before: dayStart),
+                seconds: seconds + Self.secondsPerDay,
+                isPreviousServiceDay: true
+            )
+            if shouldPrioritizeCurrentServiceDay(seconds: seconds) {
+                searches.append(previousSearch)
+            } else {
+                searches.insert(previousSearch, at: 0)
+            }
+        }
+        return searches
+    }
+
+    private func route(
+        context: OfflineRoutingContext,
+        originStopIds: Set<String>,
+        destinationStopIds: Set<String>,
+        routeDestinationStopIds: Set<String>,
+        terminalWalkLinksByStopId: [String: [OfflineWalkLink]],
+        seconds: Int,
+        isPreviousServiceDay: Bool,
+        arrivalDeparture: ArrivalDeparture,
+        maxTransfers: Int
+    ) -> [OfflineJourneyCandidate] {
+        let router = OfflineTimetableRouter(context: context)
+        switch arrivalDeparture {
+        case .departure:
+            return router.routeDeparture(
+                originStopIds: originStopIds,
+                destinationStopIds: routeDestinationStopIds,
+                departureSeconds: seconds,
+                maxTransfers: maxTransfers,
+                finalDestinationStopIds: destinationStopIds,
+                terminalWalkLinksByStopId: terminalWalkLinksByStopId
+            )
+        case .arrival:
+            return router.routeArrival(
+                originStopIds: originStopIds,
+                destinationStopIds: routeDestinationStopIds,
+                arrivalSeconds: seconds,
+                maxTransfers: maxTransfers,
+                finalDestinationStopIds: destinationStopIds,
+                earliestArrivalSeconds: isPreviousServiceDay ? Self.secondsPerDay : nil
+            )
+        }
+    }
+
+    private func filter(
+        _ candidates: [OfflineJourneyCandidate],
+        for arrivalDeparture: ArrivalDeparture,
+        requestedDate date: Date
+    ) -> [OfflineJourneyCandidate] {
+        switch arrivalDeparture {
+        case .departure:
+            return candidates.filter { candidate in
+                guard let departure = candidate.parts.first?.startDeparture else { return false }
+                return departure >= date
+            }
+        case .arrival:
+            return candidates.filter { candidate in
+                guard let arrival = candidate.parts.last?.endArrival else { return false }
+                return arrival <= date
+            }
+        }
+    }
+
+    private func normalize(
+        _ candidates: [OfflineJourneyCandidate],
+        relativeTo dayStart: Date
+    ) -> [OfflineJourneyCandidate] {
+        candidates.map { candidate in
+            guard let first = candidate.parts.first, let last = candidate.parts.last else {
+                return candidate
+            }
+            return OfflineJourneyCandidate(
+                labels: candidate.labels,
+                parts: candidate.parts,
+                zones: candidate.zones,
+                arrivalSeconds: Int(last.endArrival.timeIntervalSince(dayStart)),
+                departureSeconds: Int(first.startDeparture.timeIntervalSince(dayStart)),
+                transferCount: candidate.transferCount,
+                walkSeconds: candidate.walkSeconds
+            )
+        }
     }
 
     private func shouldSearchNextServiceDay(departureSeconds: Int, candidateCount: Int) -> Bool {
         candidateCount < 8 && departureSeconds >= Self.overnightSearchThresholdSeconds
     }
 
+    private func shouldSearchPreviousServiceDay(seconds: Int) -> Bool {
+        seconds < Self.earlyMorningSearchThresholdSeconds
+    }
+
+    private func shouldUsePreviousServiceDayOnly(seconds: Int, candidateCount: Int) -> Bool {
+        seconds < Self.previousServiceDayOnlyThresholdSeconds &&
+            candidateCount >= Self.minimumEarlyMorningCandidateCount
+    }
+
+    private func shouldPrioritizeCurrentServiceDay(seconds: Int) -> Bool {
+        seconds >= Self.currentServiceDayPriorityThresholdSeconds
+    }
+
+    private func shouldUseCurrentServiceDayOnly(seconds: Int, candidateCount: Int) -> Bool {
+        shouldPrioritizeCurrentServiceDay(seconds: seconds) &&
+            seconds < Self.earlyMorningSearchThresholdSeconds &&
+            candidateCount >= Self.minimumEarlyMorningCandidateCount
+    }
+
     private func nextServiceDate(after dayStart: Date) -> Date {
         Self.bratislavaCalendar.date(byAdding: .day, value: 1, to: dayStart)!
+    }
+
+    private func previousServiceDate(before dayStart: Date) -> Date {
+        Self.bratislavaCalendar.date(byAdding: .day, value: -1, to: dayStart)!
     }
 
     private func localServiceDaySeconds(for date: Date) -> Int {
