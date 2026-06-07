@@ -10,6 +10,7 @@ struct CheckCase {
     let maxMs: Int
     let requiredLines: Set<String>
     let minUniqueLineSignatures: Int
+    let requiredActiveFeed: String?
 
     init(
         label: String,
@@ -20,7 +21,8 @@ struct CheckCase {
         minJourneys: Int,
         maxMs: Int,
         requiredLines: Set<String>,
-        minUniqueLineSignatures: Int = 0
+        minUniqueLineSignatures: Int = 0,
+        requiredActiveFeed: String? = nil
     ) {
         self.label = label
         self.from = from
@@ -31,6 +33,7 @@ struct CheckCase {
         self.maxMs = maxMs
         self.requiredLines = requiredLines
         self.minUniqueLineSignatures = minUniqueLineSignatures
+        self.requiredActiveFeed = requiredActiveFeed
     }
 }
 
@@ -38,7 +41,7 @@ let cases: [CheckCase] = [
     CheckCase(label: "short_city", from: "Hronská", to: "Most SNP", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["70"], minUniqueLineSignatures: 2),
     CheckCase(label: "medium_city", from: "Zlaté piesky", to: "Hlavná stanica", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["61"]),
     CheckCase(label: "train_station_pair", from: "Hlavná stanica", to: "Stn. Petržalka", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["93"]),
-    CheckCase(label: "regional_bus", from: "Autobusová stanica", to: "Rovinka, Obecný úrad", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["725", "727", "737"]),
+    CheckCase(label: "regional_bus", from: "Autobusová stanica", to: "Rovinka, Obecný úrad", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["725", "727", "737"], requiredActiveFeed: "regional"),
     CheckCase(label: "regional_train", from: "Hlavná stanica", to: "Pezinok, Žel. stanica", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 4, maxMs: 5000, requiredLines: ["R50", "S50"]),
     CheckCase(label: "long_suburban", from: "Most SNP", to: "Senec, Žel. stanica", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 4, maxMs: 5000, requiredLines: ["S60", "620"]),
     CheckCase(label: "late_short", from: "Hronská", to: "Most SNP", iso: "2026-06-02T23:30:00+02:00", mode: .departure, minJourneys: 3, maxMs: 5000, requiredLines: ["N70"]),
@@ -122,11 +125,21 @@ enum OfflineRoutingCheck {
             let allLines = Set(journeys.flatMap { ($0.parts ?? []).compactMap(\.routeShortName) })
             let firstDeparture = journeys.compactMap { $0.parts?.first?.startDeparture }.min()
             let lastArrival = journeys.compactMap { $0.parts?.last?.endArrival }.max()
+            let unavailableFeed = check.requiredActiveFeed.flatMap { feed in
+                activeServiceIds(feed: feed, on: date, scheduleDb: scheduleDb).isEmpty ? feed : nil
+            }
 
             print("\(check.label): count=\(journeys.count) elapsedMs=\(elapsedMs) lines=\(Array(allLines).sorted())")
+            if ProcessInfo.processInfo.environment["TRANSI_ROUTING_DEBUG"] == "1" {
+                printJourneys(journeys)
+            }
 
             if elapsedMs > check.maxMs {
                 failures.append("\(check.label): elapsed \(elapsedMs)ms > \(check.maxMs)ms")
+            }
+            if let unavailableFeed {
+                print("\(check.label): skipped unavailable feed=\(unavailableFeed) date=\(gtfsDateString(for: date))")
+                continue
             }
             if journeys.count < check.minJourneys {
                 failures.append("\(check.label): count \(journeys.count) < \(check.minJourneys)")
@@ -157,6 +170,71 @@ enum OfflineRoutingCheck {
                 fputs("FAIL: \(failure)\n", stderr)
             }
             exit(1)
+        }
+    }
+
+    private static func activeServiceIds(feed: String, on date: Date, scheduleDb: SQLiteDatabase) -> Set<String> {
+        let dateString = gtfsDateString(for: date)
+        let dayColumn = dayOfWeekColumn(for: date)
+        let calendarRows = scheduleDb.query("""
+            SELECT service_id FROM calendar
+            WHERE feed = ? AND start_date <= ? AND end_date >= ? AND \(dayColumn) = 1
+        """, params: [feed, dateString, dateString])
+        var ids = Set(calendarRows.compactMap { $0["service_id"] as? String })
+        let exceptionRows = scheduleDb.query(
+            "SELECT service_id, exception_type FROM calendar_dates WHERE feed = ? AND date = ?",
+            params: [feed, dateString]
+        )
+        for row in exceptionRows {
+            guard let serviceId = row["service_id"] as? String,
+                  let type = row["exception_type"] as? Int else { continue }
+            if type == 1 { ids.insert(serviceId) }
+            if type == 2 { ids.remove(serviceId) }
+        }
+        return ids
+    }
+
+    private static func dayOfWeekColumn(for date: Date) -> String {
+        switch bratislavaCalendar.component(.weekday, from: date) {
+        case 1: return "sunday"
+        case 2: return "monday"
+        case 3: return "tuesday"
+        case 4: return "wednesday"
+        case 5: return "thursday"
+        case 6: return "friday"
+        case 7: return "saturday"
+        default: return "monday"
+        }
+    }
+
+    private static func gtfsDateString(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = bratislavaCalendar
+        formatter.timeZone = bratislavaTimeZone
+        formatter.dateFormat = "yyyyMMdd"
+        return formatter.string(from: date)
+    }
+
+    private static var bratislavaCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = bratislavaTimeZone
+        return calendar
+    }
+
+    private static var bratislavaTimeZone: TimeZone {
+        TimeZone(identifier: "Europe/Bratislava")!
+    }
+
+    private static func printJourneys(_ journeys: [Journey]) {
+        for (index, journey) in journeys.enumerated() {
+            let parts = journey.parts ?? []
+            let signature = parts.map { part -> String in
+                let line = part.routeShortName ?? "walk"
+                let start = part.startStopName ?? "?"
+                let end = part.endStopName ?? "?"
+                return "\(line):\(start)->\(end)"
+            }.joined(separator: " | ")
+            print("  [\(index + 1)] \(signature)")
         }
     }
 }

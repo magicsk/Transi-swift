@@ -9,6 +9,7 @@ struct OfflineRoutingContext {
     let stopTimesByStopId: [String: [OfflineStopTime]]
     let reverseStopTimesByStopId: [String: [OfflineStopTime]]
     let walkLinksByStopId: [String: [OfflineWalkLink]]
+    let activeServiceIdsByFeed: [String: Set<String>]
 
     static func build(scheduleDb: SQLiteDatabase, baseDb: SQLiteDatabase, date: Date, maxWalkDuration: Int) -> OfflineRoutingContext {
         let calendar = bratislavaCalendar()
@@ -41,7 +42,8 @@ struct OfflineRoutingContext {
             tripsByKey: trips,
             stopTimesByStopId: stopTimesByStop,
             reverseStopTimesByStopId: reverseStopTimesByStop,
-            walkLinksByStopId: walkLinks
+            walkLinksByStopId: walkLinks,
+            activeServiceIdsByFeed: active
         )
     }
 

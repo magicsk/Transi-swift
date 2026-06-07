@@ -25,20 +25,21 @@ class OfflineRoutingEngine {
         guard !fromStops.isEmpty, !toStops.isEmpty else { return [] }
         let directFromStops = resolver.resolveStops(named: fromName, maxWalkDuration: 0)
         let directToStops = resolver.resolveStops(named: toName, maxWalkDuration: 0)
-        let destinationFeeds = Set(directToStops.map(\.feed))
-        let feedMatchedFromStops = directFromStops.filter { destinationFeeds.contains($0.feed) }
-        let endpointFromStops = feedMatchedFromStops.isEmpty ? directFromStops : feedMatchedFromStops
-        let originFeeds = Set(endpointFromStops.map(\.feed))
-        let feedMatchedToStops = directToStops.filter { originFeeds.contains($0.feed) }
-        let endpointToStops = feedMatchedToStops.isEmpty ? directToStops : feedMatchedToStops
-        let originStopIds = Set((endpointFromStops.isEmpty ? fromStops : endpointFromStops).map(\.id))
-        let destinationStopIds = Set((endpointToStops.isEmpty ? toStops : endpointToStops).map(\.id))
-
         let context = OfflineRoutingContext.build(
             scheduleDb: scheduleDb,
             baseDb: baseDb,
             date: date,
             maxWalkDuration: maxWalkDuration
+        )
+        let originStopIds = endpointStopIds(
+            directStops: directFromStops,
+            resolvedStops: fromStops,
+            context: context
+        )
+        let destinationStopIds = endpointStopIds(
+            directStops: directToStops,
+            resolvedStops: toStops,
+            context: context
         )
         let hasMainDestinationStopTimes = destinationStopIds.contains { context.stopTimesByStopId[$0]?.isEmpty == false }
         guard hasMainDestinationStopTimes || arrivalDeparture == .departure else {
@@ -101,6 +102,29 @@ class OfflineRoutingEngine {
                     zones: Array($0.representative.zones).sorted()
                 )
             }
+    }
+
+    private func endpointStopIds(
+        directStops: [OfflineStop],
+        resolvedStops: [OfflineStop],
+        context: OfflineRoutingContext
+    ) -> Set<String> {
+        let preferredStops = directStops.isEmpty ? resolvedStops : directStops
+        let activePreferredStops = preferredStops.filter { hasActiveStopTimes($0.id, in: context) }
+        if !activePreferredStops.isEmpty {
+            return Set(activePreferredStops.map(\.id))
+        }
+
+        let activeResolvedStops = resolvedStops.filter { hasActiveStopTimes($0.id, in: context) }
+        if !activeResolvedStops.isEmpty {
+            return Set(activeResolvedStops.map(\.id))
+        }
+
+        return Set(preferredStops.map(\.id))
+    }
+
+    private func hasActiveStopTimes(_ stopId: String, in context: OfflineRoutingContext) -> Bool {
+        context.stopTimesByStopId[stopId]?.isEmpty == false
     }
 
     private func shouldSearchNextServiceDay(departureSeconds: Int, candidateCount: Int) -> Bool {
