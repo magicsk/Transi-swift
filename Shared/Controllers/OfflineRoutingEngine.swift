@@ -44,7 +44,7 @@ class OfflineRoutingEngine {
         guard hasMainDestinationStopTimes || arrivalDeparture == .departure else {
             return []
         }
-        let seconds = max(0, Int(date.timeIntervalSince(context.dayStart)))
+        let seconds = localServiceDaySeconds(for: date)
         let router = OfflineTimetableRouter(context: context)
         var candidates: [OfflineJourneyCandidate]
 
@@ -109,6 +109,13 @@ class OfflineRoutingEngine {
 
     private func nextServiceDate(after dayStart: Date) -> Date {
         Self.bratislavaCalendar.date(byAdding: .day, value: 1, to: dayStart)!
+    }
+
+    private func localServiceDaySeconds(for date: Date) -> Int {
+        let components = Self.bratislavaCalendar.dateComponents([.hour, .minute, .second], from: date)
+        return (components.hour ?? 0) * 3600 +
+            (components.minute ?? 0) * 60 +
+            (components.second ?? 0)
     }
 
     private static var bratislavaCalendar: Calendar {
