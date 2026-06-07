@@ -18,6 +18,7 @@
 		DA0FF11E0EE0000000000003 /* OfflineRoutingTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE0000000000004 /* OfflineRoutingTypes.swift */; };
 		DA0FF11E0EE0000000000005 /* OfflineStopResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE0000000000006 /* OfflineStopResolver.swift */; };
 		DA0FF11E0EE0000000000007 /* OfflineRoutingContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE0000000000008 /* OfflineRoutingContext.swift */; };
+		DA0FF11E0EE0000000000009 /* OfflineTimetableRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE000000000000A /* OfflineTimetableRouter.swift */; };
 		DAE746486B0815B721293408 /* TimetableDownloadBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */; };
 		DA74F9EA5264354744462CFD /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DA15FBBD3CE82E468F9A2F02 /* libz.tbd */; };
 		DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */; };
@@ -216,6 +217,7 @@
 		DA0FF11E0EE0000000000004 /* OfflineRoutingTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineRoutingTypes.swift; sourceTree = "<group>"; };
 		DA0FF11E0EE0000000000006 /* OfflineStopResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineStopResolver.swift; sourceTree = "<group>"; };
 		DA0FF11E0EE0000000000008 /* OfflineRoutingContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineRoutingContext.swift; sourceTree = "<group>"; };
+		DA0FF11E0EE000000000000A /* OfflineTimetableRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineTimetableRouter.swift; sourceTree = "<group>"; };
 		DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDownloadBanner.swift; sourceTree = "<group>"; };
 		DA15FBBD3CE82E468F9A2F02 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDatePicker.swift; sourceTree = "<group>"; };
@@ -577,6 +579,7 @@
 				DA0FF11E0EE0000000000004 /* OfflineRoutingTypes.swift */,
 				DA0FF11E0EE0000000000006 /* OfflineStopResolver.swift */,
 				DA0FF11E0EE0000000000008 /* OfflineRoutingContext.swift */,
+				DA0FF11E0EE000000000000A /* OfflineTimetableRouter.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -822,6 +825,7 @@
 				DA0FF11E0EE0000000000003 /* OfflineRoutingTypes.swift in Sources */,
 				DA0FF11E0EE0000000000005 /* OfflineStopResolver.swift in Sources */,
 				DA0FF11E0EE0000000000007 /* OfflineRoutingContext.swift in Sources */,
+				DA0FF11E0EE0000000000009 /* OfflineTimetableRouter.swift in Sources */,
 				DAE746486B0815B721293408 /* TimetableDownloadBanner.swift in Sources */,
 				DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */,
 				DAAA8A4A2B8242D7006A1EC8 /* LoadingIndicator.swift in Sources */,
