@@ -108,7 +108,7 @@ const cases = [
   },
 ];
 
-const fmt = new Intl.DateTimeFormat('sv-SE', {
+const bratislavaDateTimeFormatter = new Intl.DateTimeFormat('sv-SE', {
   timeZone: 'Europe/Bratislava',
   year: 'numeric',
   month: '2-digit',
@@ -118,8 +118,15 @@ const fmt = new Intl.DateTimeFormat('sv-SE', {
   hourCycle: 'h23',
 });
 
+function fmt(dateLike) {
+  if (!dateLike) return null;
+  const date = new Date(dateLike);
+  if (Number.isNaN(date.getTime())) return null;
+  return bratislavaDateTimeFormatter.format(date);
+}
+
 function localDateParts(iso) {
-  const parts = Object.fromEntries(fmt.formatToParts(new Date(iso)).map((part) => [part.type, part.value]));
+  const parts = Object.fromEntries(bratislavaDateTimeFormatter.formatToParts(new Date(iso)).map((part) => [part.type, part.value]));
   return {
     date: `${parts.year}-${parts.month}-${parts.day}`,
     time: `${parts.hour}:${parts.minute}`,
@@ -138,8 +145,8 @@ function summarizeRJourney(journey) {
   const lines = parts.map((part) => rPartValue(part, 'routeShortName')).filter(Boolean);
 
   return {
-    departure: rPartValue(first, 'startDeparture'),
-    arrival: rPartValue(last, 'endArrival'),
+    departure: fmt(rPartValue(first, 'startDeparture')),
+    arrival: fmt(rPartValue(last, 'endArrival')),
     lines,
   };
 }
@@ -164,8 +171,8 @@ function iLineNames(journey) {
 
 function summarizeIJourney(journey) {
   return {
-    departure: journey?.departure?.date ?? null,
-    arrival: journey?.arrival?.date ?? null,
+    departure: fmt(journey?.departure?.date),
+    arrival: fmt(journey?.arrival?.date),
     lines: iLineNames(journey),
   };
 }
