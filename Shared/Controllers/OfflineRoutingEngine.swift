@@ -124,9 +124,3 @@ class OfflineRoutingEngine {
         return calendar
     }
 }
-
-final class OfflineJourneyGrouper {
-    func group(_ candidates: [OfflineJourneyCandidate]) -> [OfflineGroupedJourney] {
-        candidates.map { OfflineGroupedJourney(representative: $0, alternatives: []) }
-    }
-}

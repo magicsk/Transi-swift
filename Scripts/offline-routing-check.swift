@@ -111,6 +111,16 @@ enum OfflineRoutingCheck {
             if check.requiredLines.isDisjoint(with: allLines) {
                 failures.append("\(check.label): missing required lines \(Array(check.requiredLines).sorted())")
             }
+            let signatures = journeys.map { journey in
+                (journey.parts ?? [])
+                    .filter { $0.routeType != 64 }
+                    .compactMap(\.routeShortName)
+                    .joined(separator: ">")
+            }
+            let uniqueSignatures = Set(signatures)
+            if uniqueSignatures.count < min(signatures.count, 2) {
+                failures.append("\(check.label): grouped output collapsed all line signatures")
+            }
             if check.mode == .departure, let firstDeparture, firstDeparture < date {
                 failures.append("\(check.label): first departure \(firstDeparture) is before requested \(date)")
             }
