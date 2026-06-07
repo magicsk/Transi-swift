@@ -1,6 +1,8 @@
 import Foundation
 
 class OfflineRoutingEngine {
+    private static let overnightSearchThresholdSeconds = 21 * 60 * 60
+
     let scheduleDb: SQLiteDatabase
     let baseDb: SQLiteDatabase
 
@@ -68,8 +70,8 @@ class OfflineRoutingEngine {
                 guard let departure = candidate.parts.first?.startDeparture else { return false }
                 return departure >= date
             }
-            if candidates.count < 8 {
-                let nextDate = context.dayStart.addingTimeInterval(86_400)
+            if shouldSearchNextServiceDay(departureSeconds: seconds, candidateCount: candidates.count) {
+                let nextDate = nextServiceDate(after: context.dayStart)
                 let nextContext = OfflineRoutingContext.build(
                     scheduleDb: scheduleDb,
                     baseDb: baseDb,
@@ -99,6 +101,20 @@ class OfflineRoutingEngine {
                     zones: Array($0.representative.zones).sorted()
                 )
             }
+    }
+
+    private func shouldSearchNextServiceDay(departureSeconds: Int, candidateCount: Int) -> Bool {
+        candidateCount < 8 && departureSeconds >= Self.overnightSearchThresholdSeconds
+    }
+
+    private func nextServiceDate(after dayStart: Date) -> Date {
+        Self.bratislavaCalendar.date(byAdding: .day, value: 1, to: dayStart)!
+    }
+
+    private static var bratislavaCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Europe/Bratislava")!
+        return calendar
     }
 }
 

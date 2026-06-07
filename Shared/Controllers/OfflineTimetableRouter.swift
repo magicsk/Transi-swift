@@ -216,6 +216,26 @@ final class OfflineTimetableRouter {
         for entry in frontier {
             let destinations = reverseWalkingDestinations(from: entry.label)
             for destination in destinations {
+                if originStopIds.contains(destination.stopId), let walkLink = destination.walkLink {
+                    let terminalLabel = OfflineRoutingLabel(
+                        stopId: destination.stopId,
+                        time: destination.time,
+                        transfers: round,
+                        walkSeconds: destination.walkSeconds,
+                        previousIndex: entry.index,
+                        tripKey: nil,
+                        boardStopId: nil,
+                        alightStopId: nil,
+                        boardTime: nil,
+                        alightTime: nil,
+                        walkLink: walkLink
+                    )
+                    labels.append(terminalLabel)
+                    if let candidate = buildReverseCandidate(terminal: terminalLabel, allLabels: labels) {
+                        candidates.append(candidate)
+                    }
+                    continue
+                }
                 var scannedStopTimes = 0
                 var boardingsByLine = [String: Int]()
                 for stopTime in arrivingStopTimes(to: destination.stopId, atOrBefore: destination.time) {
@@ -445,8 +465,7 @@ final class OfflineTimetableRouter {
         guard !removedEntries.isEmpty else { return }
         let removedLabels = Set(removedEntries.map { $0.label })
         candidates.removeAll { candidate in
-            guard let terminal = candidate.labels.first else { return false }
-            return removedLabels.contains(terminal)
+            candidate.labels.contains { removedLabels.contains($0) }
         }
     }
 
@@ -560,6 +579,24 @@ final class OfflineTimetableRouter {
     private func mapReverseParts(labels: [OfflineRoutingLabel]) -> [Part] {
         var parts = [Part]()
         for label in labels {
+            if label.tripKey == nil {
+                if let link = label.walkLink,
+                   let from = context.stopsById[link.fromStopId],
+                   let to = context.stopsById[link.toStopId] {
+                    parts.append(Part(
+                        startStopName: from.name,
+                        endStopName: to.name,
+                        startStopCode: from.platform,
+                        endStopCode: to.platform,
+                        startDeparture: context.dayStart.addingTimeInterval(TimeInterval(label.time)),
+                        endArrival: context.dayStart.addingTimeInterval(TimeInterval(label.time + link.seconds)),
+                        routeType: 64,
+                        tripHeadsign: "Walk",
+                        routeShortName: nil
+                    ))
+                }
+                continue
+            }
             guard let tripKey = label.tripKey,
                   let trip = context.tripsByKey[tripKey],
                   let board = label.boardStopId.flatMap({ context.stopsById[$0] }),
