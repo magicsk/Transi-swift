@@ -93,7 +93,7 @@ class OfflineRoutingEngine {
         }
 
         return OfflineJourneyGrouper()
-            .group(candidates)
+            .group(candidates, mode: arrivalDeparture)
             .map {
                 Journey(
                     id: UUID().uuidString,

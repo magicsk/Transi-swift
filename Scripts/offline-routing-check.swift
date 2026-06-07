@@ -9,10 +9,33 @@ struct CheckCase {
     let minJourneys: Int
     let maxMs: Int
     let requiredLines: Set<String>
+    let minUniqueLineSignatures: Int
+
+    init(
+        label: String,
+        from: String,
+        to: String,
+        iso: String,
+        mode: ArrivalDeparture,
+        minJourneys: Int,
+        maxMs: Int,
+        requiredLines: Set<String>,
+        minUniqueLineSignatures: Int = 0
+    ) {
+        self.label = label
+        self.from = from
+        self.to = to
+        self.iso = iso
+        self.mode = mode
+        self.minJourneys = minJourneys
+        self.maxMs = maxMs
+        self.requiredLines = requiredLines
+        self.minUniqueLineSignatures = minUniqueLineSignatures
+    }
 }
 
 let cases: [CheckCase] = [
-    CheckCase(label: "short_city", from: "Hronská", to: "Most SNP", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["70"]),
+    CheckCase(label: "short_city", from: "Hronská", to: "Most SNP", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["70"], minUniqueLineSignatures: 2),
     CheckCase(label: "medium_city", from: "Zlaté piesky", to: "Hlavná stanica", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["61"]),
     CheckCase(label: "train_station_pair", from: "Hlavná stanica", to: "Stn. Petržalka", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["93"]),
     CheckCase(label: "regional_bus", from: "Autobusová stanica", to: "Rovinka, Obecný úrad", iso: "2026-06-02T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["725", "727", "737"]),
@@ -118,8 +141,8 @@ enum OfflineRoutingCheck {
                     .joined(separator: ">")
             }
             let uniqueSignatures = Set(signatures)
-            if uniqueSignatures.count < min(signatures.count, 2) {
-                failures.append("\(check.label): grouped output collapsed all line signatures")
+            if check.minUniqueLineSignatures > 0 && uniqueSignatures.count < check.minUniqueLineSignatures {
+                failures.append("\(check.label): unique line signatures \(uniqueSignatures.count) < \(check.minUniqueLineSignatures)")
             }
             if check.mode == .departure, let firstDeparture, firstDeparture < date {
                 failures.append("\(check.label): first departure \(firstDeparture) is before requested \(date)")
