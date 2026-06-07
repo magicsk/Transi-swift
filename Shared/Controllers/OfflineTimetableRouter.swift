@@ -3,6 +3,10 @@ import Foundation
 final class OfflineTimetableRouter {
     private typealias FrontierEntry = (index: Int, label: OfflineRoutingLabel)
 
+    private let maxCandidatesPerStopPerRound = 3
+    private let maxReturnedCandidates = 8
+    private let maxBoardingsPerStopExpansion = 50
+
     private let context: OfflineRoutingContext
 
     init(context: OfflineRoutingContext) {
@@ -54,10 +58,10 @@ final class OfflineTimetableRouter {
                 candidates: &candidates
             )
             frontier = expanded
-            if frontier.isEmpty { break }
+            if frontier.isEmpty || candidates.count >= maxReturnedCandidates { break }
         }
 
-        return Array(candidates.sorted(by: departureSort).prefix(40))
+        return Array(candidates.sorted(by: departureSort).prefix(maxReturnedCandidates))
     }
 
     private func expandDeparture(
@@ -70,9 +74,16 @@ final class OfflineTimetableRouter {
     ) -> [FrontierEntry] {
         var next = [FrontierEntry]()
         for entry in frontier {
+            if candidates.count >= maxReturnedCandidates { return next }
             let origins = walkingOrigins(from: entry.label)
             for origin in origins {
+                if candidates.count >= maxReturnedCandidates { return next }
+                var expandedBoardings = 0
+                var boardingsByLine = [String: Int]()
                 for stopTime in departingStopTimes(from: origin.stopId, atOrAfter: origin.time) {
+                    if candidates.count >= maxReturnedCandidates || expandedBoardings >= maxBoardingsPerStopExpansion {
+                        break
+                    }
                     if stopTime.tripKey == entry.label.tripKey {
                         continue
                     }
@@ -80,7 +91,14 @@ final class OfflineTimetableRouter {
                           let boardIndex = trip.stopTimes.firstIndex(where: { $0.stopId == stopTime.stopId && $0.sequence == stopTime.sequence }) else {
                         continue
                     }
+                    let lineBoardings = boardingsByLine[trip.routeShortName, default: 0]
+                    if lineBoardings >= 3 {
+                        continue
+                    }
+                    boardingsByLine[trip.routeShortName] = lineBoardings + 1
+                    expandedBoardings += 1
                     for alight in trip.stopTimes[(boardIndex + 1)...] {
+                        if candidates.count >= maxReturnedCandidates { return next }
                         let newLabel = OfflineRoutingLabel(
                             stopId: alight.stopId,
                             time: alight.arrival,
@@ -171,13 +189,17 @@ final class OfflineTimetableRouter {
         if entries.contains(where: { dominates($0.label, entry.label) }) {
             return nil
         }
-        let removed = entries.filter { dominates(entry.label, $0.label) }
-        if !removed.isEmpty {
-            let removedIndices = Set(removed.map { $0.index })
-            entries.removeAll { removedIndices.contains($0.index) }
-        }
+        let previousEntries = entries
+        entries.removeAll { dominates(entry.label, $0.label) }
         entries.append(entry)
-        bestByRound[round][stopId] = entries
+        entries.sort(by: frontierSort)
+        let keptEntries = Array(entries.prefix(maxCandidatesPerStopPerRound))
+        guard keptEntries.contains(where: { $0.index == entry.index }) else {
+            return nil
+        }
+        let keptIndices = Set(keptEntries.map { $0.index })
+        let removed = previousEntries.filter { !keptIndices.contains($0.index) }
+        bestByRound[round][stopId] = keptEntries
         return removed
     }
 
@@ -312,5 +334,12 @@ final class OfflineTimetableRouter {
         if lhs.transferCount != rhs.transferCount { return lhs.transferCount < rhs.transferCount }
         if lhs.walkSeconds != rhs.walkSeconds { return lhs.walkSeconds < rhs.walkSeconds }
         return lhs.departureSeconds < rhs.departureSeconds
+    }
+
+    private func frontierSort(_ lhs: FrontierEntry, _ rhs: FrontierEntry) -> Bool {
+        if lhs.label.time != rhs.label.time { return lhs.label.time < rhs.label.time }
+        if lhs.label.transfers != rhs.label.transfers { return lhs.label.transfers < rhs.label.transfers }
+        if lhs.label.walkSeconds != rhs.label.walkSeconds { return lhs.label.walkSeconds < rhs.label.walkSeconds }
+        return lhs.label.stopId < rhs.label.stopId
     }
 }

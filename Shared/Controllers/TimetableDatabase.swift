@@ -555,6 +555,7 @@ class TimetableDatabase: ObservableObject {
                 fromName: fromName,
                 toName: toName,
                 date: date,
+                arrivalDeparture: arrivalDeparture,
                 maxTransfers: maxTransfers,
                 maxWalkDuration: maxWalkDuration
             )
