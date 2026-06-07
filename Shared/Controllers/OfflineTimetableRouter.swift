@@ -15,9 +15,11 @@ final class OfflineTimetableRouter {
         departureSeconds: Int,
         maxTransfers: Int
     ) -> [OfflineJourneyCandidate] {
+        guard !originStopIds.isEmpty, !destinationStopIds.isEmpty else { return [] }
+
         let transferLimit = max(0, maxTransfers)
         var labels = [OfflineRoutingLabel]()
-        var bestByRound = Array(repeating: [String: OfflineRoutingLabel](), count: transferLimit + 2)
+        var bestByRound = Array(repeating: [String: [FrontierEntry]](), count: transferLimit + 2)
         var frontier = [FrontierEntry]()
 
         for stopId in originStopIds.sorted() {
@@ -36,8 +38,9 @@ final class OfflineTimetableRouter {
             )
             labels.append(label)
             let index = labels.count - 1
-            bestByRound[0][stopId] = label
-            frontier.append((index: index, label: label))
+            let entry = (index: index, label: label)
+            bestByRound[0][stopId] = [entry]
+            frontier.append(entry)
         }
 
         var candidates = [OfflineJourneyCandidate]()
@@ -61,7 +64,7 @@ final class OfflineTimetableRouter {
         frontier: [FrontierEntry],
         round: Int,
         labels: inout [OfflineRoutingLabel],
-        bestByRound: inout [[String: OfflineRoutingLabel]],
+        bestByRound: inout [[String: [FrontierEntry]]],
         destinationStopIds: Set<String>,
         candidates: inout [OfflineJourneyCandidate]
     ) -> [FrontierEntry] {
@@ -69,7 +72,10 @@ final class OfflineTimetableRouter {
         for entry in frontier {
             let origins = walkingOrigins(from: entry.label)
             for origin in origins {
-                for stopTime in context.stopTimesByStopId[origin.stopId] ?? [] where stopTime.departure >= origin.time {
+                for stopTime in departingStopTimes(from: origin.stopId, atOrAfter: origin.time) {
+                    if stopTime.tripKey == entry.label.tripKey {
+                        continue
+                    }
                     guard let trip = context.tripsByKey[stopTime.tripKey],
                           let boardIndex = trip.stopTimes.firstIndex(where: { $0.stopId == stopTime.stopId && $0.sequence == stopTime.sequence }) else {
                         continue
@@ -89,24 +95,43 @@ final class OfflineTimetableRouter {
                             walkLink: origin.walkLink
                         )
                         let nextRound = min(round + 1, bestByRound.count - 1)
-                        if isDominated(newLabel, by: bestByRound[nextRound][alight.stopId]) {
+                        let newIndex = labels.count
+                        let newEntry = (index: newIndex, label: newLabel)
+                        guard let removedEntries = admit(newEntry, into: &bestByRound, round: nextRound) else {
                             continue
                         }
                         labels.append(newLabel)
-                        let newIndex = labels.count - 1
-                        bestByRound[nextRound][alight.stopId] = newLabel
+                        removeEntries(removedEntries, from: &next)
+                        removeCandidates(endingAt: removedEntries, from: &candidates)
                         if destinationStopIds.contains(alight.stopId) {
                             if let candidate = buildCandidate(terminal: newLabel, allLabels: labels) {
                                 candidates.append(candidate)
                             }
                         } else {
-                            next.append((index: newIndex, label: newLabel))
+                            next.append(newEntry)
                         }
                     }
                 }
             }
         }
         return next
+    }
+
+    private func departingStopTimes(from stopId: String, atOrAfter time: Int) -> ArraySlice<OfflineStopTime> {
+        guard let stopTimes = context.stopTimesByStopId[stopId], !stopTimes.isEmpty else {
+            return ArraySlice<OfflineStopTime>()
+        }
+        var low = stopTimes.startIndex
+        var high = stopTimes.endIndex
+        while low < high {
+            let mid = low + (high - low) / 2
+            if stopTimes[mid].departure < time {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+        return stopTimes[low...]
     }
 
     private struct WalkOrigin {
@@ -136,11 +161,45 @@ final class OfflineTimetableRouter {
         return result
     }
 
-    private func isDominated(_ label: OfflineRoutingLabel, by existing: OfflineRoutingLabel?) -> Bool {
-        guard let existing else { return false }
-        return existing.time <= label.time &&
-            existing.transfers <= label.transfers &&
-            existing.walkSeconds <= label.walkSeconds
+    private func admit(
+        _ entry: FrontierEntry,
+        into bestByRound: inout [[String: [FrontierEntry]]],
+        round: Int
+    ) -> [FrontierEntry]? {
+        let stopId = entry.label.stopId
+        var entries = bestByRound[round][stopId] ?? []
+        if entries.contains(where: { dominates($0.label, entry.label) }) {
+            return nil
+        }
+        let removed = entries.filter { dominates(entry.label, $0.label) }
+        if !removed.isEmpty {
+            let removedIndices = Set(removed.map { $0.index })
+            entries.removeAll { removedIndices.contains($0.index) }
+        }
+        entries.append(entry)
+        bestByRound[round][stopId] = entries
+        return removed
+    }
+
+    private func removeEntries(_ removedEntries: [FrontierEntry], from frontier: inout [FrontierEntry]) {
+        guard !removedEntries.isEmpty else { return }
+        let removedIndices = Set(removedEntries.map { $0.index })
+        frontier.removeAll { removedIndices.contains($0.index) }
+    }
+
+    private func removeCandidates(endingAt removedEntries: [FrontierEntry], from candidates: inout [OfflineJourneyCandidate]) {
+        guard !removedEntries.isEmpty else { return }
+        let removedLabels = Set(removedEntries.map { $0.label })
+        candidates.removeAll { candidate in
+            guard let terminal = candidate.labels.last else { return false }
+            return removedLabels.contains(terminal)
+        }
+    }
+
+    private func dominates(_ lhs: OfflineRoutingLabel, _ rhs: OfflineRoutingLabel) -> Bool {
+        lhs.time <= rhs.time &&
+            lhs.transfers <= rhs.transfers &&
+            lhs.walkSeconds <= rhs.walkSeconds
     }
 
     private func buildCandidate(terminal: OfflineRoutingLabel, allLabels: [OfflineRoutingLabel]) -> OfflineJourneyCandidate? {
