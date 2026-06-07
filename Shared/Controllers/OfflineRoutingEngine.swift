@@ -38,12 +38,13 @@ class OfflineRoutingEngine {
             date: date,
             maxWalkDuration: maxWalkDuration
         )
-        guard destinationStopIds.contains(where: { context.stopTimesByStopId[$0]?.isEmpty == false }) else {
+        let hasMainDestinationStopTimes = destinationStopIds.contains { context.stopTimesByStopId[$0]?.isEmpty == false }
+        guard hasMainDestinationStopTimes || arrivalDeparture == .departure else {
             return []
         }
         let seconds = max(0, Int(date.timeIntervalSince(context.dayStart)))
         let router = OfflineTimetableRouter(context: context)
-        let candidates: [OfflineJourneyCandidate]
+        var candidates: [OfflineJourneyCandidate]
 
         switch arrivalDeparture {
         case .departure:
@@ -62,6 +63,33 @@ class OfflineRoutingEngine {
             )
         }
 
+        if arrivalDeparture == .departure {
+            candidates = candidates.filter { candidate in
+                guard let departure = candidate.parts.first?.startDeparture else { return false }
+                return departure >= date
+            }
+            if candidates.count < 8 {
+                let nextDate = context.dayStart.addingTimeInterval(86_400)
+                let nextContext = OfflineRoutingContext.build(
+                    scheduleDb: scheduleDb,
+                    baseDb: baseDb,
+                    date: nextDate,
+                    maxWalkDuration: maxWalkDuration
+                )
+                let nextRouter = OfflineTimetableRouter(context: nextContext)
+                candidates.append(contentsOf: nextRouter.routeDeparture(
+                    originStopIds: originStopIds,
+                    destinationStopIds: destinationStopIds,
+                    departureSeconds: 0,
+                    maxTransfers: maxTransfers
+                ))
+                candidates = candidates.filter { candidate in
+                    guard let departure = candidate.parts.first?.startDeparture else { return false }
+                    return departure >= date
+                }
+            }
+        }
+
         return OfflineJourneyGrouper()
             .group(candidates)
             .map {
@@ -71,17 +99,6 @@ class OfflineRoutingEngine {
                     zones: Array($0.representative.zones).sorted()
                 )
             }
-    }
-}
-
-extension OfflineTimetableRouter {
-    func routeArrival(
-        originStopIds: Set<String>,
-        destinationStopIds: Set<String>,
-        arrivalSeconds: Int,
-        maxTransfers: Int
-    ) -> [OfflineJourneyCandidate] {
-        return []
     }
 }
 

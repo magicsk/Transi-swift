@@ -7,6 +7,7 @@ struct OfflineRoutingContext {
     let zonesByStopId: [String: String]
     let tripsByKey: [String: OfflineTrip]
     let stopTimesByStopId: [String: [OfflineStopTime]]
+    let reverseStopTimesByStopId: [String: [OfflineStopTime]]
     let walkLinksByStopId: [String: [OfflineWalkLink]]
 
     static func build(scheduleDb: SQLiteDatabase, baseDb: SQLiteDatabase, date: Date, maxWalkDuration: Int) -> OfflineRoutingContext {
@@ -28,6 +29,10 @@ struct OfflineRoutingContext {
         for stopId in stopTimesByStop.keys {
             stopTimesByStop[stopId]?.sort(by: stopTimeSort)
         }
+        var reverseStopTimesByStop = stopTimesByStop
+        for stopId in reverseStopTimesByStop.keys {
+            reverseStopTimesByStop[stopId]?.sort(by: reverseStopTimeSort)
+        }
         return OfflineRoutingContext(
             serviceDate: dayStart,
             dayStart: dayStart,
@@ -35,6 +40,7 @@ struct OfflineRoutingContext {
             zonesByStopId: Dictionary(uniqueKeysWithValues: stops.compactMap { key, stop in stop.zone.map { (key, $0) } }),
             tripsByKey: trips,
             stopTimesByStopId: stopTimesByStop,
+            reverseStopTimesByStopId: reverseStopTimesByStop,
             walkLinksByStopId: walkLinks
         )
     }
@@ -226,6 +232,13 @@ struct OfflineRoutingContext {
 
     private static func stopTimeSort(_ lhs: OfflineStopTime, _ rhs: OfflineStopTime) -> Bool {
         if lhs.departure != rhs.departure { return lhs.departure < rhs.departure }
+        if lhs.tripKey != rhs.tripKey { return lhs.tripKey < rhs.tripKey }
+        if lhs.sequence != rhs.sequence { return lhs.sequence < rhs.sequence }
+        return lhs.stopId < rhs.stopId
+    }
+
+    private static func reverseStopTimeSort(_ lhs: OfflineStopTime, _ rhs: OfflineStopTime) -> Bool {
+        if lhs.arrival != rhs.arrival { return lhs.arrival > rhs.arrival }
         if lhs.tripKey != rhs.tripKey { return lhs.tripKey < rhs.tripKey }
         if lhs.sequence != rhs.sequence { return lhs.sequence < rhs.sequence }
         return lhs.stopId < rhs.stopId
