@@ -47,8 +47,15 @@ enum OfflineRoutingCheck {
 
         let parser = ISO8601DateFormatter()
         parser.formatOptions = [.withInternetDateTime]
-        let checkCases = selected.isEmpty ? cases : cases.filter { selected.contains($0.label) }
         var failures = [String]()
+
+        let contextDate = parser.date(from: "2026-06-02T08:00:00+02:00")!
+        let context = OfflineRoutingContext.build(scheduleDb: scheduleDb, baseDb: baseDb, date: contextDate, maxWalkDuration: 15)
+        if context.tripsByKey.isEmpty {
+            failures.append("context: expected active trips")
+        }
+
+        let checkCases = selected.isEmpty ? cases : cases.filter { selected.contains($0.label) }
 
         let resolver = OfflineStopResolver(baseDb: baseDb)
         let hlavna = resolver.resolveStops(named: "Hlavná stanica", maxWalkDuration: 15)
