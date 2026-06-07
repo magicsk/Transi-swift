@@ -10,13 +10,15 @@ struct OfflineRoutingContext {
     let walkLinksByStopId: [String: [OfflineWalkLink]]
 
     static func build(scheduleDb: SQLiteDatabase, baseDb: SQLiteDatabase, date: Date, maxWalkDuration: Int) -> OfflineRoutingContext {
-        let dayStart = Calendar.current.startOfDay(for: date)
-        let dateString = dayStart.toString()
+        let calendar = bratislavaCalendar()
+        let dayStart = calendar.startOfDay(for: date)
+        let dateString = gtfsDateString(for: dayStart)
         let dayColumn = dayOfWeekColumn(for: dayStart)
         let stops = loadStops(baseDb: baseDb)
         let active = activeServiceIdsByFeed(scheduleDb: scheduleDb, date: dateString, dayColumn: dayColumn)
         let trips = loadTrips(scheduleDb: scheduleDb, activeServiceIdsByFeed: active)
-        let walkLinks = buildWalkLinks(stops: Array(stops.values), maxWalkDuration: maxWalkDuration)
+        let sortedStops = stops.values.sorted(by: stopSort)
+        let walkLinks = buildWalkLinks(stops: sortedStops, maxWalkDuration: maxWalkDuration)
         var stopTimesByStop = [String: [OfflineStopTime]]()
         for trip in trips.values {
             for stopTime in trip.stopTimes {
@@ -24,7 +26,7 @@ struct OfflineRoutingContext {
             }
         }
         for stopId in stopTimesByStop.keys {
-            stopTimesByStop[stopId]?.sort { $0.departure < $1.departure }
+            stopTimesByStop[stopId]?.sort(by: stopTimeSort)
         }
         return OfflineRoutingContext(
             serviceDate: dayStart,
@@ -50,7 +52,7 @@ struct OfflineRoutingContext {
                 id: id,
                 feed: feed,
                 name: name,
-                normalizedName: name,
+                normalizedName: normalizeStopName(name),
                 lat: lat,
                 lon: lon,
                 platform: row["platform_code"] as? String,
@@ -63,10 +65,12 @@ struct OfflineRoutingContext {
     private static func loadTrips(scheduleDb: SQLiteDatabase, activeServiceIdsByFeed: [String: Set<String>]) -> [String: OfflineTrip] {
         var clauses = [String]()
         var params = [Any]()
-        for (feed, ids) in activeServiceIdsByFeed where !ids.isEmpty {
-            clauses.append("(t.feed = ? AND t.service_id IN (\(ids.map { _ in "?" }.joined(separator: ","))))")
+        for feed in ["city", "regional", "trains"] {
+            guard let ids = activeServiceIdsByFeed[feed], !ids.isEmpty else { continue }
+            let sortedIds = ids.sorted()
+            clauses.append("(t.feed = ? AND t.service_id IN (\(sortedIds.map { _ in "?" }.joined(separator: ","))))")
             params.append(feed)
-            params.append(contentsOf: Array(ids))
+            params.append(contentsOf: sortedIds)
         }
         guard !clauses.isEmpty else { return [:] }
         let rows = scheduleDb.query("""
@@ -99,7 +103,7 @@ struct OfflineRoutingContext {
         }
 
         return Dictionary(uniqueKeysWithValues: grouped.map { key, value in
-            let sorted = value.stopTimes.sorted { $0.sequence < $1.sequence }
+            let sorted = value.stopTimes.sorted(by: tripStopTimeSort)
             return (key, OfflineTrip(key: key, id: value.id, feed: value.feed, routeShortName: value.route, routeType: value.type, headsign: value.headsign, serviceId: value.service, stopTimes: sorted))
         })
     }
@@ -160,6 +164,9 @@ struct OfflineRoutingContext {
                 }
             }
         }
+        for stopId in links.keys {
+            links[stopId]?.sort(by: walkLinkSort)
+        }
         return links
     }
 
@@ -182,7 +189,7 @@ struct OfflineRoutingContext {
     }
 
     private static func dayOfWeekColumn(for date: Date) -> String {
-        switch Calendar(identifier: .gregorian).component(.weekday, from: date) {
+        switch bratislavaCalendar().component(.weekday, from: date) {
         case 1: return "sunday"
         case 2: return "monday"
         case 3: return "tuesday"
@@ -192,6 +199,55 @@ struct OfflineRoutingContext {
         case 7: return "saturday"
         default: return "monday"
         }
+    }
+
+    private static func bratislavaCalendar() -> Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = bratislavaTimeZone()
+        return calendar
+    }
+
+    private static func bratislavaTimeZone() -> TimeZone {
+        TimeZone(identifier: "Europe/Bratislava")!
+    }
+
+    private static func gtfsDateString(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = bratislavaCalendar()
+        formatter.timeZone = bratislavaTimeZone()
+        formatter.dateFormat = "yyyyMMdd"
+        return formatter.string(from: date)
+    }
+
+    private static func stopSort(_ lhs: OfflineStop, _ rhs: OfflineStop) -> Bool {
+        if lhs.id != rhs.id { return lhs.id < rhs.id }
+        return lhs.feed < rhs.feed
+    }
+
+    private static func stopTimeSort(_ lhs: OfflineStopTime, _ rhs: OfflineStopTime) -> Bool {
+        if lhs.departure != rhs.departure { return lhs.departure < rhs.departure }
+        if lhs.tripKey != rhs.tripKey { return lhs.tripKey < rhs.tripKey }
+        if lhs.sequence != rhs.sequence { return lhs.sequence < rhs.sequence }
+        return lhs.stopId < rhs.stopId
+    }
+
+    private static func tripStopTimeSort(_ lhs: OfflineStopTime, _ rhs: OfflineStopTime) -> Bool {
+        if lhs.sequence != rhs.sequence { return lhs.sequence < rhs.sequence }
+        if lhs.departure != rhs.departure { return lhs.departure < rhs.departure }
+        return lhs.stopId < rhs.stopId
+    }
+
+    private static func walkLinkSort(_ lhs: OfflineWalkLink, _ rhs: OfflineWalkLink) -> Bool {
+        if lhs.seconds != rhs.seconds { return lhs.seconds < rhs.seconds }
+        return lhs.toStopId < rhs.toStopId
+    }
+
+    private static func normalizeStopName(_ name: String) -> String {
+        name.replacingOccurrences(of: "Bratislava, ", with: "")
+            .replacingOccurrences(of: "Rovinka, ", with: "")
+            .replacingOccurrences(of: "Dunajská Lužná, ", with: "")
+            .replacingOccurrences(of: "Miloslavov, ", with: "")
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "sk_SK"))
     }
 
     private static func haversineMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double) -> Double {

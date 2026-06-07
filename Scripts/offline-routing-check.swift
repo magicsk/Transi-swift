@@ -54,6 +54,15 @@ enum OfflineRoutingCheck {
         if context.tripsByKey.isEmpty {
             failures.append("context: expected active trips")
         }
+        if context.stopsById.isEmpty {
+            failures.append("context: expected stops")
+        }
+        if context.stopTimesByStopId.isEmpty {
+            failures.append("context: expected stop time index")
+        }
+        if context.walkLinksByStopId.isEmpty {
+            failures.append("context: expected walk link index")
+        }
 
         let checkCases = selected.isEmpty ? cases : cases.filter { selected.contains($0.label) }
 
