@@ -50,6 +50,19 @@ enum OfflineRoutingCheck {
         let checkCases = selected.isEmpty ? cases : cases.filter { selected.contains($0.label) }
         var failures = [String]()
 
+        let resolver = OfflineStopResolver(baseDb: baseDb)
+        let hlavna = resolver.resolveStops(named: "Hlavná stanica", maxWalkDuration: 15)
+        let petrzalka = resolver.resolveStops(named: "Stn. Petržalka", maxWalkDuration: 15)
+        let pezinok = resolver.resolveStops(named: "Pezinok, Žel. stanica", maxWalkDuration: 15)
+        let resolverChecks: [(String, [OfflineStop], String)] = [
+            ("Hlavná stanica", hlavna, "Bratislava hl.st."),
+            ("Stn. Petržalka", petrzalka, "Bratislava-Petržalka"),
+            ("Pezinok, Žel. stanica", pezinok, "Pezinok"),
+        ]
+        for (label, stops, expectedName) in resolverChecks where !stops.contains(where: { $0.name == expectedName }) {
+            failures.append("\(label): missing alias candidate \(expectedName)")
+        }
+
         for check in checkCases {
             guard let date = parser.date(from: check.iso) else {
                 failures.append("\(check.label): invalid date")
