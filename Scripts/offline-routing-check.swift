@@ -25,17 +25,28 @@ let cases: [CheckCase] = [
 @main
 enum OfflineRoutingCheck {
     static func main() {
+        let selected = Set(CommandLine.arguments.dropFirst())
+        let knownLabels = Set(cases.map(\.label))
+        let unknownLabels = selected.subtracting(knownLabels)
+
+        if !unknownLabels.isEmpty {
+            for label in unknownLabels.sorted() {
+                fputs("FAIL: unknown case label \(label)\n", stderr)
+            }
+            exit(1)
+        }
+
         let basePath = ProcessInfo.processInfo.environment["TRANSI_BASE_DB"] ?? "/Users/magic_sk/Developer/js/api/public/timetable/base.db"
         let schedulePath = ProcessInfo.processInfo.environment["TRANSI_SCHEDULE_DB"] ?? "/Users/magic_sk/Developer/js/api/public/timetable/schedule.db"
 
         guard let baseDb = SQLiteDatabase(path: basePath), let scheduleDb = SQLiteDatabase(path: schedulePath) else {
             fatalError("Failed to open timetable databases")
         }
-        scheduleDb.execute("ATTACH DATABASE '\(basePath)' AS base")
+        let escapedBasePath = basePath.replacingOccurrences(of: "'", with: "''")
+        scheduleDb.execute("ATTACH DATABASE '\(escapedBasePath)' AS base")
 
         let parser = ISO8601DateFormatter()
         parser.formatOptions = [.withInternetDateTime]
-        let selected = Set(CommandLine.arguments.dropFirst())
         let checkCases = selected.isEmpty ? cases : cases.filter { selected.contains($0.label) }
         var failures = [String]()
 
