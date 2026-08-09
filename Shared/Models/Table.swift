@@ -60,6 +60,38 @@ struct Connection: Codable, Identifiable, Hashable {
     )
 }
 
+struct LiveActivityConnectionReference: Hashable {
+    let connectionId: String
+    let line: String
+    let departureTimeCP: TimeInterval
+    let stopId: Int
+    let platform: Int
+
+    init(connection: Connection) {
+        self.connectionId = connection.id
+        self.line = connection.line
+        self.departureTimeCP = connection.departureTimeCP
+        self.stopId = connection.stopId
+        self.platform = connection.platform
+    }
+
+    init(connectionId: String, line: String, departureTimeCP: TimeInterval, stopId: Int, platform: Int) {
+        self.connectionId = connectionId
+        self.line = line
+        self.departureTimeCP = departureTimeCP
+        self.stopId = stopId
+        self.platform = platform
+    }
+}
+
+extension Connection {
+    func matchesLiveActivityReference(_ reference: LiveActivityConnectionReference) -> Bool {
+        guard stopId == reference.stopId else { return false }
+        if id == reference.connectionId { return true }
+        return line == reference.line && departureTimeCP == reference.departureTimeCP
+    }
+}
+
 extension Connection {
     init?(json: [String: Any], platform: Int, stopId: Int, expanded: Bool = false) {
         let id = "\(json["i"] as? Int ?? 0):\(platform)"

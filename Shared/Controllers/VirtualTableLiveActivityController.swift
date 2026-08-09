@@ -16,10 +16,12 @@ enum LiveActivityManagerError: Error {
 
 struct LiveActivityTab {
     let id: String
-    let connectionId: String
-    let platform: Int
-    let stopId: Int
+    let reference: LiveActivityConnectionReference
     var controller: SimpleVirtualTableController?
+
+    var connectionId: String { reference.connectionId }
+    var platform: Int { reference.platform }
+    var stopId: Int { reference.stopId }
 }
 
 enum VirtualTableLiveActivityController {
@@ -43,9 +45,7 @@ enum VirtualTableLiveActivityController {
             liveActivities.append(
                 LiveActivityTab(
                     id: id,
-                    connectionId: connection.id,
-                    platform: connection.platform,
-                    stopId: connection.stopId,
+                    reference: LiveActivityConnectionReference(connection: connection),
                     controller: reuseController?.controller ?? SimpleVirtualTableController(stop: connection.stopId)
                 )
             )
@@ -62,15 +62,14 @@ enum VirtualTableLiveActivityController {
             GlobalController.startBackgroundMode()
             activities.forEach { activity in
                 let connection = activity.contentState.connection
+                guard !liveActivities.contains(where: { $0.id == activity.id }) else { return }
                 let reuseController = liveActivities.first(where: { la in
                     la.stopId == connection.stopId
                 })
                 liveActivities.append(
                     LiveActivityTab(
                         id: activity.id,
-                        connectionId: connection.id,
-                        platform: connection.platform,
-                        stopId: connection.stopId,
+                        reference: LiveActivityConnectionReference(connection: connection),
                         controller: reuseController?.controller ?? SimpleVirtualTableController(stop: connection.stopId)
                     )
                 )
@@ -86,14 +85,20 @@ enum VirtualTableLiveActivityController {
     }
 
     static func listAllTabActivities() -> [LiveActivityTab] {
-        let activities = listAllActivities()
-        liveActivities = liveActivities.filter { liveActivity in
-            let containts = activities.contains(liveActivity.id)
-            if !containts {
-                liveActivity.controller?.disconnect()
+        let activityIds = Set(listAllActivities())
+        let remainingActivities = liveActivities.filter { activityIds.contains($0.id) }
+        let removedActivities = liveActivities.filter { !activityIds.contains($0.id) }
+
+        for removedActivity in removedActivities {
+            let controllerStillInUse = remainingActivities.contains { activity in
+                activity.stopId == removedActivity.stopId
             }
-            return containts
+            if !controllerStillInUse {
+                removedActivity.controller?.disconnect()
+            }
         }
+
+        liveActivities = remainingActivities
         if liveActivities.isEmpty && GlobalController.appState.phase == .background {
             GlobalController.stopBackgroundMode()
         }
@@ -104,10 +109,15 @@ enum VirtualTableLiveActivityController {
         for activity in Activity<VirtualTableActivityAttributes>.activities {
             await activity.end(dismissalPolicy: .immediate)
         }
+        let controllers = liveActivities.compactMap(\.controller)
+        liveActivities.removeAll()
+        controllers.forEach { $0.disconnect() }
+        GlobalController.stopBackgroundMode()
     }
 
     static func endActivity(_ id: String) async {
         await Activity<VirtualTableActivityAttributes>.activities.first(where: { $0.id == id })?.end(dismissalPolicy: .immediate)
+        _ = listAllTabActivities()
         if Activity<VirtualTableActivityAttributes>.activities.isEmpty {
             GlobalController.stopBackgroundMode()
         }
