@@ -105,7 +105,7 @@ struct Part: Codable, Hashable {
     )
 }
 
-enum ArrivalDeparture {
+enum ArrivalDeparture: String, Codable {
     case arrival
     case departure
 }

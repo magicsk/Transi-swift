@@ -11,6 +11,8 @@ struct Stored {
     static let stops = "stops"
     static let stopsVersion = "stopsVersion"
     static let trip = "trip"
+    static let tripRecentSearches = "trip_recent_searches"
+    static let tripSearchID = "trip_search_id"
     static let tripSearchTimestamp = "trip_timestamp"
     static let tripSaveDuration = "trip_save_duration"
     static let tripMaxWalkDuration = "trip_max_walk_duration"

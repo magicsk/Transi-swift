@@ -20,45 +20,60 @@ struct TripPlannerSearchInputs: View {
     var body: some View {
         VStack {
             HStack(spacing: .zero) {
-                getInputIcon(tripPlannerController.from.type ?? "")
-                TextField(text: $tripPlannerController.from.name.toUnwrapped(defaultValue: "")) {
-                    Text("From").foregroundColor(.placeholderText)
-                }
-                .disabled(true)
-                Image(systemName: "arrow.up.arrow.down")
-                    .foregroundColor(.label)
-                    .padding(.horizontal, 14.0)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        switchStops()
+                Button {
+                    lastField = "from"
+                    showStopList = true
+                } label: {
+                    HStack(spacing: .zero) {
+                        getInputIcon(tripPlannerController.from.type ?? "")
+                        Text(tripPlannerController.from.name ?? "From")
+                            .foregroundColor(
+                                tripPlannerController.from.name?.isEmpty == false
+                                    ? .label : .placeholderText
+                            )
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-            }
-            .onTapGestureOnBackground {
-                lastField = "from"
-                showStopList = true
-            }
-            .onPress {
-                lastField = "from"
-                showStopList = true
+                    .frame(minHeight: 44.0)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    "From, \(tripPlannerController.from.name ?? "not selected")"
+                )
+
+                Button {
+                    switchStops()
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                        .foregroundColor(.label)
+                        .frame(width: 44.0, height: 44.0)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Switch stops")
             }
             .padding(.bottom, 5.0)
             Divider().padding(.leading, 40.0).padding(.bottom, 15.0)
-            HStack(spacing: .zero) {
-                getInputIcon(tripPlannerController.to.type ?? "")
-                TextField(text: $tripPlannerController.to.name.toUnwrapped(defaultValue: "")) {
-                    Text("To").foregroundColor(.placeholderText)
+            Button {
+                lastField = "to"
+                showStopList = true
+            } label: {
+                HStack(spacing: .zero) {
+                    getInputIcon(tripPlannerController.to.type ?? "")
+                    Text(tripPlannerController.to.name ?? "To")
+                        .foregroundColor(
+                            tripPlannerController.to.name?.isEmpty == false
+                                ? .label : .placeholderText
+                        )
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .frame(minHeight: 44.0)
+                .contentShape(Rectangle())
             }
-            .disabled(true)
-            .onTapGestureOnBackground {
-                lastField = "to"
-                showStopList = true
-            }
-            .onPress {
-                lastField = "to"
-                showStopList = true
-            }
-        }.modifier(ListStackModifier())
+            .buttonStyle(.plain)
+            .accessibilityLabel("To, \(tripPlannerController.to.name ?? "not selected")")
+        }
+        .modifier(ListStackModifier())
     }
 
     func switchStops() {
