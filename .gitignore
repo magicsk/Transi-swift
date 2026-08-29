@@ -127,4 +127,6 @@ Release.xcconfig
 
 # Claude Code
 .claude/
-CLAUDE.md
+
+# Local verification artifacts
+/.artifacts/
