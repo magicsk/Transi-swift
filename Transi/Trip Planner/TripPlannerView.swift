@@ -54,7 +54,7 @@ struct TripPlannerView: View {
                                 currentTripResults
                             } else {
                                 TabView(selection: selectedSearchID) {
-                                    ForEach(tripPlannerController.recentSearches) { search in
+                                    ForEach(pagedSearches) { search in
                                         tripResults(for: search)
                                             .tag(search.id)
                                     }
@@ -140,6 +140,10 @@ struct TripPlannerView: View {
         ).id
     }
 
+    private var pagedSearches: [RecentTripSearch] {
+        Array(tripPlannerController.recentSearches.reversed())
+    }
+
     private var selectedSearchID: Binding<RecentTripSearch.ID> {
         Binding {
             currentSearchID
@@ -153,7 +157,7 @@ struct TripPlannerView: View {
 
     private var recentSearchIndicator: some View {
         HStack(spacing: 7.0) {
-            ForEach(tripPlannerController.recentSearches) { search in
+            ForEach(pagedSearches) { search in
                 Capsule()
                     .fill(search.id == currentSearchID ? Color.accentColor : Color.secondary)
                     .opacity(search.id == currentSearchID ? 1.0 : 0.3)
@@ -168,7 +172,7 @@ struct TripPlannerView: View {
     }
 
     private var currentSearchIndex: Int {
-        tripPlannerController.recentSearches.firstIndex(where: {
+        pagedSearches.firstIndex(where: {
             $0.id == currentSearchID
         }) ?? 0
     }

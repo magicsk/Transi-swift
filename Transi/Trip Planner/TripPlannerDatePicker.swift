@@ -10,12 +10,12 @@ import SwiftUI
 struct TripPlannerDatePicker: View {
     @StateObject var tripPlannerController = GlobalController.tripPlanner
     @Binding private var dateDialog: Bool
-    @State private var adDate = Date()
-    @State private var arrivalDepartureSetNow = false
+    @State private var adDate: Date
     @State private var sheetContentHeight = 270.0
 
     init(_ dateDialog: Binding<Bool>) {
         _dateDialog = dateDialog
+        _adDate = State(initialValue: GlobalController.tripPlanner.arrivalDepartureDate)
     }
     
     var body: some View {
@@ -34,17 +34,12 @@ struct TripPlannerDatePicker: View {
             .labelsHidden()
             .onChange(of: adDate) { _ in
                 tripPlannerController.arrivalDepartureDate = adDate
-                if arrivalDepartureSetNow {
-                    tripPlannerController.arrivalDepartureCustomDate = false
-                    arrivalDepartureSetNow = false
-                } else {
-                    tripPlannerController.arrivalDepartureCustomDate = true
-                }
+                tripPlannerController.arrivalDepartureCustomDate = true
             }
             HStack {
                 Spacer()
                 Button("Now") {
-                    arrivalDepartureSetNow = true
+                    tripPlannerController.arrivalDepartureCustomDate = false
                     tripPlannerController.arrivalDepartureDate = Date()
                     dateDialog = false
                     tripPlannerController.fetchTrip()

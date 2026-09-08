@@ -18,7 +18,7 @@ struct TripPlannerSearchInputs: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: .zero) {
             HStack(spacing: .zero) {
                 Button {
                     lastField = "from"
@@ -52,8 +52,7 @@ struct TripPlannerSearchInputs: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Switch stops")
             }
-            .padding(.bottom, 5.0)
-            Divider().padding(.leading, 40.0).padding(.bottom, 15.0)
+            Divider().padding(.leading, 40.0)
             Button {
                 lastField = "to"
                 showStopList = true

@@ -11,7 +11,7 @@ struct ListStackModifier: ViewModifier {
     func body(content: Content) -> some View {
         ZStack {
             content
-                .padding(.vertical, 15.0)
+                .padding(.vertical, 8.0)
                 .padding(.horizontal, 4.0)
                 .frame(maxWidth: .infinity)
                 .background(.secondarySystemGroupedBackground)

@@ -15,6 +15,7 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
     let arrivalDepartureDate: Date
     let arrivalDepartureCustomDate: Bool
     var trip: Trip?
+    var tripSavedAt: Date?
 
     var id: String { "\(from.id):\(to.id)" }
     var cacheID: String {
@@ -30,6 +31,8 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
         case arrivalDeparture
         case arrivalDepartureDate
         case arrivalDepartureCustomDate
+        case trip
+        case tripSavedAt
     }
 
     init(
@@ -38,7 +41,8 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
         arrivalDeparture: ArrivalDeparture = .departure,
         arrivalDepartureDate: Date = Date(),
         arrivalDepartureCustomDate: Bool = false,
-        trip: Trip? = nil
+        trip: Trip? = nil,
+        tripSavedAt: Date? = nil
     ) {
         self.from = from
         self.to = to
@@ -46,6 +50,7 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
         self.arrivalDepartureDate = arrivalDepartureDate
         self.arrivalDepartureCustomDate = arrivalDepartureCustomDate
         self.trip = trip
+        self.tripSavedAt = tripSavedAt
     }
 
     init(from decoder: Decoder) throws {
@@ -64,24 +69,15 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
             Bool.self,
             forKey: .arrivalDepartureCustomDate
         ) ?? false
-        trip = nil
+        trip = try container.decodeIfPresent(Trip.self, forKey: .trip)
+        tripSavedAt = try container.decodeIfPresent(Date.self, forKey: .tripSavedAt)
     }
 
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(from, forKey: .from)
-        try container.encode(to, forKey: .to)
-        try container.encode(arrivalDeparture, forKey: .arrivalDeparture)
-        try container.encode(arrivalDepartureDate, forKey: .arrivalDepartureDate)
-        try container.encode(arrivalDepartureCustomDate, forKey: .arrivalDepartureCustomDate)
-    }
 }
 
 class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelegate {
     private static let recentSearchLimit = 10
-    private let saveDuration = UserDefaults.standard.integer(forKey: Stored.tripSaveDuration)
-    private let searchTimestamp: TimeInterval = UserDefaults.standard.double(
-        forKey: Stored.tripSearchTimestamp)
+    private let recentSearchQueue = DispatchQueue(label: "eu.magicsk.Transi.recentSearches", qos: .utility)
     @Published var trip = Trip()
     @Published var from: Stop = .empty
     @Published var to: Stop = .empty
@@ -107,23 +103,6 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
 
     override init() {
         super.init()
-        recentSearches = Array(
-            (UserDefaults.standard.retrieve(
-                object: [RecentTripSearch].self,
-                forKey: Stored.tripRecentSearches
-            ) ?? []).prefix(Self.recentSearchLimit)
-        )
-        let savedCacheID = UserDefaults.standard.string(forKey: Stored.tripSearchID)
-        let restoredSearch = savedCacheID.flatMap { cacheID in
-            recentSearches.first(where: { $0.cacheID == cacheID })
-        } ?? recentSearches.first
-        if let restoredSearch {
-            from = restoredSearch.from
-            to = restoredSearch.to
-            arrivalDeparture = restoredSearch.arrivalDeparture
-            arrivalDepartureDate = restoredSearch.arrivalDepartureDate
-            arrivalDepartureCustomDate = restoredSearch.arrivalDepartureCustomDate
-        }
         loadSavedTrip()
     }
 
@@ -138,6 +117,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         }
 
         if source == .initial && recordSearch {
+            if !arrivalDepartureCustomDate { arrivalDepartureDate = Date() }
             rememberCurrentSearch()
         }
 
@@ -187,7 +167,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             self.loading = true
             self.error = nil // Clear error on new search
         }
-        let initialSearchDate = self.arrivalDepartureCustomDate ? self.arrivalDepartureDate : Date()
+        let initialSearchDate = arrivalDepartureDate
 
         GlobalController.timetableDatabase.queryOfflineTrip(
             fromName: from.name ?? "",
@@ -207,12 +187,9 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                     self.error = .noJourneys
                 } else {
                     self.error = nil // Clear any previous errors
-                    let timestamp = Date().timeIntervalSince1970
                     let newTrip = Trip(journey: journeys)
                     self.trip = newTrip
                     self.cacheTripForCurrentSearch(newTrip)
-                    UserDefaults.standard.save(customObject: newTrip, forKey: Stored.trip)
-                    UserDefaults.standard.setValue(timestamp, forKey: Stored.tripSearchTimestamp)
                 }
             }
         }
@@ -232,7 +209,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         let maxTransfers = UserDefaults.standard.integer(forKey: Stored.tripMaxTransfers)
         let maxWalkDuration = UserDefaults.standard.integer(forKey: Stored.tripMaxWalkDuration)
 
-        let initialSearchDate = self.arrivalDepartureCustomDate ? self.arrivalDepartureDate : Date()
+        let initialSearchDate = arrivalDepartureDate
 
         if source == .initial {
             self.nextRApiSearchDate = initialSearchDate
@@ -415,15 +392,12 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                         < ($1.parts?.first?.startDeparture ?? Date())
                 }
 
-                let timestamp = Date().timeIntervalSince1970
                 self.lastSearchDate = Date()
 
                 let newTrip = Trip(journey: uniqueJourneys)
                 self.trip = newTrip
                 self.cacheTripForCurrentSearch(newTrip)
 
-                UserDefaults.standard.save(customObject: newTrip, forKey: Stored.trip)
-                UserDefaults.standard.setValue(timestamp, forKey: Stored.tripSearchTimestamp)
 
             } else {
                 let combinedJourneys = (self.trip.journey ?? []) + newUnifiedJourneys
@@ -433,7 +407,6 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                 }
                 self.trip.journey = uniqueJourneys
                 self.cacheTripForCurrentSearch(self.trip)
-                UserDefaults.standard.save(customObject: self.trip, forKey: Stored.trip)
             }
         }
     }
@@ -471,7 +444,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         to = search.to
         arrivalDeparture = search.arrivalDeparture
         arrivalDepartureDate = search.arrivalDepartureDate
-        arrivalDepartureCustomDate = search.arrivalDepartureCustomDate
+        arrivalDepartureCustomDate = true
         if let cachedTrip = search.trip {
             _ = generation(for: .initial)
             trip = cachedTrip
@@ -485,8 +458,14 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func clearRecentSearches() {
+        _ = generation(for: .initial)
+        loading = false
+        loadingMore = false
+        error = nil
         recentSearches.removeAll()
-        UserDefaults.standard.removeObject(forKey: Stored.tripRecentSearches)
+        recentSearchQueue.async {
+            UserDefaults.standard.removeObject(forKey: Stored.tripRecentSearches)
+        }
     }
 
     func currentSearchMatchesCriteria() -> Bool {
@@ -495,7 +474,6 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             return false
         }
         return search.arrivalDeparture == arrivalDeparture
-            && search.arrivalDepartureCustomDate == arrivalDepartureCustomDate
             && (!arrivalDepartureCustomDate
                 || search.arrivalDepartureDate == arrivalDepartureDate)
     }
@@ -518,10 +496,11 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         recentSearches.removeAll { $0.id == search.id }
         recentSearches.insert(search, at: 0)
         recentSearches = Array(recentSearches.prefix(Self.recentSearchLimit))
-        UserDefaults.standard.save(
-            customObject: recentSearches,
-            forKey: Stored.tripRecentSearches
-        )
+        let searches = recentSearches
+        recentSearchQueue.async {
+            UserDefaults.standard.removeObject(forKey: Stored.trip)
+            UserDefaults.standard.save(customObject: searches, forKey: Stored.tripRecentSearches)
+        }
 
         assert(
             recentSearches.first == search
@@ -534,7 +513,14 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         let currentID = RecentTripSearch(from: from, to: to, trip: nil).id
         guard let index = recentSearches.firstIndex(where: { $0.id == currentID }) else { return }
         recentSearches[index].trip = trip
-        UserDefaults.standard.set(recentSearches[index].cacheID, forKey: Stored.tripSearchID)
+        let savedAt = Date()
+        recentSearches[index].tripSavedAt = savedAt
+        let searches = recentSearches
+        let cacheID = searches[index].cacheID
+        recentSearchQueue.async {
+            UserDefaults.standard.save(customObject: searches, forKey: Stored.tripRecentSearches)
+            UserDefaults.standard.set(cacheID, forKey: Stored.tripSearchID)
+        }
         assert(recentSearches[index].trip == trip)
     }
 
@@ -559,28 +545,51 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func loadSavedTrip() {
-        let dateOfLastTrip = Date(timeIntervalSince1970: searchTimestamp)
-        let differenceInHours = Date.now.timeIntervalSince(dateOfLastTrip) / 3600
-        if saveDuration == -1 || Int(differenceInHours) < saveDuration {
-            if let cachedTrip = UserDefaults.standard.retrieve(
-                object: Trip.self, forKey: Stored.trip)
+        let generation = searchGenerationLock.withLock { searchGeneration }
+        recentSearchQueue.async {
+            let defaults = UserDefaults.standard
+            let saveDuration = defaults.integer(forKey: Stored.tripSaveDuration)
+            let now = Date()
+            func canRestore(_ savedAt: Date?) -> Bool {
+                saveDuration == -1 || (saveDuration > 0 && savedAt.map {
+                    now.timeIntervalSince($0) < Double(saveDuration) * 3600
+                } == true)
+            }
+            var searches = Array((defaults.retrieve(
+                object: [RecentTripSearch].self, forKey: Stored.tripRecentSearches
+            ) ?? []).prefix(Self.recentSearchLimit))
+            for index in searches.indices where !canRestore(searches[index].tripSavedAt) {
+                searches[index].trip = nil
+            }
+            let savedCacheID = defaults.string(forKey: Stored.tripSearchID)
+            let legacySavedAt = Date(timeIntervalSince1970: defaults.double(forKey: Stored.tripSearchTimestamp))
+            let legacyTrip = canRestore(legacySavedAt)
+                ? defaults.retrieve(object: Trip.self, forKey: Stored.trip) : nil
+            if let index = searches.firstIndex(where: { $0.cacheID == savedCacheID }),
+                searches[index].tripSavedAt == nil, let legacyTrip
             {
-                DispatchQueue.main.async {
-                    if self.recentSearches.isEmpty {
-                        self.trip = cachedTrip
-                        return
-                    }
-                    guard
-                        let savedCacheID = UserDefaults.standard.string(
-                            forKey: Stored.tripSearchID
-                        ),
-                        let index = self.recentSearches.firstIndex(where: {
-                            $0.cacheID == savedCacheID
-                        })
-                    else { return }
-                    self.trip = cachedTrip
-                    self.recentSearches[index].trip = cachedTrip
+                searches[index].trip = legacyTrip
+                searches[index].tripSavedAt = legacySavedAt
+            }
+            let restoredSearch = searches.first(where: { $0.cacheID == savedCacheID }) ?? searches.first
+            let savedSearches = searches
+            DispatchQueue.main.async {
+                guard self.isCurrentSearch(generation) else { return }
+                self.recentSearches = savedSearches
+                guard self.to == .empty,
+                    self.from == .empty || self.from == .actualLocation
+                else { return }
+                if let restoredSearch {
+                    self.from = restoredSearch.from
+                    self.to = restoredSearch.to
+                    self.arrivalDeparture = restoredSearch.arrivalDeparture
+                    self.arrivalDepartureDate = restoredSearch.arrivalDepartureDate
+                    self.arrivalDepartureCustomDate = true
+                    self.trip = restoredSearch.trip ?? Trip()
+                } else if let legacyTrip {
+                    self.trip = legacyTrip
                 }
+                self.preparePagination(for: self.trip)
             }
         }
     }
