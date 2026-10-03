@@ -100,15 +100,19 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         mapView.region = defaultLocation
         mapView.mapType = .satellite
         mapView.userTrackingMode = .follow
+        // MapKit stops drawing overlays at its own closest zoom (~3.2 m camera distance).
+        mapView.cameraZoomRange = MKMapView.CameraZoomRange(minCenterCoordinateDistance: 4)
 
         let tileLightConfig = MapCache(withConfig: MapCacheConfig(withUrlTemplate: sourceLightUrl))
         tileLightOverlay = CachedTileOverlay(withCache: tileLightConfig)
         tileLightOverlay?.tileSize = .init(width: 512, height: 512)
         tileLightOverlay?.canReplaceMapContent = true
+        tileLightOverlay?.maximumZ = 22
         let tileDarkConfig = MapCache(withConfig: MapCacheConfig(withUrlTemplate: sourceDarkUrl))
         tileDarkOverlay = CachedTileOverlay(withCache: tileDarkConfig)
         tileDarkOverlay?.tileSize = .init(width: 512, height: 512)
         tileDarkOverlay?.canReplaceMapContent = true
+        tileDarkOverlay?.maximumZ = 22
 
         mapView.addOverlay(
             traitCollection.userInterfaceStyle == .dark ? tileDarkOverlay! : tileLightOverlay!)
@@ -291,7 +295,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
     }
 
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        return mapView.mapCacheRenderer(forOverlay: overlay)
+        return TileOverlayRenderer(overlay: overlay)
     }
 
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
@@ -345,6 +349,67 @@ class ClusterAnnotationView: MKMarkerAnnotationView {
             titleVisibility = .hidden
             subtitleVisibility = .hidden
             markerTintColor = nil
+        }
+    }
+}
+
+class TileOverlayRenderer: MKTileOverlayRenderer {
+    private typealias Tile = (path: MKTileOverlayPath, rect: MKMapRect, key: NSString)
+
+    private let images: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        cache.countLimit = 100 // ponytail: ~1 MB per decoded tile, use totalCostLimit if memory shows up
+        return cache
+    }()
+
+    private let loadingLock = NSLock()
+    private var loading = Set<NSString>()
+
+    override func canDraw(_ mapRect: MKMapRect, zoomScale: MKZoomScale) -> Bool {
+        let tiles = tiles(for: mapRect, zoomScale)
+        if let tile = tiles.first, images.object(forKey: tile.key) == nil { load(tile) }
+        return tiles.contains { images.object(forKey: $0.key) != nil }
+    }
+
+    override func draw(_ mapRect: MKMapRect, zoomScale: MKZoomScale, in context: CGContext) {
+        guard let (tile, image) = tiles(for: mapRect, zoomScale).lazy
+            .compactMap({ tile in self.images.object(forKey: tile.key).map { (tile, $0) } }).first
+        else { return }
+        context.saveGState()
+        context.clip(to: rect(for: mapRect))
+        UIGraphicsPushContext(context)
+        image.draw(in: rect(for: tile.rect))
+        UIGraphicsPopContext()
+        context.restoreGState()
+    }
+
+    // MapKit asks for one tile per mapRect at z = log2(world width * zoomScale / tileSize)
+    // (measured: zoomScale 8 -> z22 with 512 pt tiles). Returns that tile, capped at maximumZ,
+    // followed by its ancestors, which are drawn upscaled until a sharper tile is loaded.
+    private func tiles(for mapRect: MKMapRect, _ zoomScale: MKZoomScale) -> [Tile] {
+        guard let overlay = overlay as? MKTileOverlay else { return [] }
+        let z = Int(log2(MKMapSize.world.width * Double(zoomScale) / Double(overlay.tileSize.width)).rounded())
+        return stride(from: min(z, overlay.maximumZ), through: overlay.minimumZ, by: -1).map { z in
+            let size = MKMapSize.world.width / pow(2, Double(z))
+            let x = Int(mapRect.midX / size), y = Int(mapRect.midY / size)
+            return (
+                MKTileOverlayPath(x: x, y: y, z: z, contentScaleFactor: contentScaleFactor),
+                MKMapRect(x: Double(x) * size, y: Double(y) * size, width: size, height: size),
+                "\(z)/\(x)/\(y)" as NSString
+            )
+        }
+    }
+
+    private func load(_ tile: Tile) {
+        guard let overlay = overlay as? MKTileOverlay,
+              loadingLock.withLock({ loading.insert(tile.key).inserted })
+        else { return }
+        overlay.loadTile(at: tile.path) { [weak self] data, _ in
+            guard let self = self else { return }
+            let image = data.flatMap { UIImage(data: $0) }
+            if let image = image { self.images.setObject(image, forKey: tile.key) }
+            self.loadingLock.withLock { _ = self.loading.remove(tile.key) }
+            if image != nil { self.setNeedsDisplay(tile.rect) }
         }
     }
 }
