@@ -52,3 +52,11 @@ Public transit app for Bratislava. The main product is the iOS app; the reposito
 
 - Store proof under the ignored `.artifacts/transi/<date>-<slug>/` path and use `$transi-visual-proof` to capture and present it.
 - When sharing any local-only page or artifact, expose only that artifact directory through Tailscale Serve and provide both local and Tailnet URLs. Never expose the repository root, API keys, build configuration secrets, or unrelated files.
+
+## Commits and release notes
+
+- Release notes are generated from commits: `.github/workflows/swift.yml` runs `magicsk/tag-changelog-multiline`. It publishes every line of every commit message since the previous tag, and the app's What's New sheet shows those notes to users.
+- Write every commit as one line, `<type>: <subject>`. Add no body, no blank line and no trailers such as `Co-Authored-By`; this overrides tool defaults that add them. Put details in the PR description or handoff instead. A line without a type is published under "Other Changes", and any `word: text` line becomes its own section.
+- Use `feat:`, `fix:`, `improvements:` or `perf:` only for changes users notice, and write the subject for them. Describe what changed in plain language, without file names, code symbols, internal jargon or version bumps. For example: `fix: Live Activity no longer re-alerts while a bus waits near your stop`.
+- Give internal-only work a type that `.github/tag-changelog-config.js` hides: `chore:`, `refactor:`, `docs:`, `test:`, `build:`, `ci:` or `style:`. This covers agent workflows, scripts, tests, tooling, refactors and version bumps. When a change has both kinds of work, split it into separate commits.
+- Never create merge commits; rebase and merge with `--ff-only`, because "Merge branch …" lines are published too.
