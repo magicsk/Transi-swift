@@ -11,6 +11,7 @@ import SwiftUI
 struct TransiApp: App {
     @State private var selection = 1
     @State private var urlErrorAlert = false
+    @State private var changelog: Changelog?
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -67,6 +68,16 @@ struct TransiApp: App {
                     isPresented: $urlErrorAlert
                 ) {} message: {
                     Text("Openned url is either expired or no longer supported.")
+                }
+                .sheet(item: $changelog) { ChangelogView(changelog: $0) }
+                .onAppear {
+                    Changelog.fetchIfUpdated { notes in
+                        // Presenting over the URL alert or another sheet would dismiss or drop it; retry next launch instead.
+                        let root = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.rootViewController
+                        if !urlErrorAlert, root?.presentedViewController == nil {
+                            changelog = notes
+                        }
+                    }
                 }
         }
         .onChange(of: scenePhase) { phase in

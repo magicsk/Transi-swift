@@ -31,4 +31,5 @@ struct Stored {
     static let offlineTripPlanner = "offline_trip_planner"
     static let magicApiUrlOverride = "magic_api_url_override"
     static let tripPlannerDbSha = "trip_planner_db_sha"
+    static let changelogVersion = "changelog_version"
 }

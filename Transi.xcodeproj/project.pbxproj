@@ -79,6 +79,7 @@
 		DAA552382B9D28E900C750BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA552372B9D28E900C750BC /* SearchBar.swift */; };
 		DAA552392B9D28E900C750BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA552372B9D28E900C750BC /* SearchBar.swift */; };
 		DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817C72974387B00E2FBB7 /* TransiApp.swift */; };
+		DA1C4A6F2F8F000100C0FFEE /* ChangelogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C4A6E2F8F000100C0FFEE /* ChangelogView.swift */; };
 		DAA817CC2974387C00E2FBB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
 		DAA817F829743B4B00E2FBB7 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA817F729743B4B00E2FBB7 /* Table.swift */; };
 		DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA10F72B7232D5001B1EDA /* NowIndicator.swift */; };
@@ -226,6 +227,7 @@
 		DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveDynamicView.swift; sourceTree = "<group>"; };
 		DAA552372B9D28E900C750BC /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
+		DA1C4A6E2F8F000100C0FFEE /* ChangelogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangelogView.swift; sourceTree = "<group>"; };
 		DAA817CB2974387C00E2FBB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DAA817CD2974387C00E2FBB7 /* Transi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Transi.entitlements; sourceTree = "<group>"; };
 		DAA817CF2974387C00E2FBB7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -439,6 +441,7 @@
 				DAA817F22974393300E2FBB7 /* Info.plist */,
 				DAA817C72974387B00E2FBB7 /* TransiApp.swift */,
 				DACFD5D72EAD28DE009720B5 /* ContentView.swift */,
+				DA1C4A6E2F8F000100C0FFEE /* ChangelogView.swift */,
 				DAA817CD2974387C00E2FBB7 /* Transi.entitlements */,
 				DAA817CE2974387C00E2FBB7 /* Preview Content */,
 				DA8D2C052F4FA34200BA4245 /* Settings */,
@@ -809,6 +812,7 @@
 				DA1C5A182CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */,
 				DABD03222A0AF3BF00FD2C4B /* Binding.swift in Sources */,
 				DAA817C82974387B00E2FBB7 /* TransiApp.swift in Sources */,
+				DA1C4A6F2F8F000100C0FFEE /* ChangelogView.swift in Sources */,
 				DA7887F02B79235800BFFB4F /* VirtualTableController.swift in Sources */,
 				DAEF77B129744893008D66DE /* Stops.swift in Sources */,
 				DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */,
