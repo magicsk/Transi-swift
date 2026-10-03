@@ -192,6 +192,22 @@ func getLiveActivityProgressMinutes(
     return isProgress ? minutes : nil
 }
 
+// The socket and regional feeds share no trip id and their timetables can be up to 3 minutes
+// apart. That is close enough to hide a live duplicate, but some lines run every 2 minutes, so a
+// timetable-only row takes over, and hides, live data only on the exact schedule. Regional
+// platforms can be unknown (-1).
+func isSameDeparture(_ a: Connection, _ b: Connection, within tolerance: TimeInterval = 180) -> Bool {
+    a.line == b.line && (a.platform == b.platform || a.platform == -1 || b.platform == -1)
+        && abs(a.departureTimeCP - b.departureTimeCP) <= tolerance
+}
+
+// The regional feed also lists trips arriving at their last stop, which nobody can board there.
+// It has no flag for them, so compare the headsign; it shortens the bus station to "AS".
+func terminates(_ connection: Connection, at stopName: String?) -> Bool {
+    let headsign = connection.headsign.replacingOccurrences(of: "Bratislava, ", with: "")
+    return headsign == stopName || (headsign == "AS" && stopName == "Autobusová stanica")
+}
+
 struct RegionalConnectionsResponse: Codable {
     let current: [RegionalConnection]
 }

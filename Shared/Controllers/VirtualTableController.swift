@@ -150,6 +150,7 @@ class VirtualTableController: ObservableObject {
                 newRegionalConnections.removeAll { connection in
                     connection.departureTimeRaw < (Date().timeIntervalSince1970 + 15)
                         || connection.type != "online"
+                        || terminates(connection, at: self.currentStop.name)
                 }
 
                 self.connectionsProcessingQueue.async { [weak self] in
@@ -170,34 +171,26 @@ class VirtualTableController: ObservableObject {
     }
 
     private func getRegionalConnection(_ connection: Connection) -> Connection? {
-        return internalRegionalConnections.first(where: {
-            $0.line == connection.line && $0.type == "online"
-                && $0.departureTimeCP == connection.departureTimeCP
-        })
+        return internalRegionalConnections.first(where: { isSameDeparture($0, connection, within: 0) })
     }
 
     private func sortAndPublishConnections() {
         connectionsProcessingQueue.async { [weak self] in
             guard let self = self else { return }
-            var connectionsForPublish: [Connection] = []
-            var regionalConnectionsToRemove: [String] = []
-            connectionsForPublish.append(contentsOf: self.internalConnections)
-
-            connectionsForPublish = self.internalConnections.map { connection in
-                if var regionalConnection = self.getRegionalConnection(connection) {
-                    // print("Replacing \(connection.id) with \(regionalConnection.id)")
-                    regionalConnectionsToRemove.append(regionalConnection.id)
-                    if connection.type == "online" {
-                        return connection
-                    }
+            var connectionsForPublish = self.internalConnections.map { connection in
+                if connection.type != "online", var regionalConnection = self.getRegionalConnection(connection) {
                     regionalConnection.platform = connection.platform
                     return regionalConnection
                 }
                 return connection
             }
-            let newRegionalConnections = self.internalRegionalConnections.filter {
-                $0.departureTimeCP < Date().timeIntervalSince1970
-                    && !regionalConnectionsToRemove.contains($0.id)
+            let newRegionalConnections = self.internalRegionalConnections.filter { regionalConnection in
+                regionalConnection.departureTimeCP < Date().timeIntervalSince1970
+                    && !self.internalConnections.contains {
+                        $0.type == "online"
+                            ? isSameDeparture($0, regionalConnection)
+                            : isSameDeparture($0, regionalConnection, within: 0)
+                    }
             }
             connectionsForPublish.append(contentsOf: newRegionalConnections)
 

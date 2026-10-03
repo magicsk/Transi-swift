@@ -132,6 +132,7 @@ class SimpleVirtualTableController: ObservableObject {
                 newRegionalConnections.removeAll { connection in
                     connection.departureTimeRaw < (Date().timeIntervalSince1970 + 15)
                         || connection.type != "online"
+                        || terminates(connection, at: stop.name)
                 }
 
                 self.connectionsProcessingQueue.async { [weak self] in
@@ -148,29 +149,25 @@ class SimpleVirtualTableController: ObservableObject {
     }
 
     private func getRegionalConnection(_ connection: Connection) -> Connection? {
-        return internalRegionalConnections.first(where: {
-            $0.line == connection.line && $0.type == "online"
-                && $0.departureTimeCP == connection.departureTimeCP
-        })
+        return internalRegionalConnections.first(where: { isSameDeparture($0, connection, within: 0) })
     }
 
     private func sortAndPublishConnections(endMissingActivities: Bool) {
-        var regionalConnectionsToRemove = [String]()
         var connectionsForPublish = internalConnections.map { connection in
-            if var regionalConnection = getRegionalConnection(connection) {
-                regionalConnectionsToRemove.append(regionalConnection.id)
-                if connection.type == "online" {
-                    return connection
-                }
+            if connection.type != "online", var regionalConnection = getRegionalConnection(connection) {
                 regionalConnection.platform = connection.platform
                 return regionalConnection
             }
             return connection
         }
 
-        let newRegionalConnections = internalRegionalConnections.filter {
-            $0.departureTimeCP < Date().timeIntervalSince1970
-                && !regionalConnectionsToRemove.contains($0.id)
+        let newRegionalConnections = internalRegionalConnections.filter { regionalConnection in
+            regionalConnection.departureTimeCP < Date().timeIntervalSince1970
+                && !internalConnections.contains {
+                    $0.type == "online"
+                        ? isSameDeparture($0, regionalConnection)
+                        : isSameDeparture($0, regionalConnection, within: 0)
+                }
         }
         connectionsForPublish.append(contentsOf: newRegionalConnections)
 
