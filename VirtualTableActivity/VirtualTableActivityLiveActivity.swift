@@ -13,6 +13,7 @@ struct VirtualTableActivityAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         var connection: Connection
         var vehicleInfo: VehicleInfo?
+        var lastAlertMinutes: Int?
     }
 }
 

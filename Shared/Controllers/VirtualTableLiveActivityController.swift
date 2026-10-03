@@ -124,13 +124,15 @@ enum VirtualTableLiveActivityController {
     }
 
     static func updateActivity(id: String, connection: Connection, vehicleInfo: VehicleInfo?) async {
-        let updatedContentState =
-            VirtualTableActivityAttributes.ContentState(
-                connection: connection,
-                vehicleInfo: vehicleInfo
-            )
         let activity = Activity<VirtualTableActivityAttributes>.activities.first(where: { $0.id == id })
         let oldConnection = activity?.contentState.connection
+        let lastAlertMinutes = activity?.contentState.lastAlertMinutes
+        var updatedContentState =
+            VirtualTableActivityAttributes.ContentState(
+                connection: connection,
+                vehicleInfo: vehicleInfo,
+                lastAlertMinutes: lastAlertMinutes
+            )
 
         var alertConfig: AlertConfiguration?
         let departureTimeRemainingRaw = Int(connection.departureTimeRaw - Date().timeIntervalSince1970)
@@ -144,7 +146,12 @@ enum VirtualTableLiveActivityController {
         let isNew = (notifyOnTimeChange && oldConnection?.departureTimeRemaining != connection.departureTimeRemaining)
             || (notifyOnDelayChange && oldConnection?.delayText != connection.delayText)
             || (notifyOnPositionChange && oldConnection?.lastStopName != connection.lastStopName)
-        if departureTimeRemainingRaw < liveActivityThreshold, isNew {
+        if departureTimeRemainingRaw < liveActivityThreshold, isNew,
+           let progressMinutes = getLiveActivityProgressMinutes(
+               from: oldConnection, to: connection, lastAlertMinutes: lastAlertMinutes
+           )
+        {
+            updatedContentState.lastAlertMinutes = progressMinutes
             let vehicleText = vehicleInfo != nil ? "\n\(vehicleInfo!.type) #\(String(connection.busID.dropFirst(2)))" : ""
             alertConfig = AlertConfiguration(
                 title: "\(connection.line) ▶ \(connection.headsign) in \(connection.departureTimeRemaining)",

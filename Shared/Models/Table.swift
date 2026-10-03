@@ -180,6 +180,18 @@ func getShortDepartureTimeRemainingText(
         : departureTimeRemainingRaw > 0 ? "<1" : "now"
 }
 
+// A vehicle stuck near the stop bounces its ETA (2→1→2 min) and grows its delay on every update.
+// Live Activity alerts need real progress: another last stop, or fewer minutes left than at the
+// last alert. Returns the minutes left (0 for "<1 min", -1 for "now") on progress, nil otherwise.
+func getLiveActivityProgressMinutes(
+    from old: Connection?, to new: Connection, lastAlertMinutes: Int?
+) -> Int? {
+    let departureTimeRemainingRaw = Int(new.departureTimeRaw - Date().timeIntervalSince1970)
+    let minutes = departureTimeRemainingRaw > 0 ? departureTimeRemainingRaw / 60 : -1
+    let isProgress = old?.lastStopName != new.lastStopName || minutes < lastAlertMinutes ?? .max
+    return isProgress ? minutes : nil
+}
+
 struct RegionalConnectionsResponse: Codable {
     let current: [RegionalConnection]
 }
