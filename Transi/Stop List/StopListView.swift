@@ -102,12 +102,13 @@ struct StopListView: View {
                                     stopsListProvider.toggleFavorite(stop.id)
                                 } label: {
                                     if isFavorite {
-                                        Label("Remove Favorite", systemImage: "star.slash")
+                                        Label("Remove Favorite", systemImage: "trash")
+                                            .labelStyle(.iconOnly)
                                     } else {
                                         Label("Favorite", systemImage: "star")
                                     }
                                 }
-                                .tint(.yellow)
+                                .tint(isFavorite ? .red : .yellow)
                             }
                         }
                     }
