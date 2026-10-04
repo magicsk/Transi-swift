@@ -157,29 +157,39 @@ struct GlobalController {
         }
     }
 
+    // UNUserNotificationCenter calls can block on a synchronous XPC reply from usernotificationsd,
+    // so they run off the main thread, in call order, on this serial queue.
+    private static let notificationQueue = DispatchQueue(label: "eu.magicsk.transi.notifications")
+
     private static func registerForNotifications() {
-        let category = UNNotificationCategory(identifier: "Transi", actions: [], intentIdentifiers: [])
-        UNUserNotificationCenter.current().setNotificationCategories([category])
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in
+        notificationQueue.async {
+            let category = UNNotificationCategory(identifier: "Transi", actions: [], intentIdentifiers: [])
+            UNUserNotificationCenter.current().setNotificationCategories([category])
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in
+            }
         }
     }
 
     static func cancelApplicationQuitNotification() {
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["eu.magicsk.Transi.AppStoppedRunning"])
+        notificationQueue.async {
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["eu.magicsk.Transi.AppStoppedRunning"])
+        }
     }
 
     static func scheduleApplicationQuitNotification() {
         let delay = 5 as TimeInterval
 
-        let content = UNMutableNotificationContent()
-        content.title = NSLocalizedString("App Stopped Running", comment: "")
-        content.body = NSLocalizedString("Tap this notification to resume live activity.", comment: "")
-        content.sound = .defaultCritical
+        notificationQueue.async {
+            let content = UNMutableNotificationContent()
+            content.title = NSLocalizedString("App Stopped Running", comment: "")
+            content.body = NSLocalizedString("Tap this notification to resume live activity.", comment: "")
+            content.sound = .defaultCritical
 
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: delay + 1, repeats: false)
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: delay + 1, repeats: false)
 
-        let request = UNNotificationRequest(identifier: "eu.magicsk.Transi.AppStoppedRunning", content: content, trigger: trigger)
-        UNUserNotificationCenter.current().add(request)
+            let request = UNNotificationRequest(identifier: "eu.magicsk.Transi.AppStoppedRunning", content: content, trigger: trigger)
+            UNUserNotificationCenter.current().add(request)
+        }
 
         DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
             if shouldRunInBackground {
