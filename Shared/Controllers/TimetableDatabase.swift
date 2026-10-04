@@ -882,6 +882,8 @@ class TimetableDatabase: ObservableObject {
     // MARK: - Trip Planner Queries
 
     func queryOfflineTrip(fromName: String, toName: String, date: Date, arrivalDeparture: ArrivalDeparture, maxTransfers: Int = 1, maxWalkDuration: Int = 15, completion: @escaping ([Journey]) -> Void) {
+        // Callers are on the main thread, which owns the published stops list; snapshot it before going off main.
+        let imhdStops = GlobalController.stopsListProvider.stops
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self, let scheduleDb = self.scheduleDb, let baseDb = self.baseDb else {
                 DispatchQueue.main.async { completion([]) }
@@ -895,7 +897,8 @@ class TimetableDatabase: ObservableObject {
                 date: date,
                 arrivalDeparture: arrivalDeparture,
                 maxTransfers: maxTransfers,
-                maxWalkDuration: maxWalkDuration
+                maxWalkDuration: maxWalkDuration,
+                imhdStops: imhdStops
             )
 
             DispatchQueue.main.async {

@@ -691,7 +691,9 @@ final class OfflineTimetableRouter {
                     endArrival: context.dayStart.addingTimeInterval(TimeInterval(walkArrival)),
                     routeType: 64,
                     tripHeadsign: "Walk",
-                    routeShortName: nil
+                    routeShortName: nil,
+                    startStopGps: from.gps,
+                    endStopGps: to.gps
                 ))
             }
             guard let tripKey = label.tripKey,
@@ -711,7 +713,9 @@ final class OfflineTimetableRouter {
                 endArrival: context.dayStart.addingTimeInterval(TimeInterval(alightTime)),
                 routeType: trip.routeType,
                 tripHeadsign: trip.headsign,
-                routeShortName: trip.routeShortName
+                routeShortName: trip.routeShortName,
+                startStopGps: board.gps,
+                endStopGps: alight.gps
             ))
         }
         return parts
@@ -733,7 +737,9 @@ final class OfflineTimetableRouter {
                         endArrival: context.dayStart.addingTimeInterval(TimeInterval(label.time + link.seconds)),
                         routeType: 64,
                         tripHeadsign: "Walk",
-                        routeShortName: nil
+                        routeShortName: nil,
+                        startStopGps: from.gps,
+                        endStopGps: to.gps
                     ))
                 }
                 continue
@@ -755,7 +761,9 @@ final class OfflineTimetableRouter {
                 endArrival: context.dayStart.addingTimeInterval(TimeInterval(alightTime)),
                 routeType: trip.routeType,
                 tripHeadsign: trip.headsign,
-                routeShortName: trip.routeShortName
+                routeShortName: trip.routeShortName,
+                startStopGps: board.gps,
+                endStopGps: alight.gps
             ))
             if let link = label.walkLink,
                let from = context.stopsById[link.fromStopId],
@@ -769,7 +777,9 @@ final class OfflineTimetableRouter {
                     endArrival: context.dayStart.addingTimeInterval(TimeInterval(alightTime + link.seconds)),
                     routeType: 64,
                     tripHeadsign: "Walk",
-                    routeShortName: nil
+                    routeShortName: nil,
+                    startStopGps: from.gps,
+                    endStopGps: to.gps
                 ))
             }
         }

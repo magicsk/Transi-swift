@@ -27,7 +27,8 @@ class OfflineRoutingEngine {
         date: Date,
         arrivalDeparture: ArrivalDeparture,
         maxTransfers: Int,
-        maxWalkDuration: Int
+        maxWalkDuration: Int,
+        imhdStops: [Stop]
     ) -> [Journey] {
         let resolver = OfflineStopResolver(baseDb: baseDb)
         let fromStops = resolver.resolveStops(named: fromName, maxWalkDuration: maxWalkDuration)
@@ -144,16 +145,137 @@ class OfflineRoutingEngine {
         )
         candidates = limitToInitialSearchWindow(candidates, for: arrivalDeparture, requestedDate: date)
 
-        return OfflineJourneyGrouper()
+        let representatives = OfflineJourneyGrouper()
             .group(candidates, mode: arrivalDeparture)
-            .sorted { displaySort($0.representative, $1.representative, mode: arrivalDeparture) }
-            .map {
-                Journey(
-                    id: "o-\(UUID().uuidString)",
-                    parts: $0.representative.parts,
-                    zones: Array($0.representative.zones).sorted()
+            .map(\.representative)
+            .sorted { displaySort($0, $1, mode: arrivalDeparture) }
+        let trips = tripStops(forTripKeys: Set(representatives.flatMap { $0.labels.compactMap(\.tripKey) }))
+        let imhdStopsByName = Dictionary(grouping: imhdStops.filter { $0.id > 0 }) { $0.name ?? "" }
+        return representatives.map {
+            Journey(
+                id: "o-\(UUID().uuidString)",
+                parts: partsWithStops($0, trips: trips, imhdStopsByName: imhdStopsByName),
+                zones: Array($0.zones).sorted()
+            )
+        }
+    }
+
+    private struct TripStop {
+        let stopId: String
+        /// Service-day seconds, like the router's label times.
+        let seconds: Int
+        let name: String
+        let platform: String?
+        let gps: StopGps
+        let zone: String?
+        let isRequestStop: Bool
+    }
+
+    private struct TripStops {
+        var stops = [TripStop]()
+        var lowFloor: Bool?
+    }
+
+    /// Every stop of the given trips, in order, from one query. Keys match `OfflineTrip.key`.
+    private func tripStops(forTripKeys tripKeys: Set<String>) -> [String: TripStops] {
+        var tripIdsByFeed = [String: [String]]()
+        for key in tripKeys {
+            let feedAndId = key.split(separator: ":", maxSplits: 1)
+            guard feedAndId.count == 2 else { continue }
+            tripIdsByFeed[String(feedAndId[0]), default: []].append(String(feedAndId[1]))
+        }
+        guard !tripIdsByFeed.isEmpty else { return [:] }
+        var clauses = [String]()
+        var params = [Any]()
+        for (feed, tripIds) in tripIdsByFeed {
+            clauses.append("(st.feed = ? AND st.trip_id IN (\(tripIds.map { _ in "?" }.joined(separator: ","))))")
+            params.append(feed)
+            params.append(contentsOf: tripIds)
+        }
+        let rows = scheduleDb.query("""
+            SELECT st.feed, st.trip_id, st.stop_id, st.departure_time, st.pickup_type, st.drop_off_type,
+                   t.wheelchair_accessible, s.stop_name, s.stop_lat, s.stop_lon, s.platform_code, s.zone_id
+            FROM stop_times st
+            JOIN trips t ON t.trip_id = st.trip_id AND t.feed = st.feed
+            JOIN base.stops s ON s.stop_id = st.stop_id AND s.feed = st.feed
+            WHERE \(clauses.joined(separator: " OR "))
+            ORDER BY st.feed, st.trip_id, st.stop_sequence
+        """, params: params)
+
+        var result = [String: TripStops]()
+        for row in rows {
+            guard let feed = row["feed"] as? String,
+                  let tripId = row["trip_id"] as? String,
+                  let stopId = row["stop_id"] as? String,
+                  let seconds = row["departure_time"] as? Int,
+                  let name = row["stop_name"] as? String,
+                  let lat = row["stop_lat"] as? Double,
+                  let lon = row["stop_lon"] as? Double else { continue }
+            let key = "\(feed):\(tripId)"
+            // The feed writes "-" for stops without a zone.
+            let zone = (row["zone_id"] as? String).flatMap { $0.isEmpty || $0 == "-" ? nil : $0 }
+            result[key, default: TripStops()].stops.append(TripStop(
+                stopId: stopId,
+                seconds: seconds,
+                name: name,
+                platform: row["platform_code"] as? String,
+                gps: StopGps(lon: lon, lat: lat),
+                zone: zone,
+                isRequestStop: row["pickup_type"] as? Int == 3 || row["drop_off_type"] as? Int == 3
+            ))
+            // GTFS wheelchair_accessible: 1 accessible, 2 not, anything else unknown.
+            switch row["wheelchair_accessible"] as? Int {
+            case 1: result[key]?.lowFloor = true
+            case 2: result[key]?.lowFloor = false
+            default: break
+            }
+        }
+        return result
+    }
+
+    /// The candidate's parts with every transit leg's stops, from boarding to alighting, and its low-floor flag.
+    private func partsWithStops(
+        _ candidate: OfflineJourneyCandidate,
+        trips: [String: TripStops],
+        imhdStopsByName: [String: [Stop]]
+    ) -> [Part] {
+        var parts = candidate.parts
+        // The router builds one transit part per trip label, in label order.
+        let tripLabels = candidate.labels.filter { $0.tripKey != nil }
+        let transitIndices = parts.indices.filter { parts[$0].routeType != 64 }
+        guard tripLabels.count == transitIndices.count else { return parts }
+
+        for (label, index) in zip(tripLabels, transitIndices) {
+            guard let trip = label.tripKey.flatMap({ trips[$0] }),
+                  let boardTime = label.boardTime,
+                  let alightTime = label.alightTime,
+                  let board = trip.stops.firstIndex(where: { $0.stopId == label.boardStopId && $0.seconds == boardTime }),
+                  let alight = trip.stops[(board + 1)...].firstIndex(where: {
+                      $0.stopId == label.alightStopId && $0.seconds == alightTime
+                  }) else { continue }
+            let boardDeparture = parts[index].startDeparture
+            parts[index].lowFloor = trip.lowFloor
+            parts[index].stops = trip.stops[board...alight].map { stop in
+                PartStop(
+                    name: stop.name,
+                    platform: stop.platform,
+                    // Offsets from the boarding time keep the router's service day, also past midnight.
+                    time: boardDeparture.addingTimeInterval(TimeInterval(stop.seconds - boardTime)),
+                    gps: stop.gps,
+                    zone: stop.zone,
+                    isRequestStop: stop.isRequestStop,
+                    stopId: imhdStopId(name: stop.name, platform: stop.platform, in: imhdStopsByName)
                 )
             }
+        }
+        return parts
+    }
+
+    /// The imhd stop with that name, preferring one with the platform letter. Regional stops
+    /// in the city carry a "Bratislava, " prefix the imhd names do not have.
+    private func imhdStopId(name: String, platform: String?, in stopsByName: [String: [Stop]]) -> Int? {
+        let stops = stopsByName[name] ?? stopsByName[name.replacingOccurrences(of: "Bratislava, ", with: "")] ?? []
+        return (stops.first { $0.platformLabels?.contains { $0.label == platform } == true } ?? stops.first)?.id
     }
 
     private func endpointAnchorStopIds(

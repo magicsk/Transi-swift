@@ -26,6 +26,8 @@ struct OfflineStop: Hashable {
     let lon: Double
     let platform: String?
     let zone: String?
+
+    var gps: StopGps { StopGps(lon: lon, lat: lat) }
 }
 
 struct OfflineStopTime {
