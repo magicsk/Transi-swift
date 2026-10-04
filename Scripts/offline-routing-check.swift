@@ -58,6 +58,7 @@ let cases: [CheckCase] = [
     CheckCase(label: "hill_destination_direct", from: "Hodžovo nám.", to: "Hrad", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 2, maxMs: 5000, requiredLines: ["47"], forbidsFinalWalk: true),
     CheckCase(label: "hill_destination_hub", from: "Hlavná stanica", to: "Hrad", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 3, maxMs: 5000, requiredLines: ["44"], forbidsFinalWalk: true),
     CheckCase(label: "brodna_krce_afternoon", from: "Brodná", to: "Krče", iso: "2026-07-13T15:00:00+02:00", mode: .departure, minJourneys: 6, maxMs: 5000, requiredLines: ["21", "92"], maxDepartureSpanSeconds: 2 * 60 * 60),
+    CheckCase(label: "hronska_zochova", from: "Hronská", to: "Zochova", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 3, maxMs: 5000, requiredLines: ["72"]),
 ]
 
 @main
@@ -77,9 +78,18 @@ enum OfflineRoutingCheck {
         let basePath = ProcessInfo.processInfo.environment["TRANSI_BASE_DB"] ?? "/Users/magic_sk/Developer/js/api/public/timetable/base.db"
         let schedulePath = ProcessInfo.processInfo.environment["TRANSI_SCHEDULE_DB"] ?? "/Users/magic_sk/Developer/js/api/public/timetable/schedule.db"
 
+        let stopsPath = ProcessInfo.processInfo.environment["TRANSI_STOPS_JSON"] ?? "/Users/magic_sk/Developer/js/api/data/stops.json"
+
         guard let baseDb = SQLiteDatabase(path: basePath), let scheduleDb = SQLiteDatabase(path: schedulePath) else {
             fatalError("Failed to open timetable databases")
         }
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        guard let stopsData = FileManager.default.contents(atPath: stopsPath),
+              let imhdStops = try? decoder.decode([Stop].self, from: stopsData) else {
+            fatalError("Failed to read imhd stops from \(stopsPath)")
+        }
+        let imhdStopIdsByName = Dictionary(imhdStops.compactMap { stop in stop.name.map { ($0, stop.id) } }) { first, _ in first }
         let escapedBasePath = basePath.replacingOccurrences(of: "'", with: "''")
         scheduleDb.execute("ATTACH DATABASE '\(escapedBasePath)' AS base")
 
@@ -139,7 +149,8 @@ enum OfflineRoutingCheck {
                 date: date,
                 arrivalDeparture: check.mode,
                 maxTransfers: maxTransfers,
-                maxWalkDuration: maxWalkDuration
+                maxWalkDuration: maxWalkDuration,
+                imhdStops: imhdStops
             )
             let elapsedMs = Int(Date().timeIntervalSince(start) * 1000)
             let allLines = Set(journeys.flatMap { ($0.parts ?? []).compactMap(\.routeShortName) })
@@ -149,7 +160,7 @@ enum OfflineRoutingCheck {
                 activeServiceIds(feed: feed, on: date, scheduleDb: scheduleDb).isEmpty ? feed : nil
             }
 
-            print("\(check.label): count=\(journeys.count) elapsedMs=\(elapsedMs) lines=\(Array(allLines).sorted())")
+            print("\(check.label): count=\(journeys.count) elapsedMs=\(elapsedMs) lines=\(Array(allLines).sorted()) \(legStopsSummary(journeys))")
             if ProcessInfo.processInfo.environment["TRANSI_ROUTING_DEBUG"] == "1" {
                 printJourneys(journeys)
             }
@@ -176,6 +187,9 @@ enum OfflineRoutingCheck {
             let uniqueSignatures = Set(signatures)
             if !skipFixedExpectations, check.minUniqueLineSignatures > 0 && uniqueSignatures.count < check.minUniqueLineSignatures {
                 failures.append("\(check.label): unique line signatures \(uniqueSignatures.count) < \(check.minUniqueLineSignatures)")
+            }
+            for failure in legStopsFailures(in: journeys, imhdStopIdsByName: imhdStopIdsByName) {
+                failures.append("\(check.label): \(failure)")
             }
             if let repeatedLineSignature = repeatedTransitLineSignature(in: journeys) {
                 failures.append("\(check.label): repeated transit line \(repeatedLineSignature)")
@@ -280,7 +294,62 @@ enum OfflineRoutingCheck {
             let start = parts.first.map { formatter.string(from: $0.startDeparture) } ?? "?"
             let end = parts.last.map { formatter.string(from: $0.endArrival) } ?? "?"
             print("  [\(index + 1)] \(start)-\(end) \(signature)")
+            for part in parts where part.routeType != 64 {
+                let stops = (part.stops ?? []).map { stop in
+                    "\(formatter.string(from: stop.time)) \(stop.name) \(stop.platform ?? "-") z\(stop.zone ?? "-") #\(stop.stopId.map(String.init) ?? "-")\(stop.isRequestStop ? " x" : "")"
+                }
+                print("      \(part.routeShortName ?? "?") lowFloor=\(part.lowFloor.map(String.init) ?? "-"): \(stops.joined(separator: ", "))")
+            }
         }
+    }
+
+    /// Every transit leg lists its stops from boarding to alighting, timed like the leg; city stops
+    /// carry platforms and zones; stops named like an imhd stop carry its id. Every part has end coordinates.
+    private static func legStopsFailures(in journeys: [Journey], imhdStopIdsByName: [String: Int]) -> [String] {
+        var failures = [String]()
+        for part in journeys.flatMap({ $0.parts ?? [] }) {
+            let leg = "\(part.routeShortName ?? "walk"):\(part.startStopName ?? "?")->\(part.endStopName ?? "?")"
+            if part.startStopGps == nil || part.endStopGps == nil {
+                failures.append("\(leg) has no start or end coordinates")
+            }
+            if part.routeType == 64 { continue }
+            guard let stops = part.stops, stops.count >= 2, let first = stops.first, let last = stops.last else {
+                failures.append("\(leg) has no stops")
+                continue
+            }
+            if first.name != part.startStopName || first.platform != part.startStopCode
+                || first.gps != part.startStopGps || first.time != part.startDeparture {
+                failures.append("\(leg) stops do not start at the boarding stop and time")
+            }
+            if last.name != part.endStopName || last.platform != part.endStopCode
+                || last.gps != part.endStopGps || last.time != part.endArrival {
+                failures.append("\(leg) stops do not end at the alighting stop and time")
+            }
+            if zip(stops, stops.dropFirst()).contains(where: { $0.time > $1.time }) {
+                failures.append("\(leg) stop times decrease")
+            }
+            if stops.contains(where: { $0.gps == nil }) {
+                failures.append("\(leg) has a stop without coordinates")
+            }
+            // Only city stops have platform letters, and city trips stay on city stops.
+            if part.startStopCode != nil, stops.contains(where: { $0.platform == nil || $0.zone == nil }) {
+                failures.append("\(leg) has a city stop without platform or zone")
+            }
+            for stop in stops {
+                let expected = imhdStopIdsByName[stop.name]
+                    ?? imhdStopIdsByName[stop.name.replacingOccurrences(of: "Bratislava, ", with: "")]
+                if stop.stopId != expected {
+                    failures.append("\(leg) stop \(stop.name) has imhd id \(stop.stopId.map(String.init) ?? "nil"), expected \(expected.map(String.init) ?? "nil")")
+                }
+            }
+        }
+        return failures
+    }
+
+    private static func legStopsSummary(_ journeys: [Journey]) -> String {
+        let legs = journeys.flatMap { $0.parts ?? [] }.filter { $0.routeType != 64 }
+        let stops = legs.flatMap { $0.stops ?? [] }
+        return "legs=\(legs.count) stops=\(stops.count) imhdIds=\(stops.filter { $0.stopId != nil }.count) requestStops=\(stops.filter(\.isRequestStop).count) lowFloorKnown=\(legs.filter { $0.lowFloor != nil }.count)"
     }
 
     private static func repeatedTransitLineSignature(in journeys: [Journey]) -> String? {
