@@ -32,15 +32,20 @@ struct TripPlannerList: View {
                         EmptyView().id("top")
                     }
                     Section {
-                        ForEach(Array(parts.enumerated()), id: \.offset) { index, part in
-                            if part.routeType == 64 {
-                                TripPlannerWalkListItem(part, last: index == parts.count - 1)
-                            } else if part.routeType != nil {
-                                TripPlannerTransitListItem(part)
-                            } else {
-                                Text("Something went wrong")
+                        NavigationLink(value: journey) {
+                            VStack(alignment: .leading, spacing: 12.0) {
+                                ForEach(Array(parts.enumerated()), id: \.offset) { index, part in
+                                    if part.routeType == 64 {
+                                        TripPlannerWalkListItem(part, last: index == parts.count - 1)
+                                    } else if part.routeType != nil {
+                                        TripPlannerTransitListItem(part)
+                                    } else {
+                                        Text("Something went wrong")
+                                    }
+                                }
                             }
                         }
+                        .accessibilityHint("Shows the route on a map with every stop")
                     } header: {
                         Text(getHeaderText(parts, journey.zones))
                     }

@@ -39,12 +39,18 @@ class SimpleVirtualTableController: ObservableObject {
     var vehicleInfo = [VehicleInfo]()
     var socketStatus = "unknown"
     var currentStop: Int
+    /// Called on the main thread after `connections` or `vehicleInfo` change.
+    var onUpdate: (() -> Void)?
+    /// False for boards that only read departures, like the trip detail's, so they never update or end the
+    /// table's Live Activities for this stop.
+    let updatesLiveActivities: Bool
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(stop: Int) {
+    init(stop: Int, updatesLiveActivities: Bool = true) {
         socket = manager.defaultSocket
         currentStop = stop
+        self.updatesLiveActivities = updatesLiveActivities
         startListeners()
         connect()
     }
@@ -85,7 +91,7 @@ class SimpleVirtualTableController: ObservableObject {
     }
 
     private func updateConnections() {
-        let liveActivities = VirtualTableLiveActivityController.listAllTabActivities()
+        let liveActivities = updatesLiveActivities ? VirtualTableLiveActivityController.listAllTabActivities() : []
         for index in connections.indices {
             let connection = connections[index]
             let oldDepartureTime = connection.departureTimeRemaining
@@ -184,10 +190,12 @@ class SimpleVirtualTableController: ObservableObject {
             self.connections = connectionsForPublish
             self.socketStatus = "connected"
             self.updateLiveActivities(endMissingActivities: endMissingActivities)
+            self.onUpdate?()
         }
     }
 
     private func updateLiveActivities(endMissingActivities: Bool) {
+        guard updatesLiveActivities else { return }
         let liveActivities = VirtualTableLiveActivityController.listAllTabActivities()
             .filter { $0.stopId == currentStop }
         for liveActivity in liveActivities {
@@ -215,6 +223,7 @@ class SimpleVirtualTableController: ObservableObject {
     }
 
     private func updateLiveActivitiesForVehicleInfo(_ updatedVehicleInfo: VehicleInfo) {
+        guard updatesLiveActivities else { return }
         let liveActivities = VirtualTableLiveActivityController.listAllTabActivities()
             .filter { $0.stopId == currentStop }
         for connection in connections where connection.busID == updatedVehicleInfo.issi {
@@ -346,10 +355,12 @@ class SimpleVirtualTableController: ObservableObject {
                             if self.vehicleInfo[index] != newVehicleInfo {
                                 self.vehicleInfo[index] = newVehicleInfo
                                 self.updateLiveActivitiesForVehicleInfo(newVehicleInfo)
+                                self.onUpdate?()
                             }
                         } else {
                             self.vehicleInfo.append(newVehicleInfo)
                             self.updateLiveActivitiesForVehicleInfo(newVehicleInfo)
+                            self.onUpdate?()
                         }
                     }
                 }

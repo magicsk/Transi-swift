@@ -12,6 +12,7 @@ extension TripPlannerController {
         return rJourneys.compactMap { rJourney -> Journey? in
             guard let rParts = rJourney.parts else { return nil }
 
+            // ponytail: stops stay nil; fetchStops(for:) loads the leg from the B-API when it is opened.
             let parts = rParts.map { rPart in
                 Part(
                     startStopName: rPart.startStopName,
@@ -22,14 +23,23 @@ extension TripPlannerController {
                     endArrival: dateFromUtc(rPart.endArrival),
                     routeType: rPart.routeType,
                     tripHeadsign: rPart.tripHeadsign,
-                    routeShortName: rPart.routeShortName
+                    routeShortName: rPart.routeShortName,
+                    tripId: rPart.tripId,
+                    startStopId: rPart.startStopId,
+                    endStopId: rPart.endStopId,
+                    startStationId: rPart.startStationId,
+                    endStationId: rPart.endStationId,
+                    startStopGps: rPart.startStopGps,
+                    endStopGps: rPart.endStopGps,
+                    delaySeconds: rPart.tripDelay
                 )
             }
 
             return Journey(
                 id: "r-\(UUID().uuidString)",
                 parts: parts,
-                zones: rJourney.zones?.map { String($0) }
+                zones: rJourney.zones?.map { String($0) },
+                ticketId: rJourney.ticketId
             )
         }
     }
@@ -41,7 +51,17 @@ extension TripPlannerController {
         return f
     }()
 
-    func mapIApiToJourneys(_ iJourneys: [IApiJourney]) -> [Journey] {
+    /// `stops` is a snapshot of the stops list, joined on `stopPoleID` for coordinates and imhd stop ids.
+    func mapIApiToJourneys(_ iJourneys: [IApiJourney], stops: [Stop]) -> [Journey] {
+        let stopsByPlatformId = Dictionary(
+            stops.flatMap { stop in (stop.platformLabels ?? []).map { ($0.id, stop) } },
+            uniquingKeysWith: { first, _ in first }
+        )
+        func magicStop(_ iStop: IApiStop?, platform: String?) -> Stop? {
+            guard let iStop else { return nil }
+            return iStop.stopPoleID.flatMap { stopsByPlatformId[$0] }
+                ?? stops.stop(stationId: nil, name: iStop.name, platform: platform)
+        }
 
         return iJourneys.compactMap { iJourney -> Journey? in
             let iParts = iJourney.parts
@@ -77,6 +97,25 @@ extension TripPlannerController {
                 let startDepDate = TripPlannerController.iApiDateFormatter.date(from: iPart.departure.date) ?? Date()
                 let endArrDate = TripPlannerController.iApiDateFormatter.date(from: iPart.arrival.date) ?? Date()
 
+                let startMagicStop = magicStop(startStop, platform: startStop?.label)
+                let endMagicStop = magicStop(endStop, platform: endStopCode)
+                let iStops = isWalking ? [] : iPart.stops ?? []
+                let partStops = iStops.enumerated().map { stopIndex, iStop in
+                    let isLast = stopIndex == iStops.count - 1
+                    let time = isLast ? iStop.arrival ?? iStop.departure : iStop.departure ?? iStop.arrival
+                    let stop = magicStop(iStop, platform: iStop.label)
+                    return PartStop(
+                        name: iStop.name,
+                        platform: iStop.label,
+                        time: time.flatMap { TripPlannerController.iApiDateFormatter.date(from: $0.date) }
+                            ?? (isLast ? endArrDate : startDepDate),
+                        gps: stop?.gps,
+                        zone: iStop.fareZones?.zones.first,
+                        isRequestStop: iStop.requestStop == "1",
+                        stopId: stop?.id
+                    )
+                }
+
                 parts.append(
                     Part(
                         startStopName: startStop?.name,
@@ -87,7 +126,13 @@ extension TripPlannerController {
                         endArrival: endArrDate,
                         routeType: routeType,
                         tripHeadsign: iPart.destination,
-                        routeShortName: routeShortName
+                        routeShortName: routeShortName,
+                        startStationId: startMagicStop?.stationId,
+                        endStationId: endMagicStop?.stationId,
+                        startStopGps: startMagicStop?.gps,
+                        endStopGps: endMagicStop?.gps,
+                        lowFloor: isWalking ? nil : iPart.attributes?.lowfloor,
+                        stops: partStops.isEmpty ? nil : partStops
                     ))
             }
 
@@ -95,6 +140,68 @@ extension TripPlannerController {
                 id: "i-\(UUID().uuidString)",
                 parts: parts,
                 zones: iJourney.fareZones?.zones
+            )
+        }
+    }
+}
+
+extension Calendar {
+    static let bratislava: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Europe/Bratislava") ?? .current
+        return calendar
+    }()
+
+    /// The wall-clock time `minutes` after midnight of `serviceDay`; over 1440 falls on the next day.
+    func date(minutes: Int, after serviceDay: Date) -> Date {
+        let day = date(byAdding: .day, value: minutes / 1440, to: serviceDay) ?? serviceDay
+        return date(bySettingHour: minutes % 1440 / 60, minute: minutes % 60, second: 0, of: day) ?? day
+    }
+}
+
+extension Array where Element == Stop {
+    /// The stop of a station, or else the first one with that name, preferring one with the platform letter.
+    func stop(stationId: Int?, name: String?, platform: String?) -> Stop? {
+        let candidates = filter { stationId != nil ? $0.stationId == stationId : name != nil && $0.name == name }
+        return candidates.first { $0.platformLabels?.contains { $0.label == platform } == true } ?? candidates.first
+    }
+}
+
+extension Stop {
+    /// Station-level position, up to ~200 m from the platform.
+    var gps: StopGps? {
+        guard let lat, let lng else { return nil }
+        return StopGps(lon: lng, lat: lat)
+    }
+}
+
+extension BApiTrip {
+    /// `part`'s leg: its boarding stop, then the first alighting stop after it (a trip can pass a stop
+    /// twice). Nil when the part has no B-API stop ids or the trip does not serve them.
+    func partStops(for part: Part, stops: [Stop]) -> [PartStop]? {
+        let calendar = Calendar.bratislava
+        let start = calendar.dateComponents([.hour, .minute], from: part.startDeparture)
+        let startMinute = (start.hour ?? 0) * 60 + (start.minute ?? 0)
+        let boardings = stopTimes.indices.filter { stopTimes[$0].stopId == part.startStopId }
+        guard let first = boardings.first(where: { stopTimes[$0].departure % 1440 == startMinute }) ?? boardings.first,
+              let last = stopTimes[(first + 1)...].firstIndex(where: { $0.stopId == part.endStopId }),
+              let serviceDay = calendar.date(
+                  byAdding: .day, value: -(stopTimes[first].departure / 1440),
+                  to: calendar.startOfDay(for: part.startDeparture)
+              )
+        else { return nil }
+
+        return stopTimes[first...last].map { stopTime in
+            PartStop(
+                name: stopTime.stopName,
+                platform: stopTime.stopCode,
+                time: calendar.date(
+                    minutes: stopTime.stopId == part.endStopId ? stopTime.arrival : stopTime.departure,
+                    after: serviceDay
+                ),
+                gps: stopTime.stopGps,
+                zone: stopTime.zone,
+                stopId: stops.stop(stationId: stopTime.stationId, name: stopTime.stopName, platform: stopTime.stopCode)?.id
             )
         }
     }

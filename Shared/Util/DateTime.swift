@@ -44,9 +44,15 @@ func dateStringFromDate(_ date: Date) -> String {
     return date.formatted(date: .numeric, time: .omitted)
 }
 
+/// Whole minutes between the clock minutes `timeStringFromDate` shows (it drops the seconds), so a
+/// duration always matches the times beside it: 16:30:15 → 16:40:45 is 10 min.
+func minutesBetween(_ from: Date, _ to: Date) -> Int {
+    let minute = { (date: Date) in (date.timeIntervalSinceReferenceDate / 60).rounded(.down) }
+    return Int(minute(to) - minute(from))
+}
+
 func timeDiffFromDates(_ from: Date, _ to: Date) -> String {
-    let diff = to - from
-    return "\(Int(diff / 60))"
+    "\(minutesBetween(from, to))"
 }
 
 func clockStringFromDate(_ time: Date) -> String {

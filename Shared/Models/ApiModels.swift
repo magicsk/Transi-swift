@@ -18,23 +18,24 @@ struct RApiTrip: Codable {
     var journey: [RApiJourney]?
 }
 
+// The fetch decoder converts snake_case keys, so "trip_id" only matches `tripId`, never `tripID`.
 struct RApiJourney: Codable {
     var journeyGuid: String
     var parts: [RApiPart]?
     var zones: [Int]?
-    var ticketID: Int?
+    var ticketId: Int?
 }
 
 struct RApiPart: Codable {
-    var startStopID, endStopID: Int?
+    var startStopId, endStopId: Int?
     var startStopName, startStopCode, endStopName, endStopCode: String?
-    var startStationID, endStationID: Int?
+    var startStationId, endStationId: Int?
     var startStopGps, endStopGps: StopGps?
     var startDeparture, endArrival: String?
-    var duration, routeType, tripID, tripRouteID: Int?
+    var duration, routeType, tripId, tripRouteId: Int?
     var tripHeadsign, tripShortName, routeShortName: String?
     var tripZones: [Int]?
-    var tripDelay, ticketID: Int?
+    var tripDelay, ticketId: Int?
 }
 
 struct TripReq: Codable, Hashable {
@@ -94,6 +95,9 @@ struct IApiStop: Codable {
     let arrival: IApiTime?
     let departure: IApiTime?
     let label: String?
+    let fareZones: FareZones?
+    /// "1" for a request stop.
+    let requestStop: String?
 }
 
 struct IApiTime: Codable {
@@ -121,4 +125,23 @@ struct FareZones: Codable {
             self.zones = []
         }
     }
+}
+
+/// B-API `/mobile/v1/trip/{trip_id}/`.
+struct BApiTrip: Codable {
+    let tripId: Int
+    /// Seconds; nil until the vehicle runs.
+    let tripDelay: Int?
+    let stopTimes: [BApiStopTime]
+}
+
+struct BApiStopTime: Codable {
+    let stopId: Int
+    let stationId: Int?
+    let stopGps: StopGps?
+    let stopCode: String?
+    let stopName: String
+    /// Minutes after midnight of the trip's service day, Bratislava time; over 1440 after midnight.
+    let arrival, departure: Int
+    let zone: String?
 }

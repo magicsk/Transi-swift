@@ -30,8 +30,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
 {
     let stopListProvider = GlobalController.stopsListProvider
     let appState = GlobalController.appState
-    private var tileLightOverlay: MKTileOverlay?
-    private var tileDarkOverlay: MKTileOverlay?
+    private let tiles = TransportTiles()
     private var sheetViewController: MapBottomSheetView?
     private var sheetNavController: UIHostingController<MapBottomSheetView>?
     private var mapView: MKMapView!
@@ -46,11 +45,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         longitudinalMeters: 500
     )
     private lazy var locationButton = UIButton(configuration: .filled())
-
-    let sourceLightUrl =
-        "\(GlobalController.thunderforestApiUrl)/transport/{z}/{x}/{y}@2x.png?apikey=\(GlobalController.thunderforestApiKey)"
-    let sourceDarkUrl =
-        "\(GlobalController.thunderforestApiUrl)/transport-dark/{z}/{x}/{y}@2x.png?apikey=\(GlobalController.thunderforestApiKey)"
 
     init(_ changeTab: @escaping (Int) -> Void) {
         self.changeTab = changeTab
@@ -83,39 +77,19 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if mapLoaded {
-            mapView.removeOverlay(
-                traitCollection.userInterfaceStyle == .dark ? tileLightOverlay! : tileDarkOverlay!)
-            mapView.addOverlay(
-                traitCollection.userInterfaceStyle == .dark ? tileDarkOverlay! : tileLightOverlay!)
+            tiles.update(mapView, for: traitCollection.userInterfaceStyle)
         }
     }
 
     private func setupMapView() {
         mapView = MKMapView(frame: view.bounds)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        mapView.pointOfInterestFilter = .excludingAll
         mapView.delegate = self
         mapView.showsScale = true
         mapView.showsUserLocation = true
         mapView.region = defaultLocation
-        mapView.mapType = .satellite
         mapView.userTrackingMode = .follow
-        // MapKit stops drawing overlays at its own closest zoom (~3.2 m camera distance).
-        mapView.cameraZoomRange = MKMapView.CameraZoomRange(minCenterCoordinateDistance: 4)
-
-        let tileLightConfig = MapCache(withConfig: MapCacheConfig(withUrlTemplate: sourceLightUrl))
-        tileLightOverlay = CachedTileOverlay(withCache: tileLightConfig)
-        tileLightOverlay?.tileSize = .init(width: 512, height: 512)
-        tileLightOverlay?.canReplaceMapContent = true
-        tileLightOverlay?.maximumZ = 22
-        let tileDarkConfig = MapCache(withConfig: MapCacheConfig(withUrlTemplate: sourceDarkUrl))
-        tileDarkOverlay = CachedTileOverlay(withCache: tileDarkConfig)
-        tileDarkOverlay?.tileSize = .init(width: 512, height: 512)
-        tileDarkOverlay?.canReplaceMapContent = true
-        tileDarkOverlay?.maximumZ = 22
-
-        mapView.addOverlay(
-            traitCollection.userInterfaceStyle == .dark ? tileDarkOverlay! : tileLightOverlay!)
+        tiles.install(on: mapView, for: traitCollection.userInterfaceStyle)
 
         view.addSubview(mapView)
 
@@ -350,6 +324,39 @@ class ClusterAnnotationView: MKMarkerAnnotationView {
             subtitleVisibility = .hidden
             markerTintColor = nil
         }
+    }
+}
+
+/// Thunderforest transport tiles drawn instead of Apple's map, swapped for the dark style in dark mode.
+final class TransportTiles {
+    private let light = TransportTiles.overlay(style: "transport")
+    private let dark = TransportTiles.overlay(style: "transport-dark")
+
+    func install(on mapView: MKMapView, for style: UIUserInterfaceStyle) {
+        mapView.pointOfInterestFilter = .excludingAll
+        mapView.mapType = .satellite
+        // MapKit stops drawing overlays at its own closest zoom (~3.2 m camera distance).
+        mapView.cameraZoomRange = MKMapView.CameraZoomRange(minCenterCoordinateDistance: 4)
+        update(mapView, for: style)
+    }
+
+    /// Shows the tiles for `style` at the `.aboveRoads` level, so overlays at `.aboveLabels` draw on top.
+    /// Render them with `TileOverlayRenderer`.
+    func update(_ mapView: MKMapView, for style: UIUserInterfaceStyle) {
+        let (shown, hidden) = style == .dark ? (dark, light) : (light, dark)
+        mapView.removeOverlay(hidden)
+        if !mapView.overlays.contains(where: { $0 === shown }) {
+            mapView.insertOverlay(shown, at: 0, level: .aboveRoads)
+        }
+    }
+
+    private static func overlay(style: String) -> MKTileOverlay {
+        let url = "\(GlobalController.thunderforestApiUrl)/\(style)/{z}/{x}/{y}@2x.png?apikey=\(GlobalController.thunderforestApiKey)"
+        let overlay = CachedTileOverlay(withCache: MapCache(withConfig: MapCacheConfig(withUrlTemplate: url)))
+        overlay.tileSize = .init(width: 512, height: 512)
+        overlay.canReplaceMapContent = true
+        overlay.maximumZ = 22
+        return overlay
     }
 }
 

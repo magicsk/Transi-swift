@@ -69,6 +69,9 @@ struct TripPlannerView: View {
                 }
                 .padding(.top, -16.0)
                 .navigationTitle(Text("Trip planner"))
+                .navigationDestination(for: Journey.self) { journey in
+                    TripDetailView(journey: journey)
+                }
                 .toolbar {
                     Menu {
                         ForEach(tripPlannerController.recentSearches) { search in

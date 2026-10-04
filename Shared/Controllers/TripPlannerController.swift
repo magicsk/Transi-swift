@@ -133,6 +133,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             from: selectedFrom,
             to: selectedTo
         ) else { return }
+        let stops = GlobalController.stopsListProvider.stops
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
@@ -155,7 +156,8 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                     rResult: rResult,
                     iResult: iResult,
                     source: source,
-                    generation: generation
+                    generation: generation,
+                    stops: stops
                 )
             }
         }
@@ -352,11 +354,11 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
 
     private func handleFetchResults(
         rResult: RApiTrip?, iResult: IApiTripResponse?, source: FetchSource,
-        generation: Int
+        generation: Int, stops: [Stop]
     ) {
         let rJourneys = rResult?.journey ?? []
         let iJourneys = iResult?.journeys ?? []
-        let mappedIJourneys = mapIApiToJourneys(iJourneys)
+        let mappedIJourneys = mapIApiToJourneys(iJourneys, stops: stops)
         let newUnifiedJourneys = mapRApiToJourneys(rJourneys) + mappedIJourneys
 
         DispatchQueue.main.async {
@@ -407,6 +409,32 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                 }
                 self.trip.journey = uniqueJourneys
                 self.cacheTripForCurrentSearch(self.trip)
+            }
+        }
+    }
+
+    /// Loads every stop of an R-API leg and the delay in seconds of its trip's run on the road now, whatever
+    /// the leg's date (nil when none is running).
+    /// Call on the main thread; completes on it with nil stops when the leg has no trip id or the fetch fails.
+    func fetchStops(for part: Part, completion: @escaping (_ stops: [PartStop]?, _ delaySeconds: Int?) -> Void) {
+        guard let tripId = part.tripId else {
+            completion(nil, nil)
+            return
+        }
+        let stops = GlobalController.stopsListProvider.stops
+        // fetchBApi may wait for the session token, so start it off the main thread.
+        DispatchQueue.global(qos: .userInitiated).async {
+            fetchBApi(endpoint: "/mobile/v1/trip/\(tripId)/", type: BApiTrip.self) { result in
+                guard case .success(let trip) = result else {
+                    completion(nil, nil)
+                    return
+                }
+                DispatchQueue.global(qos: .userInitiated).async {
+                    let partStops = trip.partStops(for: part, stops: stops)
+                    DispatchQueue.main.async {
+                        completion(partStops, trip.tripDelay)
+                    }
+                }
             }
         }
     }
