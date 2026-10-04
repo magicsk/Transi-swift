@@ -13,6 +13,7 @@ class StopsListProvider: ObservableObject {
     var unmodifiedStops = [Stop]()
     @Published var fetchError = false
     @Published var fetchLoading = false
+    @Published var favoriteStopIds = UserDefaults.standard.array(forKey: Stored.favoriteStopIds) as? [Int] ?? []
 
     static var mapPointsNeeded = false
 
@@ -151,6 +152,15 @@ class StopsListProvider: ObservableObject {
                 }
             }
         }
+    }
+
+    func toggleFavorite(_ stopId: Int) {
+        if let index = favoriteStopIds.firstIndex(of: stopId) {
+            favoriteStopIds.remove(at: index)
+        } else {
+            favoriteStopIds.append(stopId)
+        }
+        UserDefaults.standard.set(favoriteStopIds, forKey: Stored.favoriteStopIds)
     }
 
     func getStopIdFromName(_ stopName: String) -> Int? {

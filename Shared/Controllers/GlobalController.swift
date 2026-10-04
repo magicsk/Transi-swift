@@ -122,6 +122,7 @@ struct GlobalController {
             Stored.displayClockOnTable: true,
             Stored.displaySocketStatus: true,
             Stored.defaultStopId: -1,
+            Stored.favoriteStopIds: [Int](),
             Stored.liveActivityThreshold: 200,
             Stored.notifyOnTimeChange: true,
             Stored.notifyOnDelayChange: true,

@@ -31,7 +31,13 @@ struct StopListView: View {
     }
 
     private var displayedItems: [Stop] {
-        cachedFilteredStops ?? stopsListProvider.stops
+        if let cachedFilteredStops = cachedFilteredStops { return cachedFilteredStops }
+        let stops = stopsListProvider.stops
+        let favoriteIds = Set(stopsListProvider.favoriteStopIds)
+        // Actual location (id -1) stays first, then favorites, keeping the provider's order.
+        let pinned = stops.filter { $0.id < 0 || favoriteIds.contains($0.id) }
+        let others = stops.filter { $0.id >= 0 && !favoriteIds.contains($0.id) }
+        return pinned + others
     }
 
     private func performSearch(_ text: String) {
@@ -65,10 +71,16 @@ struct StopListView: View {
                 }
                 ScrollViewReader { _ in
                     List(displayedItems) { stop in
+                        let isFavorite = stopsListProvider.favoriteStopIds.contains(stop.id)
                         Label {
                             HStack {
                                 Text(stop.name ?? "Error")
                                 Spacer()
+                                if isFavorite {
+                                    Image(systemName: "star.fill")
+                                        .foregroundColor(.yellow)
+                                        .accessibilityLabel("Favorite")
+                                }
                             }
                         }
                         icon: {
@@ -82,6 +94,20 @@ struct StopListView: View {
                             } else {
                                 GlobalController.virtualTable.changeStop(stop.id)
                                 coordinator.parent.selectedIndex = 1
+                            }
+                        }
+                        .swipeActions {
+                            if stop.id > 0 {
+                                Button {
+                                    stopsListProvider.toggleFavorite(stop.id)
+                                } label: {
+                                    if isFavorite {
+                                        Label("Remove Favorite", systemImage: "star.slash")
+                                    } else {
+                                        Label("Favorite", systemImage: "star")
+                                    }
+                                }
+                                .tint(.yellow)
                             }
                         }
                     }

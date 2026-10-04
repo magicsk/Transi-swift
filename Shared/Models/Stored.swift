@@ -24,6 +24,7 @@ struct Stored {
     static let timetableBaseDbSha = "timetable_base_db_sha"
     static let timetableScheduleDbSha = "timetable_schedule_db_sha"
     static let defaultStopId = "default_stop_id"
+    static let favoriteStopIds = "favorite_stop_ids"
     static let liveActivityThreshold = "live_activity_threshold"
     static let notifyOnTimeChange = "notify_on_time_change"
     static let notifyOnDelayChange = "notify_on_delay_change"
