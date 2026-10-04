@@ -208,9 +208,20 @@ func textColorFromLineNum(_ lineNum: String) -> Color? {
 
 func isRounded(_ lineNum: String) -> Bool {
     let lineInt = Int(lineNum) ?? 99
-    if lineInt < 20 || lineNum.starts(with: "S") || lineNum.starts(with: "R") || lineNum.starts(with: "AT") {
+    if lineInt < 20 || isTrain(lineNum) {
         return true
     } else {
         return false
     }
+}
+
+/// DPB city lines: 1–199, night N and replacement X lines. Regional buses (200+), trains and 901 are not.
+func isCityLine(_ lineNum: String) -> Bool {
+    if lineNum.starts(with: "N") || lineNum.starts(with: "X") { return true }
+    return (1..<200).contains(Int(lineNum) ?? 0)
+}
+
+/// Trains: S and R lines (like "S20", "R 805") and AT lines into Austria.
+func isTrain(_ lineNum: String) -> Bool {
+    lineNum.starts(with: "S") || lineNum.starts(with: "R") || lineNum.starts(with: "AT")
 }

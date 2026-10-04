@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DA7C1C0F2F90A00100A1B2C3 /* TripTicketButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7C1C0E2F90A00100A1B2C3 /* TripTicketButton.swift */; };
+		DA7C1C0D2F90A00100A1B2C3 /* TicketCatalogueProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7C1C0C2F90A00100A1B2C3 /* TicketCatalogueProvider.swift */; };
+		DA7C1C0B2F90A00100A1B2C3 /* TicketCatalogue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7C1C0A2F90A00100A1B2C3 /* TicketCatalogue.swift */; };
 		DAA2CD08BD4588BC2DF3A2FE /* TimetableManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1D343E9BA7330709940737 /* TimetableManifest.swift */; };
 		DAE6A3FAB566B3F8D5A243FC /* SQLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA85A3A8B28DBCC43872EACA /* SQLite.swift */; };
 		DA87394F8A900FB8EE491E85 /* Gzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAE669B06984E562AF846DE /* Gzip.swift */; };
@@ -188,6 +191,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DA7C1C0E2F90A00100A1B2C3 /* TripTicketButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripTicketButton.swift; sourceTree = "<group>"; };
+		DA7C1C0C2F90A00100A1B2C3 /* TicketCatalogueProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketCatalogueProvider.swift; sourceTree = "<group>"; };
+		DA7C1C0A2F90A00100A1B2C3 /* TicketCatalogue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketCatalogue.swift; sourceTree = "<group>"; };
 		DA1D343E9BA7330709940737 /* TimetableManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableManifest.swift; sourceTree = "<group>"; };
 		DA85A3A8B28DBCC43872EACA /* SQLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLite.swift; sourceTree = "<group>"; };
 		DAAE669B06984E562AF846DE /* Gzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gzip.swift; sourceTree = "<group>"; };
@@ -340,6 +346,7 @@
 				DA1C7E600F2B4C6D8E9A1B2C /* TripDetailModel.swift */,
 				DA1C7E620F2B4C6D8E9A1B2C /* TripDetailView.swift */,
 				DA1C7E640F2B4C6D8E9A1B2C /* TripDetailSheet.swift */,
+				DA7C1C0E2F90A00100A1B2C3 /* TripTicketButton.swift */,
 				DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */,
 				DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */,
 				DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */,
@@ -482,6 +489,7 @@
 				DABD03272A0AF7B800FD2C4B /* Trip.swift */,
 				DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */,
 				DAB0094F2B2E7383009DF2CD /* Stored.swift */,
+				DA7C1C0A2F90A00100A1B2C3 /* TicketCatalogue.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -490,6 +498,7 @@
 			isa = PBXGroup;
 			children = (
 				DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */,
+				DA7C1C0C2F90A00100A1B2C3 /* TicketCatalogueProvider.swift */,
 				DAC95A102B77ABAF005E93C7 /* LocationProvider.swift */,
 				DA467DEA2BE9156F00057872 /* AppStateProvider.swift */,
 			);
@@ -834,6 +843,9 @@
 				DAAA10F82B7232D5001B1EDA /* NowIndicator.swift in Sources */,
 				DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */,
 				DA8D2C042F4FA34200BA4245 /* SettingsView.swift in Sources */,
+				DA7C1C0F2F90A00100A1B2C3 /* TripTicketButton.swift in Sources */,
+				DA7C1C0D2F90A00100A1B2C3 /* TicketCatalogueProvider.swift in Sources */,
+				DA7C1C0B2F90A00100A1B2C3 /* TicketCatalogue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -33,4 +33,9 @@ struct Stored {
     static let magicApiUrlOverride = "magic_api_url_override"
     static let tripPlannerDbSha = "trip_planner_db_sha"
     static let changelogVersion = "changelog_version"
+    static let passDays = "pass_days"
+    static let passValidFrom = "pass_valid_from"
+    static let passZones = "pass_zones"
+    static let passNetworkWide = "pass_network_wide"
+    static let passBankCard = "pass_bank_card"
 }

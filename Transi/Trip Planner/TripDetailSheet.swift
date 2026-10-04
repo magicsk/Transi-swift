@@ -29,6 +29,13 @@ struct TripDetailSheet: View {
                 }
                 .foregroundColor(.primary)
                 .accessibilityHint("Shows the whole route on the map")
+                if journey.rideCount > 0 {
+                    // Journey actions, one full-width button per line.
+                    VStack(spacing: 12) {
+                        TripTicketButton(model: model)
+                    }
+                    .padding(.vertical, 6)
+                }
             }
             Section("Steps") {
                 ForEach(steps, id: \.self) { step in

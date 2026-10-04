@@ -26,6 +26,11 @@ struct SettingsView: View {
     @AppStorage(Stored.tripSaveDuration) var tripSaveDuration = -1
     @AppStorage(Stored.offlineTripPlanner) var offlineTripPlanner = false
     @AppStorage(Stored.magicApiUrlOverride) var magicApiUrlOverride = ""
+    @AppStorage(Stored.passDays) var passDays = 0
+    @AppStorage(Stored.passValidFrom) var passValidFrom = 0.0
+    @AppStorage(Stored.passZones) var passZones = "100,101"
+    @AppStorage(Stored.passNetworkWide) var passNetworkWide = false
+    @AppStorage(Stored.passBankCard) var passBankCard = false
 
     @State private var showStopPicker = false
     @State private var pickedStop: Stop = .empty
@@ -55,6 +60,7 @@ struct SettingsView: View {
                 notificationTriggersSection
                 timetablesSection
                 tripPlannerSection
+                passSection
                 developerSection
             }
             .navigationTitle("Settings")
@@ -165,6 +171,65 @@ struct SettingsView: View {
                 }
         }
     }
+
+    // MARK: - My Pass
+
+    private var passValidFromDate: Binding<Date> {
+        Binding(
+            get: { Date(timeIntervalSinceReferenceDate: passValidFrom) },
+            set: { passValidFrom = Calendar.bratislava.startOfDay(for: $0).timeIntervalSinceReferenceDate }
+        )
+    }
+
+    private var passZonesSummary: Text {
+        let zones = SeasonPass.zoneSet(passZones)
+        if passNetworkWide { return Text("All zones") }
+        return zones.isEmpty ? Text("None") : Text(verbatim: zones.sorted().joined(separator: ", "))
+    }
+
+    private var passSection: some View {
+        Section {
+            Picker("Pass", selection: $passDays) {
+                Text("None").tag(0)
+                ForEach(SeasonPass.durations, id: \.self) { days in
+                    Text("\(days) days").tag(days)
+                }
+            }
+            .onChange(of: passDays) { days in
+                // A new pass starts today; clearing it forgets the date.
+                if days == 0 {
+                    passValidFrom = 0
+                } else if passValidFrom == 0 {
+                    passValidFrom = Calendar.bratislava.startOfDay(for: Date()).timeIntervalSinceReferenceDate
+                }
+            }
+            if let pass = SeasonPass(days: passDays, validFrom: passValidFrom, zones: passZones,
+                                     networkWide: passNetworkWide, bankCard: passBankCard) {
+                DatePicker("Valid from", selection: passValidFromDate, displayedComponents: .date)
+                    // Pass days are Bratislava days, wherever the phone is.
+                    .environment(\.timeZone, Calendar.bratislava.timeZone)
+                LabeledContent("Valid until", value: SeasonPass.dayFormatter.string(from: pass.lastDay))
+                NavigationLink {
+                    PassZonesView()
+                } label: {
+                    LabeledContent {
+                        passZonesSummary
+                    } label: {
+                        Text("Zones")
+                    }
+                }
+                Toggle("Bought with a bank card (city lines only)", isOn: $passBankCard)
+            }
+        } header: {
+            Text("My pass")
+        } footer: {
+            if passDays > 0 {
+                Text("Passes bought with a bank card from DPB are valid only on Bratislava city lines in zones 100 and 101.")
+            }
+        }
+        .onAppear { GlobalController.ticketCatalogue.load() }
+    }
+
     // MARK: - Developer
 
     private var developerSection: some View {
@@ -184,6 +249,75 @@ struct SettingsView: View {
         } footer: {
             Text("Override the Magic API base URL (e.g. http://localhost:3000). Leave empty to use the default.")
         }
+    }
+}
+
+/// Pass zones: "100 + 101" together, 101 and the regional zones from the IDS BK catalogue, or network-wide.
+private struct PassZonesView: View {
+    @StateObject var ticketCatalogue = GlobalController.ticketCatalogue
+    @AppStorage(Stored.passZones) var passZones = "100,101"
+    @AppStorage(Stored.passNetworkWide) var passNetworkWide = false
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("All zones (network-wide)", isOn: $passNetworkWide)
+            }
+            if !passNetworkWide {
+                Section {
+                    zoneRow("100", title: Text("100 + 101"), detail: Text("Bratislava"))
+                    if let zones = ticketCatalogue.catalogue?.zones {
+                        ForEach(zones.filter { $0.zoneName != "100" }, id: \.zoneId) { zone in
+                            zoneRow(zone.zoneName, title: Text(verbatim: zone.zoneName),
+                                    detail: zone.zoneDescription.map { Text(verbatim: $0) })
+                        }
+                    } else if ticketCatalogue.loadFailed {
+                        Text("Regional zones couldn't be loaded. Check your connection.")
+                            .foregroundStyle(.secondary)
+                        Button("Try again") { ticketCatalogue.load() }
+                    } else {
+                        HStack {
+                            Text("Loading regional zones…")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            ProgressView()
+                        }
+                    }
+                } footer: {
+                    Text("Zone 100 is sold only together with 101.")
+                }
+            }
+        }
+        .navigationTitle("Zones")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { ticketCatalogue.load() }
+    }
+
+    private func zoneRow(_ zone: String, title: Text, detail: Text?) -> some View {
+        let isSelected = SeasonPass.zoneSet(passZones).contains(zone)
+        return Button {
+            passZones = SeasonPass.toggling(zone, in: passZones)
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    title
+                        .foregroundColor(.primary)
+                    if let detail {
+                        detail
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.accentColor)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

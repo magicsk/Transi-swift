@@ -28,6 +28,7 @@ struct GlobalController {
     static let virtualTable = VirtualTableController()
     static let tripPlanner = TripPlannerController()
     static let timetableDatabase = TimetableDatabase()
+    static let ticketCatalogue = TicketCatalogueProvider()
 
     private static let tokenLock = NSLock()
     private static var _sessionToken = ""
@@ -128,6 +129,11 @@ struct GlobalController {
             Stored.notifyOnDelayChange: true,
             Stored.notifyOnPositionChange: true,
             Stored.offlineTripPlanner: false,
+            Stored.passDays: 0,
+            Stored.passValidFrom: 0.0,
+            Stored.passZones: "100,101",
+            Stored.passNetworkWide: false,
+            Stored.passBankCard: false,
         ])
     }
 
