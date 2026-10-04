@@ -6,7 +6,12 @@ class OfflineRoutingEngine {
     private static let currentServiceDayPriorityThresholdSeconds = 4 * 60 * 60
     private static let previousServiceDayOnlyThresholdSeconds = 2 * 60 * 60
     private static let minimumEarlyMorningCandidateCount = 8
+    private static let initialSearchWindowSeconds = 2 * 60 * 60
+    private static let minimumWindowCandidateCount = 3
     private static let secondsPerDay = 24 * 60 * 60
+    private static let contextCacheLimit = 8
+    private static let contextCacheLock = NSLock()
+    private static var contextCache = [ContextCacheKey: OfflineRoutingContext]()
 
     let scheduleDb: SQLiteDatabase
     let baseDb: SQLiteDatabase
@@ -43,12 +48,7 @@ class OfflineRoutingEngine {
         let searches = serviceDaySearches(for: date, seconds: seconds)
 
         for search in searches {
-            let context = OfflineRoutingContext.build(
-                scheduleDb: scheduleDb,
-                baseDb: baseDb,
-                date: search.serviceDate,
-                maxWalkDuration: maxWalkDuration
-            )
+            let context = routingContext(date: search.serviceDate, maxWalkDuration: maxWalkDuration)
             let routeOriginStopIds = endpointCandidateStopIds(
                 directStops: directFromStops,
                 resolvedStops: fromStops,
@@ -64,16 +64,19 @@ class OfflineRoutingEngine {
                 resolvedStops: toStops,
                 context: context
             )
+            let terminalWalkLinks = shouldUseTerminalWalkLinks(directDestinationStops: directToStops, context: context)
+                ? terminalWalkLinksByStopId(
+                    context: context,
+                    destinationStopIds: destinationStopIds,
+                    resolvedStops: toStops
+                )
+                : [:]
             candidates.append(contentsOf: route(
                 context: context,
                 originStopIds: originNeedsAnchorWalk ? originStopIds : routeOriginStopIds,
                 destinationStopIds: destinationStopIds,
                 routeDestinationStopIds: routeDestinationStopIds,
-                terminalWalkLinksByStopId: terminalWalkLinksByStopId(
-                    context: context,
-                    destinationStopIds: destinationStopIds,
-                    resolvedStops: toStops
-                ),
+                terminalWalkLinksByStopId: terminalWalkLinks,
                 seconds: search.seconds,
                 isPreviousServiceDay: search.isPreviousServiceDay,
                 arrivalDeparture: arrivalDeparture,
@@ -98,12 +101,7 @@ class OfflineRoutingEngine {
             let validCandidateCount = filter(candidates, for: arrivalDeparture, requestedDate: date).count
             if shouldSearchNextServiceDay(departureSeconds: seconds, candidateCount: validCandidateCount) {
                 let nextDate = nextServiceDate(after: Self.bratislavaCalendar.startOfDay(for: date))
-                let nextContext = OfflineRoutingContext.build(
-                    scheduleDb: scheduleDb,
-                    baseDb: baseDb,
-                    date: nextDate,
-                    maxWalkDuration: maxWalkDuration
-                )
+                let nextContext = routingContext(date: nextDate, maxWalkDuration: maxWalkDuration)
                 let nextRouteOriginStopIds = endpointCandidateStopIds(
                     directStops: directFromStops,
                     resolvedStops: fromStops,
@@ -119,16 +117,19 @@ class OfflineRoutingEngine {
                     resolvedStops: toStops,
                     context: nextContext
                 )
+                let nextTerminalWalkLinks = shouldUseTerminalWalkLinks(directDestinationStops: directToStops, context: nextContext)
+                    ? terminalWalkLinksByStopId(
+                        context: nextContext,
+                        destinationStopIds: destinationStopIds,
+                        resolvedStops: toStops
+                    )
+                    : [:]
                 candidates.append(contentsOf: route(
                     context: nextContext,
                     originStopIds: nextOriginNeedsAnchorWalk ? originStopIds : nextRouteOriginStopIds,
                     destinationStopIds: destinationStopIds,
                     routeDestinationStopIds: nextRouteDestinationStopIds,
-                    terminalWalkLinksByStopId: terminalWalkLinksByStopId(
-                        context: nextContext,
-                        destinationStopIds: destinationStopIds,
-                        resolvedStops: toStops
-                    ),
+                    terminalWalkLinksByStopId: nextTerminalWalkLinks,
                     seconds: 0,
                     isPreviousServiceDay: false,
                     arrivalDeparture: arrivalDeparture,
@@ -141,12 +142,14 @@ class OfflineRoutingEngine {
             filter(candidates, for: arrivalDeparture, requestedDate: date),
             relativeTo: Self.bratislavaCalendar.startOfDay(for: date)
         )
+        candidates = limitToInitialSearchWindow(candidates, for: arrivalDeparture, requestedDate: date)
 
         return OfflineJourneyGrouper()
             .group(candidates, mode: arrivalDeparture)
+            .sorted { displaySort($0.representative, $1.representative, mode: arrivalDeparture) }
             .map {
                 Journey(
-                    id: UUID().uuidString,
+                    id: "o-\(UUID().uuidString)",
                     parts: $0.representative.parts,
                     zones: Array($0.representative.zones).sorted()
                 )
@@ -178,6 +181,14 @@ class OfflineRoutingEngine {
         }
 
         return Set(preferredStops.map(\.id))
+    }
+
+    private func shouldUseTerminalWalkLinks(
+        directDestinationStops: [OfflineStop],
+        context: OfflineRoutingContext
+    ) -> Bool {
+        directDestinationStops.isEmpty ||
+            !directDestinationStops.contains { hasActiveStopTimes($0.id, in: context) }
     }
 
     private func terminalWalkLinksByStopId(
@@ -221,6 +232,46 @@ class OfflineRoutingEngine {
         let serviceDate: Date
         let seconds: Int
         let isPreviousServiceDay: Bool
+    }
+
+    private struct ContextCacheKey: Hashable {
+        let schedule: SQLiteDatabaseFingerprint
+        let base: SQLiteDatabaseFingerprint
+        let serviceDay: TimeInterval
+        let maxWalkDuration: Int
+    }
+
+    private func routingContext(date: Date, maxWalkDuration: Int) -> OfflineRoutingContext {
+        let key = ContextCacheKey(
+            schedule: scheduleDb.fingerprint,
+            base: baseDb.fingerprint,
+            serviceDay: Self.bratislavaCalendar.startOfDay(for: date).timeIntervalSince1970,
+            maxWalkDuration: maxWalkDuration
+        )
+
+        Self.contextCacheLock.lock()
+        if let cached = Self.contextCache[key] {
+            Self.contextCacheLock.unlock()
+            return cached
+        }
+        Self.contextCacheLock.unlock()
+
+        let context = OfflineRoutingContext.build(
+            scheduleDb: scheduleDb,
+            baseDb: baseDb,
+            date: date,
+            maxWalkDuration: maxWalkDuration
+        )
+
+        Self.contextCacheLock.lock()
+        Self.contextCache[key] = context
+        if Self.contextCache.count > Self.contextCacheLimit,
+           let oldestKey = Self.contextCache.keys.first {
+            Self.contextCache.removeValue(forKey: oldestKey)
+        }
+        Self.contextCacheLock.unlock()
+
+        return context
     }
 
     private func serviceDaySearches(for date: Date, seconds: Int) -> [ServiceDaySearch] {
@@ -313,6 +364,59 @@ class OfflineRoutingEngine {
                 transferCount: candidate.transferCount,
                 walkSeconds: candidate.walkSeconds
             )
+        }
+    }
+
+    private func limitToInitialSearchWindow(
+        _ candidates: [OfflineJourneyCandidate],
+        for arrivalDeparture: ArrivalDeparture,
+        requestedDate date: Date
+    ) -> [OfflineJourneyCandidate] {
+        let requestedSeconds = Int(date.timeIntervalSince(Self.bratislavaCalendar.startOfDay(for: date)))
+        let inWindow: [OfflineJourneyCandidate]
+        switch arrivalDeparture {
+        case .departure:
+            inWindow = candidates.filter {
+                $0.departureSeconds <= requestedSeconds + Self.initialSearchWindowSeconds
+            }
+        case .arrival:
+            inWindow = candidates.filter {
+                $0.arrivalSeconds >= requestedSeconds - Self.initialSearchWindowSeconds
+            }
+        }
+        return inWindow.count >= Self.minimumWindowCandidateCount ? inWindow : candidates
+    }
+
+    private func displaySort(
+        _ lhs: OfflineJourneyCandidate,
+        _ rhs: OfflineJourneyCandidate,
+        mode: ArrivalDeparture
+    ) -> Bool {
+        switch mode {
+        case .departure:
+            if lhs.departureSeconds != rhs.departureSeconds { return lhs.departureSeconds < rhs.departureSeconds }
+            return qualitySort(lhs, rhs, mode: mode)
+        case .arrival:
+            if lhs.arrivalSeconds != rhs.arrivalSeconds { return lhs.arrivalSeconds > rhs.arrivalSeconds }
+            return qualitySort(lhs, rhs, mode: mode)
+        }
+    }
+
+    private func qualitySort(
+        _ lhs: OfflineJourneyCandidate,
+        _ rhs: OfflineJourneyCandidate,
+        mode: ArrivalDeparture
+    ) -> Bool {
+        let lhsDuration = lhs.arrivalSeconds - lhs.departureSeconds
+        let rhsDuration = rhs.arrivalSeconds - rhs.departureSeconds
+        if lhsDuration != rhsDuration { return lhsDuration < rhsDuration }
+        if lhs.transferCount != rhs.transferCount { return lhs.transferCount < rhs.transferCount }
+        if lhs.walkSeconds != rhs.walkSeconds { return lhs.walkSeconds < rhs.walkSeconds }
+        switch mode {
+        case .departure:
+            return lhs.arrivalSeconds < rhs.arrivalSeconds
+        case .arrival:
+            return lhs.departureSeconds > rhs.departureSeconds
         }
     }
 

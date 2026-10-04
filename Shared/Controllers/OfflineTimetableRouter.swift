@@ -6,8 +6,9 @@ final class OfflineTimetableRouter {
     private let maxCandidatesPerStopPerRound = 4
     private let maxReturnedCandidates = 60
     private let maxBoardingsPerStopExpansion = 80
-    private let maxScannedStopTimesPerExpansion = 70
-    private let maxWalkOriginsPerExpansion = 20
+    private let maxScannedStopTimesPerExpansion = 50
+    private let maxWalkOriginsPerExpansion = 16
+    private let maxWalkOriginsPerStopName = 2
     private let maxBoardingsPerLineExpansion = 3
 
     private let context: OfflineRoutingContext
@@ -71,7 +72,8 @@ final class OfflineTimetableRouter {
             if frontier.isEmpty { break }
         }
 
-        return Array(candidates.sorted(by: departureSort).prefix(maxReturnedCandidates))
+        trim(&candidates, by: departureSort)
+        return candidates.sorted(by: departureSort)
     }
 
     func routeArrival(
@@ -127,7 +129,8 @@ final class OfflineTimetableRouter {
             if frontier.isEmpty { break }
         }
 
-        return Array(candidates.sorted(by: arrivalSort).prefix(maxReturnedCandidates))
+        trim(&candidates, by: arrivalSort)
+        return candidates.sorted(by: arrivalSort)
     }
 
     private static func buildReverseWalkLinks(_ walkLinksByStopId: [String: [OfflineWalkLink]]) -> [String: [OfflineWalkLink]] {
@@ -356,12 +359,16 @@ final class OfflineTimetableRouter {
 
     private func appendDepartureCandidate(_ candidate: OfflineJourneyCandidate, to candidates: inout [OfflineJourneyCandidate]) {
         candidates.append(candidate)
-        trim(&candidates, by: departureSort)
+        if candidates.count > maxReturnedCandidates * 2 {
+            trim(&candidates, by: departureSort)
+        }
     }
 
     private func appendArrivalCandidate(_ candidate: OfflineJourneyCandidate, to candidates: inout [OfflineJourneyCandidate]) {
         candidates.append(candidate)
-        trim(&candidates, by: arrivalSort)
+        if candidates.count > maxReturnedCandidates * 2 {
+            trim(&candidates, by: arrivalSort)
+        }
     }
 
     private func trim(
@@ -369,8 +376,34 @@ final class OfflineTimetableRouter {
         by areInIncreasingOrder: (OfflineJourneyCandidate, OfflineJourneyCandidate) -> Bool
     ) {
         guard candidates.count > maxReturnedCandidates else { return }
+        // Cutting purely by the sort order would keep only the dense cluster
+        // of earliest-arriving permutations and starve the result of later
+        // departures and slower-but-simpler journeys, so shed dominated
+        // candidates first.
+        let nonDominated = candidates.filter { candidate in
+            !candidates.contains { other in
+                other.labels != candidate.labels && candidateDominates(other, candidate)
+            }
+        }
+        if !nonDominated.isEmpty {
+            candidates = nonDominated
+        }
+        guard candidates.count > maxReturnedCandidates else { return }
         candidates.sort(by: areInIncreasingOrder)
         candidates.removeSubrange(maxReturnedCandidates...)
+    }
+
+    private func candidateDominates(_ lhs: OfflineJourneyCandidate, _ rhs: OfflineJourneyCandidate) -> Bool {
+        guard lhs.departureSeconds >= rhs.departureSeconds,
+              lhs.arrivalSeconds <= rhs.arrivalSeconds,
+              lhs.transferCount <= rhs.transferCount,
+              lhs.walkSeconds <= rhs.walkSeconds else {
+            return false
+        }
+        return lhs.departureSeconds > rhs.departureSeconds ||
+            lhs.arrivalSeconds < rhs.arrivalSeconds ||
+            lhs.transferCount < rhs.transferCount ||
+            lhs.walkSeconds < rhs.walkSeconds
     }
 
     private func departingStopTimes(from stopId: String, atOrAfter time: Int) -> ArraySlice<OfflineStopTime> {
@@ -445,13 +478,34 @@ final class OfflineTimetableRouter {
                 walkLink: nil
             )
         ]
-        for link in (context.walkLinksByStopId[label.stopId] ?? []).prefix(maxWalkOriginsPerExpansion) {
+        for link in diverseWalkLinks(context.walkLinksByStopId[label.stopId] ?? [], stopIdFor: { $0.toStopId }) {
             result.append(WalkOrigin(
                 stopId: link.toStopId,
                 time: label.time + link.seconds,
                 walkSeconds: label.walkSeconds + link.seconds,
                 walkLink: link
             ))
+        }
+        return result
+    }
+
+    /// Walk links are sorted nearest-first, so a flat prefix gets exhausted by
+    /// the sibling platforms of large hubs before reaching any other stop.
+    /// Cap links per destination stop name so distinct stops stay reachable.
+    private func diverseWalkLinks(
+        _ links: [OfflineWalkLink],
+        stopIdFor: (OfflineWalkLink) -> String
+    ) -> [OfflineWalkLink] {
+        var result = [OfflineWalkLink]()
+        var linksPerName = [String: Int]()
+        for link in links {
+            if result.count >= maxWalkOriginsPerExpansion { break }
+            let stopId = stopIdFor(link)
+            let name = context.stopsById[stopId]?.name ?? stopId
+            let count = linksPerName[name, default: 0]
+            if count >= maxWalkOriginsPerStopName { continue }
+            linksPerName[name] = count + 1
+            result.append(link)
         }
         return result
     }
@@ -469,9 +523,11 @@ final class OfflineTimetableRouter {
                 walkLink: nil
             ))
         }
-        let links = (reverseWalkLinksByStopId[label.stopId] ?? [])
-            .filter { allowedStopIds?.contains($0.fromStopId) != false }
-            .prefix(maxWalkOriginsPerExpansion)
+        let links = diverseWalkLinks(
+            (reverseWalkLinksByStopId[label.stopId] ?? [])
+                .filter { allowedStopIds?.contains($0.fromStopId) != false },
+            stopIdFor: { $0.fromStopId }
+        )
         for link in links {
             result.append(WalkOrigin(
                 stopId: link.fromStopId,
@@ -756,17 +812,27 @@ final class OfflineTimetableRouter {
     }
 
     private func departureSort(_ lhs: OfflineJourneyCandidate, _ rhs: OfflineJourneyCandidate) -> Bool {
-        if lhs.arrivalSeconds != rhs.arrivalSeconds { return lhs.arrivalSeconds < rhs.arrivalSeconds }
+        let lhsDuration = durationSeconds(lhs)
+        let rhsDuration = durationSeconds(rhs)
+        if lhsDuration != rhsDuration { return lhsDuration < rhsDuration }
         if lhs.transferCount != rhs.transferCount { return lhs.transferCount < rhs.transferCount }
         if lhs.walkSeconds != rhs.walkSeconds { return lhs.walkSeconds < rhs.walkSeconds }
+        if lhs.arrivalSeconds != rhs.arrivalSeconds { return lhs.arrivalSeconds < rhs.arrivalSeconds }
         return lhs.departureSeconds < rhs.departureSeconds
     }
 
     private func arrivalSort(_ lhs: OfflineJourneyCandidate, _ rhs: OfflineJourneyCandidate) -> Bool {
-        if lhs.departureSeconds != rhs.departureSeconds { return lhs.departureSeconds > rhs.departureSeconds }
+        let lhsDuration = durationSeconds(lhs)
+        let rhsDuration = durationSeconds(rhs)
+        if lhsDuration != rhsDuration { return lhsDuration < rhsDuration }
         if lhs.transferCount != rhs.transferCount { return lhs.transferCount < rhs.transferCount }
         if lhs.walkSeconds != rhs.walkSeconds { return lhs.walkSeconds < rhs.walkSeconds }
+        if lhs.departureSeconds != rhs.departureSeconds { return lhs.departureSeconds > rhs.departureSeconds }
         return lhs.arrivalSeconds < rhs.arrivalSeconds
+    }
+
+    private func durationSeconds(_ candidate: OfflineJourneyCandidate) -> Int {
+        candidate.arrivalSeconds - candidate.departureSeconds
     }
 
     private func frontierSort(_ lhs: FrontierEntry, _ rhs: FrontierEntry) -> Bool {

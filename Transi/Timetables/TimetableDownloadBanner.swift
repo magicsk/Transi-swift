@@ -15,9 +15,14 @@ struct TimetableDownloadBanner: View {
         case .checking:
             bannerView("Checking for updates...", icon: "arrow.triangle.2.circlepath")
         case .downloading:
-            bannerView("Downloading timetable database...", icon: "arrow.down.circle")
+            let percent = timetableDb.downloadProgress.map { " \(Int($0 * 100))%" } ?? ""
+            bannerView(
+                "\(timetableDb.downloadDetail ?? "Downloading timetable database")\(percent)",
+                icon: "arrow.down.circle",
+                progress: timetableDb.downloadProgress
+            )
         case .decompressing:
-            bannerView("Decompressing database...", icon: "archivebox")
+            bannerView(timetableDb.downloadDetail ?? "Installing database...", icon: "archivebox")
         case let .error(message):
             bannerView(message, icon: "exclamationmark.triangle", isError: true)
         default:
@@ -25,17 +30,31 @@ struct TimetableDownloadBanner: View {
         }
     }
 
-    private func bannerView(_ text: String, icon: String, isError: Bool = false) -> some View {
-        HStack(spacing: 10) {
-            if isError {
-                Image(systemName: icon)
-                    .foregroundColor(.orange)
-            } else {
-                ProgressView()
+    private func bannerView(_ text: String, icon: String, isError: Bool = false, progress: Double? = nil) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 10) {
+                if isError {
+                    Image(systemName: icon)
+                        .foregroundColor(.orange)
+                } else if let progress {
+                    ProgressView(value: progress)
+                        .frame(width: 40)
+                } else {
+                    ProgressView()
+                }
+                Text(text)
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondaryLabel)
             }
-            Text(text)
-                .font(.system(size: 14))
-                .foregroundColor(.secondaryLabel)
+            if !isError {
+                if #available(iOS 26.0, *) {
+                    EmptyView()
+                } else {
+                    Text("Keep Transi open until this finishes.")
+                        .font(.caption)
+                        .foregroundColor(.secondaryLabel)
+                }
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)

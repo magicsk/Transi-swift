@@ -26,6 +26,7 @@ struct SettingsView: View {
     @AppStorage(Stored.tripMaxTransfers) var tripMaxTransfers = 3
     @AppStorage(Stored.tripSaveDuration) var tripSaveDuration = -1
     @AppStorage(Stored.offlineTripPlanner) var offlineTripPlanner = false
+    @AppStorage(Stored.timetableAllowCellularUpdates) var allowCellularDatabaseUpdates = false
     @AppStorage(Stored.magicApiUrlOverride) var magicApiUrlOverride = ""
     @AppStorage(Stored.developerSettings) var developerSettings = false
     @AppStorage(Stored.passDays) var passDays = 0
@@ -41,6 +42,7 @@ struct SettingsView: View {
     @State private var aboutTaps = 0
     /// Keeps the developer section while its override is cleared for a new one, until Settings closes.
     @State private var hadApiUrlOverride = !(UserDefaults.standard.string(forKey: Stored.magicApiUrlOverride) ?? "").isEmpty
+    @State private var showForegroundDownloadWarning = false
 
     private var defaultStopName: String {
         if defaultStopId <= 0 { return "Actual location" }
@@ -65,7 +67,7 @@ struct SettingsView: View {
                 displaySection
                 liveActivitySection
                 notificationTriggersSection
-                timetablesSection
+                offlineDatabaseSection
                 tripPlannerSection
                 // Only where a trip can be followed, as for its start button.
                 if UIDevice.current.userInterfaceIdiom == .phone, !ProcessInfo.processInfo.isiOSAppOnMac {
@@ -89,6 +91,11 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showStopPicker) {
             StopListView(stop: $pickedStop, isPresented: $showStopPicker)
+        }
+        .alert("Keep Transi open", isPresented: $showForegroundDownloadWarning) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("This iOS version cannot continue the timetable database download after you leave the app.")
         }
         .onChange(of: pickedStop) { stop in
             if stop.id != Stop.empty.id {
@@ -142,25 +149,28 @@ struct SettingsView: View {
 
     // MARK: - Timetables
 
-    private var timetablesSection: some View {
-        Section("Timetables") {
+    private var offlineDatabaseSection: some View {
+        Section {
             Toggle(isOn: $offlineTimetables) {
                 stageLabel("Offline timetables", stage: "Beta")
             }
-                .onChange(of: offlineTimetables) { enabled in
-                    if enabled {
-                        _ = timetableDatabase.openDatabases()
-                        timetableDatabase.checkAndUpdate()
-                    } else {
-                        timetableDatabase.closeDatabases()
+                .onChange(of: offlineTimetables) { _ in updateOfflineDatabaseState() }
+            Toggle(isOn: $offlineTripPlanner) {
+                stageLabel("Offline trip planner", stage: "Alpha")
+            }
+                .onChange(of: offlineTripPlanner) { _ in updateOfflineDatabaseState() }
+            Toggle("Cellular database updates", isOn: $allowCellularDatabaseUpdates)
+                .onChange(of: allowCellularDatabaseUpdates) { enabled in
+                    if enabled, offlineTimetables || offlineTripPlanner {
+                        timetableDatabase.checkAndUpdate(force: true)
                     }
                 }
-            Button(role: .destructive) {
-                timetableDatabase.deleteDatabases()
-                offlineTimetables = false
-            } label: {
-                Text("Delete database")
-            }
+            timetableDownloadStatusRow
+            databaseStatusRows
+        } header: {
+            Text("Offline database")
+        } footer: {
+            Text("Timetables and offline trip planning use the same database. Updates use Wi-Fi only unless cellular database updates are enabled.")
         }
     }
 
@@ -180,15 +190,80 @@ struct SettingsView: View {
                 Text("For a week").tag(168)
                 Text("Forever").tag(-1)
             }
-            Toggle(isOn: $offlineTripPlanner) {
-                stageLabel("Offline trip planner", stage: "Alpha")
+        }
+    }
+
+    @ViewBuilder
+    private var databaseStatusRows: some View {
+        if let status = timetableDatabase.databaseStatus {
+            HStack {
+                Text("Database size")
+                Spacer()
+                Text(ByteCountFormatter.string(fromByteCount: status.sizeBytes, countStyle: .file))
+                    .foregroundColor(.secondary)
             }
-                .onChange(of: offlineTripPlanner) { enabled in
-                    if enabled {
-                        _ = timetableDatabase.openDatabases()
-                        timetableDatabase.checkAndUpdate()
-                    }
+            HStack {
+                Text("Last updated")
+                Spacer()
+                Text(status.updatedAt.formatted(date: .abbreviated, time: .shortened))
+                    .foregroundColor(.secondary)
+            }
+            Button(role: .destructive) {
+                timetableDatabase.deleteDatabases()
+                offlineTimetables = false
+                offlineTripPlanner = false
+            } label: {
+                Text("Delete database")
+            }
+        } else {
+            HStack {
+                Text("Database")
+                Spacer()
+                Text("Not downloaded")
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var timetableDownloadStatusRow: some View {
+        switch timetableDatabase.downloadState {
+        case .checking:
+            Label("Checking for timetable updates", systemImage: "arrow.triangle.2.circlepath")
+        case .downloading:
+            VStack(alignment: .leading, spacing: 6) {
+                Text(timetableDatabase.downloadDetail ?? "Downloading timetable database")
+                ProgressView(value: timetableDatabase.downloadProgress ?? 0)
+                if let progress = timetableDatabase.downloadProgress {
+                    Text("\(Int(progress * 100))%")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
+            }
+        case .decompressing:
+            Label(timetableDatabase.downloadDetail ?? "Installing timetable database", systemImage: "archivebox")
+        case let .error(message):
+            Label(message, systemImage: "exclamationmark.triangle")
+                .foregroundColor(.orange)
+        default:
+            EmptyView()
+        }
+    }
+
+    private func warnIfForegroundDownloadIsRequired() {
+        if #available(iOS 26.0, *) {
+            return
+        }
+        showForegroundDownloadWarning = true
+    }
+
+    private func updateOfflineDatabaseState() {
+        if offlineTimetables || offlineTripPlanner {
+            warnIfForegroundDownloadIsRequired()
+            _ = timetableDatabase.openDatabases()
+            timetableDatabase.checkAndUpdate()
+        } else {
+            timetableDatabase.closeDatabases()
         }
     }
 

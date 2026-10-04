@@ -1,6 +1,9 @@
 import CommonCrypto
 import Foundation
 import SwiftUI
+#if os(iOS) && canImport(BackgroundTasks)
+import BackgroundTasks
+#endif
 
 enum TimetableDownloadState {
     case idle
@@ -11,13 +14,32 @@ enum TimetableDownloadState {
     case error(String)
 }
 
+struct TimetableDatabaseStatus {
+    let sizeBytes: Int64
+    let updatedAt: Date
+}
+
 class TimetableDatabase: ObservableObject {
     @Published var downloadState: TimetableDownloadState = .idle
+    @Published var downloadProgress: Double?
+    @Published var downloadDetail: String?
     @Published var isReady = false
 
     private var baseDb: SQLiteDatabase?
     private var scheduleDb: SQLiteDatabase?
     private let dbDir: URL
+    private let updateLock = NSLock()
+    private var updateInFlight = false
+    private var updateCompletions = [(Bool) -> Void]()
+    private let downloadProgressLock = NSLock()
+    private var downloadFractions = [String: Double]()
+    private var progressObservations = [NSKeyValueObservation]()
+    private var activeDownloadTasks = [URLSessionDataTask]()
+
+    #if os(iOS) && canImport(BackgroundTasks)
+    private var continuedProcessingTask: AnyObject?
+    private var registeredContinuedProcessingIdentifiers = Set<String>()
+    #endif
 
     /// Manifest-check throttle: skip refetch if last successful check was within this window.
     /// Server already sets `Cache-Control: max-age=300` on /timetable/manifest.
@@ -31,12 +53,32 @@ class TimetableDatabase: ObservableObject {
         UserDefaults.standard.bool(forKey: Stored.offlineTripPlanner)
     }
 
+    var shouldMaintainOfflineDatabase: Bool {
+        isOfflineEnabled || isPlannerOfflineEnabled
+    }
+
+    private var allowsCellularDatabaseUpdates: Bool {
+        UserDefaults.standard.bool(forKey: Stored.timetableAllowCellularUpdates)
+    }
+
+    private var databaseSessionConfiguration: URLSessionConfiguration {
+        let configuration = URLSessionConfiguration.default
+        configuration.allowsCellularAccess = allowsCellularDatabaseUpdates
+        return configuration
+    }
+
+    private var databaseNetworkFailureMessage: String {
+        allowsCellularDatabaseUpdates
+            ? "Failed to update timetable database"
+            : "Connect to Wi-Fi or allow cellular database updates"
+    }
+
     init() {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         dbDir = appSupport.appendingPathComponent("timetable_db")
         try? FileManager.default.createDirectory(at: dbDir, withIntermediateDirectories: true)
 
-        if isOfflineEnabled {
+        if shouldMaintainOfflineDatabase {
             _ = openDatabases()
             checkAndUpdate()
         }
@@ -62,6 +104,10 @@ class TimetableDatabase: ObservableObject {
         }
 
         scheduleDb?.execute("ATTACH DATABASE '\(basePath)' AS base")
+        guard hasUsableTimetableData() else {
+            closeDatabases()
+            return false
+        }
 
         DispatchQueue.main.async {
             self.isReady = true
@@ -71,21 +117,37 @@ class TimetableDatabase: ObservableObject {
     }
 
     func closeDatabases() {
+        cancelActiveDownloads()
         baseDb = nil
         scheduleDb = nil
         DispatchQueue.main.async {
             self.isReady = false
             self.downloadState = .idle
+            self.downloadProgress = nil
+            self.downloadDetail = nil
         }
     }
 
-    func checkAndUpdate(force: Bool = false) {
-        guard isOfflineEnabled else { return }
+    func checkAndUpdate(
+        force: Bool = false,
+        allowBackgroundContinuation: Bool = true,
+        completion: ((Bool) -> Void)? = nil
+    ) {
+        guard shouldMaintainOfflineDatabase else {
+            completion?(false)
+            return
+        }
+        guard beginUpdate(completion: completion) else { return }
+
+        if allowBackgroundContinuation {
+            submitContinuedProcessingTaskIfAvailable()
+        }
 
         // Throttle: skip if we successfully fetched the manifest within the TTL window.
-        if !force {
+        if !force && isReady {
             let lastCheck = UserDefaults.standard.double(forKey: Stored.timetableLastCheckTimestamp)
             if lastCheck > 0 && Date().timeIntervalSince1970 - lastCheck < Self.manifestCheckTTL {
+                finishUpdate(success: true)
                 return
             }
         }
@@ -94,7 +156,7 @@ class TimetableDatabase: ObservableObject {
             self.downloadState = .checking
         }
 
-        fetchMagicApi(endpoint: "/timetable/manifest", type: TimetableManifest.self) { [weak self] result in
+        fetchManifest { [weak self] result in
             guard let self else { return }
             switch result {
             case let .success(manifest):
@@ -107,9 +169,10 @@ class TimetableDatabase: ObservableObject {
                     if self.isReady {
                         self.downloadState = .ready
                     } else {
-                        self.downloadState = .error("Failed to check for updates")
+                        self.downloadState = .error(self.databaseNetworkFailureMessage)
                     }
                 }
+                self.finishUpdate(success: self.isReady)
             }
         }
     }
@@ -118,18 +181,27 @@ class TimetableDatabase: ObservableObject {
         let storedBaseSha = UserDefaults.standard.string(forKey: Stored.timetableBaseDbSha) ?? ""
         let storedScheduleSha = UserDefaults.standard.string(forKey: Stored.timetableScheduleDbSha) ?? ""
 
-        let needsBase = manifest.databases.base.sha256 != storedBaseSha
-        let needsSchedule = manifest.databases.schedule.sha256 != storedScheduleSha
+        var needsBase = manifest.databases.base.sha256 != storedBaseSha
+        var needsSchedule = manifest.databases.schedule.sha256 != storedScheduleSha
 
         if !needsBase && !needsSchedule {
-            if !isReady {
-                _ = openDatabases()
-            } else {
+            if isReady {
                 DispatchQueue.main.async {
                     self.downloadState = .ready
                 }
+                finishUpdate(success: true)
+                return
             }
-            return
+            if openDatabases() {
+                finishUpdate(success: true)
+                return
+            }
+            // Stored SHAs claim we are up to date but the local databases are
+            // missing or unusable — re-download both.
+            UserDefaults.standard.removeObject(forKey: Stored.timetableBaseDbSha)
+            UserDefaults.standard.removeObject(forKey: Stored.timetableScheduleDbSha)
+            needsBase = true
+            needsSchedule = true
         }
 
         DispatchQueue.main.async {
@@ -137,7 +209,12 @@ class TimetableDatabase: ObservableObject {
         }
 
         let group = DispatchGroup()
+        let successLock = NSLock()
         var success = true
+        beginDownloadProgress(files: [
+            needsBase ? "base.db" : nil,
+            needsSchedule ? "schedule.db" : nil,
+        ].compactMap { $0 })
 
         if needsBase {
             group.enter()
@@ -147,7 +224,11 @@ class TimetableDatabase: ObservableObject {
                 expectedSha: manifest.databases.base.sha256,
                 storedShaKey: Stored.timetableBaseDbSha
             ) { ok in
-                if !ok { success = false }
+                if !ok {
+                    successLock.lock()
+                    success = false
+                    successLock.unlock()
+                }
                 group.leave()
             }
         }
@@ -160,7 +241,11 @@ class TimetableDatabase: ObservableObject {
                 expectedSha: manifest.databases.schedule.sha256,
                 storedShaKey: Stored.timetableScheduleDbSha
             ) { ok in
-                if !ok { success = false }
+                if !ok {
+                    successLock.lock()
+                    success = false
+                    successLock.unlock()
+                }
                 group.leave()
             }
         }
@@ -169,11 +254,49 @@ class TimetableDatabase: ObservableObject {
             guard let self else { return }
             if success {
                 self.closeDatabases()
-                _ = self.openDatabases()
+                if !self.openDatabases() {
+                    UserDefaults.standard.removeObject(forKey: Stored.timetableBaseDbSha)
+                    UserDefaults.standard.removeObject(forKey: Stored.timetableScheduleDbSha)
+                    self.downloadState = .error("Downloaded timetable database is empty or invalid")
+                    self.finishUpdate(success: false)
+                } else {
+                    self.finishUpdate(success: true)
+                }
             } else {
-                self.downloadState = .error("Download failed")
+                self.downloadState = .error(self.databaseNetworkFailureMessage)
+                self.finishUpdate(success: false)
             }
         }
+    }
+
+    private func fetchManifest(completion: @escaping (Result<TimetableManifest, Error>) -> Void) {
+        guard let url = URL(string: "\(GlobalController.magicApiBaseUrl)/timetable/manifest") else {
+            completion(.failure(NSError(domain: "TimetableDatabase", code: -1)))
+            return
+        }
+
+        let session = URLSession(configuration: databaseSessionConfiguration)
+        session.dataTask(with: url) { data, _, error in
+            defer { session.finishTasksAndInvalidate() }
+            if let error {
+                DispatchQueue.main.async { completion(.failure(error)) }
+                return
+            }
+            guard let data else {
+                DispatchQueue.main.async {
+                    completion(.failure(NSError(domain: "TimetableDatabase", code: -2)))
+                }
+                return
+            }
+            do {
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let manifest = try decoder.decode(TimetableManifest.self, from: data)
+                DispatchQueue.main.async { completion(.success(manifest)) }
+            } catch {
+                DispatchQueue.main.async { completion(.failure(error)) }
+            }
+        }.resume()
     }
 
     private func downloadAndDecompress(
@@ -189,8 +312,15 @@ class TimetableDatabase: ObservableObject {
             return
         }
 
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let self, let data, error == nil,
+        let fileName = destination.lastPathComponent
+        let session = URLSession(configuration: databaseSessionConfiguration)
+        let task = session.dataTask(with: url) { [weak self] data, response, error in
+            defer { session.finishTasksAndInvalidate() }
+            guard let self else {
+                completion(false)
+                return
+            }
+            guard let data, error == nil,
                   let httpResponse = response as? HTTPURLResponse,
                   httpResponse.statusCode == 200
             else {
@@ -203,9 +333,12 @@ class TimetableDatabase: ObservableObject {
                 completion(false)
                 return
             }
+            self.setDownloadFraction(fileName, fraction: 1, detail: "\(fileName) downloaded")
 
             DispatchQueue.main.async {
                 self.downloadState = .decompressing
+                self.downloadDetail = "Installing \(fileName)"
+                self.updateContinuedProcessingProgress()
             }
 
             let tempURL = destination.appendingPathExtension("tmp")
@@ -221,8 +354,186 @@ class TimetableDatabase: ObservableObject {
                 try? FileManager.default.removeItem(at: tempURL)
                 completion(false)
             }
-        }.resume()
+        }
+        trackDownloadTask(task, fileName: fileName)
+        task.resume()
     }
+
+    private func beginUpdate(completion: ((Bool) -> Void)?) -> Bool {
+        updateLock.lock()
+        defer { updateLock.unlock() }
+        if let completion {
+            updateCompletions.append(completion)
+        }
+        if updateInFlight {
+            return false
+        }
+        updateInFlight = true
+        return true
+    }
+
+    private func finishUpdate(success: Bool) {
+        downloadProgressLock.lock()
+        let observations = progressObservations
+        progressObservations.removeAll()
+        activeDownloadTasks.removeAll()
+        downloadFractions.removeAll()
+        downloadProgressLock.unlock()
+        observations.forEach { $0.invalidate() }
+
+        updateLock.lock()
+        updateInFlight = false
+        let completions = updateCompletions
+        updateCompletions.removeAll()
+        updateLock.unlock()
+
+        DispatchQueue.main.async {
+            self.downloadProgress = nil
+            self.downloadDetail = nil
+            self.completeContinuedProcessingTask(success: success)
+        }
+        completions.forEach { $0(success) }
+    }
+
+    private func beginDownloadProgress(files: [String]) {
+        downloadProgressLock.lock()
+        downloadFractions = Dictionary(uniqueKeysWithValues: files.map { ($0, 0.0) })
+        downloadProgressLock.unlock()
+        DispatchQueue.main.async {
+            self.downloadProgress = files.isEmpty ? nil : 0
+            self.downloadDetail = files.isEmpty ? nil : "Starting download"
+            self.updateContinuedProcessingProgress()
+        }
+    }
+
+    private func trackDownloadTask(_ task: URLSessionDataTask, fileName: String) {
+        let observation = task.progress.observe(\.fractionCompleted, options: [.initial, .new]) { [weak self] progress, _ in
+            self?.setDownloadFraction(fileName, fraction: progress.fractionCompleted, detail: "Downloading \(fileName)")
+        }
+        downloadProgressLock.lock()
+        activeDownloadTasks.append(task)
+        progressObservations.append(observation)
+        downloadProgressLock.unlock()
+    }
+
+    private func setDownloadFraction(_ fileName: String, fraction: Double, detail: String) {
+        downloadProgressLock.lock()
+        if downloadFractions[fileName] != nil {
+            downloadFractions[fileName] = max(0, min(1, fraction))
+        }
+        let values = Array(downloadFractions.values)
+        downloadProgressLock.unlock()
+
+        let progress = values.isEmpty ? nil : values.reduce(0, +) / Double(values.count)
+        DispatchQueue.main.async {
+            self.downloadProgress = progress
+            self.downloadDetail = detail
+            self.updateContinuedProcessingProgress()
+        }
+    }
+
+    private func cancelActiveDownloads() {
+        downloadProgressLock.lock()
+        let tasks = activeDownloadTasks
+        activeDownloadTasks.removeAll()
+        downloadProgressLock.unlock()
+        tasks.forEach { $0.cancel() }
+    }
+
+    private func submitContinuedProcessingTaskIfAvailable() {
+        #if os(iOS) && canImport(BackgroundTasks)
+        if #available(iOS 26.0, *) {
+            submitContinuedProcessingTask()
+        }
+        #endif
+    }
+
+    private func updateContinuedProcessingProgress() {
+        #if os(iOS) && canImport(BackgroundTasks)
+        if #available(iOS 26.0, *),
+           let task = continuedProcessingTask as? BGContinuedProcessingTask {
+            let fraction = downloadProgress ?? 0
+            task.progress.totalUnitCount = 100
+            task.progress.completedUnitCount = Int64(max(0, min(1, fraction)) * 100)
+            task.updateTitle(
+                "Updating Timetables",
+                subtitle: downloadDetail ?? "Preparing offline database"
+            )
+        }
+        #endif
+    }
+
+    private func completeContinuedProcessingTask(success: Bool) {
+        #if os(iOS) && canImport(BackgroundTasks)
+        if #available(iOS 26.0, *),
+           let task = continuedProcessingTask as? BGContinuedProcessingTask {
+            task.progress.completedUnitCount = success ? task.progress.totalUnitCount : task.progress.completedUnitCount
+            task.setTaskCompleted(success: success)
+            continuedProcessingTask = nil
+        }
+        #endif
+    }
+
+    #if os(iOS) && canImport(BackgroundTasks)
+    @available(iOS 26.0, *)
+    private func submitContinuedProcessingTask() {
+        let bundleId = Bundle.main.bundleIdentifier ?? "eu.magicsk.Transi"
+        let identifier = "\(bundleId).timetable.continued.\(UUID().uuidString)"
+        guard registerContinuedProcessingHandler(identifier: identifier) else { return }
+
+        let request = BGContinuedProcessingTaskRequest(
+            identifier: identifier,
+            title: "Updating Timetables",
+            subtitle: "Preparing offline database"
+        )
+        request.strategy = .queue
+        request.requiredResources = []
+
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            #if DEBUG
+            print("Failed to submit timetable background task: \(error)")
+            #endif
+        }
+    }
+
+    @available(iOS 26.0, *)
+    private func registerContinuedProcessingHandler(identifier: String) -> Bool {
+        if registeredContinuedProcessingIdentifiers.contains(identifier) {
+            return true
+        }
+
+        let didRegister = BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: nil) { [weak self] task in
+            self?.handleContinuedProcessingTask(task)
+        }
+        if didRegister {
+            registeredContinuedProcessingIdentifiers.insert(identifier)
+        }
+        return didRegister
+    }
+
+    @available(iOS 26.0, *)
+    private func handleContinuedProcessingTask(_ task: BGTask) {
+        guard let task = task as? BGContinuedProcessingTask else {
+            task.setTaskCompleted(success: false)
+            return
+        }
+
+        continuedProcessingTask = task
+        DispatchQueue.main.async {
+            self.updateContinuedProcessingProgress()
+        }
+
+        task.expirationHandler = { [weak self, weak task] in
+            self?.cancelActiveDownloads()
+            task?.setTaskCompleted(success: false)
+            self?.continuedProcessingTask = nil
+        }
+
+        checkAndUpdate(force: true, allowBackgroundContinuation: false)
+    }
+    #endif
 
     private func sha256(_ data: Data) -> String {
         var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
@@ -489,12 +800,39 @@ class TimetableDatabase: ObservableObject {
         }
     }
 
+    var databaseStatus: TimetableDatabaseStatus? {
+        var sizeBytes: Int64 = 0
+        var updatedAt: Date?
+        for fileName in ["base.db", "schedule.db"] {
+            let path = dbDir.appendingPathComponent(fileName).path
+            guard let attributes = try? FileManager.default.attributesOfItem(atPath: path) else {
+                return nil
+            }
+            sizeBytes += (attributes[.size] as? NSNumber)?.int64Value ?? 0
+            if let modified = attributes[.modificationDate] as? Date {
+                updatedAt = max(updatedAt ?? modified, modified)
+            }
+        }
+        guard let updatedAt else { return nil }
+        return TimetableDatabaseStatus(sizeBytes: sizeBytes, updatedAt: updatedAt)
+    }
+
     func deleteDatabases() {
         closeDatabases()
         try? FileManager.default.removeItem(at: dbDir.appendingPathComponent("base.db"))
         try? FileManager.default.removeItem(at: dbDir.appendingPathComponent("schedule.db"))
         UserDefaults.standard.removeObject(forKey: Stored.timetableBaseDbSha)
         UserDefaults.standard.removeObject(forKey: Stored.timetableScheduleDbSha)
+        UserDefaults.standard.removeObject(forKey: Stored.timetableLastCheckTimestamp)
+    }
+
+    private func hasUsableTimetableData() -> Bool {
+        guard let baseDb, let scheduleDb else { return false }
+        let stopCount = (baseDb.query("SELECT COUNT(*) AS count FROM stops").first?["count"] as? Int) ?? 0
+        let routeCount = (baseDb.query("SELECT COUNT(*) AS count FROM routes").first?["count"] as? Int) ?? 0
+        let tripCount = (scheduleDb.query("SELECT COUNT(*) AS count FROM trips").first?["count"] as? Int) ?? 0
+        let stopTimeCount = (scheduleDb.query("SELECT COUNT(*) AS count FROM stop_times").first?["count"] as? Int) ?? 0
+        return stopCount > 0 && routeCount > 0 && tripCount > 0 && stopTimeCount > 0
     }
 
     // MARK: - Helpers

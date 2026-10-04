@@ -7,6 +7,12 @@ const OFFLINE_CHECK = '/tmp/transi-offline-routing-check';
 const S_USER_AGENT = 'ProdProd/204 CFNetwork/3826.600.41 Darwin/24.6.0';
 const G_USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';
+const TEST_ISO = process.env.TRANSI_COMPARE_ISO ?? '2026-07-13T14:00:00+02:00';
+const BRODNA_KRCE_ISO = process.env.TRANSI_BRODNA_KRCE_ISO ?? '2026-07-13T15:00:00+02:00';
+const MAX_WALK_DURATION = Number(process.env.TRANSI_COMPARE_MAX_WALK_DURATION ?? 15);
+const MAX_TRANSFERS = Number(process.env.TRANSI_COMPARE_MAX_TRANSFERS ?? 3);
+const SEARCH_WINDOW_HOURS = Number(process.env.TRANSI_COMPARE_SEARCH_HOURS ?? 2);
+const RETRY_SEARCH_WINDOW_HOURS = Number(process.env.TRANSI_COMPARE_RETRY_SEARCH_HOURS ?? 8);
 
 function readJson(path) {
   try {
@@ -68,43 +74,62 @@ const cases = [
     label: 'short_city',
     from: stopByName('Hronská'),
     to: stopByName('Most SNP'),
-    iso: '2026-06-02T08:00:00+02:00',
+    iso: TEST_ISO,
   },
   {
     label: 'medium_city',
     from: stopByName('Zlaté piesky'),
     to: stopByName('Hlavná stanica'),
-    iso: '2026-06-02T08:00:00+02:00',
+    iso: TEST_ISO,
   },
   {
     label: 'train_station_pair',
     from: stopByName('Hlavná stanica'),
     to: stopByName('Stn. Petržalka'),
-    iso: '2026-06-02T08:00:00+02:00',
+    iso: TEST_ISO,
   },
   {
     label: 'regional_bus',
     from: stopByName('Autobusová stanica'),
     to: stopByName('Rovinka, Obecný úrad'),
-    iso: '2026-06-02T08:00:00+02:00',
+    iso: TEST_ISO,
   },
   {
     label: 'regional_train',
     from: stopByName('Hlavná stanica'),
     to: stopByName('Pezinok, Žel. stanica'),
-    iso: '2026-06-02T08:00:00+02:00',
+    iso: TEST_ISO,
   },
   {
     label: 'long_suburban',
     from: stopByName('Most SNP'),
     to: stopByName('Senec, Žel. stanica'),
-    iso: '2026-06-02T08:00:00+02:00',
+    iso: TEST_ISO,
   },
   {
-    label: 'late_short',
+    label: 'day_short_repeat',
     from: stopByName('Hronská'),
     to: stopByName('Most SNP'),
-    iso: '2026-06-02T23:30:00+02:00',
+    iso: TEST_ISO,
+    offlineLabel: 'late_short',
+  },
+  {
+    label: 'hill_destination_direct',
+    from: stopByName('Hodžovo nám.'),
+    to: stopByName('Hrad'),
+    iso: TEST_ISO,
+  },
+  {
+    label: 'hill_destination_hub',
+    from: stopByName('Hlavná stanica'),
+    to: stopByName('Hrad'),
+    iso: TEST_ISO,
+  },
+  {
+    label: 'brodna_krce_afternoon',
+    from: stopByName('Brodná'),
+    to: stopByName('Krče'),
+    iso: BRODNA_KRCE_ISO,
   },
 ];
 
@@ -174,6 +199,44 @@ function summarizeIJourney(journey) {
     departure: fmt(journey?.departure?.date),
     arrival: fmt(journey?.arrival?.date),
     lines: iLineNames(journey),
+  };
+}
+
+function normalizedSignature(lines) {
+  return lines.filter(Boolean).join('>');
+}
+
+function parseOfflineJourneys(output) {
+  return output
+    .split(/\r?\n/)
+    .map((line) => line.match(/^\s+\[\d+\]\s+(.*)$/)?.[1])
+    .filter(Boolean)
+    .map((signature) => {
+      const routeSignature = signature.replace(/^\d{2}:\d{2}-\d{2}:\d{2}\s+/, '');
+      const lines = routeSignature
+        .split(' | ')
+        .map((part) => part.split(':')[0])
+        .filter((line) => line && line !== 'walk');
+      return { lines };
+    });
+}
+
+function compareOverallResult(offlineJourneys, r, i) {
+  const offline = offlineJourneys.slice(0, 5).map((journey) => normalizedSignature(journey.lines)).filter(Boolean);
+  const online = [
+    ...(Array.isArray(r.journeys) ? r.journeys : []),
+    ...(Array.isArray(i.journeys) ? i.journeys : []),
+  ]
+    .slice(0, 6)
+    .map((journey) => normalizedSignature(journey.lines))
+    .filter(Boolean);
+  const onlineSet = new Set(online);
+  const matched = offline.find((signature) => onlineSet.has(signature)) ?? null;
+  return {
+    offline,
+    online,
+    matched,
+    alternative: matched ? null : offline[0] ?? null,
   };
 }
 
@@ -265,9 +328,9 @@ async function fetchR(c) {
   const url = `${config.R_API_URL}/mobile/v1/raptor/`;
   const baseBody = {
     org_id: 120,
-    max_walk_duration: 15,
-    max_transfers: 3,
-    search_to_hours: 2,
+    max_walk_duration: MAX_WALK_DURATION,
+    max_transfers: MAX_TRANSFERS,
+    search_to_hours: SEARCH_WINDOW_HOURS,
     search_from: c.iso,
     from_station_id: [c.from.stationId],
     to_station_id: [c.to.stationId],
@@ -293,7 +356,7 @@ async function fetchR(c) {
     return summarizeRResult(first, false);
   }
 
-  const retry = await post({ ...baseBody, search_to_hours: 8 });
+  const retry = await post({ ...baseBody, search_to_hours: RETRY_SEARCH_WINDOW_HOURS });
   return summarizeRResult(retry, true);
 }
 
@@ -335,8 +398,32 @@ async function fetchI(c) {
   };
 }
 
+const failures = [];
+
+console.log(JSON.stringify({
+  settings: {
+    iso: TEST_ISO,
+    mode: 'departure',
+    maxWalkDuration: MAX_WALK_DURATION,
+    maxTransfers: MAX_TRANSFERS,
+    raptorSearchHours: SEARCH_WINDOW_HOURS,
+    raptorRetrySearchHours: RETRY_SEARCH_WINDOW_HOURS,
+    imhdParams: { pa: '0', pl: '1.0-4.0', pp: '0', pc: '0' },
+  },
+}));
+
 for (const c of cases) {
-  const offline = spawnSync(OFFLINE_CHECK, [c.label], { encoding: 'utf8' });
+  const offline = spawnSync(OFFLINE_CHECK, [c.offlineLabel ?? c.label], {
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      TRANSI_ROUTING_DEBUG: '1',
+      TRANSI_CHECK_ISO: c.iso,
+      TRANSI_MAX_WALK_DURATION: String(MAX_WALK_DURATION),
+      TRANSI_MAX_TRANSFERS: String(MAX_TRANSFERS),
+      TRANSI_SKIP_EXPECTATIONS: '1',
+    },
+  });
   if (offline.error || offline.status !== 0) {
     console.error(`Offline harness failed for ${c.label} with status ${offline.status ?? 'unknown'}`);
     if (offline.error) console.error(offline.error.message);
@@ -346,12 +433,31 @@ for (const c of cases) {
   }
 
   const [r, i] = await Promise.all([fetchR(c), fetchI(c)]);
+  const offlineJourneys = parseOfflineJourneys(offline.stdout);
+  const comparison = compareOverallResult(offlineJourneys, r, i);
+  const hasOnlineReference = comparison.online.length > 0;
+  if (hasOnlineReference && comparison.offline.length === 0) {
+    failures.push(`${c.label}: online APIs returned journeys but offline returned no parsed journeys`);
+  }
+  if (hasOnlineReference && comparison.offline.length > 0 && !comparison.matched) {
+    failures.push(
+      `${c.label}: offline top routes did not match IDSBK/IMHD top routes; best offline alternative ${comparison.alternative}`
+    );
+  }
   console.log(
     JSON.stringify({
       label: c.label,
       offline: offline.stdout.trim(),
       r,
       i,
+      comparison,
     })
   );
+}
+
+if (failures.length > 0) {
+  for (const failure of failures) {
+    console.error(`FAIL: ${failure}`);
+  }
+  process.exit(1);
 }

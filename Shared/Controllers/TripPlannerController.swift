@@ -97,6 +97,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
 
     private var nextRApiSearchDate: Date?
     private var nextIApiSearchDate: Date?
+    private var nextOfflineSearchDate: Date?
     private var lastSearchDate = Date()
     private let searchGenerationLock = NSLock()
     private var searchGeneration = 0
@@ -163,13 +164,23 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
-    private func fetchOfflineTrip(from: Stop, to: Stop, generation: Int) {
-        DispatchQueue.main.async {
-            guard self.isCurrentSearch(generation) else { return }
-            self.loading = true
-            self.error = nil // Clear error on new search
+    private func fetchOfflineTrip(from: Stop, to: Stop, generation: Int, append: Bool = false) {
+        let searchDate: Date
+        if append {
+            guard !loadingMore, let nextDate = nextOfflineSearchDate else { return }
+            searchDate = nextDate
+            DispatchQueue.main.async {
+                guard self.isCurrentSearch(generation) else { return }
+                self.loadingMore = true
+            }
+        } else {
+            searchDate = arrivalDepartureDate
+            DispatchQueue.main.async {
+                guard self.isCurrentSearch(generation) else { return }
+                self.loading = true
+                self.error = nil // Clear error on new search
+            }
         }
-        let initialSearchDate = arrivalDepartureDate
 
         // Resolve "Actual location" (id=-1) to the nearest known stop's name so the
         // offline engine can find a matching GTFS stop. Mirrors what the online path
@@ -192,7 +203,8 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         if resolvedFromName.isEmpty || resolvedToName.isEmpty {
             DispatchQueue.main.async {
                 self.loading = false
-                self.error = .noJourneys
+                self.loadingMore = false
+                if !append { self.error = .noJourneys }
             }
             return
         }
@@ -200,7 +212,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         GlobalController.timetableDatabase.queryOfflineTrip(
             fromName: resolvedFromName,
             toName: resolvedToName,
-            date: initialSearchDate,
+            date: searchDate,
             arrivalDeparture: arrivalDeparture,
             maxTransfers: UserDefaults.standard.integer(forKey: Stored.tripMaxTransfers),
             maxWalkDuration: UserDefaults.standard.integer(forKey: Stored.tripMaxWalkDuration)
@@ -210,17 +222,54 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             DispatchQueue.main.async {
                 guard self.isCurrentSearch(generation) else { return }
                 self.loading = false
-                if journeys.isEmpty {
+                self.loadingMore = false
+                if append {
+                    let existing = self.trip.journey ?? []
+                    let existingSet = Set(existing)
+                    let newJourneys = journeys.filter { !existingSet.contains($0) }
+                    self.advanceOfflineSearchDate(after: searchDate, journeys: journeys)
+                    guard !newJourneys.isEmpty else { return }
+                    self.trip.journey = self.sortedJourneys(existing + newJourneys)
+                    self.cacheTripForCurrentSearch(self.trip)
+                } else if journeys.isEmpty {
                     self.trip = Trip()
                     self.error = .noJourneys
                 } else {
                     self.error = nil // Clear any previous errors
-                    let newTrip = Trip(journey: journeys)
+                    self.advanceOfflineSearchDate(after: searchDate, journeys: journeys)
+                    let newTrip = Trip(journey: self.sortedJourneys(journeys))
                     self.trip = newTrip
                     self.cacheTripForCurrentSearch(newTrip)
                 }
             }
         }
+    }
+
+    /// Move the next offline page boundary past the journeys just returned, so
+    /// the next "load more" search starts where this one ended. Falls back to a
+    /// fixed step when a page comes back empty to avoid re-searching the same
+    /// window forever.
+    private func advanceOfflineSearchDate(after searchDate: Date, journeys: [Journey]) {
+        switch arrivalDeparture {
+        case .departure:
+            let latestDeparture = journeys.compactMap { $0.parts?.first?.startDeparture }.max()
+            nextOfflineSearchDate = latestDeparture?.addingTimeInterval(60)
+                ?? searchDate.addingTimeInterval(1800)
+        case .arrival:
+            let earliestArrival = journeys.compactMap { $0.parts?.last?.endArrival }.min()
+            nextOfflineSearchDate = earliestArrival?.addingTimeInterval(-60)
+                ?? searchDate.addingTimeInterval(-1800)
+        }
+    }
+
+    private func sortedJourneys(_ journeys: [Journey]) -> [Journey] {
+        journeys.sorted {
+            journeyStartDate($0) < journeyStartDate($1)
+        }
+    }
+
+    private func journeyStartDate(_ journey: Journey) -> Date {
+        journey.parts?.first?.startDeparture ?? .distantFuture
     }
 
     private func prepareFetchParameters(source: FetchSource, from: Stop, to: Stop) -> FetchParams? {
@@ -432,10 +481,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
 
             if source == .initial {
 
-                let uniqueJourneys = Array(Set(newUnifiedJourneys)).sorted {
-                    ($0.parts?.first?.startDeparture ?? Date())
-                        < ($1.parts?.first?.startDeparture ?? Date())
-                }
+                let uniqueJourneys = self.sortedJourneys(Array(Set(newUnifiedJourneys)))
 
                 self.lastSearchDate = Date()
 
@@ -446,10 +492,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
 
             } else {
                 let combinedJourneys = (self.trip.journey ?? []) + newUnifiedJourneys
-                let uniqueJourneys = Array(Set(combinedJourneys)).sorted {
-                    ($0.parts?.first?.startDeparture ?? Date())
-                        < ($1.parts?.first?.startDeparture ?? Date())
-                }
+                let uniqueJourneys = self.sortedJourneys(Array(Set(combinedJourneys)))
                 self.trip.journey = uniqueJourneys
                 self.cacheTripForCurrentSearch(self.trip)
             }
@@ -529,6 +572,16 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func loadMoreTripsIfNeeded(_ journey: Journey) {
+        let lastOfflineJourney = trip.journey?.last(where: { $0.id.hasPrefix("o-") })
+        if journey.id == lastOfflineJourney?.id {
+            #if DEBUG
+            print("fetching more offline")
+            #endif
+            let generation = searchGenerationLock.withLock { searchGeneration }
+            fetchOfflineTrip(from: from, to: to, generation: generation, append: true)
+            return
+        }
+
         let lastRJourney = trip.journey?.last(where: { $0.id.hasPrefix("r-") })
         let lastIJourney = trip.journey?.last(where: { $0.id.hasPrefix("i-") })
 
@@ -637,6 +690,11 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         nextIApiSearchDate = trip.journey?
             .last(where: { $0.id.hasPrefix("i-") })?
             .parts?.first?.startDeparture.addingTimeInterval(60)
+        nextOfflineSearchDate = nil
+        let offlineJourneys = trip.journey?.filter { $0.id.hasPrefix("o-") } ?? []
+        if !offlineJourneys.isEmpty {
+            advanceOfflineSearchDate(after: arrivalDepartureDate, journeys: offlineJourneys)
+        }
     }
 
     private func generation(for source: FetchSource) -> Int {

@@ -140,7 +140,7 @@ struct OfflineRoutingContext {
     private static func buildWalkLinks(stops: [OfflineStop], maxWalkDuration: Int) -> [String: [OfflineWalkLink]] {
         guard maxWalkDuration > 0 else { return [:] }
         let limit = maxWalkDuration * 60
-        let maxMeters = Double(limit) * 1.33
+        let maxMeters = Double(limit) * OfflineWalk.metersPerSecond
         let cellSize = maxMeters / 111_000.0
         var buckets = [WalkGridKey: [IndexedStop]]()
         for (index, stop) in stops.enumerated() {
@@ -167,7 +167,7 @@ struct OfflineRoutingContext {
                 guard other.id != stop.id,
                       abs(other.lat - stop.lat) < latDelta,
                       abs(other.lon - stop.lon) < lonDelta else { continue }
-                let seconds = max(30, Int(haversineMeters(lat1: stop.lat, lon1: stop.lon, lat2: other.lat, lon2: other.lon) / 1.33))
+                let seconds = OfflineWalk.seconds(forMeters: haversineMeters(lat1: stop.lat, lon1: stop.lon, lat2: other.lat, lon2: other.lon))
                 if seconds <= limit {
                     links[stop.id, default: []].append(OfflineWalkLink(fromStopId: stop.id, toStopId: other.id, seconds: seconds))
                 }

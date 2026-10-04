@@ -4,6 +4,10 @@
 <dict>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).timetable.continued.*</string>
+	</array>
 	<key>B_API_KEY</key>
 	<string>$(B_API_KEY)</string>
 	<key>B_API_URL</key>
@@ -20,16 +24,21 @@
 				<string>transi</string>
 			</array>
 			<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-	</dict>
-</dict>
+			<dict>
+				<key>NSAllowsLocalNetworking</key>
+				<true/>
+			</dict>
+		</dict>
 	</array>
 	<key>I_API_URL</key>
 	<string>$(I_API_URL)</string>
 	<key>MAGIC_API_URL</key>
 	<string>$(MAGIC_API_URL)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>R_API_KEY</key>
 	<string>$(R_API_KEY)</string>
 	<key>R_API_URL</key>
@@ -41,11 +50,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
+		<string>processing</string>
 	</array>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-	</dict>
 </dict>
 </plist>

@@ -8,10 +8,20 @@
 import Foundation
 import SQLite3
 
+struct SQLiteDatabaseFingerprint: Hashable {
+    let path: String
+    let size: UInt64
+    let modificationTime: TimeInterval
+}
+
 class SQLiteDatabase {
     private var db: OpaquePointer?
+    let path: String
+    let fingerprint: SQLiteDatabaseFingerprint
 
     init?(path: String) {
+        self.path = URL(fileURLWithPath: path).standardizedFileURL.path
+        self.fingerprint = Self.fingerprint(for: self.path)
         if sqlite3_open_v2(path, &db, SQLITE_OPEN_READWRITE, nil) != SQLITE_OK {
             sqlite3_close(db)
             return nil
@@ -74,5 +84,12 @@ class SQLiteDatabase {
             results.append(row)
         }
         return results
+    }
+
+    private static func fingerprint(for path: String) -> SQLiteDatabaseFingerprint {
+        let attributes = try? FileManager.default.attributesOfItem(atPath: path)
+        let size = (attributes?[.size] as? NSNumber)?.uint64Value ?? 0
+        let modificationTime = (attributes?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
+        return SQLiteDatabaseFingerprint(path: path, size: size, modificationTime: modificationTime)
     }
 }

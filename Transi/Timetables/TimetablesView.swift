@@ -26,7 +26,7 @@ struct TimetablesView: View {
             // TODO: change to NavigationSplitView
             NavigationStack {
                 ScrollView {
-                    if timetableDb.isOfflineEnabled && !timetableDb.isReady {
+                    if timetableDb.shouldMaintainOfflineDatabase && !timetableDb.isReady {
                         TimetableDownloadBanner()
                             .padding(.bottom, 5)
                     }
@@ -96,6 +96,11 @@ struct TimetablesView: View {
             .onAppear {
                 fetchTimetables()
             }
+            .onChange(of: timetableDb.isReady) { ready in
+                if ready {
+                    fetchTimetables(force: true)
+                }
+            }
             .onReceive(GlobalController.appState.$pendingTimetableLine.compactMap { $0 }) { line in
                 GlobalController.appState.pendingTimetableLine = nil
                 openFromUrl = line
@@ -121,8 +126,8 @@ struct TimetablesView: View {
             }
     }
 
-    func fetchTimetables() {
-        guard category.regionalbuses.isEmpty else { return }
+    func fetchTimetables(force: Bool = false) {
+        guard force || categoryIsEmpty else { return }
         loading = true
 
         if timetableDb.isOfflineEnabled && timetableDb.isReady {
@@ -144,6 +149,15 @@ struct TimetablesView: View {
                 }
             }
         }
+    }
+
+    private var categoryIsEmpty: Bool {
+        category.trams.isEmpty &&
+            category.trolleybuses.isEmpty &&
+            category.buses.isEmpty &&
+            category.nightlines.isEmpty &&
+            category.trains.isEmpty &&
+            category.regionalbuses.isEmpty
     }
 
     private func categorizeRoutes(_ routes: [Route]) {

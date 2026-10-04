@@ -70,7 +70,7 @@ struct GlobalController {
         // After the restore, so an answer from the trip Live Activity that relaunched the app finds its trip.
         TripQuestion.answer = { await tripLiveActivity.answer(stillOn: $0) }
         tripSchedule.sync()
-        if timetableDatabase.isOfflineEnabled {
+        if timetableDatabase.shouldMaintainOfflineDatabase {
             _ = timetableDatabase.openDatabases()
             timetableDatabase.checkAndUpdate()
         }
@@ -101,7 +101,7 @@ struct GlobalController {
                 if !LocationProvider.isLocationAvailable {
                     stopsListProvider.setDefaultStopIfNeeded()
                 }
-                if timetableDatabase.isOfflineEnabled && !timetableDatabase.isReady {
+                if timetableDatabase.shouldMaintainOfflineDatabase && !timetableDatabase.isReady {
                     _ = timetableDatabase.openDatabases()
                     timetableDatabase.checkAndUpdate()
                 }
@@ -159,6 +159,7 @@ struct GlobalController {
             Stored.passBankCard: false,
             Stored.tripReminderMinutes: 15,
             Stored.tripStartMinutes: 15,
+            Stored.timetableAllowCellularUpdates: false,
         ])
     }
 

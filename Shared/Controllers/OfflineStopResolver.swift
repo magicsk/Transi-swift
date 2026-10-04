@@ -93,7 +93,7 @@ final class OfflineStopResolver {
     }
 
     private func nearbyStops(to stop: OfflineStop, secondsLimit: Int) -> [OfflineStop] {
-        let maxMeters = Double(secondsLimit) * 1.33
+        let maxMeters = Double(secondsLimit) * OfflineWalk.metersPerSecond
         let latDelta = maxMeters / 111_000.0
         let lonDelta = maxMeters / max(1.0, 111_000.0 * cos(stop.lat * .pi / 180))
         let rows = baseDb.query("""
@@ -134,7 +134,7 @@ final class OfflineStopResolver {
     }
 
     private func walkSeconds(from a: OfflineStop, to b: OfflineStop) -> Int {
-        max(30, Int(haversineMeters(lat1: a.lat, lon1: a.lon, lat2: b.lat, lon2: b.lon) / 1.33))
+        OfflineWalk.seconds(forMeters: haversineMeters(lat1: a.lat, lon1: a.lon, lat2: b.lat, lon2: b.lon))
     }
 
     private func haversineMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double) -> Double {

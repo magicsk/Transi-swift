@@ -14,16 +14,14 @@
 		DAE6A3FAB566B3F8D5A243FC /* SQLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA85A3A8B28DBCC43872EACA /* SQLite.swift */; };
 		DA87394F8A900FB8EE491E85 /* Gzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAE669B06984E562AF846DE /* Gzip.swift */; };
 		DA941C49EDC50A005B9B654A /* TimetableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFC0A95B266F008A6B94431 /* TimetableDatabase.swift */; };
+		DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */; };
+		DA09CC782F032B81006E4FB9 /* MarqueeText in Frameworks */ = {isa = PBXBuildFile; productRef = DA09CC772F032B81006E4FB9 /* MarqueeText */; };
 		DA0FF11E0EE0000000000001 /* OfflineRoutingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE0000000000002 /* OfflineRoutingEngine.swift */; };
-		DA0FF11E0EE000000000000B /* OfflineJourneyGrouper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE000000000000C /* OfflineJourneyGrouper.swift */; };
 		DA0FF11E0EE0000000000003 /* OfflineRoutingTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE0000000000004 /* OfflineRoutingTypes.swift */; };
 		DA0FF11E0EE0000000000005 /* OfflineStopResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE0000000000006 /* OfflineStopResolver.swift */; };
 		DA0FF11E0EE0000000000007 /* OfflineRoutingContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE0000000000008 /* OfflineRoutingContext.swift */; };
 		DA0FF11E0EE0000000000009 /* OfflineTimetableRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE000000000000A /* OfflineTimetableRouter.swift */; };
-		DAE746486B0815B721293408 /* TimetableDownloadBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */; };
-		DA74F9EA5264354744462CFD /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DA15FBBD3CE82E468F9A2F02 /* libz.tbd */; };
-		DA0976BC2B68258E00ABD463 /* TripPlannerDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */; };
-		DA09CC782F032B81006E4FB9 /* MarqueeText in Frameworks */ = {isa = PBXBuildFile; productRef = DA09CC772F032B81006E4FB9 /* MarqueeText */; };
+		DA0FF11E0EE000000000000B /* OfflineJourneyGrouper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0FF11E0EE000000000000C /* OfflineJourneyGrouper.swift */; };
 		DA10FA402A0939A2005D7E49 /* TripPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */; };
 		DA1C5A182CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */; };
 		DA1C5A192CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */; };
@@ -31,7 +29,6 @@
 		DA1F2E6F2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */; };
 		DA23A7812B02951F00BC8428 /* SwiftUIX in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7802B02951F00BC8428 /* SwiftUIX */; };
 		DA23A7862B02957700BC8428 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DA23A7852B02957700BC8428 /* SocketIO */; };
-
 		DA3059562E9043440055A692 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = DA3059552E9043440055A692 /* SwiftUIIntrospect */; };
 		DA3F83DC2B1E7CB20006F41E /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DB2B1E7CB20006F41E /* Errors.swift */; };
 		DA3F83DE2B1E9A3F0006F41E /* MKMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3F83DD2B1E9A3F0006F41E /* MKMapView.swift */; };
@@ -67,6 +64,7 @@
 		DA737DE62B90D20E0093FAC6 /* RemoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA737DE52B90D20E0093FAC6 /* RemoteImage.swift */; };
 		DA737DEC2B90E2D40093FAC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA817CB2974387C00E2FBB7 /* Assets.xcassets */; };
 		DA737DEF2B9116840093FAC6 /* Vehicles.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */; };
+		DA74F9EA5264354744462CFD /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DA15FBBD3CE82E468F9A2F02 /* libz.tbd */; };
 		DA76B57C2ECE4B620074F4E2 /* ApiModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76B57B2ECE4B620074F4E2 /* ApiModels.swift */; };
 		DA76B57D2ECE4B620074F4E2 /* ApiModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76B57B2ECE4B620074F4E2 /* ApiModels.swift */; };
 		DA7887EA2B77DA0800BFFB4F /* TimetablesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10FA412A0939CA005D7E49 /* TimetablesView.swift */; };
@@ -86,6 +84,7 @@
 		DA855B772AF68BED00372C31 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA855B762AF68BED00372C31 /* Util.swift */; };
 		DA89EDE629BA981700C32F24 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE529BA981700C32F24 /* UserDefaults.swift */; };
 		DA89EDEA29BB6FDC00C32F24 /* StopListIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */; };
+		DA8D2C042F4FA34200BA4245 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D2C032F4FA34200BA4245 /* SettingsView.swift */; };
 		DA96FBC22CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */; };
 		DA96FBC32CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */; };
 		DAA552382B9D28E900C750BC /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA552372B9D28E900C750BC /* SearchBar.swift */; };
@@ -100,7 +99,6 @@
 		DAAA8A4C2B827D44006A1EC8 /* Fetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */; };
 		DAAA8A4E2B8285E9006A1EC8 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAA8A4D2B8285E9006A1EC8 /* LoadingView.swift */; };
 		DAAB2C0A29F8751F00D79A70 /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = DAAB2C0929F8751F00D79A70 /* Fuse */; };
-		DA8D2C042F4FA34200BA4245 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D2C032F4FA34200BA4245 /* SettingsView.swift */; };
 		DAB0094E2B2E71BF009DF2CD /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094D2B2E71BF009DF2CD /* View.swift */; };
 		DAB009502B2E7383009DF2CD /* Stored.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB0094F2B2E7383009DF2CD /* Stored.swift */; };
 		DAB40A892BEFD58D0067F972 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAE77C3F2B88DE8C008F3185 /* WidgetKit.framework */; };
@@ -152,6 +150,7 @@
 		DAE714E22B2FAF650059B8A1 /* Timetables.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714E12B2FAF650059B8A1 /* Timetables.swift */; };
 		DAE714E32B2FAF650059B8A1 /* Timetables.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE714E12B2FAF650059B8A1 /* Timetables.swift */; };
 		DAE714E62B2FC0D50059B8A1 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = DAE714E52B2FC0D50059B8A1 /* WrappingHStack */; };
+		DAE746486B0815B721293408 /* TimetableDownloadBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */; };
 		DAE77C422B88DE8C008F3185 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAE77C412B88DE8C008F3185 /* SwiftUI.framework */; };
 		DAE77C472B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE77C462B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift */; };
 		DAE77C512B88DE8E008F3185 /* VirtualTableActivityExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DAE77C3E2B88DE8C008F3185 /* VirtualTableActivityExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -214,23 +213,21 @@
 		DA85A3A8B28DBCC43872EACA /* SQLite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLite.swift; sourceTree = "<group>"; };
 		DAAE669B06984E562AF846DE /* Gzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gzip.swift; sourceTree = "<group>"; };
 		DAFC0A95B266F008A6B94431 /* TimetableDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDatabase.swift; sourceTree = "<group>"; };
+		DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDatePicker.swift; sourceTree = "<group>"; };
 		DA0FF11E0EE0000000000002 /* OfflineRoutingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineRoutingEngine.swift; sourceTree = "<group>"; };
-		DA0FF11E0EE000000000000C /* OfflineJourneyGrouper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineJourneyGrouper.swift; sourceTree = "<group>"; };
 		DA0FF11E0EE0000000000004 /* OfflineRoutingTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineRoutingTypes.swift; sourceTree = "<group>"; };
 		DA0FF11E0EE0000000000006 /* OfflineStopResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineStopResolver.swift; sourceTree = "<group>"; };
 		DA0FF11E0EE0000000000008 /* OfflineRoutingContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineRoutingContext.swift; sourceTree = "<group>"; };
 		DA0FF11E0EE000000000000A /* OfflineTimetableRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineTimetableRouter.swift; sourceTree = "<group>"; };
-		DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDownloadBanner.swift; sourceTree = "<group>"; };
-		DA15FBBD3CE82E468F9A2F02 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerDatePicker.swift; sourceTree = "<group>"; };
+		DA0FF11E0EE000000000000C /* OfflineJourneyGrouper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineJourneyGrouper.swift; sourceTree = "<group>"; };
 		DA10FA3B2A093807005D7E49 /* VirtualTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableView.swift; sourceTree = "<group>"; };
 		DA10FA3F2A0939A2005D7E49 /* TripPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripPlannerView.swift; sourceTree = "<group>"; };
 		DA10FA412A0939CA005D7E49 /* TimetablesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetablesView.swift; sourceTree = "<group>"; };
+		DA15FBBD3CE82E468F9A2F02 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		DA16CE482B33AFE100B27B1E /* TimetableDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDetailView.swift; sourceTree = "<group>"; };
 		DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveViewLarge.swift; sourceTree = "<group>"; };
 		DA1F2E6D2CBE794200D65DCF /* VirtualTableActivityDynamicIsland.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityDynamicIsland.swift; sourceTree = "<group>"; };
 		DA269E0F298960EF00F42107 /* VirtualTableList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableList.swift; sourceTree = "<group>"; };
-
 		DA32836029E19C920070FCA0 /* VirtualTableDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableDetail.swift; sourceTree = "<group>"; };
 		DA32836329E33F650070FCA0 /* VirtualTableListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableListItem.swift; sourceTree = "<group>"; };
 		DA3F83DB2B1E7CB20006F41E /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
@@ -259,6 +256,7 @@
 		DA855B762AF68BED00372C31 /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		DA89EDE529BA981700C32F24 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		DA89EDE929BB6FDC00C32F24 /* StopListIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListIcon.swift; sourceTree = "<group>"; };
+		DA8D2C032F4FA34200BA4245 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveDynamicView.swift; sourceTree = "<group>"; };
 		DAA552372B9D28E900C750BC /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		DAA817C72974387B00E2FBB7 /* TransiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransiApp.swift; sourceTree = "<group>"; };
@@ -273,8 +271,6 @@
 		DAAA8A492B8242D7006A1EC8 /* LoadingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicator.swift; sourceTree = "<group>"; };
 		DAAA8A4B2B827D44006A1EC8 /* Fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fetch.swift; sourceTree = "<group>"; };
 		DAAA8A4D2B8285E9006A1EC8 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
-		DA8D2C032F4FA34200BA4245 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		DA8D2C052F4FA34200BA4245 /* Settings */ = {isa = PBXGroup; children = (DA8D2C032F4FA34200BA4245 /* SettingsView.swift */,); path = Settings; sourceTree = "<group>"; };
 		DAB0094D2B2E71BF009DF2CD /* View.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		DAB0094F2B2E7383009DF2CD /* Stored.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stored.swift; sourceTree = "<group>"; };
 		DAB467F62B7A48B400B45A1C /* StopsListProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopsListProvider.swift; sourceTree = "<group>"; };
@@ -304,6 +300,7 @@
 		DAD16F322C1B170200E620C4 /* VirtualTableActivityLiveViewSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTableActivityLiveViewSmall.swift; sourceTree = "<group>"; };
 		DAD294B82BA38C9900875B3A /* SimpleVirtualTableController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleVirtualTableController.swift; sourceTree = "<group>"; };
 		DA1C7E5A0F2B4C6D8E9A1B2C /* PartLiveTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartLiveTracker.swift; sourceTree = "<group>"; };
+		DAD7B99FB71D74A8CA2992DA /* TimetableDownloadBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetableDownloadBanner.swift; sourceTree = "<group>"; };
 		DAD9BF1A2B0AAF59009F73AE /* MapBottomSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapBottomSheetView.swift; sourceTree = "<group>"; };
 		DAD9BF1C2B0ABAE9009F73AE /* CLLocationCoordinate2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocationCoordinate2D.swift; sourceTree = "<group>"; };
 		DAE714D82B2FA2E20059B8A1 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
@@ -462,6 +459,14 @@
 				DAB0094D2B2E71BF009DF2CD /* View.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		DA8D2C052F4FA34200BA4245 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				DA8D2C032F4FA34200BA4245 /* SettingsView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		DAA817BB2974387B00E2FBB7 = {
@@ -1267,8 +1272,14 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Transi-Watch-App-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location will be used for showing nearby stops. Everything stays on your device.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = eu.magicsk.transi;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
@@ -1303,8 +1314,14 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Transi-Watch-App-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location will be used for showing nearby stops. Everything stays on your device.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = eu.magicsk.transi;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
@@ -1339,9 +1356,13 @@
 				INFOPLIST_FILE = VirtualTableActivity/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = VirtualTableActivity;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location is used to sort stops list by nearest and show your position on the map.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1378,9 +1399,13 @@
 				INFOPLIST_FILE = VirtualTableActivity/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = VirtualTableActivity;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Location is used to sort stops list by nearest, show your position on the map and always location needed for live activities.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location is used to sort stops list by nearest and show your position on the map.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

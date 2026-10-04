@@ -5,6 +5,18 @@ enum OfflineRoutingMode {
     case arrival
 }
 
+enum OfflineWalk {
+    /// Effective speed in m/s over straight-line distance. Real paths detour
+    /// around blocks and climb hills, so this is deliberately slower than an
+    /// actual walking pace applied to a routed path.
+    static let metersPerSecond = 0.9
+    static let minimumSeconds = 60
+
+    static func seconds(forMeters meters: Double) -> Int {
+        max(minimumSeconds, Int(meters / metersPerSecond))
+    }
+}
+
 struct OfflineStop: Hashable {
     let id: String
     let feed: String
