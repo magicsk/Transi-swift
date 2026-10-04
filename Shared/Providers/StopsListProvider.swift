@@ -76,12 +76,14 @@ class StopsListProvider: ObservableObject {
                                         self.stops = newStops
                                         self.unmodifiedStops = newStops
                                         self.fetchLoading = false
+                                        if let location = LocationProvider.lastLocation {
+                                            self.sortStops(coordinates: location.coordinate)
+                                        } else {
+                                            self.setDefaultStopIfNeeded()
+                                        }
                                     }
                                     self.updateActualLocationEntry()
                                     Self.saveCachedStops(newStops)
-                                    if let location = LocationProvider.lastLocation {
-                                        self.sortStops(coordinates: location.coordinate)
-                                    }
                                 case .failure:
                                     DispatchQueue.main.async {
                                         self.fetchError = true
@@ -116,9 +118,10 @@ class StopsListProvider: ObservableObject {
         }
     }
 
+    // Waits for a stop list, so a fresh install never shows a placeholder stop. The /stops completion resolves the table.
     func setDefaultStopIfNeeded() {
         DispatchQueue.main.async {
-            if GlobalController.virtualTable.currentStop.id == Stop.empty.id {
+            if GlobalController.virtualTable.currentStop.id == Stop.empty.id, !self.unmodifiedStops.isEmpty {
                 self.showDefaultStop()
             }
         }
