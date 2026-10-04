@@ -118,10 +118,18 @@ class StopsListProvider: ObservableObject {
     func setDefaultStopIfNeeded() {
         DispatchQueue.main.async {
             if GlobalController.virtualTable.currentStop.id == Stop.empty.id {
-                let defaultStopId = UserDefaults.standard.integer(forKey: Stored.defaultStopId)
-                let stopId = defaultStopId > 0 ? defaultStopId : GlobalController.getNearestStopId()
-                GlobalController.virtualTable.changeStop(stopId, switchOnly: true)
+                self.showDefaultStop()
             }
+        }
+    }
+
+    // Main thread. A valid default turns off nearest-stop following, so later location fixes keep it.
+    private func showDefaultStop() {
+        let defaultStopId = UserDefaults.standard.integer(forKey: Stored.defaultStopId)
+        if defaultStopId > 0, GlobalController.getStopById(defaultStopId) != nil {
+            GlobalController.virtualTable.changeStop(defaultStopId)
+        } else {
+            GlobalController.virtualTable.changeStop(GlobalController.getNearestStopId(), switchOnly: true)
         }
     }
 
@@ -135,10 +143,11 @@ class StopsListProvider: ObservableObject {
                 self.stops = sorted
                 self.updateActualLocationEntry()
                 if GlobalController.virtualTable.changeLocation {
-                    let defaultStopId = UserDefaults.standard.integer(forKey: Stored.defaultStopId)
-                    let isFirstSort = GlobalController.virtualTable.currentStop.id == Stop.empty.id
-                    let stopId = (isFirstSort && defaultStopId > 0) ? defaultStopId : GlobalController.getNearestStopId()
-                    GlobalController.virtualTable.changeStop(stopId, switchOnly: true)
+                    if GlobalController.virtualTable.currentStop.id == Stop.empty.id {
+                        self.showDefaultStop()
+                    } else {
+                        GlobalController.virtualTable.changeStop(GlobalController.getNearestStopId(), switchOnly: true)
+                    }
                 }
             }
         }

@@ -95,7 +95,7 @@ struct SettingsView: View {
         } header: {
             Text("General")
         } footer: {
-            Text("The stop shown when the app opens.")
+            Text("The stop shown when the app opens. Actual location follows the nearest stop.")
         }
     }
 
