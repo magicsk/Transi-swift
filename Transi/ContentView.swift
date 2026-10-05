@@ -39,7 +39,23 @@ struct ContentView: UIViewControllerRepresentable {
         searchVC.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 4)
 
         tabBarController.delegate = context.coordinator
-        tabBarController.viewControllers = [plannerVC, tableVC, timetablesVC, mapVC, searchVC]
+        if #available(iOS 26.0, *) {
+            // Since the iOS 27 SDK, Search sits apart from the tab bar only as a prominent search tab,
+            // no longer as a search tab bar item.
+            let tabs = ([plannerVC, tableVC, timetablesVC, mapVC] as [UIViewController]).map { controller in
+                let item = controller.tabBarItem!
+                return UITab(title: item.title ?? "", image: item.image, identifier: "\(item.tag)") { _ in controller }
+            }
+            let searchTab = UISearchTab { _ in searchVC }
+            tabBarController.tabs = tabs + [searchTab]
+            #if compiler(>=6.4) // The iOS 27 SDK (Xcode 27); CI still builds with Xcode 26.
+                if #available(iOS 27.0, *) {
+                    tabBarController.prominentTabIdentifier = searchTab.identifier
+                }
+            #endif
+        } else {
+            tabBarController.viewControllers = [plannerVC, tableVC, timetablesVC, mapVC, searchVC]
+        }
 
         return tabBarController
     }
@@ -61,7 +77,7 @@ struct ContentView: UIViewControllerRepresentable {
             uiViewController.tabBar.scrollEdgeAppearance = tabBarAppearance
         }
 
-        if selectionChanged, let searchVC = uiViewController.viewControllers?[selectedIndex] as? HybridSearchViewController {
+        if selectionChanged, let searchVC = uiViewController.selectedViewController as? HybridSearchViewController {
             DispatchQueue.main.async {
                 searchVC.searchController?.searchBar.becomeFirstResponder()
             }
@@ -81,16 +97,21 @@ struct ContentView: UIViewControllerRepresentable {
         }
 
         func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-            guard let newIndex = tabBarController.viewControllers?.firstIndex(of: viewController) else {
+            shouldSelect(tabBarController.viewControllers?.firstIndex(of: viewController), in: tabBarController)
+        }
+
+        @available(iOS 18.0, *)
+        func tabBarController(_ tabBarController: UITabBarController, shouldSelectTab tab: UITab) -> Bool {
+            shouldSelect(tabBarController.tabs.firstIndex(of: tab), in: tabBarController)
+        }
+
+        /// Routes a tap through the binding, so the selection changes in one place.
+        private func shouldSelect(_ newIndex: Int?, in tabBarController: UITabBarController) -> Bool {
+            guard let newIndex, newIndex != tabBarController.selectedIndex else {
                 return true
             }
-
-            if newIndex != tabBarController.selectedIndex {
-                parent.selectedIndex = newIndex
-                return false
-            }
-
-            return true
+            parent.selectedIndex = newIndex
+            return false
         }
     }
 }
