@@ -485,17 +485,6 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         }
     }
 
-    func clearRecentSearches() {
-        _ = generation(for: .initial)
-        loading = false
-        loadingMore = false
-        error = nil
-        recentSearches.removeAll()
-        recentSearchQueue.async {
-            UserDefaults.standard.removeObject(forKey: Stored.tripRecentSearches)
-        }
-    }
-
     func currentSearchMatchesCriteria() -> Bool {
         let currentID = RecentTripSearch(from: from, to: to).id
         guard let search = recentSearches.first(where: { $0.id == currentID }) else {

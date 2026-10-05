@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TripPlannerView: View {
     @StateObject var tripPlannerController = GlobalController.tripPlanner
+    @Namespace private var namespace
     @State private var showSettings = false
     @State private var stop: Stop = .example
     @State private var lastField = ""
@@ -77,35 +78,27 @@ struct TripPlannerView: View {
                     TripDetailView(journey: journey)
                 }
                 .toolbar {
-                    Menu {
-                        ForEach(tripPlannerController.recentSearches) { search in
-                            Button {
-                                tripPlannerController.showRecentSearch(search)
-                            } label: {
-                                Text(
-                                    "\(search.from.name ?? "From") → \(search.to.name ?? "To")"
-                                )
-                            }
-                        }
-                        Divider()
-                        Button("Clear Recents", role: .destructive) {
-                            tripPlannerController.clearRecentSearches()
-                        }
-                    } label: {
-                        Image(systemName: "clock.arrow.circlepath")
-                    }
-                    .disabled(tripPlannerController.recentSearches.isEmpty)
-                    .accessibilityLabel("Recent searches")
-
-                    Button {
+                    let settingsButton = Button {
                         showSettings = true
                     } label: {
                         Image(systemName: "gearshape")
                     }
+                    .accessibilityLabel("Settings")
+                    if #available(iOS 18.0, *) {
+                        settingsButton
+                            .matchedTransitionSource(id: "settings", in: namespace)
+                    } else {
+                        settingsButton
+                    }
                 }
             }
             .sheet(isPresented: $showSettings, onDismiss: showJourneyAfterSheets) {
-                SettingsView()
+                if #available(iOS 18.0, *) {
+                    SettingsView()
+                        .navigationTransition(.zoom(sourceID: "settings", in: namespace))
+                } else {
+                    SettingsView()
+                }
             }
             .sheet(isPresented: $dateDialog, onDismiss: showJourneyAfterSheets) {
                 TripPlannerDatePicker($dateDialog)
