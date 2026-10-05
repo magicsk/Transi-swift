@@ -17,8 +17,8 @@ extension TripPlannerController {
                 Part(
                     startStopName: rPart.startStopName,
                     endStopName: rPart.endStopName,
-                    startStopCode: rPart.startStopCode,
-                    endStopCode: rPart.endStopCode,
+                    startStopCode: rPart.startStopCode.nonEmpty,
+                    endStopCode: rPart.endStopCode.nonEmpty,
                     startDeparture: dateFromUtc(rPart.startDeparture),
                     endArrival: dateFromUtc(rPart.endArrival),
                     routeType: rPart.routeType,
@@ -87,9 +87,10 @@ extension TripPlannerController {
                 let isWalking = iPart.type == "🚶" || iPart.type == "\u{1F6B6}"
                 let routeType = isWalking ? 64 : 1
 
-                var endStopCode = endStop?.label
+                let startStopCode = startStop?.label.nonEmpty
+                var endStopCode = endStop?.label.nonEmpty
                 if isWalking && endStopCode == nil && iParts.indices.contains(index + 1) {
-                    endStopCode = iParts[index + 1].stops?.first?.label
+                    endStopCode = iParts[index + 1].stops?.first?.label.nonEmpty
                 }
 
                 let routeShortName = mappedLines.indices.contains(index) ? mappedLines[index] : nil
@@ -97,16 +98,17 @@ extension TripPlannerController {
                 let startDepDate = TripPlannerController.iApiDateFormatter.date(from: iPart.departure.date) ?? Date()
                 let endArrDate = TripPlannerController.iApiDateFormatter.date(from: iPart.arrival.date) ?? Date()
 
-                let startMagicStop = magicStop(startStop, platform: startStop?.label)
+                let startMagicStop = magicStop(startStop, platform: startStopCode)
                 let endMagicStop = magicStop(endStop, platform: endStopCode)
                 let iStops = isWalking ? [] : iPart.stops ?? []
                 let partStops = iStops.enumerated().map { stopIndex, iStop in
                     let isLast = stopIndex == iStops.count - 1
                     let time = isLast ? iStop.arrival ?? iStop.departure : iStop.departure ?? iStop.arrival
-                    let stop = magicStop(iStop, platform: iStop.label)
+                    let platform = iStop.label.nonEmpty
+                    let stop = magicStop(iStop, platform: platform)
                     return PartStop(
                         name: iStop.name,
-                        platform: iStop.label,
+                        platform: platform,
                         time: time.flatMap { TripPlannerController.iApiDateFormatter.date(from: $0.date) }
                             ?? (isLast ? endArrDate : startDepDate),
                         gps: stop?.gps,
@@ -120,7 +122,7 @@ extension TripPlannerController {
                     Part(
                         startStopName: startStop?.name,
                         endStopName: endStop?.name,
-                        startStopCode: startStop?.label,
+                        startStopCode: startStopCode,
                         endStopCode: endStopCode,
                         startDeparture: startDepDate,
                         endArrival: endArrDate,
@@ -167,6 +169,13 @@ extension Array where Element == Stop {
     }
 }
 
+extension Optional where Wrapped == String {
+    /// Nil for an empty string: train stops come with an empty platform letter.
+    var nonEmpty: String? {
+        self?.isEmpty == false ? self : nil
+    }
+}
+
 extension Stop {
     /// Station-level position, up to ~200 m from the platform.
     var gps: StopGps? {
@@ -194,14 +203,14 @@ extension BApiTrip {
         return stopTimes[first...last].map { stopTime in
             PartStop(
                 name: stopTime.stopName,
-                platform: stopTime.stopCode,
+                platform: stopTime.stopCode.nonEmpty,
                 time: calendar.date(
                     minutes: stopTime.stopId == part.endStopId ? stopTime.arrival : stopTime.departure,
                     after: serviceDay
                 ),
                 gps: stopTime.stopGps,
                 zone: stopTime.zone,
-                stopId: stops.stop(stationId: stopTime.stationId, name: stopTime.stopName, platform: stopTime.stopCode)?.id
+                stopId: stops.stop(stationId: stopTime.stationId, name: stopTime.stopName, platform: stopTime.stopCode.nonEmpty)?.id
             )
         }
     }

@@ -27,6 +27,7 @@ struct GlobalController {
     static let stopsListProvider = StopsListProvider()
     static let virtualTable = VirtualTableController()
     static let tripPlanner = TripPlannerController()
+    static let tripLiveActivity = TripLiveActivityController()
     static let timetableDatabase = TimetableDatabase()
     static let ticketCatalogue = TicketCatalogueProvider()
 
@@ -62,6 +63,7 @@ struct GlobalController {
         registerUserDefaults()
         fetchSessionToken()
         VirtualTableLiveActivityController.activateExistingActitivites()
+        tripLiveActivity.restore()
         if timetableDatabase.isOfflineEnabled {
             _ = timetableDatabase.openDatabases()
             timetableDatabase.checkAndUpdate()
@@ -104,6 +106,10 @@ struct GlobalController {
     }
 
     static func stopBackgroundMode() {
+        guard backgroundModeCanStop(
+            tableActivities: VirtualTableLiveActivityController.liveActivities.count,
+            followsTrip: TripLiveActivityController.followsTrip
+        ) else { return }
         shouldRunInBackground = false
         cancelApplicationQuitNotification()
         DispatchQueue.global().asyncAfter(deadline: .now() + 6) {

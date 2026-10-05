@@ -27,6 +27,10 @@ struct TransiApp: App {
                     switch dest {
                     case .trip:
                         selection = 0
+                    case .activeTrip:
+                        selection = 0
+                        // Just the planner once the trip is no longer followed.
+                        GlobalController.appState.pendingJourney = GlobalController.tripLiveActivity.journey
                     case .table(let stopId, let expandConnection):
                         selection = 1
                         if let exp = expandConnection {
@@ -45,7 +49,7 @@ struct TransiApp: App {
                 .onOpenURL { url in
                     switch url.host {
                     case "trip":
-                        GlobalController.appState.pendingNavigation = .trip
+                        GlobalController.appState.pendingNavigation = url.path == "/active" ? .activeTrip : .trip
                     case "table":
                         if url.pathComponents.endIndex >= 2, let stopId = Int(url.pathComponents[1]) {
                             let expandConnection = url.pathComponents.endIndex >= 3 ? url.pathComponents[2] : nil

@@ -47,7 +47,7 @@ struct TripPlannerList: View {
                         }
                         .accessibilityHint("Shows the route on a map with every stop")
                     } header: {
-                        Text(getHeaderText(parts, journey.zones))
+                        getHeaderText(parts, journey.zones)
                     }
                     .onAppear {
                         loadMoreTripsIfNeeded(journey)
@@ -76,19 +76,15 @@ struct TripPlannerList: View {
     }
 }
 
-func getHeaderText(_ parts: [Part], _ zones: [String]?) -> String {
+func getHeaderText(_ parts: [Part], _ zones: [String]?) -> Text {
     if let first = parts.first, let last = parts.last {
         let startTime = timeStringFromDate(first.startDeparture)
         let duration = timeDiffFromDates(first.startDeparture, last.endArrival)
         let numOfZones = zones?.count ?? 0
-        var timeDateSection = "\(startTime)"
-        if !Calendar.current.isDate(first.startDeparture, inSameDayAs: Date()) {
-            let startDate = dateStringFromDate(first.startDeparture)
-            timeDateSection = "\(startDate) \(startTime)"
-        }
-        return "\(timeDateSection) | \(duration) min | \(numOfZones) zones"
+        let timeDateSection = dayStringUnlessToday(first.startDeparture).map { "\($0) \(startTime)" } ?? startTime
+        return Text("\(timeDateSection) | \(duration) min | ^[\(numOfZones) zone](inflect: true)")
     } else {
-        return "Error"
+        return Text("Error")
     }
 }
 

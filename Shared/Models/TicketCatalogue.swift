@@ -107,6 +107,9 @@ struct SeasonPass: Equatable {
         case bankCard
         /// Zones the trip passes through that the pass lacks.
         case zones([String])
+        /// Zones the pass lacks, on a trip it partly covers with a regional bus: those take no ticket for the other
+        /// zones alongside a pass (PP A.12.9), so the trip needs one of its own.
+        case regionalBus([String])
     }
 
     /// Why the pass isn't valid in every one of `zones` on every `transit` leg; nil when it is.
@@ -194,6 +197,11 @@ enum TicketCoverage: Equatable {
                 self = .partlyCovered(passZones: zones.intersection(pass.zones).sorted(), zones: uncovered.sorted(),
                                       ticket: ticket)
                 return
+            }
+            // With a regional bus (lines 200 and up) no ticket for the other zones goes with the pass: say why.
+            if case .zones(let missing) = reason, uncovered.count < zones.count,
+               transit.contains(where: { Int($0.routeShortName ?? "").map { $0 >= 200 } == true }) {
+                reason = .regionalBus(missing)
             }
         }
         let rApiTicket = journey.ticketId.flatMap { id in catalogue.tickets?.first { $0.ticketId == id } }

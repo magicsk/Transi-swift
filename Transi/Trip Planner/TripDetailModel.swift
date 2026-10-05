@@ -5,6 +5,7 @@
 //  Created by magic_sk on 04/10/2026.
 //
 
+import Combine
 import Foundation
 
 /// One row of the journey detail's step list.
@@ -81,6 +82,49 @@ enum MapFocus: Equatable {
     /// this ride's start.
     case change(to: Int)
     case stop(StopGps)
+    /// Stops of a ride, around where its vehicle is.
+    case stretch([StopGps])
+}
+
+extension TripProgress {
+    /// The step row the traveller is at: the walk or change to the next vehicle until it leaves, the ride, then the
+    /// walk after the last vehicle.
+    func step(in journey: Journey) -> JourneyStep? {
+        let steps = journey.steps
+        switch phase {
+        case .board(let index), .change(let index):
+            guard let ride = steps.firstIndex(of: .ride(index)) else { return nil }
+            return steps[max(ride - 1, 0)]
+        case .ride(let index):
+            return .ride(index)
+        case .walk:
+            return steps.last
+        case .arrived:
+            return nil
+        }
+    }
+
+    /// What the map follows: the walk to and the stop of the next vehicle, the vehicle from the stop it left through
+    /// the next one (through the alighting stop once that is 2 stops away), the walk, then the whole route.
+    /// `journey` is the one the progress was computed on, whose leg stops `nextStop` counts.
+    func mapFocus(on journey: Journey) -> MapFocus {
+        switch phase {
+        case .board(let index), .change(let index):
+            return .change(to: index)
+        case .ride(let index):
+            let stops = journey.parts?[index].legStops ?? []
+            guard let nextStop, stops.count > 1 else { return .part(index) }
+            let last = stops.count - 1
+            // Past the alighting stop the vehicle still counts as reaching it.
+            let next = max(min(nextStop, last), 1)
+            let stretch = stops[(next - 1) ... (next >= last - 1 ? last : next)].compactMap(\.gps)
+            return stretch.isEmpty ? .part(index) : .stretch(stretch)
+        case .walk(let index):
+            return .part(index)
+        case .arrived:
+            return .route
+        }
+    }
 }
 
 /// The journey shown in the detail, completed while it is visible: the stops of R-API legs and the live
@@ -99,6 +143,10 @@ final class TripDetailModel: ObservableObject {
     @Published private(set) var tripDelays = [Int: Int?]()
     /// Set by the map.
     var onFocus: ((MapFocus) -> Void)?
+    /// Set by the map, which fits the sheet's summary detent to it: the summary's frame in the window.
+    var onSummaryFrame: ((CGRect) -> Void)?
+    /// Sent by the map when the sheet comes down to the summary with the list scrolled past it.
+    let showSummary = PassthroughSubject<Void, Never>()
 
     private var trackers = [Int: PartLiveTracker]()
     private var trackerTimer: Timer?
@@ -171,9 +219,15 @@ final class TripDetailModel: ObservableObject {
         return part.isLive(delaySeconds: delay) ? delay : nil
     }
 
-    /// From the departure board (the last one seen), else the B-API's (nil when its vehicle was not
-    /// running), else the one from the search. Nil when none is known.
+    /// From the boards the trip Live Activity follows this journey's vehicles on, so the step it shows above the
+    /// summary agrees (the sheet observes it, which redraws the delays); else the departure board (the last one
+    /// seen), else the B-API's (nil when its vehicle was not running), else the one from the search. Nil when none
+    /// is known.
     private func knownDelaySeconds(_ index: Int) -> Int? {
+        let trip = GlobalController.tripLiveActivity
+        if trip.journey == journey, let delay = trip.liveDelays[index] {
+            return delay
+        }
         if let connection = liveConnections[index], connection.type == "online" {
             return connection.delay * 60
         }

@@ -204,7 +204,11 @@ func isSameDeparture(_ a: Connection, _ b: Connection, within tolerance: TimeInt
 // The regional feed also lists trips arriving at their last stop, which nobody can board there.
 // It has no flag for them, so compare the headsign; it shortens the bus station to "AS".
 func terminates(_ connection: Connection, at stopName: String?) -> Bool {
-    let headsign = connection.headsign.replacingOccurrences(of: "Bratislava, ", with: "")
+    terminates(headsign: connection.headsign, at: stopName)
+}
+
+func terminates(headsign: String, at stopName: String?) -> Bool {
+    let headsign = headsign.replacingOccurrences(of: "Bratislava, ", with: "")
     return headsign == stopName || (headsign == "AS" && stopName == "Autobusová stanica")
 }
 

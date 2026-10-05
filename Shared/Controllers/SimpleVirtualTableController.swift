@@ -41,6 +41,12 @@ class SimpleVirtualTableController: ObservableObject {
     var currentStop: Int
     /// Called on the main thread after `connections` or `vehicleInfo` change.
     var onUpdate: (() -> Void)?
+    /// From each connect or drop until the socket's board arrives; meanwhile `connections` hold at most the
+    /// regional departures, without the city's vehicles.
+    private var awaitsSocketBoardSince: Date? = Date()
+    /// Whether `connections` show the whole board: the socket's arrived since it last connected, or did not within
+    /// 10 s, as at stops outside the city, which have only regional departures. Read on the main thread.
+    var hasWholeBoard: Bool { awaitsSocketBoardSince.map { Date().timeIntervalSince($0) >= 10 } ?? true }
     /// False for boards that only read departures, like the trip detail's, so they never update or end the
     /// table's Live Activities for this stop.
     let updatesLiveActivities: Bool
@@ -189,6 +195,8 @@ class SimpleVirtualTableController: ObservableObject {
             guard let self = self else { return }
             self.connections = connectionsForPublish
             self.socketStatus = "connected"
+            // Only the socket's board ends missing activities: unlike the regional departures, it is whole.
+            if endMissingActivities { self.awaitsSocketBoardSince = nil }
             self.updateLiveActivities(endMissingActivities: endMissingActivities)
             self.onUpdate?()
         }
@@ -270,6 +278,7 @@ class SimpleVirtualTableController: ObservableObject {
             guard let self = self else { return }
             self.connected = true
             DispatchQueue.main.async { [weak self] in
+                self?.awaitsSocketBoardSince = Date()
                 self?.startUpdater()
             }
         }
@@ -279,6 +288,7 @@ class SimpleVirtualTableController: ObservableObject {
             DispatchQueue.main.async { [weak self] in
                 self?.connections = [Connection]()
                 self?.vehicleInfo = [VehicleInfo]()
+                self?.awaitsSocketBoardSince = Date()
             }
             self.connectionsProcessingQueue.async { [weak self] in
                 self?.internalConnections = [Connection]()

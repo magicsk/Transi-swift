@@ -12,5 +12,6 @@ import WidgetKit
 struct VirtualTableActivityBundle: WidgetBundle {
     var body: some Widget {
         VirtualTableActivityLiveActivity()
+        TripActivityLiveActivity()
     }
 }

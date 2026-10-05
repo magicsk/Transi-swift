@@ -56,7 +56,7 @@ struct TripPlannerStopCodeView: View {
     let code: String?
 
     var body: some View {
-        if let stopCode = code {
+        if let stopCode = code, !stopCode.isEmpty {
             HStack(alignment: .bottom, spacing: -2.0) {
                 Image("stop")
                     .scaledToFit()

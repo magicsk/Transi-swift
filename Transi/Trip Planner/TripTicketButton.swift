@@ -108,6 +108,11 @@ struct TripTicketButton: View {
         case .zones(let zones):
             let names = zones.joined(separator: ", ")
             return zones.count == 1 ? Text("Zone \(names) isn't on your pass") : Text("Zones \(names) aren't on your pass")
+        case .regionalBus(let zones):
+            let names = zones.joined(separator: ", ")
+            return zones.count == 1
+                ? Text("Zone \(names) isn't on your pass. Regional buses need a ticket for the whole trip.")
+                : Text("Zones \(names) aren't on your pass. Regional buses need a ticket for the whole trip.")
         }
     }
 

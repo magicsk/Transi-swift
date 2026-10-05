@@ -14,6 +14,9 @@ struct TripPlannerView: View {
     @State private var lastField = ""
     @State private var showStopList = false
     @State private var dateDialog = false
+    @State private var path = [Journey]()
+    /// A journey to show once the planner's sheets have gone, so the detail can present its own.
+    @State private var journeyAfterSheets: Journey?
     private static let feedbackGenerator: UIImpactFeedbackGenerator = {
         let gen = UIImpactFeedbackGenerator(style: .rigid)
         gen.prepare()
@@ -21,7 +24,7 @@ struct TripPlannerView: View {
     }()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack {
                 Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
                 VStack(spacing: .zero) {
@@ -44,6 +47,7 @@ struct TripPlannerView: View {
                     .padding(.horizontal, 24.0)
                     .padding(.top, -10.0)
                     .padding(.bottom, 10.0)
+                    CurrentTripButton(show: show)
                     ZStack {
                         VStack(spacing: .zero) {
                             if tripPlannerController.recentSearches.count > 1 {
@@ -100,13 +104,13 @@ struct TripPlannerView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showSettings) {
+            .sheet(isPresented: $showSettings, onDismiss: showJourneyAfterSheets) {
                 SettingsView()
             }
-            .sheet(isPresented: $dateDialog) {
+            .sheet(isPresented: $dateDialog, onDismiss: showJourneyAfterSheets) {
                 TripPlannerDatePicker($dateDialog)
             }
-            .sheet(isPresented: $showStopList) {
+            .sheet(isPresented: $showStopList, onDismiss: showJourneyAfterSheets) {
                 StopListView(stop: self.$stop, isPresented: self.$showStopList)
             }
             .alert(
@@ -117,6 +121,23 @@ struct TripPlannerView: View {
                 if let message = error.failureReason {
                     Text(message)
                 }
+            }
+            .onReceive(GlobalController.appState.$pendingJourney.compactMap { $0 }) { journey in
+                // Received as it is set, which would overwrite a nil set now.
+                DispatchQueue.main.async {
+                    if GlobalController.appState.pendingJourney == journey {
+                        GlobalController.appState.pendingJourney = nil
+                    }
+                }
+                guard showSettings || dateDialog || showStopList else {
+                    show(journey)
+                    return
+                }
+                // The detail presents its own sheet, which can't come up over these.
+                journeyAfterSheets = journey
+                showSettings = false
+                dateDialog = false
+                showStopList = false
             }
             .onChange(of: stop) { stop in
                 if lastField == "from" {
@@ -133,6 +154,19 @@ struct TripPlannerView: View {
                 }
             }
         }
+    }
+
+    /// Replaces another journey's detail, but not this one's.
+    private func show(_ journey: Journey) {
+        if path.last != journey {
+            path = [journey]
+        }
+    }
+
+    private func showJourneyAfterSheets() {
+        guard let journey = journeyAfterSheets else { return }
+        journeyAfterSheets = nil
+        show(journey)
     }
 
     private var currentSearchID: RecentTripSearch.ID {
@@ -219,6 +253,51 @@ struct TripPlannerView: View {
             Text("Plan your first trip.").foregroundColor(.secondaryLabel)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+/// The trip followed on the Lock Screen, which after a relaunch has no other way back in the app. It observes the trip
+/// Live Activity itself, so the trip's refreshes redraw only this entry, not the whole planner.
+private struct CurrentTripButton: View {
+    @StateObject private var tripLiveActivity = GlobalController.tripLiveActivity
+    let show: (Journey) -> Void
+
+    var body: some View {
+        if let journey = tripLiveActivity.journey {
+            Button {
+                show(journey)
+            } label: {
+                HStack(spacing: 12.0) {
+                    Image(systemName: "dot.radiowaves.left.and.right")
+                        .font(.title3.weight(.semibold))
+                        .foregroundColor(.accentColor)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 2.0) {
+                        Text("Current trip")
+                            .font(.headline)
+                        Text("\(journey.parts?.first?.startStopName ?? "Start") → \(journey.parts?.last?.endStopName ?? "End")")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 8.0)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundColor(.tertiaryLabel)
+                        .accessibilityHidden(true)
+                }
+                .padding(.horizontal, 16.0)
+                .padding(.vertical, 12.0)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.secondarySystemGroupedBackground)
+                .cornerRadius(26.0)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 16.0)
+            .padding(.bottom, 10.0)
+            .accessibilityHint("Shows the trip on the map, step by step")
+        }
     }
 }
 

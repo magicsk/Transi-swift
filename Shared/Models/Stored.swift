@@ -38,4 +38,6 @@ struct Stored {
     static let passZones = "pass_zones"
     static let passNetworkWide = "pass_network_wide"
     static let passBankCard = "pass_bank_card"
+    /// The followed trip Live Activity's journey, keyed by activity id.
+    static let tripLiveActivities = "trip_live_activities"
 }

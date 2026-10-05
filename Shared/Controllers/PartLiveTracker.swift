@@ -37,9 +37,9 @@ final class PartLiveTracker {
     private var busID: String?
 
     /// Watches `part` at `stop` (the boarding stop by default) and calls `onUpdate` on the main thread with
-    /// its departure there, or nil while it is not on the board. Follows the first vehicle matched live, or
-    /// `busID` from an earlier tracker, and never switches to another one. Nil for walks and stops missing
-    /// from the stops list. Call on the main thread.
+    /// its departure there, or nil while it is not on the board, once the whole board loaded after each connect.
+    /// Follows the first vehicle matched live, or `busID` from an earlier tracker, and never switches to another
+    /// one. Nil for walks and stops missing from the stops list. Call on the main thread.
     init?(
         part: Part, at stop: PartStop? = nil, busID: String? = nil,
         onUpdate: @escaping (Connection?, VehicleInfo?) -> Void
@@ -61,7 +61,9 @@ final class PartLiveTracker {
         // Only reads the board: the table's Live Activities for this stop stay with their own controllers.
         let controller = SimpleVirtualTableController(stop: boardStop.id, updatesLiveActivities: false)
         controller.onUpdate = { [weak self, weak controller] in
-            guard let self, let controller else { return }
+            // Until the whole board loads, a vehicle missing from it may only be missing from the regional
+            // departures, and a regional row could take the place of the city vehicle followed.
+            guard let self, let controller, controller.hasWholeBoard else { return }
             let connection = part.liveConnection(
                 in: controller.connections, platform: platform, scheduled: scheduled, busID: self.busID
             )

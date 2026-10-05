@@ -154,6 +154,12 @@
 		DAEF77B32974680B008D66DE /* StopListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEF77B22974680B008D66DE /* StopListView.swift */; };
 		DAF4A9242BF1058600A46591 /* Vehicles.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA737DEE2B9116840093FAC6 /* Vehicles.xcassets */; };
 		DAF4C8242F14236D00C6E906 /* TripPlannerController+Mapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF4C8232F14236D00C6E906 /* TripPlannerController+Mapping.swift */; };
+		6B15C0691A2C4EA090B5991D /* TripActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83B790C902B48CABFC94B04 /* TripActivityAttributes.swift */; };
+		722E5E531CD74725AF173901 /* TripActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83B790C902B48CABFC94B04 /* TripActivityAttributes.swift */; };
+		80D48C58F1134B7BB5F50FB4 /* TripActivityLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5852F7EB3C40D79C06485E /* TripActivityLiveActivity.swift */; };
+		90505F7AB9054555B073A116 /* TripProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = F99E5CA7DE1242479D9BA5C6 /* TripProgress.swift */; };
+		DAB3FC92F30F4FA6B939E816 /* TripLiveActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA11E9CCDDF47E698080B05 /* TripLiveActivityController.swift */; };
+		0B44975AC9BD4BE0A56ED202 /* StartTripButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 452F8E6699EF4D0F83B53AB4 /* StartTripButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -296,6 +302,11 @@
 		DAEF77B029744893008D66DE /* Stops.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stops.swift; sourceTree = "<group>"; };
 		DAEF77B22974680B008D66DE /* StopListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopListView.swift; sourceTree = "<group>"; };
 		DAF4C8232F14236D00C6E906 /* TripPlannerController+Mapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TripPlannerController+Mapping.swift"; sourceTree = "<group>"; };
+		C83B790C902B48CABFC94B04 /* TripActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripActivityAttributes.swift; sourceTree = "<group>"; };
+		ED5852F7EB3C40D79C06485E /* TripActivityLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripActivityLiveActivity.swift; sourceTree = "<group>"; };
+		F99E5CA7DE1242479D9BA5C6 /* TripProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripProgress.swift; sourceTree = "<group>"; };
+		DCA11E9CCDDF47E698080B05 /* TripLiveActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripLiveActivityController.swift; sourceTree = "<group>"; };
+		452F8E6699EF4D0F83B53AB4 /* StartTripButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartTripButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -347,6 +358,7 @@
 				DA1C7E620F2B4C6D8E9A1B2C /* TripDetailView.swift */,
 				DA1C7E640F2B4C6D8E9A1B2C /* TripDetailSheet.swift */,
 				DA7C1C0E2F90A00100A1B2C3 /* TripTicketButton.swift */,
+				452F8E6699EF4D0F83B53AB4 /* StartTripButton.swift */,
 				DA500BF32A1140D700630226 /* TripPlannerTransitListItem.swift */,
 				DA500BF52A1140E600630226 /* TripPlannerWalkListItem.swift */,
 				DA0976BB2B68258E00ABD463 /* TripPlannerDatePicker.swift */,
@@ -487,6 +499,7 @@
 				DAE714E12B2FAF650059B8A1 /* Timetables.swift */,
 				DA1D343E9BA7330709940737 /* TimetableManifest.swift */,
 				DABD03272A0AF7B800FD2C4B /* Trip.swift */,
+				F99E5CA7DE1242479D9BA5C6 /* TripProgress.swift */,
 				DA63552F29E48A3E00AAD7C0 /* VehicleInfo.swift */,
 				DAB0094F2B2E7383009DF2CD /* Stored.swift */,
 				DA7C1C0A2F90A00100A1B2C3 /* TicketCatalogue.swift */,
@@ -539,6 +552,7 @@
 				DAC95A0C2B77A93C005E93C7 /* VirtualTableController.swift */,
 				DAD294B82BA38C9900875B3A /* SimpleVirtualTableController.swift */,
 				DA1C7E5A0F2B4C6D8E9A1B2C /* PartLiveTracker.swift */,
+				DCA11E9CCDDF47E698080B05 /* TripLiveActivityController.swift */,
 				DAC95A0E2B77A948005E93C7 /* TripPlannerController.swift */,
 				DAE77C562B8A5C9B008F3185 /* VirtualTableLiveActivityController.swift */,
 				DAFC0A95B266F008A6B94431 /* TimetableDatabase.swift */,
@@ -590,6 +604,8 @@
 				DA1C5A172CB49F3C00DB1032 /* VirtualTableActivityLiveViewLarge.swift */,
 				DA4DDA582B8BF86100E8DFCA /* VirtualTableActivityBundle.swift */,
 				DAE77C462B88DE8C008F3185 /* VirtualTableActivityLiveActivity.swift */,
+				ED5852F7EB3C40D79C06485E /* TripActivityLiveActivity.swift */,
+				C83B790C902B48CABFC94B04 /* TripActivityAttributes.swift */,
 				DAE77C4E2B88DE8E008F3185 /* Info.plist */,
 				DAD16F2F2C1B085700E620C4 /* VirtualTableActivityLiveView.swift */,
 				DA96FBC12CBDBC1600660BB9 /* VirtualTableActivityLiveDynamicView.swift */,
@@ -761,6 +777,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B44975AC9BD4BE0A56ED202 /* StartTripButton.swift in Sources */,
+				DAB3FC92F30F4FA6B939E816 /* TripLiveActivityController.swift in Sources */,
+				90505F7AB9054555B073A116 /* TripProgress.swift in Sources */,
+				6B15C0691A2C4EA090B5991D /* TripActivityAttributes.swift in Sources */,
 				DAA2CD08BD4588BC2DF3A2FE /* TimetableManifest.swift in Sources */,
 				DAE6A3FAB566B3F8D5A243FC /* SQLite.swift in Sources */,
 				DA87394F8A900FB8EE491E85 /* Gzip.swift in Sources */,
@@ -875,6 +895,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				80D48C58F1134B7BB5F50FB4 /* TripActivityLiveActivity.swift in Sources */,
+				722E5E531CD74725AF173901 /* TripActivityAttributes.swift in Sources */,
 				DA4DDA5F2B8BF9F500E8DFCA /* LineText.swift in Sources */,
 				DAD16F312C1B085700E620C4 /* VirtualTableActivityLiveView.swift in Sources */,
 				DA737DE32B8FB4700093FAC6 /* Stops.swift in Sources */,

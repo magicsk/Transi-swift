@@ -136,7 +136,6 @@ enum VirtualTableLiveActivityController {
 
         var alertConfig: AlertConfiguration?
         let departureTimeRemainingRaw = Int(connection.departureTimeRaw - Date().timeIntervalSince1970)
-        let liveActivitySounds = UserDefaults.standard.bool(forKey: Stored.liveActivitiesSounds)
 
         let notifyOnTimeChange = UserDefaults.standard.bool(forKey: Stored.notifyOnTimeChange)
         let notifyOnDelayChange = UserDefaults.standard.bool(forKey: Stored.notifyOnDelayChange)
@@ -160,7 +159,16 @@ enum VirtualTableLiveActivityController {
             )
         }
         await activity?.update(using: updatedContentState, alertConfiguration: alertConfig)
-        if alertConfig != nil, liveActivitySounds, GlobalController.appState.phase == .background, await UIApplication.shared.isProtectedDataAvailable {
+        if alertConfig != nil {
+            await playAlertSound()
+        }
+    }
+
+    /// Live Activity alerts are silent; in the background the app plays their sound when the setting allows it.
+    static func playAlertSound() async {
+        if UserDefaults.standard.bool(forKey: Stored.liveActivitiesSounds),
+           GlobalController.appState.phase == .background, await UIApplication.shared.isProtectedDataAvailable
+        {
             AudioServicesPlayAlertSound(SystemSoundID(1111))
         }
     }
