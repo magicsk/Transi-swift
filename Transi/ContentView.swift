@@ -45,7 +45,12 @@ struct ContentView: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UITabBarController, context _: Context) {
-        uiViewController.selectedIndex = selectedIndex
+        // Setting even an unchanged index makes iOS 27 refresh the tab's floating bar inside this update,
+        // which invalidates this view again and loops until the watchdog kills the app.
+        let selectionChanged = uiViewController.selectedIndex != selectedIndex
+        if selectionChanged {
+            uiViewController.selectedIndex = selectedIndex
+        }
         if #available(iOS 26.0, *) {} else {
             let tabBarAppearance = UITabBarAppearance()
             if uiViewController.selectedIndex == 3 {
@@ -56,7 +61,7 @@ struct ContentView: UIViewControllerRepresentable {
             uiViewController.tabBar.scrollEdgeAppearance = tabBarAppearance
         }
 
-        if let searchVC = uiViewController.viewControllers?[selectedIndex] as? HybridSearchViewController {
+        if selectionChanged, let searchVC = uiViewController.viewControllers?[selectedIndex] as? HybridSearchViewController {
             DispatchQueue.main.async {
                 searchVC.searchController?.searchBar.becomeFirstResponder()
             }
