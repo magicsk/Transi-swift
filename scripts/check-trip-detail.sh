@@ -25,6 +25,8 @@ xcrun swiftc -module-cache-path "$transi_test_cache" -target "$(uname -m)-apple-
     "$shared/Controllers/TripPlannerController+Mapping.swift" \
     "$transi_test_cache/stubs.swift" "$transi_test_cache/main.swift"
 "$transi_test_cache/check" "$transi_root/scripts/fixtures/trip-detail.json"
+# Again on a device far from Bratislava: the API's Bratislava times must not depend on it, and day names follow it.
+TZ=Asia/Tokyo "$transi_test_cache/check" "$transi_root/scripts/fixtures/trip-detail.json"
 exit
 
 : <<'SWIFT'
@@ -276,4 +278,76 @@ for (time, delay, expected) in liveCases {
            "Live at \(time), \(delay ?? 0) s late")
 }
 print("PASS: \(liveCases.count) live window cases")
+
+// Train stops come with empty platform letters, which map to none, so no bare platform sign shows.
+var emptyCodes = fixture.raptor.journey![0]
+emptyCodes.parts![0].startStopCode = ""
+emptyCodes.parts![0].endStopCode = ""
+let noCodes = planner.mapRApiToJourneys([emptyCodes])[0].parts![0]
+assert(noCodes.startStopCode == nil && noCodes.endStopCode == nil, "R-API empty stop codes")
+let trainTrip = BApiTrip(tripId: 3, tripDelay: nil, stopTimes: [
+    BApiStopTime(stopId: 1, stationId: nil, stopGps: nil, stopCode: "", stopName: "Bratislava-Nové Mesto",
+                 arrival: 754, departure: 754, zone: "100"),
+    BApiStopTime(stopId: 2, stationId: nil, stopGps: nil, stopCode: nil, stopName: "Svätý Jur",
+                 arrival: 769, departure: 769, zone: "111"),
+])
+assert(trainTrip.partStops(for: leg(1, 2, at: "2026-10-05 12:34"), stops: [])?.map(\.platform) == [nil, nil],
+       "B-API empty stop codes")
+let fixtureJSON = try String(contentsOf: URL(fileURLWithPath: CommandLine.arguments[1]), encoding: .utf8)
+let emptyLabels = try apiDecoder.decode(
+    Fixture.self, from: Data(fixtureJSON.replacingOccurrences(of: #""label":"A""#, with: #""label":"""#).utf8)
+)
+let emptyLabelParts = planner.mapIApiToJourneys(emptyLabels.cepo.journeys ?? [], stops: fixture.stops)[0].parts!
+assert(emptyLabelParts[0].startStopCode == nil && emptyLabelParts[0].stops?.first?.platform == nil
+       && emptyLabelParts[0].stops?.first?.stopId == 94, "I-API empty labels, still joined to the stops list")
+assert(emptyLabelParts.allSatisfy { part in
+    part.startStopCode != "" && part.endStopCode != "" && (part.stops ?? []).allSatisfy { $0.platform != "" }
+}, "No empty I-API platform letters")
+assert(String?.none.nonEmpty == nil && String?.some("").nonEmpty == nil && String?.some("B").nonEmpty == "B",
+       "Empty platforms are none")
+print("PASS: empty R-API, B-API and I-API platform letters map to none")
+
+// A known delay moves a vehicle's times as the trip Live Activity shows them.
+let scheduledBoarding = local("2026-10-05 12:19")
+assert(scheduledBoarding.expected(delaySeconds: nil) == scheduledBoarding, "No delay")
+assert(scheduledBoarding.expected(delaySeconds: 180) == local("2026-10-05 12:22"), "3 min late")
+assert(scheduledBoarding.expected(delaySeconds: -120) == local("2026-10-05 12:17"), "2 min early")
+// Moved by the whole minutes the delay reads as, so a time is struck through exactly when the delay text says
+// "+1 min" or more, and agrees with the change buffers.
+let expectedCases: [(seconds: Int, time: String)] = [
+    (20, "12:19"), (29, "12:19"), (30, "12:20"), (50, "12:20"), (90, "12:21"), (-50, "12:18"),
+]
+for (seconds, time) in expectedCases {
+    let expected = scheduledBoarding.expected(delaySeconds: seconds)
+    assert(expected == local("2026-10-05 \(time)"), "\(seconds) s late shows \(time)")
+    assert(expected == scheduledBoarding + TimeInterval(delayMinutes(seconds) * 60), "\(seconds) s as its delay text")
+    assert((timeStringFromDate(expected) != timeStringFromDate(scheduledBoarding)) == (delayMinutes(seconds) != 0),
+           "\(seconds) s: the scheduled time is struck through only beside a delay in minutes")
+}
+print("PASS: expected times, \(expectedCases.count) delays in whole minutes")
+
+// Journeys on another day than today on the device's clock say which, beside a time shown on that clock.
+let device = Calendar.current
+let laterToday = device.startOfDay(for: Date()).addingTimeInterval(60)
+let tomorrow = device.date(byAdding: .day, value: 1, to: laterToday)!
+let yesterday = device.date(byAdding: .day, value: -1, to: laterToday)!
+let inThreeDays = device.date(byAdding: .day, value: 3, to: laterToday)!
+assert(dayStringUnlessToday(laterToday) == nil, "Today")
+for day in [tomorrow, yesterday] {
+    assert(dayStringUnlessToday(day).map { $0.rangeOfCharacter(from: .decimalDigits) == nil } == true,
+           "Next to today, in words: \(dayStringUnlessToday(day) ?? "nil")")
+}
+assert(dayStringUnlessToday(tomorrow) != dayStringUnlessToday(yesterday), "Tomorrow isn't yesterday")
+assert(dayStringUnlessToday(inThreeDays).map { $0.rangeOfCharacter(from: .decimalDigits) != nil } == true,
+       "In three days, a date: \(dayStringUnlessToday(inThreeDays) ?? "nil")")
+assert(dayStringUnlessToday(inThreeDays)?.contains(String(device.component(.year, from: inThreeDays))) == false,
+       "A short date, without the year")
+// Just after and before midnight on the device, which the second run puts 7 hours ahead of Bratislava.
+let afterMidnight = device.date(byAdding: .minute, value: 29, to: tomorrow)!
+let beforeMidnight = device.date(byAdding: .minute, value: -31, to: tomorrow)!
+assert(dayStringUnlessToday(afterMidnight) == dayStringUnlessToday(tomorrow) && dayStringUnlessToday(afterMidnight) != nil,
+       "\(timeStringFromDate(afterMidnight)) is tomorrow: \(dayStringUnlessToday(afterMidnight) ?? "nil")")
+assert(dayStringUnlessToday(beforeMidnight) == nil,
+       "\(timeStringFromDate(beforeMidnight)) is today: \(dayStringUnlessToday(beforeMidnight) ?? "nil")")
+print("PASS: day names for journeys not today, in \(TimeZone.current.identifier)")
 SWIFT

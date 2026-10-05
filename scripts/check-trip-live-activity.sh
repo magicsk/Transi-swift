@@ -1,0 +1,436 @@
+#!/bin/bash
+set -euo pipefail
+
+transi_root="$(cd "$(dirname "$0")/.." && pwd)"
+transi_test_cache="$(mktemp -d "${TMPDIR:-/tmp}/transi-trip-live-activity-check.XXXXXX")"
+trap 'rm -r -- "$transi_test_cache"' EXIT
+
+# Compile the production trip models, the trip Live Activity's step logic without ActivityKit (unavailable on
+# macOS) and the trip detail's following of it, then replay the real legs of scripts/fixtures/trip-detail.json.
+sed -n '/^\/\/ Swift regression checks/,/^SWIFT$/ { /^SWIFT$/!p; }' "$0" > "$transi_test_cache/main.swift"
+{
+    printf '%s\n' 'class TripPlannerController {}' 'protocol ActivityAttributes {}'
+    grep -v '^import ActivityKit$' "$transi_root/VirtualTableActivity/TripActivityAttributes.swift"
+    awk '/^extension Part \{/,/^}/' "$transi_root/Shared/Controllers/PartLiveTracker.swift"
+    # The trip detail's steps and map focus, which follow the trip's progress.
+    awk '/^enum JourneyStep/,/^}/
+        /^enum MapFocus/,/^}/
+        /^extension Journey \{/,/^}/
+        /^extension Part \{/,/^}/
+        /^extension TripProgress \{/,/^}/' "$transi_root/Transi/Trip Planner/TripDetailModel.swift"
+} > "$transi_test_cache/stubs.swift"
+shared="$transi_root/Shared"
+xcrun swiftc -module-cache-path "$transi_test_cache" -target "$(uname -m)-apple-macosx14.0" \
+    -o "$transi_test_cache/check" \
+    "$shared/Models/Trip.swift" "$shared/Models/TripProgress.swift" "$shared/Models/StopGps.swift" \
+    "$shared/Models/ApiModels.swift" "$shared/Models/AnyCodable.swift" "$shared/Models/Stops.swift" \
+    "$shared/Models/Table.swift" "$shared/Util/DateTime.swift" "$shared/Extensions/Date.swift" \
+    "$shared/Extensions/String.swift" "$shared/Extensions/CLLocationCoordinate2D.swift" \
+    "$shared/Controllers/TripPlannerController+Mapping.swift" \
+    "$transi_test_cache/stubs.swift" "$transi_test_cache/main.swift"
+"$transi_test_cache/check" "$transi_root/scripts/fixtures/trip-detail.json"
+exit
+
+: <<'SWIFT'
+// Swift regression checks
+import Foundation
+
+struct Fixture: Decodable {
+    let raptor: RApiTrip
+    let trip: BApiTrip
+    let cepo: IApiTripResponse
+    let stops: [Stop]
+}
+
+let apiDecoder = JSONDecoder()
+apiDecoder.keyDecodingStrategy = .convertFromSnakeCase
+let fixture = try apiDecoder.decode(
+    Fixture.self, from: Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[1]))
+)
+let localFormatter = DateFormatter()
+localFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+localFormatter.timeZone = TimeZone(identifier: "Europe/Bratislava")
+func local(_ time: String) -> Date { localFormatter.date(from: "2026-10-05 \(time.count == 5 ? time + ":00" : time)")! }
+let planner = TripPlannerController()
+
+// R-API: 72 Hronská A 08:00 → Rajská A 08:21 with its 18 stops from the B-API, a 10-minute walk, then
+// 31 Kollárovo nám. D 08:31 → Zochova B 08:33, whose stops did not load (boarding and alighting only).
+let rJourneys = planner.mapRApiToJourneys(fixture.raptor.journey ?? [])
+var walkChange = rJourneys[0]
+walkChange.parts![0].stops = fixture.trip.partStops(for: walkChange.parts![0], stops: fixture.stops)
+// I-API: 72 Hronská → Autobusová stanica 08:18, 42 from the same platform at 08:21 to Kollárovo nám. B,
+// 80 from there at 08:31 to Zochova; every leg with its full stop list.
+let sameStopChanges = planner.mapIApiToJourneys(fixture.cepo.journeys ?? [], stops: fixture.stops)[0]
+
+func at(
+    _ time: String, _ journey: Journey = walkChange, live: [Int: Int] = [:], passedStops: [Int: Int] = [:],
+    alerted: Set<String> = []
+) -> TripUpdate {
+    journey.update(at: local(time), delays: journey.delays(live: live), passedStops: passedStops, alerted: alerted)
+}
+
+// Before boarding: the first vehicle at its boarding stop, live delay included.
+let waiting = at("07:56")
+assert(waiting.progress.phase == .board(0) && waiting.state.step == .board && waiting.state.line == "72", "Board 72")
+assert(waiting.state.title == "Board at Hronská" && waiting.state.detail == "Platform A · in 4 min"
+       && waiting.state.compact == "4 min" && waiting.state.minimal == "4m" && waiting.state.delay == nil,
+       "Board text: \(waiting.state)")
+let late = at("07:56", live: [0: 120])
+assert(late.state.detail == "Platform A · in 6 min" && late.state.delay == 2 && late.state.time == local("08:02"),
+       "A 2-minute late 72 leaves at 08:02")
+assert(at("08:01", live: [0: 120]).progress.phase == .board(0), "Still waiting for the late 72 at 08:01")
+// The time moves by the whole minutes the delay reads as, like the trip detail's times and change buffers.
+for (seconds, minutes, time) in [(20, 0, "08:00"), (50, 1, "08:01"), (90, 2, "08:02"), (-50, -1, "07:59")] {
+    let shown = at("07:56", live: [0: seconds]).state
+    assert(shown.delay == minutes && shown.time == local(time), "\(seconds) s late reads \(time): \(shown)")
+}
+assert(at("07:59:30").state.detail == "Platform A · in <1 min" && at("06:50").state.detail == "Platform A · at "
+       + timeStringFromDate(local("08:00")), "Countdown under a minute and over an hour")
+assert(waiting.state.warning == .tightChange, "The 31 leaves as the walk ends: a tight change ahead")
+assert(at("07:56").alert == nil, "No alert before boarding")
+assert(walkChange.trackerTargets(for: waiting.progress) == [TripTrackerTarget(part: 0, stop: 0)],
+       "Watch only the boarding stop")
+print("PASS: before boarding, with and without a live delay")
+
+// Riding: stops left from the stop times, corrected by the stop the vehicle left last.
+let riding = at("08:10:30")
+assert(riding.progress == TripProgress(phase: .ride(0), nextStop: 10, stopsLeft: 8, fraction: 0.56),
+       "Pažítková is next, 8 stops to Rajská: \(riding.progress)")
+assert(riding.state.title == "Get off in 8 stops" && riding.state.detail == "Rajská, platform A"
+       && riding.state.compact == "8 stops" && riding.state.minimal == "8" && riding.state.time == local("08:21"),
+       "Ride text: \(riding.state)")
+let behind = at("08:10:30", passedStops: [0: 7])
+assert(behind.progress.stopsLeft == 10 && behind.progress.nextStop == 8 && behind.progress.fraction! < 0.56,
+       "The vehicle left Brodná last: 10 stops left")
+assert(at("08:12", live: [0: 120]).progress.stopsLeft == 8, "A delay shifts every stop time")
+assert(walkChange.trackerTargets(for: riding.progress)
+       == [TripTrackerTarget(part: 0, stop: 10), TripTrackerTarget(part: 2, stop: 0)],
+       "Follow the 72 at Pažítková and watch the 31 at Kollárovo nám.")
+let lastStop = at("08:20:30")
+assert(lastStop.progress.stopsLeft == 1 && lastStop.state.title == "Get off at the next stop", "Next stop")
+assert(walkChange.trackerTargets(for: lastStop.progress)
+       == [TripTrackerTarget(part: 0, stop: 16), TripTrackerTarget(part: 2, stop: 0)],
+       "The 72 ends at Rajská, so keep following it at Ondrejský cintorín")
+assert(at("08:20:30", passedStops: [0: 17]).state.title == "Get off now", "Left the alighting stop")
+print("PASS: stops left, live position, delay shift and the followed stop")
+
+// Changes: the walk to another stop, then two same-platform changes.
+let change = at("08:25")
+assert(change.progress.phase == .change(2) && change.state.title == "Walk to platform D"
+       && change.state.detail == "Kollárovo nám. · 31 leaves in 6 min" && change.state.compact == "D · 6m"
+       && change.state.minimal == "D" && change.state.line == "31" && change.state.warning == .tightChange,
+       "Change text: \(change.state)")
+assert(change.alert == TripAlert(key: "change-2", title: "Change to platform D",
+                                 body: "Kollárovo nám. · 31 leaves in 6 min"), "Change alert")
+assert(walkChange.trackerTargets(for: change.progress) == [TripTrackerTarget(part: 2, stop: 0)], "Watch the 31")
+let missed = at("08:15", live: [0: 63])
+assert(missed.state.warning == .likelyMissedChange && missed.alert?.key == "missed-2"
+       && missed.alert?.title == "Change likely missed"
+       && missed.alert?.body == "31 leaves Kollárovo nám. at \(timeStringFromDate(local("08:31")))",
+       "A 63 s late 72 misses the 31: \(String(describing: missed.alert))")
+let onTime = at("08:15", live: [0: 29])
+assert(onTime.state.delay == 0 && onTime.state.warning == .tightChange && onTime.alert == nil
+       && at("08:15", live: [0: 30]).state.warning == .likelyMissedChange,
+       "The change is likely missed once the 72's delay shows as +1 min, not while it shows on time")
+assert(at("08:15", live: [0: 63, 2: 120]).state.warning == .tightChange, "A late 31 still waits")
+let atStation = at("08:19", sameStopChanges)
+assert(atStation.progress.phase == .change(1) && atStation.state.title == "Wait at platform A"
+       && atStation.state.detail == "42 leaves in 2 min", "Same-platform change: \(atStation.state)")
+assert(at("08:28", sameStopChanges).state.title == "Wait at platform B", "Second same-platform change")
+let toStation = at("08:17:30", sameStopChanges)
+assert(sameStopChanges.trackerTargets(for: toStation.progress)
+       == [TripTrackerTarget(part: 0, stop: 15), TripTrackerTarget(part: 1, stop: 0)],
+       "The 72 continues past Autobusová stanica, so follow it there")
+print("PASS: change steps, platforms, tight and likely missed changes")
+
+// The last leg and the arrival.
+let fallback = at("08:32")
+assert(fallback.progress == TripProgress(phase: .ride(2), nextStop: 1, stopsLeft: nil, fraction: 0.5)
+       && fallback.state.title == "Get off in 1 min" && fallback.state.detail == "Zochova, platform B"
+       && fallback.state.compact == "1 min", "Without its stops the 31 counts minutes: \(fallback.state)")
+assert(fallback.alert?.key == "off-2" && fallback.alert?.title == "Get off in 1 min", "Get off without stops")
+assert(walkChange.trackerTargets(for: fallback.progress) == [TripTrackerTarget(part: 2, stop: 1)],
+       "Follow the 31 at Zochova")
+let lastLeg = at("08:32", sameStopChanges)
+assert(lastLeg.progress.stopsLeft == 1 && lastLeg.state.title == "Get off at the next stop", "Two-stop leg")
+let arrived = at("08:34")
+assert(arrived.progress.phase == .arrived && arrived.state.title == "Arrived" && arrived.state.detail == "Zochova"
+       && arrived.state.time == local("08:33") && arrived.state.warning == nil && arrived.alert == nil, "Arrived")
+assert(walkChange.trackerTargets(for: arrived.progress).isEmpty, "No sockets once arrived")
+assert(at("08:34", live: [2: 120]).progress.phase == .ride(2), "A late 31 is still riding")
+var finalWalk = walkChange
+finalWalk.parts = Array(walkChange.parts![0...1])
+let walking = at("08:25", finalWalk)
+assert(walking.progress.phase == .walk(1) && walking.state.title == "Walk to Kollárovo nám."
+       && walking.state.detail == "Arrive in 6 min" && walking.state.line == nil, "Final walk: \(walking.state)")
+assert(at("08:32", finalWalk).progress.phase == .arrived && at("08:32", finalWalk, live: [0: 120]).progress.phase
+       == .walk(1), "The walk ends later after a late vehicle")
+print("PASS: last leg with and without stops, final walk and arrival")
+
+// The trip detail follows the step on its map and marks it in the steps.
+let leg72 = walkChange.parts![0].legStops
+func stretch(_ stops: ClosedRange<Int>, of leg: [PartStop] = leg72) -> MapFocus {
+    .stretch(leg[stops].map { $0.gps! })
+}
+assert(waiting.progress.mapFocus(on: walkChange) == .change(to: 0) && waiting.progress.step(in: walkChange) == .ride(0),
+       "Before boarding: Hronská, on the 72's step")
+assert(riding.progress.mapFocus(on: walkChange) == stretch(9 ... 10) && riding.progress.step(in: walkChange) == .ride(0),
+       "Riding: from the stop the 72 left to Pažítková")
+assert(TripProgress(phase: .ride(0), nextStop: 15, stopsLeft: 3).mapFocus(on: walkChange) == stretch(14 ... 15)
+       && TripProgress(phase: .ride(0), nextStop: 16, stopsLeft: 2).mapFocus(on: walkChange) == stretch(15 ... 17)
+       && lastStop.progress.mapFocus(on: walkChange) == stretch(16 ... 17),
+       "Rajská joins the stretch 2 stops before it")
+assert(at("08:20:30", passedStops: [0: 17]).progress.mapFocus(on: walkChange) == stretch(16 ... 17),
+       "Past Rajská: still the last stretch")
+assert(change.progress.mapFocus(on: walkChange) == .change(to: 2)
+       && change.progress.step(in: walkChange) == .walk([1], to: 2), "Changing: the walk to the 31")
+assert(fallback.progress.mapFocus(on: walkChange) == stretch(0 ... 1, of: walkChange.parts![2].legStops),
+       "The 31 without its stops: both ends")
+assert(TripProgress(phase: .ride(2)).mapFocus(on: walkChange) == .part(2), "No position: the whole leg")
+assert(atStation.progress.step(in: sameStopChanges) == .change(to: 1)
+       && atStation.progress.mapFocus(on: sameStopChanges) == .change(to: 1), "A change at the same stop")
+assert(walking.progress.mapFocus(on: finalWalk) == .part(1)
+       && walking.progress.step(in: finalWalk) == .walk([1], to: nil), "The final walk")
+assert(arrived.progress.mapFocus(on: walkChange) == .route && arrived.progress.step(in: walkChange) == nil,
+       "Arrived: the whole route, no step")
+let walkFirst = Journey(id: "walk-first", parts: Array(walkChange.parts![1...2]))
+assert(TripProgress(phase: .board(1)).step(in: walkFirst) == .walk([0], to: 1)
+       && TripProgress(phase: .board(1)).mapFocus(on: walkFirst) == .change(to: 1),
+       "Before boarding after a walk: the walk to the stop")
+print("PASS: the detail follows each step on the map and marks it")
+
+// Alerts fire once per step: replay a 72 stuck between Autobusová stanica and Ondrejský cintorín, its
+// position flapping and its delay growing every 10 s, then moving on to Rajská and the change.
+var alerted = Set<String>()
+var alerts = [String]()
+var dueWithoutMemory = 0
+var delay = 0
+var previousPhase = TripProgress.Phase.board(0)
+var phases = [TripProgress.Phase]()
+for second in stride(from: 0, through: 15 * 60, by: 10) {
+    let now = local("08:19").addingTimeInterval(TimeInterval(second))
+    if second < 8 * 60 {
+        delay += 10
+    } else if second == 11 * 60 {
+        delay += 90 // stuck again right after arriving: the ride resumes on paper
+    }
+    // Autobusová stanica, Ondrejský cintorín, Rajská.
+    let position = second < 8 * 60 ? (second % 20 == 0 ? 15 : 16) : 17
+    let update = walkChange.update(
+        at: now, delays: walkChange.delays(live: [0: delay]), passedStops: [0: position], alerted: alerted
+    )
+    if let alert = update.alert { alerts.append(alert.key) }
+    alerted = update.state.alerted
+    let unremembered = walkChange.update(
+        at: now, delays: walkChange.delays(live: [0: delay]), passedStops: [0: position]
+    )
+    if unremembered.alert != nil {
+        dueWithoutMemory += 1
+    }
+    if update.progress.phase != previousPhase { phases.append(update.progress.phase) }
+    previousPhase = update.progress.phase
+}
+assert(phases.contains(.change(2)) && phases.filter { $0 == .ride(0) }.count == 2, "Phases flap: \(phases)")
+assert(dueWithoutMemory >= 40, "The replay keeps alerts due on most ticks (\(dueWithoutMemory))")
+// The delay shows as +1 min from 30 s (08:19:20), after the 72 left Ondrejský cintorín (08:19:10) for Rajská.
+assert(alerts == ["off-0", "missed-2", "change-2", "off-2"], "Each alert once: \(alerts)")
+print("PASS: a stuck, flapping vehicle alerts \(alerts.count)× instead of \(dueWithoutMemory)× in 15 min: \(alerts)")
+
+// Restoring: the alerts shown live in the content state, which survives a relaunch.
+let restored = try JSONDecoder().decode(
+    TripActivityAttributes.ContentState.self, from: JSONEncoder().encode(at("08:25").state)
+)
+assert(restored.alerted == ["change-2"] && at("08:25:30", alerted: restored.alerted).alert == nil,
+       "No repeat after a relaunch")
+let payload = try JSONEncoder().encode(at("08:25", sameStopChanges, live: [0: 63], alerted: alerted).state)
+assert(payload.count < 1024, "Content state stays small: \(payload.count) bytes")
+print("PASS: alerts survive a relaunch, \(payload.count)-byte content state")
+
+// Delays: live only from online rows, else the B-API or search-time delay.
+var online = Connection.example
+online.delay = 2
+var timetable = online
+timetable.type = "cp"
+assert(online.liveDelaySeconds == 120 && timetable.liveDelaySeconds == nil, "Only online rows are live")
+let searchDelay = rJourneys[1]
+assert(searchDelay.delays(live: [:]) == [0: 63] && searchDelay.delays(live: [0: 120]) == [0: 120],
+       "Live delays win over the search-time delay")
+assert(walkChange.delays(live: [:]).isEmpty, "No delay data")
+print("PASS: delay sources")
+
+// Live boards: a stop's board lists the followed vehicle with the stop it left last until it leaves, then drops it.
+let leg = walkChange.parts![0]
+func row(_ part: Part, busID: String = "1:2552", lastStop: String, leaves: Date, late: Int = 0) -> Connection {
+    var row = Connection.example
+    row.line = part.routeShortName ?? ""
+    row.busID = busID
+    row.lastStopName = lastStop
+    row.departureTimeRaw = leaves.timeIntervalSince1970
+    row.departureTimeCP = leaves.timeIntervalSince1970 - TimeInterval(late)
+    row.delay = late / 60
+    row.type = "online"
+    return row
+}
+let prievozska = TripTrackerTarget(part: 0, stop: 11)
+var boards = TripLiveData()
+boards.receive(row(leg, lastStop: "Bratislava, Pažítková", leaves: local("08:13")), at: prievozska, of: walkChange,
+               now: local("08:12"))
+assert(boards.passedStops == [0: 10] && boards.busIDs == [0: "1:2552"] && boards.delays == [0: 0],
+       "Prievozská's board lists the 72 with Pažítková, regional prefix and all: \(boards)")
+assert(at("08:12", passedStops: boards.passedStops).progress.stopsLeft == 7, "7 stops from Prievozská")
+let seen = boards
+boards.receive(row(leg, lastStop: "Somewhere else", leaves: local("08:13")), at: prievozska, of: walkChange,
+               now: local("08:12:10"))
+assert(boards.passedStops == seen.passedStops, "Unknown stops are ignored")
+boards.receive(nil, at: prievozska, of: walkChange, now: local("08:12:30"))
+assert(boards.passedStops == seen.passedStops, "A reconnecting board before the vehicle is due is no departure")
+boards.receive(nil, at: prievozska, of: walkChange, now: local("08:13:10"))
+assert(boards.passedStops == [0: 11] && boards.busIDs == [0: "1:2552"] && boards.delays == [0: 0],
+       "Dropped from the board once due: it passed Prievozská: \(boards)")
+let miletičova = TripTrackerTarget(part: 0, stop: 12)
+boards.receive(nil, at: miletičova, of: walkChange, now: local("08:16:59"))
+assert(boards.passedStops == [0: 11], "A board that never listed the vehicle waits 3 minutes past its time")
+boards.receive(nil, at: miletičova, of: walkChange, now: local("08:17:30"))
+assert(boards.passedStops[0] == nil && at("08:17:30", passedStops: boards.passedStops).progress.stopsLeft == 3,
+       "Then it counts by the timetable, which had it leave Košická at 08:17: \(boards.passedStops)")
+boards.receive(nil, at: TripTrackerTarget(part: 2, stop: 0), of: walkChange, now: local("08:40"))
+assert(boards.passedStops[2] == nil, "A boarding stop's board tells no position")
+print("PASS: board updates set the followed vehicle's delay and the stop it left")
+
+/// Replays the trip against live boards: a tracker's first update comes before its board loaded, then a stop's
+/// board lists the vehicle `late` seconds late with the stop it left last until it leaves that stop, and the
+/// line's next vehicle 2 minutes behind it. From `unlistedFrom` no board lists the vehicle any more. Trackers
+/// match like PartLiveTracker: start from the vehicle followed so far, else lock onto the first one live. Starts
+/// from `live` and `alerted`, as after a relaunch.
+func replayBoards(
+    _ journey: Journey, late: Int, from start: String, to end: String, unlistedFrom: String? = nil,
+    live: TripLiveData = TripLiveData(), alerted: Set<String> = []
+) -> (steps: [TripUpdate], alerts: [TripAlert], live: TripLiveData) {
+    var live = live
+    var alerted = alerted
+    var loaded = Set<TripTrackerTarget>()
+    var locked = [TripTrackerTarget: String]()
+    var steps = [TripUpdate]()
+    var alerts = [TripAlert]()
+    var now = local(start)
+    while now <= local(end) {
+        let progress = journey.progress(
+            at: now, delays: journey.delays(live: live.delays), passedStops: live.passedStops
+        )
+        for target in journey.trackerTargets(for: progress) {
+            let part = journey.parts![target.part]
+            let stops = part.legStops
+            func leaves(_ stop: Int) -> Date { stops[stop].time + TimeInterval(late) }
+            var board: Connection?
+            if loaded.insert(target).inserted {
+                locked[target] = live.busIDs[target.part]
+            } else {
+                let lastStop = stops.indices.last { leaves($0) <= now }.map { stops[$0].name } ?? "none"
+                let next = row(part, busID: "1:99", lastStop: lastStop, leaves: leaves(target.stop) + 120, late: late)
+                let ours = row(part, busID: "1:\(target.part)", lastStop: lastStop, leaves: leaves(target.stop),
+                               late: late)
+                let listsOurs = now < leaves(target.stop) && unlistedFrom.map { now < local($0) } ?? true
+                board = part.liveConnection(
+                    in: listsOurs ? [ours, next] : [next], platform: nil,
+                    scheduled: stops[target.stop].time, busID: locked[target]
+                )
+                if locked[target] == nil, let board, board.type == "online" { locked[target] = board.busID }
+            }
+            live.receive(board, at: target, of: journey, now: now)
+        }
+        let update = journey.update(
+            at: now, delays: journey.delays(live: live.delays), passedStops: live.passedStops, alerted: alerted
+        )
+        if let alert = update.alert { alerts.append(alert) }
+        alerted = update.state.alerted
+        steps.append(update)
+        now += 10
+    }
+    return (steps, alerts, live)
+}
+
+func assertCountsDown(_ replay: (steps: [TripUpdate], alerts: [TripAlert], live: TripLiveData), from first: Int,
+                      to alighting: Int, then next: TripProgress.Phase, _ name: String) {
+    let rides = replay.steps.filter { $0.progress.phase == .ride(0) }
+    let counts = rides.compactMap(\.progress.stopsLeft)
+    assert(counts.first == first && counts.last == 1 && Set(counts) == Set(1...first)
+           && zip(counts, counts.dropFirst()).allSatisfy { $0 >= $1 }, "\(name) counts down every stop: \(counts)")
+    assert(rides.last?.progress.nextStop == alighting && replay.steps.last?.progress.phase == next,
+           "\(name) ends its ride at the alighting stop: \(String(describing: rides.last?.progress))")
+    let offAlerts = replay.alerts.filter { $0.key == "off-0" }
+    assert(offAlerts.count == 1 && offAlerts[0].title == "Get off at the next stop",
+           "\(name) alerts to get off once: \(replay.alerts.map(\.key))")
+}
+
+// The 72 ends at Rajská, so its board never lists it: follow it to Ondrejský cintorín.
+let terminating = replayBoards(walkChange, late: 60, from: "07:58", to: "08:24")
+assertCountsDown(terminating, from: 17, to: 17, then: .change(2), "The 72 to Rajská")
+// The 72 goes on past Autobusová stanica, whose board lists it.
+let continuing = replayBoards(sameStopChanges, late: 60, from: "07:58", to: "08:20")
+assertCountsDown(continuing, from: 15, to: 15, then: .change(1), "The 72 to Autobusová stanica")
+print("PASS: boards that list a vehicle until it leaves count down every stop and alert to get off once")
+
+// From 08:05 no board lists the 72: once its next stop is 3 minutes overdue, it counts by the timetable, so the
+// alert to get off comes when the timetable alone would give it.
+for (journey, alighting, alertsAt, end, then) in [
+    (walkChange, 17, "08:20", "08:24", TripProgress.Phase.change(2)),
+    (sameStopChanges, 15, "08:17", "08:20", .change(1)),
+] {
+    let unlisted = replayBoards(journey, late: 0, from: "07:58", to: end, unlistedFrom: "08:05")
+    let rides = unlisted.steps.filter { $0.progress.phase == .ride(0) }
+    let counts = rides.compactMap(\.progress.stopsLeft)
+    let alertTimes = unlisted.steps.indices.filter { unlisted.steps[$0].alert?.key == "off-0" }
+        .map { local("07:58") + TimeInterval($0 * 10) }
+    assert(counts.last == 1 && zip(counts, counts.dropFirst()).allSatisfy { $0 >= $1 }
+           && rides.last?.progress.nextStop == alighting && unlisted.steps.last?.progress.phase == then,
+           "The unlisted 72 counts down to the alighting stop: \(counts)")
+    assert(alertTimes == [local(alertsAt)] && unlisted.alerts.first { $0.key == "off-0" }?.title
+           == "Get off at the next stop", "The unlisted 72 alerts to get off at \(alertsAt): \(alertTimes)")
+}
+print("PASS: a vehicle the boards stop listing counts by the timetable and alerts to get off on time")
+
+// Relaunch: the live data is saved with the journey and the trip goes on where the vehicle got to.
+let beforeRelaunch = replayBoards(walkChange, late: 60, from: "07:58", to: "08:05")
+let saved = try JSONDecoder().decode(TripLiveData.self, from: JSONEncoder().encode(beforeRelaunch.live))
+assert(saved == beforeRelaunch.live && saved.passedStops == [0: 4] && saved.busIDs[0] == "1:0"
+       && saved.delays[0] == 60, "Saved live data: \(saved)")
+let relaunched = replayBoards(walkChange, late: 60, from: "08:12", to: "08:24", live: saved,
+                              alerted: beforeRelaunch.steps.last!.state.alerted)
+assert(relaunched.steps[0].progress.stopsLeft == 7, "Catches up at once: \(relaunched.steps[0].progress)")
+assertCountsDown(relaunched, from: 7, to: 17, then: .change(2), "The relaunched 72")
+var lateLastLeg = TripLiveData()
+lateLastLeg.delays = [2: 120]
+let restoredDelays = try JSONDecoder().decode(TripLiveData.self, from: JSONEncoder().encode(lateLastLeg)).delays
+assert(at("08:34").progress.phase == .arrived && at("08:34", live: restoredDelays).progress.phase == .ride(2),
+       "The saved live delay keeps a late 31 riding after a relaunch")
+assert(!tripCanEnd(at: local("08:34"), arrival: local("08:33"), awaitsLiveData: true)
+       && tripCanEnd(at: local("08:43"), arrival: local("08:33"), awaitsLiveData: true)
+       && tripCanEnd(at: local("08:34"), arrival: local("08:33"), awaitsLiveData: false),
+       "After a relaunch, arrival on saved delays ends the trip only with live data or 10 minutes later")
+// Saved on time, the 72 to Autobusová stanica runs 10 minutes late. At 08:25 the saved delay has it arrived, so the
+// app asks the alighting stop's board, which first answers empty, then lists the 72 having left Novohradská.
+var lateRide = sameStopChanges
+lateRide.parts = [sameStopChanges.parts![0]]
+let lateLeg = lateRide.parts![0]
+var stale = TripLiveData()
+stale.delays = [0: 0]
+let alighting = lateRide.trackerTargets(for: TripProgress(phase: .ride(0)))
+assert(lateRide.progress(at: local("08:25"), delays: lateRide.delays(live: stale.delays)).phase == .arrived
+       && alighting == [TripTrackerTarget(part: 0, stop: 15)], "The relaunch asks Autobusová stanica: \(alighting)")
+stale.receive(nil, at: alighting[0], of: lateRide, now: local("08:25"))
+assert(stale.passedStops.isEmpty, "An empty board tells no position: \(stale.passedStops)")
+stale.receive(row(lateLeg, lastStop: lateLeg.legStops[13].name, leaves: lateLeg.legStops[15].time + 600, late: 600),
+              at: alighting[0], of: lateRide, now: local("08:25:05"))
+let resumed = lateRide.update(
+    at: local("08:25:05"), delays: lateRide.delays(live: stale.delays), passedStops: stale.passedStops
+)
+assert(resumed.state.title == "Get off in 2 stops" && resumed.alert == nil,
+       "The late 72 resumes 2 stops before Autobusová stanica, no alert: \(resumed.state.title)")
+print("PASS: live data survives a relaunch and the trip does not end early on stale delays")
+
+// Background mode: the table's 10 s timer finds no table activity in the background and asks to stop.
+assert(!backgroundModeCanStop(tableActivities: 0, followsTrip: true), "A trip keeps background mode")
+assert(!backgroundModeCanStop(tableActivities: 1, followsTrip: false), "A table activity keeps background mode")
+assert(backgroundModeCanStop(tableActivities: 0, followsTrip: false), "Stop once neither runs")
+print("PASS: background mode stops only once no table or trip activity runs")
+SWIFT
