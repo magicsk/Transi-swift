@@ -429,4 +429,11 @@ class VirtualTableController: ObservableObject {
             }
         }
     }
+
+    // Main thread, once the stop list loads. A stop opened before that has only its id, so fill in the rest and resubscribe.
+    func resolveCurrentStop() {
+        guard currentStop.name == nil, let stop = GlobalController.getStopById(currentStop.id) else { return }
+        currentStop = stop
+        disconnect(reconnect: true)
+    }
 }

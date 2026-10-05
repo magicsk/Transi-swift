@@ -76,6 +76,7 @@ class StopsListProvider: ObservableObject {
                                         self.stops = newStops
                                         self.unmodifiedStops = newStops
                                         self.fetchLoading = false
+                                        GlobalController.virtualTable.resolveCurrentStop()
                                         if let location = LocationProvider.lastLocation {
                                             self.sortStops(coordinates: location.coordinate)
                                         } else {
