@@ -85,14 +85,16 @@ class StopsListProvider: ObservableObject {
                                     }
                                     self.updateActualLocationEntry()
                                     Self.saveCachedStops(newStops)
+                                    // Saved only with the list, so a failed download is fetched again on next launch.
+                                    UserDefaults.standard.set(stopsVersion.version, forKey: Stored.stopsVersion)
                                 case .failure:
                                     DispatchQueue.main.async {
                                         self.fetchError = true
                                         self.fetchLoading = true
+                                        self.retryIfNoStops()
                                     }
                             }
                         }
-                        UserDefaults.standard.set(stopsVersion.version, forKey: Stored.stopsVersion)
                     }
                     GlobalController.locationProvider.startUpdatingLocation()
                     if !LocationProvider.isLocationAvailable {
@@ -103,8 +105,20 @@ class StopsListProvider: ObservableObject {
                     DispatchQueue.main.async {
                         self.fetchError = true
                         self.fetchLoading = true
+                        self.retryIfNoStops()
                     }
             }
+        }
+    }
+
+    // Main thread. Without a cached list nothing works, so keep trying until it loads.
+    // Only a failure schedules the next try, so at most one fetch runs at a time.
+    private func retryIfNoStops() {
+        guard unmodifiedStops.isEmpty else { return }
+        // ponytail: fixed 5 s interval, add backoff if the extra requests ever matter
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            // fetchStops starts location updates, which must stay off in the background.
+            if GlobalController.appState.phase == .background { self.retryIfNoStops() } else { self.fetchStops() }
         }
     }
 
