@@ -87,6 +87,10 @@ struct TripStepIcon: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: size, weight: .semibold))
                 .foregroundStyle(Color.systemGreen)
+        } else if state.step == .missed {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: size, weight: .semibold))
+                .foregroundStyle(Color.systemOrange)
         } else {
             Image(systemName: "figure.walk").font(.system(size: size, weight: .semibold))
         }
@@ -122,14 +126,6 @@ struct TripStepDetail: View {
 }
 
 extension TripActivityAttributes.ContentState {
-    var warningText: String? {
-        switch warning {
-        case .tightChange: return "Tight change"
-        case .likelyMissedChange: return "Change likely missed"
-        case nil: return nil
-        }
-    }
-
     /// Everything the Lock Screen shows, in reading order.
     var accessibilitySummary: String {
         [

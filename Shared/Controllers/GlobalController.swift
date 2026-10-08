@@ -77,12 +77,20 @@ struct GlobalController {
             case .background:
                 virtualTable.disconnect()
                 if shouldRunInBackground {
-                    locationProvider.decreaseAccuracy()
+                    // A followed trip checks where the traveller is, which needs the full accuracy.
+                    if !TripLiveActivityController.followsTrip {
+                        locationProvider.decreaseAccuracy()
+                    }
                 } else {
                     locationProvider.stopUpdatingLocation()
                 }
             case .active:
                 locationProvider.startUpdatingLocation()
+                // A followed trip keeps the full accuracy in the background, so no fresh fix may come to switch the
+                // table to where the traveller got to.
+                if LocationProvider.lastLocation != nil {
+                    stopsListProvider.showNearestStop()
+                }
                 virtualTable.connect()
                 if !LocationProvider.isLocationAvailable {
                     stopsListProvider.setDefaultStopIfNeeded()

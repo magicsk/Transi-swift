@@ -43,6 +43,36 @@ struct TripAlert: Equatable {
     let body: String
 }
 
+/// The traveller's location, good to within `accuracy` metres.
+struct TripFix: Equatable {
+    let gps: StopGps
+    let accuracy: Double
+}
+
+/// Walking pace over the straight line to a stop, slower than on foot to cover the streets' detours.
+let tripWalkMetersPerSecond = 1.0
+
+/// A ride the traveller's location showed them not on, and the other connections found from where they are.
+struct TripMissed: Equatable {
+    let part: Int
+    /// They rode it for a while, so they got off or the vehicle left its route.
+    let boarded: Bool
+    /// Nil while the search runs.
+    var alternatives: TripAlternatives?
+}
+
+/// Other connections to the destination after a missed ride.
+struct TripAlternatives: Equatable {
+    /// On the same lines as the rest of the trip: the next vehicles.
+    var sameRoute = [Journey]()
+    /// The rest, the earliest arrival first.
+    var others = [Journey]()
+
+    var isEmpty: Bool { sameRoute.isEmpty && others.isEmpty }
+    /// The earliest arrival.
+    var best: Journey? { (sameRoute + others).min { $0.expectedArrival < $1.expectedArrival } }
+}
+
 /// One recomputation of the trip Live Activity.
 struct TripUpdate {
     let progress: TripProgress
@@ -87,6 +117,70 @@ struct TripLiveData: Codable, Equatable {
     var passedStops = [Int: Int]()
     /// When the followed vehicle was due to leave each board that listed it.
     var listed = [TripTrackerTarget: Date]()
+    /// The last leg stop each vehicle left by the traveller's location while they ride it. It never moves the vehicle
+    /// the location is checked against, which comes from the boards and the timetable.
+    var located = [Int: Int]()
+    /// Rides the location showed the traveller on, past their boarding stop.
+    var boarded = Set<Int>()
+    /// Since when the location has not shown the traveller on each ride.
+    var offRide = [Int: Date]()
+    /// The ride the traveller is not on, so the trip offers other connections instead of its steps.
+    var missed: Int?
+    /// Rides the traveller kept following after the location found them off, which it no longer checks.
+    var kept = Set<Int>()
+
+    /// The last leg stop each vehicle left: on the boards, or by the location when that is further on.
+    var positions: [Int: Int] { passedStops.merging(located, uniquingKeysWith: max) }
+
+    /// One refresh of the trip: takes in `fix` against where the boards and the timetable had the vehicles a minute ago
+    /// (their whole-minute times and delays may run up to that far ahead), then the ride missed, with the other
+    /// connections in `found` (nil until the search answers).
+    mutating func locate(_ fix: TripFix?, on journey: Journey, found: [Journey]?, now: Date) -> TripMissed? {
+        if let fix {
+            let progress = journey.progress(at: now - 60, delays: journey.delays(live: delays), passedStops: passedStops)
+            receive(fix, on: journey, progress: progress, now: now)
+        }
+        return missed.map { index in
+            TripMissed(
+                part: index, boarded: boarded.contains(index),
+                alternatives: found.map { journey.alternatives($0, missed: index, at: now) }
+            )
+        }
+    }
+
+    /// Takes in the traveller's location while `progress`, from the boards and the timetable, has them riding. On the
+    /// vehicle's line and not more than a stop (or 500 m, between far stops) behind it, they ride it, and the stop they
+    /// are at counts as reached; near the alighting stop they got off there. Otherwise for 45 s they missed it, once the
+    /// vehicle is that far ahead or they are off its line. Without a live delay the vehicle may only be late: it is
+    /// missed only by staying at the boarding stop or leaving the line, and not before 5 minutes after it was due.
+    mutating func receive(_ fix: TripFix, on journey: Journey, progress: TripProgress, now: Date) {
+        guard missed == nil, case .ride(let index) = progress.phase, !kept.contains(index),
+              let part = journey.parts?[index], located[index] != part.legStops.count - 1
+        else { return }
+        let stops = part.legStops
+        let vehicle = (progress.fraction ?? 0) * Double(stops.count - 1)
+        guard let place = part.placement(of: fix, near: vehicle) else { return }
+        let isLive = delays[index] != nil
+        let behind = place.stop < vehicle - 1 || place.meters(atStop: vehicle) - place.along > 500
+        let rides = place.onLine && (!behind || !isLive && place.along >= 150)
+        let alighted = stops.last?.gps.map { fix.gps.distance(to: $0) <= 300 + fix.accuracy } ?? false
+        if rides || alighted {
+            offRide[index] = nil
+            if rides, place.along >= 150 {
+                boarded.insert(index)
+            }
+            let next = rides ? place.stops.firstIndex { $0 > place.along + 40 } ?? stops.count : stops.count
+            located[index] = max(located[index] ?? 0, next - 1)
+            return
+        }
+        guard isLive || now >= part.startDeparture + TimeInterval(part.delaySeconds ?? 0) + 300
+        else { return }
+        let since = offRide[index] ?? now
+        offRide[index] = since
+        if now.timeIntervalSince(since) >= 45 {
+            missed = index
+        }
+    }
 
     /// Takes in the leg's departure on `target`'s board from its PartLiveTracker, which only reports the vehicle
     /// it follows (passed from `busIDs`, or the first one live), nil while the board does not list it. A stop's
@@ -193,29 +287,54 @@ extension Journey {
         }
     }
 
-    /// The Live Activity content at `now`, and the alert due that is not in `alerted` yet.
-    func update(at now: Date, delays: [Int: Int], passedStops: [Int: Int] = [:], alerted: Set<String> = [])
-        -> TripUpdate
-    {
+    /// The Live Activity content at `now`, and the alert due that is not in `alerted` yet. `fix` adds the walk to the
+    /// next stop; `missed` replaces the steps with the other connections.
+    func update(
+        at now: Date, delays: [Int: Int], passedStops: [Int: Int] = [:], alerted: Set<String> = [],
+        fix: TripFix? = nil, missed: TripMissed? = nil
+    ) -> TripUpdate {
         let progress = progress(at: now, delays: delays, passedStops: passedStops)
-        var state = state(for: progress, at: now, delays: delays, alerted: alerted)
-        let alert = alert(for: progress, state: state, at: now, delays: delays)
+        var state = missed.map { missedState($0, delays: delays, alerted: alerted) }
+            ?? state(for: progress, at: now, delays: delays, alerted: alerted, fix: fix)
+        let alert = alert(for: progress, state: state, at: now, delays: delays, missed: missed)
         if let alert { state.alerted.insert(alert.key) }
         return TripUpdate(progress: progress, state: state, alert: alert)
     }
 
-    private func state(for progress: TripProgress, at now: Date, delays: [Int: Int], alerted: Set<String>)
-        -> TripActivityAttributes.ContentState
-    {
+    private func state(
+        for progress: TripProgress, at now: Date, delays: [Int: Int], alerted: Set<String>, fix: TripFix?
+    ) -> TripActivityAttributes.ContentState {
         let parts = parts ?? []
         let lastTransit = parts.indices.last { parts[$0].routeType != 64 }
         func shifted(_ date: Date, _ index: Int?) -> Date {
             date.expected(delaySeconds: index.flatMap { delays[$0] })
         }
         func minutesLate(_ index: Int) -> Int? { delays[index].map(delayMinutes) }
+        var fix = fix
+        // A change starts at the arriving vehicle's whole-minute arrival, when it may still be a stop away, so the walk
+        // counts from the location only a minute later.
+        if case .change(let index) = progress.phase,
+           let arriving = parts[..<index].lastIndex(where: { $0.routeType != 64 }),
+           now < shifted(parts[arriving].endArrival, arriving) + 60
+        {
+            fix = nil
+        }
+        /// Metres to `gps` while the traveller is further than the location tells apart from being there.
+        func away(_ gps: StopGps?) -> Double? {
+            guard let fix, let gps else { return nil }
+            let meters = fix.gps.distance(to: gps)
+            return meters > max(50, fix.accuracy) ? meters : nil
+        }
         let buffer = upcomingChange(progress.phase).flatMap { transferBuffers(delays: delays)[$0] }
-        let warning: TripActivityAttributes.ContentState.Warning? = buffer.flatMap {
+        var warning: TripActivityAttributes.ContentState.Warning? = buffer.flatMap {
             $0.isLikelyMissed ? .likelyMissedChange : $0.isTight ? .tightChange : nil
+        }
+        // Searches and older trips may only know the station's position, up to ~150 m from the platform.
+        if warning != .likelyMissedChange, let index = boarding(progress.phase),
+           let meters = away(parts[index].legStops.first?.gps),
+           (meters - 150) / tripWalkMetersPerSecond > shifted(parts[index].startDeparture, index).timeIntervalSince(now)
+        {
+            warning = .mayMiss
         }
         func content(
             _ step: TripActivityAttributes.ContentState.Step, line: String? = nil, title: String, detail: String,
@@ -232,10 +351,15 @@ extension Journey {
             let part = parts[index]
             let time = shifted(part.startDeparture, index)
             let countdown = Countdown(to: time, from: now)
+            let stop = part.startStopName ?? "the stop"
+            let platform = part.legStops.first?.gps
+            let detail = away(platform).map { meters in
+                distanceText(meters) + (part.startStopCode.map { " to platform \($0)" } ?? "")
+                    + " · leaves \(countdown.phrase)"
+            } ?? [part.startStopCode.map { "Platform \($0)" }, countdown.phrase].compactMap { $0 }.joined(separator: " · ")
             return content(
-                .board, line: part.routeShortName, title: "Board at \(part.startStopName ?? "the stop")",
-                detail: [part.startStopCode.map { "Platform \($0)" }, countdown.phrase]
-                    .compactMap { $0 }.joined(separator: " · "),
+                .board, line: part.routeShortName,
+                title: away(platform) == nil ? "Board at \(stop)" : "Walk to \(stop)", detail: detail,
                 time: time, delay: minutesLate(index), compact: countdown.short, minimal: countdown.minimal
             )
         case .ride(let index):
@@ -264,13 +388,18 @@ extension Journey {
             let countdown = Countdown(to: time, from: now)
             let arriving = parts[..<index].last { $0.routeType != 64 }
             let sameStop = arriving?.endStopName == part.startStopName
-            let title = part.startStopCode.map {
-                (sameStop && arriving?.endStopCode == $0 ? "Wait at platform " : "Walk to platform ") + $0
-            } ?? "Walk to \(part.startStopName ?? "the next stop")"
+            let platform = part.legStops.first?.gps
+            let meters = away(platform)
+            // Where the location and the stop's position are known, waiting is being at the stop.
+            let waits = fix != nil && platform != nil
+                ? meters == nil : sameStop && arriving?.endStopCode == part.startStopCode
+            let title = part.startStopCode.map { (waits ? "Wait at platform " : "Walk to platform ") + $0 }
+                ?? (waits ? "Wait at " : "Walk to ") + (part.startStopName ?? "the next stop")
             let leaves = "\(part.routeShortName ?? "The next vehicle") leaves \(countdown.phrase)"
+            let walk = meters.map { distanceText($0) + (sameStop ? "" : part.startStopName.map { " to \($0)" } ?? "") }
             return content(
                 .change, line: part.routeShortName, title: title,
-                detail: [sameStop ? nil : part.startStopName, leaves].compactMap { $0 }.joined(separator: " · "),
+                detail: [walk ?? (sameStop ? nil : part.startStopName), leaves].compactMap { $0 }.joined(separator: " · "),
                 time: time, delay: minutesLate(index),
                 compact: part.startStopCode.map { "\($0) · \(countdown.minimal)" } ?? countdown.short,
                 minimal: part.startStopCode ?? countdown.minimal
@@ -278,9 +407,11 @@ extension Journey {
         case .walk(let index):
             let time = shifted(parts[index].endArrival, lastTransit)
             let countdown = Countdown(to: time, from: now)
+            let arrive = "Arrive \(countdown.phrase)"
             return content(
                 .walk, title: "Walk to \(parts[index].endStopName ?? "your destination")",
-                detail: "Arrive \(countdown.phrase)", time: time, compact: countdown.short, minimal: countdown.minimal
+                detail: away(parts[index].endStopGps).map { "\(distanceText($0)) · \(arrive.lowercased())" } ?? arrive,
+                time: time, compact: countdown.short, minimal: countdown.minimal
             )
         case .arrived:
             return content(
@@ -290,10 +421,42 @@ extension Journey {
         }
     }
 
-    /// The most urgent alert due: a likely missed change, the platform at a change, then getting off.
+    /// The other connections in place of the steps, the soonest arrival first.
+    private func missedState(_ missed: TripMissed, delays: [Int: Int], alerted: Set<String>)
+        -> TripActivityAttributes.ContentState
+    {
+        let part = parts?[missed.part]
+        let line = part?.routeShortName
+        let best = missed.alternatives?.best
+        let ride = best?.parts?.first { $0.routeType != 64 }
+        let leaves = ride.map { $0.startDeparture.expected(delaySeconds: $0.delaySeconds) }
+        let detail: String
+        if let ride, let leaves {
+            detail = "Take \(ride.routeShortName ?? "the next vehicle") at \(timeStringFromDate(leaves)) from "
+                + [ride.startStopName ?? "the stop", ride.startStopCode].compactMap { $0 }.joined(separator: " ")
+        } else {
+            detail = missed.alternatives == nil ? "Finding other connections…" : "No other connections found"
+        }
+        return TripActivityAttributes.ContentState(
+            step: .missed, line: ride?.routeShortName ?? line,
+            title: missed.boarded ? "Off the route" : "Missed \(line ?? "the vehicle")", detail: detail,
+            // Until there is another one, when the missed vehicle left.
+            time: leaves ?? part.map { $0.startDeparture.expected(delaySeconds: delays[missed.part]) } ?? .distantPast,
+            compact: "Missed", minimal: "!", alerted: alerted
+        )
+    }
+
+    /// The most urgent alert due: a missed ride, a likely missed change, the walk to a vehicle that may leave first,
+    /// the platform at a change, then getting off.
     private func alert(
-        for progress: TripProgress, state: TripActivityAttributes.ContentState, at now: Date, delays: [Int: Int]
+        for progress: TripProgress, state: TripActivityAttributes.ContentState, at now: Date, delays: [Int: Int],
+        missed: TripMissed?
     ) -> TripAlert? {
+        if let missed {
+            // Once the search answered, so the alert says what to take.
+            let alert = TripAlert(key: "lost-\(missed.part)", title: state.title, body: state.detail)
+            return missed.alternatives == nil || state.alerted.contains(alert.key) ? nil : alert
+        }
         let parts = parts ?? []
         var due = [TripAlert]()
         if state.warning == .likelyMissedChange, let index = upcomingChange(progress.phase) {
@@ -303,6 +466,12 @@ extension Journey {
                 key: "missed-\(index)", title: "Change likely missed",
                 body: "\(part.routeShortName ?? "The next vehicle") leaves \(part.startStopName ?? "the stop") "
                     + "at \(timeStringFromDate(departure))"
+            ))
+        }
+        if state.warning == .mayMiss, let index = boarding(progress.phase) {
+            due.append(TripAlert(
+                key: "hurry-\(index)", title: "You may miss \(parts[index].routeShortName ?? "the next vehicle")",
+                body: state.detail
             ))
         }
         switch progress.phase {
@@ -329,10 +498,111 @@ extension Journey {
         }
     }
 
+    /// The vehicle to walk to and board.
+    private func boarding(_ phase: TripProgress.Phase) -> Int? {
+        switch phase {
+        case .board(let index), .change(let index): return index
+        case .ride, .walk, .arrived: return nil
+        }
+    }
+
     private func nextTransit(after index: Int) -> Int? {
         guard let parts else { return nil }
         return parts.indices.first { $0 > index && parts[$0].routeType != 64 }
     }
+}
+
+extension Journey {
+    /// The last arrival, the last vehicle's search-time delay included.
+    var expectedArrival: Date {
+        let last = parts?.last { $0.routeType != 64 }
+        return (parts?.last?.endArrival ?? .distantFuture).expected(delaySeconds: last?.delaySeconds)
+    }
+
+    /// The lines of the rides from part `index` on.
+    func lines(from index: Int = 0) -> [String?] {
+        (parts ?? []).dropFirst(index).filter { $0.routeType != 64 }.map(\.routeShortName)
+    }
+
+    /// `found` (from where the traveller is, soonest first) whose first vehicle has not left, sorted out against this trip's rides
+    /// from the missed `index` on: the next two on its lines, then three others.
+    func alternatives(_ found: [Journey], missed index: Int, at now: Date) -> TripAlternatives {
+        let upcoming = found.filter { journey in
+            guard let ride = journey.parts?.first(where: { $0.routeType != 64 }) else { return false }
+            return ride.startDeparture.expected(delaySeconds: ride.delaySeconds) >= now
+        }
+        let lines = lines(from: index)
+        return TripAlternatives(
+            sameRoute: Array(upcoming.filter { $0.lines() == lines }.prefix(2)),
+            others: Array(upcoming.filter { $0.lines() != lines }.sorted { $0.expectedArrival < $1.expectedArrival }
+                .prefix(3))
+        )
+    }
+}
+
+/// Where a location lies along a ride's stops.
+struct RidePlacement {
+    /// Each stop's metres along the straight lines between the stops.
+    let stops: [Double]
+    /// Metres along them to their point nearest the location.
+    let along: Double
+    /// That point as a stop index with the fraction on to the next stop.
+    let stop: Double
+    /// Within 250 m of the line (a quarter of the gap between far stops) plus the location's accuracy: the streets
+    /// curve between stops.
+    let onLine: Bool
+
+    /// Metres along to `stop`, a stop index with the fraction on to the next stop.
+    func meters(atStop stop: Double) -> Double {
+        let lower = min(max(Int(stop), 0), stops.count - 2)
+        return stops[lower] + (stop - Double(lower)) * (stops[lower + 1] - stops[lower])
+    }
+}
+
+extension Part {
+    /// Where `fix` lies along the leg's stops; where the line passes it more than once, nearest `stop` (a stop index with
+    /// the fraction on to the next). Nil while a stop's position is unknown.
+    func placement(of fix: TripFix, near stop: Double) -> RidePlacement? {
+        // The location is the origin.
+        let points = legStops.compactMap { $0.gps?.meters(from: fix.gps) }
+        guard points.count == legStops.count, points.count > 1 else { return nil }
+        var stops = [0.0]
+        var best: (rank: (Int, Double), along: Double, stop: Double)?
+        for index in 1 ..< points.count {
+            let (a, b) = (points[index - 1], points[index])
+            let (dx, dy) = (b.x - a.x, b.y - a.y)
+            let length = hypot(dx, dy)
+            let t = length > 0 ? min(max(-(a.x * dx + a.y * dy) / (length * length), 0), 1) : 0
+            let off = hypot(a.x + t * dx, a.y + t * dy)
+            let tolerance = max(250, length / 4) + fix.accuracy
+            let at = Double(index - 1) + t
+            let rank = off <= tolerance ? (0, abs(at - stop)) : (1, off - tolerance)
+            if best.map({ rank < $0.rank }) ?? true {
+                best = (rank, stops[index - 1] + t * length, at)
+            }
+            stops.append(stops[index - 1] + length)
+        }
+        guard let best else { return nil }
+        return RidePlacement(stops: stops, along: best.along, stop: best.stop, onLine: best.rank.0 == 0)
+    }
+}
+
+extension StopGps {
+    /// Metres east and north of `origin` on a plane, true to well under 1% across a city.
+    func meters(from origin: StopGps) -> (x: Double, y: Double) {
+        let perDegree = 111_195.0
+        return ((lon - origin.lon) * perDegree * cos(origin.lat * .pi / 180), (lat - origin.lat) * perDegree)
+    }
+
+    func distance(to other: StopGps) -> Double {
+        let offset = meters(from: other)
+        return hypot(offset.x, offset.y)
+    }
+}
+
+/// "80 m", "350 m", "1.2 km".
+private func distanceText(_ meters: Double) -> String {
+    meters < 950 ? "\(Int((meters / 10).rounded()) * 10) m" : String(format: "%.1f km", meters / 1000)
 }
 
 /// Live feeds drop the "Bratislava, " prefix of regional stop names.

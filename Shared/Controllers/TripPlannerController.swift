@@ -198,6 +198,32 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     private func prepareFetchParameters(source: FetchSource, from: Stop, to: Stop) -> FetchParams? {
+        let initialSearchDate = arrivalDepartureDate
+        let isInitial = source == .initial
+
+        guard let params = Self.fetchParameters(
+            from: from,
+            to: to,
+            rApiDate: isInitial ? initialSearchDate : nextRApiSearchDate ?? initialSearchDate,
+            iApiDate: isInitial ? initialSearchDate : nextIApiSearchDate ?? initialSearchDate,
+            arrivalDeparture: arrivalDeparture,
+            includeRApi: isInitial || source == .moreRApi,
+            includeIApi: isInitial || source == .moreIApi
+        ) else { return nil }
+
+        if isInitial {
+            self.nextRApiSearchDate = initialSearchDate
+            self.nextIApiSearchDate = initialSearchDate
+        }
+        return params
+    }
+
+    /// Builds the R-API body and I-API URL for a search with the user's transfer and walk settings,
+    /// resolving the actual location (-1) to the nearest station and stop. Nil when a stop has no station.
+    private static func fetchParameters(
+        from: Stop, to: Stop, rApiDate: Date, iApiDate: Date, arrivalDeparture: ArrivalDeparture,
+        includeRApi: Bool, includeIApi: Bool
+    ) -> FetchParams? {
         guard var fromId = from.stationId, var toId = to.stationId else { return nil }
 
         if fromId == -1 { fromId = GlobalController.getNearestStationId() }
@@ -211,18 +237,10 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         let maxTransfers = UserDefaults.standard.integer(forKey: Stored.tripMaxTransfers)
         let maxWalkDuration = UserDefaults.standard.integer(forKey: Stored.tripMaxWalkDuration)
 
-        let initialSearchDate = arrivalDepartureDate
-
-        if source == .initial {
-            self.nextRApiSearchDate = initialSearchDate
-            self.nextIApiSearchDate = initialSearchDate
-        }
-
         var requestBody: TripReq? = nil
         var iApiUrl: String? = nil
 
-        if source == .initial || source == .moreRApi {
-            let rApiDate = self.nextRApiSearchDate ?? initialSearchDate
+        if includeRApi {
             let searchDateFormatted = rApiDate.formatted(.iso8601)
 
             let searchFrom = (arrivalDeparture == .departure) ? searchDateFormatted : nil
@@ -240,8 +258,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             )
         }
 
-        if source == .initial || source == .moreIApi {
-            let iApiDate = self.nextIApiSearchDate ?? initialSearchDate
+        if includeIApi {
             let searchDateFormatted = String(iApiDate.formatted(.iso8601).split(separator: "T")[0])
             let searchTime = iApiDate.formatted(Date.FormatStyle().hour().minute(.twoDigits))
 
@@ -409,6 +426,52 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                 }
                 self.trip.journey = uniqueJourneys
                 self.cacheTripForCurrentSearch(self.trip)
+            }
+        }
+    }
+
+    /// Journeys from `from` to `to` leaving around `date`, soonest first, for the followed trip's other connections.
+    /// Leaves the planner's own search alone. Online (R-API and I-API) unless the offline planner is on and ready;
+    /// falls back to the offline timetables when the online search finds nothing and they are ready.
+    /// Call on the main thread; completes on it, with no journeys when nothing was found.
+    func searchJourneys(from: Stop, to: Stop, at date: Date, completion: @escaping ([Journey]) -> Void) {
+        let database = GlobalController.timetableDatabase
+        func soonestFirst(_ journeys: [Journey]) -> [Journey] {
+            Array(Set(journeys))
+                .sorted { ($0.parts?.first?.startDeparture ?? date) < ($1.parts?.first?.startDeparture ?? date) }
+        }
+        func searchOffline() {
+            database.queryOfflineTrip(
+                fromName: from.name ?? "",
+                toName: to.name ?? "",
+                date: date,
+                arrivalDeparture: .departure,
+                maxTransfers: UserDefaults.standard.integer(forKey: Stored.tripMaxTransfers),
+                maxWalkDuration: UserDefaults.standard.integer(forKey: Stored.tripMaxWalkDuration)
+            ) { completion(soonestFirst($0)) }
+        }
+        func finish(_ journeys: [Journey]) {
+            if journeys.isEmpty && database.isReady { searchOffline() } else { completion(journeys) }
+        }
+
+        if UserDefaults.standard.bool(forKey: Stored.offlineTripPlanner) && database.isReady {
+            searchOffline()
+            return
+        }
+        let params = Self.fetchParameters(
+            from: from, to: to, rApiDate: date, iApiDate: date, arrivalDeparture: .departure,
+            includeRApi: true, includeIApi: true
+        )
+        let stops = GlobalController.stopsListProvider.stops
+
+        // fetchRApiPost may wait for the session token, so start it off the main thread.
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.performFetches(requestBody: params?.requestBody, iApiUrl: params?.iApiUrl) { rResult, iResult in
+                let journeys = soonestFirst(
+                    self.mapRApiToJourneys(rResult?.journey ?? [])
+                        + self.mapIApiToJourneys(iResult?.journeys ?? [], stops: stops)
+                )
+                DispatchQueue.main.async { finish(journeys) }
             }
         }
     }

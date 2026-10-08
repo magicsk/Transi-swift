@@ -47,6 +47,10 @@ struct TripDetailSheet: View {
                     .accessibilityHint("Shows the whole route on the map")
                     .listRowBackground(cardBackground)
                     .id(Self.summary)
+                    if isFollowed, let missed = tripLiveActivity.missed {
+                        MissedRideView(missed: missed, journey: journey, badgeSize: badgeSize)
+                            .listRowBackground(cardBackground)
+                    }
                     if journey.rideCount > 0 {
                         // Journey actions, one full-width button per line. Checked every minute, so the start
                         // enables itself an hour before departure and the actions go once the journey arrives.
@@ -510,6 +514,7 @@ private struct TripSummaryView: View {
         guard let liveStep else { return Text(verbatim: "") }
         return (liveStep.line.map { Text("Line \($0), ") } ?? Text(verbatim: ""))
             + Text(verbatim: "\(liveStep.title), \(liveStep.detail). ")
+            + (liveStep.warningText.map { Text(verbatim: "\($0). ") } ?? Text(verbatim: ""))
     }
 
     @ViewBuilder
@@ -570,15 +575,128 @@ private struct LiveStepView: View {
             if let line = state.line {
                 LineText(line, badgeSize)
             } else {
-                Image(systemName: state.step == .arrived ? "checkmark.circle.fill" : "figure.walk")
+                Image(systemName: state.step == .arrived ? "checkmark.circle.fill"
+                    : state.step == .missed ? "exclamationmark.triangle.fill" : "figure.walk")
                     .font(.title3.weight(.semibold))
-                    .foregroundColor(state.step == .arrived ? .green : .accentColor)
+                    .foregroundColor(state.step == .arrived ? .green : state.step == .missed ? .orange : .accentColor)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(state.title).font(.headline)
                 Text(state.detail).font(.subheadline).foregroundColor(.secondary)
+                if let warning = state.warningText {
+                    Label(warning, systemImage: "exclamationmark.triangle.fill")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundColor(state.warning == .likelyMissedChange ? .red : .orange)
+                }
             }
             .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+/// Once the location showed the traveller off a ride: the other connections from where they are, to follow one
+/// instead, or keep following the trip.
+private struct MissedRideView: View {
+    let missed: TripMissed
+    let journey: Journey
+    let badgeSize: CGFloat
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    var body: some View {
+        let line = journey.parts?[missed.part].routeShortName ?? ""
+        VStack(alignment: .leading, spacing: 12) {
+            Text(
+                missed.boarded
+                    ? "You're away from the route of the \(line). Follow another connection from where you are:"
+                    : "The \(line) left without you. Follow another connection from where you are:"
+            )
+            .font(.subheadline)
+            .fixedSize(horizontal: false, vertical: true)
+            if let alternatives = missed.alternatives {
+                if alternatives.isEmpty {
+                    Text("No other connections found.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                group("Same route", alternatives.sameRoute)
+                group("Other routes", alternatives.others)
+            } else {
+                HStack(spacing: 8) {
+                    ProgressView()
+                    Text("Finding other connections…")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+            Button {
+                GlobalController.tripLiveActivity.keepFollowing()
+            } label: {
+                Text("Keep following this trip")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .accessibilityHint("Goes on with this trip's steps.")
+        }
+        .padding(.vertical, 6)
+    }
+
+    @ViewBuilder
+    private func group(_ title: LocalizedStringKey, _ journeys: [Journey]) -> some View {
+        if !journeys.isEmpty {
+            Text(title)
+                .font(.footnote.weight(.semibold))
+                .foregroundColor(.secondary)
+                .accessibilityAddTraits(.isHeader)
+            ForEach(journeys, id: \.id) { row($0) }
+        }
+    }
+
+    @ViewBuilder
+    private func row(_ alternative: Journey) -> some View {
+        let parts = alternative.parts ?? []
+        if let ride = parts.first(where: { $0.routeType != 64 }), let last = parts.last {
+            let lines = alternative.lines().map { $0 ?? "?" }
+            let lastDelay = parts.last { $0.routeType != 64 }?.delaySeconds
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
+                : AnyLayout(HStackLayout(spacing: 10))
+            Button {
+                GlobalController.tripLiveActivity.start(alternative)
+                GlobalController.appState.pendingJourney = alternative
+            } label: {
+                HStack {
+                    layout {
+                        HStack(spacing: 4) {
+                            ForEach(Array(lines.enumerated()), id: \.offset) { LineText($0.element, badgeSize) }
+                        }
+                        VStack(alignment: .leading, spacing: 2) {
+                            (timeText(ride.startDeparture, delaySeconds: ride.delaySeconds) + Text(verbatim: " → ")
+                                + timeText(last.endArrival, delaySeconds: lastDelay))
+                                .font(.headline)
+                            stopText(ride.startStopName, ride.startStopCode)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 4)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundColor(.tertiaryLabel)
+                        .accessibilityHidden(true)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityElement(children: .ignore)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel(
+                Text("Line \(lines.joined(separator: ", then line ")), from \(ride.startStopName ?? "")")
+                    + platformSpoken(ride.startStopCode) + Text(", ")
+                    + spokenTime(ride.startDeparture, delaySeconds: ride.delaySeconds) + Text(" to ")
+                    + spokenTime(last.endArrival, delaySeconds: lastDelay)
+            )
+            .accessibilityHint("Follows this connection instead.")
         }
     }
 }

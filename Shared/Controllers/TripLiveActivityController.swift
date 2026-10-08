@@ -20,6 +20,8 @@ final class TripLiveActivityController: ObservableObject {
     @Published private(set) var state: TripActivityAttributes.ContentState?
     /// `journey`'s delays on the live boards (seconds, by part index), which its detail shows too.
     @Published private(set) var liveDelays = [Int: Int]()
+    /// The ride the traveller's location showed them off, with the other connections its detail offers instead.
+    @Published private(set) var missed: TripMissed?
 
     /// A trip is followed while its journey is saved, which also makes this safe to read from any thread.
     static var followsTrip: Bool { UserDefaults.standard.data(forKey: Stored.tripLiveActivities) != nil }
@@ -36,10 +38,15 @@ final class TripLiveActivityController: ObservableObject {
     private var awaitsLiveData = false
     private var trackers = [TripTrackerTarget: PartLiveTracker]()
     private var ticker: AnyCancellable?
+    /// The journeys found to the destination since the ride was missed; nil until the search answers.
+    private var found: [Journey]?
+    private var searchedAt: Date?
 
     /// Shows `journey` as a Live Activity and ends the trip followed so far; table activities stay.
     func start(_ journey: Journey) {
         end()
+        // The location is checked against the stops' positions.
+        let journey = journey.positioned(in: GlobalController.stopsListProvider.stops)
         let update = journey.update(at: Date(), delays: journey.delays(live: [:]))
         do {
             let activity = try Activity.request(
@@ -128,6 +135,7 @@ final class TripLiveActivityController: ObservableObject {
             // Stop indices now point into the full stop lists.
             self.watch([], of: loaded)
             self.live.passedStops = self.live.passedStops.filter { !missing.contains($0.key) }
+            self.live.located = self.live.located.filter { !missing.contains($0.key) }
             self.live.listed = self.live.listed.filter { !missing.contains($0.key.part) }
             self.journey = loaded
             self.save()
@@ -144,16 +152,31 @@ final class TripLiveActivityController: ObservableObject {
             return
         }
         let now = Date()
+        let fix = Self.fix(at: now)
+        let before = live
+        let missed = live.locate(fix, on: journey, found: found, now: now)
+        if live != before {
+            save()
+        }
+        if let missed, missed.alternatives?.isEmpty ?? true {
+            findAlternatives(missed.part, of: journey, at: now, fix: fix)
+        }
+        if self.missed != missed {
+            self.missed = missed
+        }
         let update = journey.update(
-            at: now, delays: journey.delays(live: live.delays), passedStops: live.passedStops, alerted: state.alerted
+            at: now, delays: journey.delays(live: live.delays), passedStops: live.positions, alerted: state.alerted,
+            fix: fix, missed: missed
         )
         let newState = update.state
         if progress != update.progress {
             progress = update.progress
         }
         if update.progress.phase != .arrived {
-            watch(journey.trackerTargets(for: update.progress), of: journey)
-        } else if tripCanEnd(at: now, arrival: newState.time, awaitsLiveData: awaitsLiveData) {
+            // Once a ride is missed, the trip's vehicles no longer matter.
+            watch(missed == nil ? journey.trackerTargets(for: update.progress) : [], of: journey)
+        } else if missed != nil || tripCanEnd(at: now, arrival: newState.time, awaitsLiveData: awaitsLiveData) {
+            // A missed trip ends when it would have arrived; its boards are no longer watched.
             stopFollowing()
             Task {
                 await TripLiveActivityController.activity(activityId)?.end(
@@ -176,6 +199,61 @@ final class TripLiveActivityController: ObservableObject {
             if alert != nil {
                 await VirtualTableLiveActivityController.playAlertSound()
             }
+        }
+    }
+
+    /// Keeps following the trip after the location found the traveller off it, which then no longer checks that ride.
+    func keepFollowing() {
+        guard let index = live.missed else { return }
+        live.kept.insert(index)
+        live.missed = nil
+        live.offRide = [:]
+        found = nil
+        searchedAt = nil
+        save()
+        refresh()
+    }
+
+    /// The traveller's last location when it tells stops apart: within 100 m, from the last half hour (it updates every
+    /// 50 m, so standing at a stop keeps an older one).
+    private static func fix(at now: Date) -> TripFix? {
+        guard let location = LocationProvider.lastLocation, (0 ... 100).contains(location.horizontalAccuracy),
+              now.timeIntervalSince(location.timestamp) < 1800
+        else { return nil }
+        let coordinate = location.coordinate
+        return TripFix(
+            gps: StopGps(lon: coordinate.longitude, lat: coordinate.latitude), accuracy: location.horizontalAccuracy
+        )
+    }
+
+    /// Searches from the stop nearest `fix` to the trip's destination, again 2 minutes after a search found nothing
+    /// still to catch. Without a location it searches from the boarding stop of a ride not boarded, and waits for one
+    /// after a boarded ride, which took the traveller away from that stop.
+    private func findAlternatives(_ index: Int, of journey: Journey, at now: Date, fix: TripFix?) {
+        guard fix != nil || !live.boarded.contains(index), searchedAt.map({ now.timeIntervalSince($0) >= 120 }) ?? true,
+              let activityId
+        else { return }
+        searchedAt = now
+        let stops = GlobalController.stopsListProvider.stops
+        let from: Stop?
+        if let fix {
+            // Measured from the fix: the list is sorted by the location only some time after it updates.
+            from = stops.filter { $0.id > 0 }
+                .compactMap { stop in stop.gps.map { (stop: stop, meters: fix.gps.distance(to: $0)) } }
+                .min { $0.meters < $1.meters }?.stop
+        } else {
+            let part = journey.parts?[index]
+            from = stops.stop(stationId: part?.startStationId, name: part?.startStopName, platform: part?.startStopCode)
+        }
+        let last = journey.parts?.last
+        guard let from, let to = stops.stop(stationId: last?.endStationId, name: last?.endStopName, platform: nil) else {
+            found = []
+            return
+        }
+        GlobalController.tripPlanner.searchJourneys(from: from, to: to, at: now) { [weak self] journeys in
+            guard let self, self.activityId == activityId, self.live.missed == index else { return }
+            self.found = journeys
+            self.refresh()
         }
     }
 
@@ -217,11 +295,18 @@ final class TripLiveActivityController: ObservableObject {
         trackers = [:]
         live = TripLiveData()
         awaitsLiveData = false
+        found = nil
+        searchedAt = nil
+        missed = nil
         journey = nil
         activityId = nil
         progress = nil
         state = nil
         UserDefaults.standard.removeObject(forKey: Stored.tripLiveActivities)
+        if GlobalController.appState.phase == .background {
+            // Table activities only need the app kept running.
+            GlobalController.locationProvider.decreaseAccuracy()
+        }
         GlobalController.stopBackgroundMode()
     }
 

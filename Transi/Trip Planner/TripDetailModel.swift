@@ -44,6 +44,22 @@ extension Journey {
         return steps
     }
 
+    /// With the stations' positions where it has none: offline results and trips saved by older versions.
+    func positioned(in stops: [Stop]) -> Journey {
+        var journey = self
+        for index in parts?.indices ?? 0 ..< 0 {
+            guard var part = journey.parts?[index] else { continue }
+            part.startStopGps = part.startStopGps ?? stops.stop(
+                stationId: part.startStationId, name: part.startStopName, platform: part.startStopCode
+            )?.gps
+            part.endStopGps = part.endStopGps ?? stops.stop(
+                stationId: part.endStationId, name: part.endStopName, platform: part.endStopCode
+            )?.gps
+            journey.parts?[index] = part
+        }
+        return journey
+    }
+
     var rideCount: Int {
         parts?.filter { $0.routeType != 64 }.count ?? 0
     }
@@ -156,20 +172,7 @@ final class TripDetailModel: ObservableObject {
 
     /// Call on the main thread.
     init(journey: Journey) {
-        // Offline results and trips saved by older versions have no positions; use the stations'.
-        var journey = journey
-        let stops = GlobalController.stopsListProvider.stops
-        for index in journey.parts?.indices ?? 0 ..< 0 {
-            guard var part = journey.parts?[index] else { continue }
-            part.startStopGps = part.startStopGps ?? stops.stop(
-                stationId: part.startStationId, name: part.startStopName, platform: part.startStopCode
-            )?.gps
-            part.endStopGps = part.endStopGps ?? stops.stop(
-                stationId: part.endStationId, name: part.endStopName, platform: part.endStopCode
-            )?.gps
-            journey.parts?[index] = part
-        }
-        self.journey = journey
+        self.journey = journey.positioned(in: GlobalController.stopsListProvider.stops)
     }
 
     /// Loads missing stops and follows the legs leaving soon; `stop()` ends the live updates.

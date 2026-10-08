@@ -161,14 +161,21 @@ class StopsListProvider: ObservableObject {
             DispatchQueue.main.async {
                 self.stops = sorted
                 self.updateActualLocationEntry()
-                if GlobalController.virtualTable.changeLocation {
-                    if GlobalController.virtualTable.currentStop.id == Stop.empty.id {
-                        self.showDefaultStop()
-                    } else {
-                        GlobalController.virtualTable.changeStop(GlobalController.getNearestStopId(), switchOnly: true)
-                    }
+                // In the background the table stays disconnected; a followed trip keeps the location updating.
+                if GlobalController.appState.phase != .background {
+                    self.showNearestStop()
                 }
             }
+        }
+    }
+
+    // Main thread. While the table follows the location, shows the stop nearest it, or the default one before any.
+    func showNearestStop() {
+        guard GlobalController.virtualTable.changeLocation, !unmodifiedStops.isEmpty else { return }
+        if GlobalController.virtualTable.currentStop.id == Stop.empty.id {
+            showDefaultStop()
+        } else {
+            GlobalController.virtualTable.changeStop(GlobalController.getNearestStopId(), switchOnly: true)
         }
     }
 
