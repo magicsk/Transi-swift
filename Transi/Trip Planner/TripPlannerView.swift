@@ -75,7 +75,8 @@ struct TripPlannerView: View {
                 .padding(.top, -16.0)
                 .navigationTitle(Text("Trip planner"))
                 .navigationDestination(for: Journey.self) { journey in
-                    TripDetailView(journey: journey)
+                    // A new detail when another journey takes this one's place, like the trip followed instead.
+                    TripDetailView(journey: journey).id(journey)
                 }
                 .toolbar {
                     let settingsButton = Button {
