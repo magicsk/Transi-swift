@@ -145,3 +145,38 @@ struct BApiStopTime: Codable {
     let arrival, departure: Int
     let zone: String?
 }
+
+/// Magic API `/timetable/shape`: a ride along the roads or tracks, one segment of [lat, lon] points from near each
+/// stop to near the next; null where unknown.
+struct TimetableShape: Codable {
+    let segments: [[[Double]]?]
+
+    /// The request for a ride of `line` through `stops`.
+    static func endpoint(line: String, stops: [StopGps]) -> String? {
+        var components = URLComponents()
+        components.path = "/timetable/shape"
+        components.queryItems = [
+            URLQueryItem(name: "line", value: line),
+            URLQueryItem(
+                name: "stops", value: stops.map { String(format: "%.5f,%.5f", $0.lat, $0.lon) }.joined(separator: ";")
+            ),
+        ]
+        // Servers read a query's "+" as a space.
+        components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
+        return components.string
+    }
+
+    /// The ride through `stops`, the ones requested, with each known segment in place of the straight line between
+    /// its two stops; straight throughout unless there is a segment for each two consecutive stops.
+    func path(through stops: [StopGps]) -> [StopGps] {
+        guard stops.count > 1, segments.count == stops.count - 1 else { return stops }
+        var path = [StopGps]()
+        for (index, segment) in segments.enumerated() {
+            let points = segment?.compactMap { $0.count == 2 ? StopGps(lon: $0[1], lat: $0[0]) : nil } ?? []
+            let piece = points.count > 1 ? points : [stops[index], stops[index + 1]]
+            // A point where one piece ends and the next starts, as the stop between two straight lines, comes once.
+            path += piece.first == path.last ? piece.dropFirst() : piece[...]
+        }
+        return path
+    }
+}

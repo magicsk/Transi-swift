@@ -94,6 +94,10 @@ final class TripDetailMapViewController: UIViewController, MKMapViewDelegate, UI
     var goBack: DismissAction?
     /// Places the sheet once another modal lets it come up.
     private var sheetRetry: DispatchWorkItem?
+    /// Ride shapes by request, kept while the app runs.
+    private static var shapes = [String: TimetableShape]()
+    /// The shapes this map requested.
+    private var shapeRequests = Set<String>()
 
     /// While the trip Live Activity follows this journey, the map follows its step until the user moves the map
     /// or picks something to show.
@@ -497,18 +501,11 @@ final class TripDetailMapViewController: UIViewController, MKMapViewDelegate, UI
     // MARK: Route
 
     private func drawRoute(_ journey: Journey) {
-        mapView.removeOverlays(mapView.overlays.filter { $0 is RoutePolyline })
+        drawLines(journey)
         mapView.removeAnnotations(mapView.annotations.filter { $0 is TripStopAnnotation })
         let parts = journey.parts ?? []
-        let casing = UIColor.systemBackground.resolvedColor(with: traitCollection)
         for (index, part) in parts.enumerated() {
-            let coordinates = Self.coordinates(of: index, in: parts)
             if part.routeType == 64 {
-                if coordinates.count > 1 {
-                    mapView.addOverlay(
-                        RoutePolyline.make(coordinates, color: .systemGray, width: 5, dashed: true), level: .aboveLabels
-                    )
-                }
                 // A journey that starts or ends on foot has no platform pin there.
                 if index == 0, let gps = part.startStopGps {
                     let name = part.startStopName ?? ""
@@ -532,11 +529,6 @@ final class TripDetailMapViewController: UIViewController, MKMapViewDelegate, UI
             let vehicle = UIImage(
                 systemName: isTrain(line) ? "train.side.front.car" : isRounded(line) ? "tram.fill" : "bus.fill"
             )
-            if coordinates.count > 1 {
-                // The tiles sit at .aboveRoads.
-                mapView.addOverlay(RoutePolyline.make(coordinates, color: casing, width: 9), level: .aboveLabels)
-                mapView.addOverlay(RoutePolyline.make(coordinates, color: color, width: 5), level: .aboveLabels)
-            }
             for stop in (part.stops ?? []).dropFirst().dropLast() {
                 if let gps = stop.gps {
                     mapView.addAnnotation(TripStopAnnotation(dotAt: gps.coordinate, name: stop.name, color: color))
@@ -565,6 +557,53 @@ final class TripDetailMapViewController: UIViewController, MKMapViewDelegate, UI
             }
         }
         highlightFocusedStop()
+    }
+
+    /// Walks dotted, rides in their line's colour over a casing, along the roads and tracks where their shape loaded.
+    /// Redrawn alone once a shape comes, so the pins keep their selection and VoiceOver focus.
+    private func drawLines(_ journey: Journey) {
+        mapView.removeOverlays(mapView.overlays.filter { $0 is RoutePolyline })
+        let parts = journey.parts ?? []
+        let casing = UIColor.systemBackground.resolvedColor(with: traitCollection)
+        for (index, part) in parts.enumerated() {
+            let coordinates = Self.coordinates(of: index, in: parts)
+            guard coordinates.count > 1 else { continue }
+            if part.routeType == 64 {
+                mapView.addOverlay(
+                    RoutePolyline.make(coordinates, color: .systemGray, width: 5, dashed: true), level: .aboveLabels
+                )
+                continue
+            }
+            let path = shapedPath(of: part) ?? coordinates
+            let color = UIColor(colorFromLineNum(part.routeShortName ?? "") ?? .gray)
+            // The tiles sit at .aboveRoads.
+            mapView.addOverlay(RoutePolyline.make(path, color: casing, width: 9), level: .aboveLabels)
+            mapView.addOverlay(RoutePolyline.make(path, color: color, width: 5), level: .aboveLabels)
+        }
+    }
+
+    /// The ride along the roads and tracks once its shape loaded for its stops' positions, which needs the ride's stop
+    /// list with a position for every stop; its two ends alone match the wrong stretch. The first draw with the list
+    /// requests it, once per map: without the list, offline or on an error the ride stays straight.
+    private func shapedPath(of part: Part) -> [CLLocationCoordinate2D]? {
+        let rideStops = part.stops ?? []
+        let stops = rideStops.compactMap(\.gps)
+        guard stops.count == rideStops.count, stops.count > 1, let line = part.routeShortName,
+              let endpoint = TimetableShape.endpoint(line: line, stops: stops)
+        else { return nil }
+        if let shape = Self.shapes[endpoint] {
+            return shape.path(through: stops).map(\.coordinate)
+        }
+        if shapeRequests.insert(endpoint).inserted {
+            fetchMagicApi(endpoint: endpoint, type: TimetableShape.self) { [weak self] result in
+                guard case .success(let shape) = result else { return }
+                Self.shapes[endpoint] = shape
+                // Stops that loaded meanwhile look up their own request, so this one never replaces theirs.
+                guard let self else { return }
+                self.drawLines(self.model.journey)
+            }
+        }
+        return nil
     }
 
     private static func platformLabel(_ label: String, _ platform: String?) -> String {
