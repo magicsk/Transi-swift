@@ -350,4 +350,34 @@ assert(dayStringUnlessToday(afterMidnight) == dayStringUnlessToday(tomorrow) && 
 assert(dayStringUnlessToday(beforeMidnight) == nil,
        "\(timeStringFromDate(beforeMidnight)) is today: \(dayStringUnlessToday(beforeMidnight) ?? "nil")")
 print("PASS: day names for journeys not today, in \(TimeZone.current.identifier)")
+
+// Ride shapes: each known segment between two stops in place of the straight line, straight where unknown.
+let shapeStops = [17.1, 17.11, 17.12, 17.13].map { StopGps(lon: $0, lat: 48.1) }
+func point(_ gps: StopGps) -> [Double] { [gps.lat, gps.lon] }
+let bend = [48.11, 17.115], curve = [48.105, 17.125]
+let nearStop1 = [48.1001, 17.1101]
+let shapeJSON = Data(#"{"segments":[null,[[48.1,17.11],[48.11,17.115],[48.1,17.12]],null]}"#.utf8)
+let decodedShape = try apiDecoder.decode(TimetableShape.self, from: shapeJSON)
+let shapeCases: [(String, [[[Double]]?], [StopGps])] = [
+    ("all unknown", [nil, nil, nil], shapeStops),
+    ("too few segments", [[point(shapeStops[0]), bend, point(shapeStops[1])], nil], shapeStops),
+    ("too many segments", [nil, nil, nil, nil], shapeStops),
+    ("one point or malformed points", [[bend], [[48.1], [17.1, 48.1, 3]], nil], shapeStops),
+    ("known between unknown, sharing the stops", decodedShape.segments,
+     [shapeStops[0], shapeStops[1], StopGps(lon: 17.115, lat: 48.11), shapeStops[2], shapeStops[3]]),
+    ("ending near the stops", [[point(shapeStops[0]), nearStop1], [nearStop1, curve, point(shapeStops[2])], nil],
+     [shapeStops[0], StopGps(lon: 17.1101, lat: 48.1001), StopGps(lon: 17.125, lat: 48.105), shapeStops[2],
+      shapeStops[3]]),
+    ("unknown after a segment ending off its stop", [[point(shapeStops[0]), nearStop1], nil, nil],
+     [shapeStops[0], StopGps(lon: 17.1101, lat: 48.1001), shapeStops[1], shapeStops[2], shapeStops[3]]),
+]
+for (name, segments, expected) in shapeCases {
+    assert(TimetableShape(segments: segments).path(through: shapeStops) == expected, "Shape: \(name)")
+}
+assert(TimetableShape(segments: []).path(through: [shapeStops[0]]) == [shapeStops[0]], "A single stop stays")
+assert(TimetableShape.endpoint(line: "N 72&", stops: [StopGps.example, StopGps(lon: 17.1, lat: -48.123456)])
+       == "/timetable/shape?line=N%2072%26&stops=48.13574,17.20874;-48.12346,17.10000", "Shape request")
+assert(TimetableShape.endpoint(line: "S+", stops: [StopGps.example, StopGps.example])?.contains("line=S%2B&") == true,
+       "A + in the line stays a +")
+print("PASS: \(shapeCases.count + 1) ride shapes joined with straight lines, and the shape request")
 SWIFT
