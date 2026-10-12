@@ -54,7 +54,7 @@ trip planner and timetables for MHD in Bratislava.
 - MacOS support
 - ~~Apple watch app~~
 
-### More screenshots info on [transi.eu](transi.eu)
+### More screenshots and info on [transi.eu](https://transi.eu)
 
 ## Download
 
