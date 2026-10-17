@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @StateObject var stopsListProvider = GlobalController.stopsListProvider
     @StateObject var timetableDatabase = GlobalController.timetableDatabase
 
@@ -26,6 +27,7 @@ struct SettingsView: View {
     @AppStorage(Stored.tripSaveDuration) var tripSaveDuration = -1
     @AppStorage(Stored.offlineTripPlanner) var offlineTripPlanner = false
     @AppStorage(Stored.magicApiUrlOverride) var magicApiUrlOverride = ""
+    @AppStorage(Stored.developerSettings) var developerSettings = false
     @AppStorage(Stored.passDays) var passDays = 0
     @AppStorage(Stored.passValidFrom) var passValidFrom = 0.0
     @AppStorage(Stored.passZones) var passZones = "100,101"
@@ -34,6 +36,9 @@ struct SettingsView: View {
 
     @State private var showStopPicker = false
     @State private var pickedStop: Stop = .empty
+    @State private var aboutTaps = 0
+    /// Keeps the developer section while its override is cleared for a new one, until Settings closes.
+    @State private var hadApiUrlOverride = !(UserDefaults.standard.string(forKey: Stored.magicApiUrlOverride) ?? "").isEmpty
 
     private var defaultStopName: String {
         if defaultStopId <= 0 { return "Actual location" }
@@ -61,7 +66,12 @@ struct SettingsView: View {
                 timetablesSection
                 tripPlannerSection
                 passSection
-                developerSection
+                aboutSection
+                // Below the about row, so it doesn't appear under a finger still tapping that row. Kept while an API
+                // override is set, so it can always be reset.
+                if developerSettings || hadApiUrlOverride || !magicApiUrlOverride.isEmpty {
+                    developerSection
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -128,7 +138,9 @@ struct SettingsView: View {
 
     private var timetablesSection: some View {
         Section("Timetables") {
-            Toggle("Offline timetables", isOn: $offlineTimetables)
+            Toggle(isOn: $offlineTimetables) {
+                stageLabel("Offline timetables", stage: "Beta")
+            }
                 .onChange(of: offlineTimetables) { enabled in
                     if enabled {
                         _ = timetableDatabase.openDatabases()
@@ -162,7 +174,9 @@ struct SettingsView: View {
                 Text("For a week").tag(168)
                 Text("Forever").tag(-1)
             }
-            Toggle("Offline trip planner", isOn: $offlineTripPlanner)
+            Toggle(isOn: $offlineTripPlanner) {
+                stageLabel("Offline trip planner", stage: "Alpha")
+            }
                 .onChange(of: offlineTripPlanner) { enabled in
                     if enabled {
                         _ = timetableDatabase.openDatabases()
@@ -248,6 +262,55 @@ struct SettingsView: View {
             Text("Developer")
         } footer: {
             Text("Override the Magic API base URL (e.g. http://localhost:3000). Leave empty to use the default.")
+        }
+    }
+
+    // MARK: - About
+
+    /// The app and its version. Tapping it five times shows or hides the developer settings.
+    private var aboutSection: some View {
+        Section {
+            VStack(spacing: 8.0) {
+                // The asset catalog keeps the app icon from UIImage(named:), but the build also bundles this file.
+                if let icon = UIImage(named: "AppIcon60x60") {
+                    Image(uiImage: icon)
+                        .resizable()
+                        .frame(width: 60.0, height: 60.0)
+                        .clipShape(RoundedRectangle(cornerRadius: 13.5, style: .continuous))
+                        .accessibilityHidden(true)
+                }
+                Text(verbatim: "Transi \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                aboutTaps += 1
+                if aboutTaps.isMultiple(of: 5) {
+                    withAnimation { developerSettings.toggle() }
+                }
+            }
+        }
+        .listRowBackground(Color.clear)
+    }
+
+    /// A setting's title tagged with how finished its feature is.
+    private func stageLabel(_ title: LocalizedStringKey, stage: LocalizedStringKey) -> some View {
+        // Beneath the title at accessibility sizes, which leave no room beside it.
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4.0))
+            : AnyLayout(HStackLayout(spacing: 6.0))
+        return layout {
+            Text(title)
+            Text(stage)
+                .font(.caption2.weight(.semibold))
+                .textCase(.uppercase)
+                .foregroundStyle(.secondary)
+                .fixedSize()
+                .padding(.horizontal, 6.0)
+                .padding(.vertical, 2.0)
+                .overlay(Capsule().strokeBorder(.secondary))
         }
     }
 }

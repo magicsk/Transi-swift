@@ -31,6 +31,7 @@ struct Stored {
     static let notifyOnPositionChange = "notify_on_position_change"
     static let offlineTripPlanner = "offline_trip_planner"
     static let magicApiUrlOverride = "magic_api_url_override"
+    static let developerSettings = "developer_settings"
     static let tripPlannerDbSha = "trip_planner_db_sha"
     static let changelogVersion = "changelog_version"
     static let passDays = "pass_days"

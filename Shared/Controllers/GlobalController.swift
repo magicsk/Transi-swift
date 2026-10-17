@@ -143,6 +143,7 @@ struct GlobalController {
             Stored.notifyOnDelayChange: true,
             Stored.notifyOnPositionChange: true,
             Stored.offlineTripPlanner: false,
+            Stored.developerSettings: false,
             Stored.passDays: 0,
             Stored.passValidFrom: 0.0,
             Stored.passZones: "100,101",
