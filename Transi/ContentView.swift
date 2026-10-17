@@ -139,6 +139,10 @@ class HybridSearchViewController: UINavigationController, UISearchBarDelegate {
         searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = coordinator
         searchController.obscuresBackgroundDuringPresentation = false
+        if #available(iOS 26.0, *), UIDevice.current.userInterfaceIdiom == .pad {
+            // The search tab's bar stays on iPad anyway; hiding it during search only drops the title's margin.
+            searchController.hidesNavigationBarDuringPresentation = false
+        }
         searchController.searchBar.delegate = self
         searchController.searchBar.placeholder = "Search"
 
