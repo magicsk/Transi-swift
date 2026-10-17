@@ -12,6 +12,9 @@ struct TripPlannerDatePicker: View {
     @Binding private var dateDialog: Bool
     @State private var adDate: Date
     @State private var sheetContentHeight = 270.0
+    /// Keeps Now and Done off the sheet's edge where it has no bottom safe area: floating on iPad and the Mac, or on
+    /// iPhones with a Home button.
+    @State private var bottomPadding = 0.0
 
     init(_ dateDialog: Binding<Bool>) {
         _dateDialog = dateDialog
@@ -51,12 +54,24 @@ struct TripPlannerDatePicker: View {
                 }
                 Spacer()
             }
+            .padding(.bottom, bottomPadding)
         }
         .background {
             GeometryReader { proxy in
                 Color.clear
-                    .task {
+                    .task(id: proxy.size.height) {
                         sheetContentHeight = proxy.size.height
+                    }
+            }
+        }
+        // Reads the safe area where the sheet ends, not where the content ends: that moves with the sheet's height,
+        // which follows the padding, and would resize the sheet in a loop.
+        .frame(maxHeight: .infinity)
+        .background {
+            GeometryReader { proxy in
+                Color.clear
+                    .task(id: proxy.safeAreaInsets.bottom) {
+                        bottomPadding = max(16.0 - proxy.safeAreaInsets.bottom, 0.0)
                     }
             }
         }
