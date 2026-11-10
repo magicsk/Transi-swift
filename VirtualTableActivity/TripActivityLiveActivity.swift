@@ -166,7 +166,9 @@ struct TripQuestionAnswers: View {
                 }
             }
             .buttonStyle(.bordered)
-            .font(.subheadline.weight(.semibold))
+            // The accent on its own tint reads poorly over the Lock Screen's dark glass.
+            .tint(.primary)
+            .font(.footnote.weight(.semibold))
             .lineLimit(1)
             .minimumScaleFactor(0.8)
         } else {
