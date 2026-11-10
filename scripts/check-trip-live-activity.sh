@@ -717,4 +717,34 @@ let locatedLive = TripLiveData(
 let reloaded = try JSONDecoder().decode(TripLiveData.self, from: JSONEncoder().encode(locatedLive))
 assert(reloaded == locatedLive && reloaded.positions == [0: 7, 2: 1], "Location data survives a relaunch: \(reloaded)")
 print("PASS: kept rides are no longer checked and the location data survives a relaunch")
+
+// Scheduled trips.
+let scheduledJourney = Journey(id: "scheduled", parts: [
+    Part(startStopName: "Hronská", endStopName: "Trnavské mýto", startDeparture: local("08:00"),
+         endArrival: local("08:03"), routeType: 64),
+    Part(startStopName: "Trnavské mýto", endStopName: "Hlavná stanica", startStopCode: "A", endStopCode: "B",
+         startDeparture: local("08:03"), endArrival: local("08:15"), routeType: 3, routeShortName: "63"),
+])
+assert(!scheduledJourney.canStart(at: local("07:29:59")) && scheduledJourney.canStart(at: local("07:30")),
+       "Starts from half an hour before the first step, the walk included; only scheduled until then")
+assert(scheduledJourney.canStart(at: local("08:20")),
+       "A trip running late past its timetabled arrival still starts, and is never offered for scheduling")
+assert(scheduledTripReminderMinutes(reminder: 15, start: 15, hasActivity: true) == nil,
+       "The Live Activity's own alert stands in for a reminder at the same minute")
+assert(scheduledTripReminderMinutes(reminder: 20, start: 15, hasActivity: true) == 20, "A reminder before the start")
+assert(scheduledTripReminderMinutes(reminder: 0, start: 15, hasActivity: true) == nil, "A reminder can be off")
+assert(scheduledTripReminderMinutes(reminder: 20, start: 15, hasActivity: false) == 20, "Only the reminder starts it")
+assert(scheduledTripReminderMinutes(reminder: 0, start: 15, hasActivity: false) == 15,
+       "Without a Live Activity the reminder can't be off: it is the only way to start")
+let scheduledStep = scheduledJourney.scheduledState!
+let rideTime = timeStringFromDate(local("08:03"))
+assert(scheduledStep.step == .board && scheduledStep.line == "63" && scheduledStep.title == "Board at Trnavské mýto"
+       && scheduledStep.detail == "Platform A · Tap to follow live" && scheduledStep.time == local("08:03")
+       && scheduledStep.compact == rideTime && scheduledStep.minimal == rideTime,
+       "No countdown, which nothing would update before the app opens: \(scheduledStep)")
+let scheduledReminder = scheduledJourney.reminderText(minutes: 15)!
+assert(scheduledReminder.title == "Leave in 15 min"
+       && scheduledReminder.body == "Line 63 from Trnavské mýto at \(rideTime). Tap to follow your trip live.",
+       "The reminder counts from the walk and names the ride: \(scheduledReminder)")
+print("PASS: scheduled trips start from half an hour before, and show no countdown until the app opens")
 SWIFT
