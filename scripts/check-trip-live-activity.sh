@@ -870,9 +870,23 @@ assert(waitingFirst.locate(nil, on: walkChange, now: local("07:59"))?.kind == .u
 var gone = TripLiveData(delays: [0: 660, 2: 0])
 assert(gone.locate(nil, on: walkChange, now: local("08:30:50"))?.kind == .unreachable && gone.missed == nil,
        "Before the 31 leaves it is only unreachable")
-let left31 = gone.locate(nil, on: walkChange, now: local("08:31"))
-assert(left31 == TripMissed(part: 2, boarded: false, arriving: 0, at: local("08:32")) && gone.missed == 2
-       && gone.missedChange && gone.suspected == nil, "Missed once the 31 left: \(String(describing: left31))")
+let stillOn72 = gone.locate(nil, on: walkChange, now: local("08:31"))
+assert(stillOn72 == TripMissed(part: 2, boarded: false, kind: .unreachable, arriving: 0, at: local("08:32"))
+       && gone.missed == 2 && gone.missedChange && gone.suspected == nil,
+       "Missed once the 31 left, while the 72 still runs to Rajská: \(String(describing: stillOn72))")
+// Still on the 72 a stop before Rajská: its steps, its get-off alert and its boards stay, the connection beside them.
+var stillFound = stillOn72!
+stillFound.alternatives = walkChange.alternatives(found + [later(35, line: "83")], missed: 2, at: local("08:32"))
+let nearRajska = at("08:31:45", live: gone.delays, passedStops: [0: 16], alerted: ["missed-2"], missed: stillFound)
+assert(nearRajska.progress.phase == .ride(0) && nearRajska.state.step == .ride
+       && nearRajska.state.title == "Get off at the next stop" && nearRajska.alert?.key == "off-0"
+       && nearRajska.state.alternative == "Take 83 at \(timeStringFromDate(local("08:35"))) from Hronská A"
+       && walkChange.trackerTargets(for: nearRajska.progress).first == TripTrackerTarget(part: 0, stop: 16),
+       "The ride to the missed change goes on: \(nearRajska.state), \(String(describing: nearRajska.alert))")
+let left31 = gone.locate(nil, on: walkChange, now: local("08:32"))
+assert(left31 == TripMissed(part: 2, boarded: false, arriving: 0, at: local("08:32")) && left31!.canReuse(
+           searchFor: stillOn72!
+       ), "Once the 72 ended, the missed screen, keeping what was found: \(String(describing: left31))")
 let goneState = at("08:32:30", live: gone.delays, alerted: ["missed-2"], missed: left31)
 assert(goneState.state.step == .missed && goneState.state.title == "Missed 31" && goneState.alert == nil,
        "Never riding the 31 that left; no second alert after the change one: \(goneState.state)")
@@ -893,16 +907,20 @@ keptChange.missed = nil
 assert(keptChange.locate(nil, on: walkChange, now: local("08:32")) == nil, "A kept ride is not missed again")
 print("PASS: an impossible change searches from the change stop at the arrival, and misses the next vehicle once it left")
 
-// A tight change whose next vehicle is not live: asked 2 minutes after it left, unless the location shows them on it.
+// A tight change whose next vehicle is not live: asked 5 minutes after it was due, as the location check waits for a
+// vehicle that may only be late, unless the location shows them on it or at its stop.
 var longLeg = walkChange
 longLeg.parts![2].endArrival = local("08:45")
 var tight = TripLiveData(delays: [0: 0])
 assert(longLeg.transferBuffers(delays: tight.delays)[2] == TransferBuffer(minutes: 0), "A tight change")
-assert(tight.locate(nil, on: longLeg, now: local("08:32:50")) == nil, "Not before 2 minutes")
-let tightAsked = tight.locate(nil, on: longLeg, now: local("08:33"))
-assert(tightAsked == TripMissed(part: 2, boarded: false, kind: .suspected),
-       "Asked whether they caught the 31: \(String(describing: tightAsked))")
-let tightState = longLeg.update(at: local("08:33"), delays: longLeg.delays(live: tight.delays), missed: tightAsked)
+var waitingLate = tight
+assert(tight.locate(nil, on: longLeg, now: local("08:35:50")) == nil
+       && waitingLate.locate(fix(moved(kollarovo, north: 100)), on: longLeg, now: local("08:36")) == nil
+       && waitingLate.suspected == nil, "Not before 5 minutes, nor while waiting at Kollárovo nám. for a late 31")
+let tightAsked = tight.locate(nil, on: longLeg, now: local("08:36"))
+assert(tightAsked == TripMissed(part: 2, boarded: false, kind: .suspected, byChange: true),
+       "Asked whether they caught the 31, by the change: \(String(describing: tightAsked))")
+let tightState = longLeg.update(at: local("08:36"), delays: longLeg.delays(live: tight.delays), missed: tightAsked)
 assert(tightState.state.step == .question && tightState.state.title == "Did you catch the 31?"
        && tightState.state.detail == "Finding other connections…" && tightState.alert == nil, "\(tightState.state)")
 var onIt = TripLiveData(delays: [0: 0], boarded: [2])
@@ -912,10 +930,98 @@ assert(liveNext.locate(nil, on: longLeg, now: local("08:34")) == nil, "A live 31
 var lateUnseen = TripLiveData(delays: [0: 120])
 assert(lateUnseen.locate(nil, on: longLeg, now: local("08:28"))?.kind == .unreachable
        && lateUnseen.locate(nil, on: longLeg, now: local("08:30:50"))?.kind == .unreachable
-       && lateUnseen.locate(nil, on: longLeg, now: local("08:31")) == TripMissed(
-           part: 2, boarded: false, kind: .suspected
-       ), "A 31 without live data after a late 72: offered, then asked as soon as they would be on it")
-print("PASS: a tight change without live data is asked about once its vehicle left")
+       && lateUnseen.locate(nil, on: longLeg, now: local("08:35:50")) == nil
+       && lateUnseen.locate(nil, on: longLeg, now: local("08:36")) == TripMissed(
+           part: 2, boarded: false, kind: .suspected, byChange: true
+       ), "A 31 without live data after a late 72: offered, then asked 5 minutes after it was due")
+print("PASS: a tight change without live data is asked about 5 minutes after its vehicle was due")
+
+// A walk shorter than planned (report 2): a minute late, the 72 leaves the planner's 10-minute walk a minute short of
+// the live 31, but it reached Rajská long before the 31 left. That is a question, not a miss, which moving with the 31
+// answers for good; at the 31's stop as it leaves, nothing is asked.
+let shortWalk = TripLiveData(delays: [0: 60, 2: 0])
+assert(walkChange.transferBuffers(delays: shortWalk.delays)[2] == TransferBuffer(minutes: -1), "Short by the walk")
+let leg31 = walkChange.parts![2].legStops
+func ride31(walkingAt start: StopGps) -> (asked: [Int?], live: TripLiveData) {
+    var live = shortWalk
+    var asked = [Int?]()
+    var now = local("08:30:30")
+    while now <= local("08:33") {
+        var current = fix(start)
+        if now > local("08:31") {
+            // On the 31 at 8 m/s.
+            current = fix(onLine(0, min(now.timeIntervalSince(local("08:31")) / 120, 0.9), of: leg31))
+            current.speed = 8
+            current.time = now
+        }
+        let update = tick(walkChange, &live, current, at: now)
+        assert(live.missed == nil && update.state.step != .missed, "Never missed: \(update.state)")
+        asked.append(live.suspected)
+        now += 15
+    }
+    return (asked, live)
+}
+let rushed = ride31(walkingAt: moved(kollarovo, north: 300))
+// 08:30:30, 08:30:45: walking; 08:31 asked; the location checks the 31 from 08:32, a minute behind.
+assert(rushed.asked.prefix(2).allSatisfy { $0 == nil } && Array(rushed.asked[2 ..< 6]) == [2, 2, 2, 2]
+       && rushed.asked[6...].allSatisfy { $0 == nil } && rushed.live.suspectedByChange && rushed.live.movedAt[2] != nil,
+       "Asked at 08:31, answered by moving with the 31 from 08:32 and not asked again: \(rushed.asked)")
+let atStop31 = ride31(walkingAt: kollarovo)
+assert(atStop31.asked.allSatisfy { $0 == nil } && atStop31.live.movedAt[2] != nil,
+       "At Kollárovo nám. as the 31 leaves, then moving with it: never asked: \(atStop31.asked)")
+assert(stayed.live.suspected == 0 && !stayed.live.suspectedByChange, "The location's questions are not the change's")
+print("PASS: a change short only by the planned walk is asked about, and moving with the next vehicle answers it")
+
+// A question nobody answers does not outlast its ride (report 2): on the 72, then 1 km off its line from 08:17. Once
+// the 72 reached Rajská a minute ago on paper the question goes, and the change and the 31 alert as usual.
+let detour = follow(from: "08:15", to: "08:33", live: liveOnTime) { now in
+    now < local("08:17") ? onTimetable(now, lag: 0) : now < local("08:31") ? onLine(12, left: 1_000)
+        : onLine(0, 0.5, of: leg31)
+}
+func tickAt(_ time: String, from start: String = "08:15") -> Int {
+    Int(local(time).timeIntervalSince(local(start)) / 15)
+}
+assert(detour.askedAt.map { $0 < local("08:19") } == true && detour.steps[tickAt("08:21:45")].state.step == .question
+       && detour.steps[tickAt("08:21:45")].state.title == "Still on the 72?"
+       && detour.steps[tickAt("08:22")].state.step == .change && detour.live.suspected == nil,
+       "Asked at \(String(describing: detour.askedAt)), then the change from 08:22: "
+       + "\(detour.steps[tickAt("08:22")].state)")
+assert(detour.alerts.contains("change-2") && detour.alerts.last == "off-2"
+       && detour.steps[tickAt("08:22")...].allSatisfy { $0.state.step != .question },
+       "The change and get-off alerts fire again: \(detour.alerts)")
+// The 72 runs 5 minutes late on paper, but the traveller already waits at the 31's stop: that answers the question.
+var askedOnLate = TripLiveData(delays: [0: 300], boarded: [0], suspected: 0)
+let waitsAt31 = follow(from: "08:22", to: "08:25:45", live: askedOnLate) { _ in kollarovo }
+assert(waitsAt31.askedAt == nil && waitsAt31.live.suspected == nil && waitsAt31.live.offRide.isEmpty
+       && waitsAt31.live.located[0] == nil && waitsAt31.steps.allSatisfy { $0.state.step == .ride },
+       "At the next ride's stop: answered at once, not asked again: \(waitsAt31.live)")
+askedOnLate.receive(fix(kollarovo), on: walkChange, progress: TripProgress(phase: .ride(0), fraction: 0.5),
+                    now: local("08:22"))
+assert(askedOnLate.suspected == nil, "Answered by the location at the next ride's stop")
+print("PASS: an unanswered question ends with its ride, and reaching the next ride's stop answers it")
+
+// What was found stays while the arrival it leaves from only moves later; other connections are dropped by that time.
+let from23 = TripMissed(part: 2, boarded: false, kind: .unreachable, arriving: 0, at: local("08:23"))
+var from24 = from23
+from24.at = local("08:24")
+assert(from24.canReuse(searchFor: from23) && from23.canReuse(searchFor: from23) && !from23.canReuse(searchFor: from24)
+       && !TripMissed(part: 2, boarded: false).canReuse(searchFor: from23)
+       && !TripMissed(part: 0, boarded: false, arriving: 0, at: local("08:24")).canReuse(searchFor: from23)
+       && TripMissed(part: 2, boarded: false).canReuse(
+           searchFor: TripMissed(part: 2, boarded: false, kind: .suspected)
+       ),
+       "A later arrival reuses the search; an earlier one, another ride or change stop searches again")
+// Moving with a ride alone is no reason to save the journey.
+var movedOnly = rideLive
+movedOnly.movedAt[0] = local("08:05")
+var furtherOn = movedOnly
+furtherOn.located[0] = 12
+assert(!movedOnly.needsSaving(since: rideLive) && furtherOn.needsSaving(since: rideLive),
+       "Saved when more than that changed")
+let savedQuestion = TripLiveData(suspected: 2, suspectedByChange: true)
+let reloadedQuestion = try JSONDecoder().decode(TripLiveData.self, from: JSONEncoder().encode(savedQuestion))
+assert(reloadedQuestion == savedQuestion, "A change's question survives a relaunch")
+print("PASS: later arrivals reuse what was found, and the journey is not saved for movement alone")
 
 // Where the vehicle to board is (report 4).
 var awaited = TripLiveData()
