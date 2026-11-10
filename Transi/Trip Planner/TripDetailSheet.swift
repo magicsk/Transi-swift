@@ -633,7 +633,9 @@ private struct MissedRideView: View {
             Text(missed.boarded ? "Still on the \(line)?" : "Did you catch the \(line)?")
                 .font(.headline)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("Your location suggests you may not be on it.")
+            (missed.byChange
+                ? Text("The change to the \(line) was very tight.")
+                : Text("Your location suggests you may not be on it."))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

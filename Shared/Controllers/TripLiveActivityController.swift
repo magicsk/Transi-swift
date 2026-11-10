@@ -39,16 +39,10 @@ final class TripLiveActivityController: ObservableObject {
     private var awaitsLiveData = false
     private var trackers = [TripTrackerTarget: PartLiveTracker]()
     private var ticker: AnyCancellable?
-    /// What `found` answers: the ride, and where and when from (see TripMissed).
-    private struct Search: Equatable {
-        let part: Int
-        let arriving: Int?
-        let at: Date?
-    }
-
     /// The journeys found to the destination for `search`; nil until the search answers.
     private var found: [Journey]?
-    private var search: Search?
+    /// The ride `found` was searched for, without its other connections.
+    private var search: TripMissed?
     private var searchedAt: Date?
     /// The last update sent to the activity, which an answer from it waits for before the app may suspend again.
     private var sending: Task<Void, Never>?
@@ -177,14 +171,13 @@ final class TripLiveActivityController: ObservableObject {
         let fix = Self.fix(at: now)
         let before = live
         var missed = live.locate(fix, on: journey, now: now)
-        if live != before {
+        if live.needsSaving(since: before) {
             save()
         }
         if let ride = missed {
-            let search = Search(part: ride.part, arriving: ride.arriving, at: ride.at)
-            if search != self.search {
-                // Another ride, change stop or arrival: what was found no longer answers it.
-                self.search = search
+            if !(search.map(ride.canReuse) ?? false) {
+                // Another ride or change stop, or an earlier arrival: what was found may not answer it.
+                search = ride
                 found = nil
                 searchedAt = nil
             }
@@ -261,6 +254,8 @@ final class TripLiveActivityController: ObservableObject {
         guard let index = live.suspected else { return }
         live.missed = index
         live.suspected = nil
+        // They chose the other connections, which the trip shows at once: no alert to tell them again.
+        state?.alerted.insert("lost-\(index)")
         save()
         refresh()
     }

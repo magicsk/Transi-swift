@@ -134,6 +134,8 @@ struct TripStepDetail: View {
                     StopIcon(color: .accent).scaleEffect(1.3).accessibilityHidden(true)
                     Text(lastStop).font(.subheadline).lineLimit(1)
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Vehicle at or past \(lastStop)")
             }
             if let progress = state.progress {
                 ProgressView(value: progress).tint(state.line.flatMap(colorFromLineNum))
