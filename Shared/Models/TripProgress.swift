@@ -47,16 +47,37 @@ struct TripAlert: Equatable {
 struct TripFix: Equatable {
     let gps: StopGps
     let accuracy: Double
+    /// Metres per second; nil when unknown.
+    var speed: Double? = nil
+    /// Degrees clockwise from north the traveller heads in; nil when unknown.
+    var course: Double? = nil
+    /// When it was measured. It updates every 50 m, so its age is how long the traveller stayed within that; an
+    /// unknown time counts as long ago.
+    var time = Date.distantPast
 }
 
 /// Walking pace over the straight line to a stop, slower than on foot to cover the streets' detours.
 let tripWalkMetersPerSecond = 1.0
 
-/// A ride the traveller's location showed them not on, and the other connections found from where they are.
+/// A ride the traveller is not on or may not be on, and the other connections found for it.
 struct TripMissed: Equatable {
+    enum Kind: Equatable {
+        /// Not on it, by their answer or the live data, so the trip offers the other connections instead of its steps.
+        case missed
+        /// The location or a passed tight change suggests they are not on it, so the trip asks.
+        case suspected
+        /// Live delays make the change to it impossible: the steps stay, and the other connections come with them.
+        case unreachable
+    }
+
     let part: Int
     /// They rode it for a while, so they got off or the vehicle left its route.
     let boarded: Bool
+    var kind = Kind.missed
+    /// The ride arriving at the change to `part`, whose alighting stop the other connections leave from at `at`, its
+    /// expected arrival; nil for from where the traveller is, now.
+    var arriving: Int? = nil
+    var at: Date? = nil
     /// Nil while the search runs.
     var alternatives: TripAlternatives?
 }
@@ -126,35 +147,47 @@ struct TripLiveData: Codable, Equatable {
     var offRide = [Int: Date]()
     /// The ride the traveller is not on, so the trip offers other connections instead of its steps.
     var missed: Int?
-    /// Rides the traveller kept following after the location found them off, which it no longer checks.
+    /// Rides the traveller kept following after the trip found them off or asked, which it no longer checks.
     var kept = Set<Int>()
+    /// The furthest leg stop whose board dropped each vehicle once due. The board watched stays past it, though a later
+    /// board may show the vehicle had not left it yet.
+    var dropped = [Int: Int]()
+    /// Where each vehicle to board is while its boarding stop's board lists it live: the stop it is at or left last.
+    var lastStops = [Int: String]()
+    /// When the location last showed the traveller moving along each ride at vehicle speed.
+    var movedAt = [Int: Date]()
+    /// The ride the traveller may not be on, which the trip asks about until they answer or the location shows them on it.
+    var suspected: Int?
+    /// `missed` left before the ride arriving at its change could get there, so its other connections leave from that
+    /// ride's alighting stop.
+    var missedChange = false
 
     /// The last leg stop each vehicle left: on the boards, or by the location when that is further on.
     var positions: [Int: Int] { passedStops.merging(located, uniquingKeysWith: max) }
 
     /// One refresh of the trip: takes in `fix` against where the boards and the timetable had the vehicles a minute ago
-    /// (their whole-minute times and delays may run up to that far ahead), then the ride missed, with the other
-    /// connections in `found` (nil until the search answers).
-    mutating func locate(_ fix: TripFix?, on journey: Journey, found: [Journey]?, now: Date) -> TripMissed? {
+    /// (their whole-minute times and delays may run up to that far ahead) and the change at hand, then the ride the trip
+    /// offers other connections for, without them yet.
+    mutating func locate(_ fix: TripFix?, on journey: Journey, now: Date) -> TripMissed? {
         if let fix {
             let progress = journey.progress(at: now - 60, delays: journey.delays(live: delays), passedStops: passedStops)
             receive(fix, on: journey, progress: progress, now: now)
         }
-        return missed.map { index in
-            TripMissed(
-                part: index, boarded: boarded.contains(index),
-                alternatives: found.map { journey.alternatives($0, missed: index, at: now) }
-            )
-        }
+        receiveChanges(of: journey, now: now)
+        return missedRide(on: journey, now: now)
     }
 
-    /// Takes in the traveller's location while `progress`, from the boards and the timetable, has them riding. On the
-    /// vehicle's line and not more than a stop (or 500 m, between far stops) behind it, they ride it, and the stop they
-    /// are at counts as reached; near the alighting stop they got off there. Otherwise for 45 s they missed it, once the
-    /// vehicle is that far ahead or they are off its line. Without a live delay the vehicle may only be late: it is
-    /// missed only by staying at the boarding stop or leaving the line, and not before 5 minutes after it was due.
+    /// Takes in the traveller's location while `progress`, from the boards and the timetable, has them riding. Moving
+    /// along the vehicle's line at vehicle speed, they ride it however far behind they are. Otherwise they ride it on
+    /// its line and not more than a stop (or 500 m, between far stops) behind it, and on a ride they boarded until
+    /// 4 minutes after they last moved with it, as it may dwell or be stuck with them. The stop they are at counts as
+    /// reached; near the alighting stop they got off there. Otherwise for 45 s they may have missed it, once the vehicle
+    /// is that far ahead or they are off its line, and the trip asks. Without a live delay the vehicle may only be late:
+    /// it is asked about only by staying at the boarding stop or leaving the line, and not before 5 minutes after it was
+    /// due. Moving with the ride asked about, or riding it past its boarding stop, answers that they are on it.
     mutating func receive(_ fix: TripFix, on journey: Journey, progress: TripProgress, now: Date) {
         guard missed == nil, case .ride(let index) = progress.phase, !kept.contains(index),
+              suspected == nil || suspected == index,
               let part = journey.parts?[index], located[index] != part.legStops.count - 1
         else { return }
         let stops = part.legStops
@@ -162,12 +195,25 @@ struct TripLiveData: Codable, Equatable {
         guard let place = part.placement(of: fix, near: vehicle) else { return }
         let isLive = delays[index] != nil
         let behind = place.stop < vehicle - 1 || place.meters(atStop: vehicle) - place.along > 500
-        let rides = place.onLine && (!behind || !isLive && place.along >= 150)
+        // Faster than anyone walks. At that speed a fix comes every 50 m, so one older than 30 s means they stopped.
+        let moving = place.onLine && now.timeIntervalSince(fix.time) <= 30 && (fix.speed ?? 0) >= 3
+            && place.heads(fix.course)
+        if moving {
+            movedAt[index] = fix.time
+        }
+        let wasBoarded = boarded.contains(index)
+        let movedLately = movedAt[index].map { now.timeIntervalSince($0) < 240 } ?? false
+        let rides = place.onLine
+            && (moving || !behind || !isLive && place.along >= 150 || wasBoarded && movedLately)
         let alighted = stops.last?.gps.map { fix.gps.distance(to: $0) <= 300 + fix.accuracy } ?? false
         if rides || alighted {
             offRide[index] = nil
             if rides, place.along >= 150 {
                 boarded.insert(index)
+            }
+            // A ride boarded before goes on by itself for a while, so only moving with it answers for it.
+            if suspected == index, alighted || moving || rides && place.along >= 150 && !wasBoarded {
+                suspected = nil
             }
             let next = rides ? place.stops.firstIndex { $0 > place.along + 40 } ?? stops.count : stops.count
             located[index] = max(located[index] ?? 0, next - 1)
@@ -177,14 +223,15 @@ struct TripLiveData: Codable, Equatable {
         else { return }
         let since = offRide[index] ?? now
         offRide[index] = since
-        if now.timeIntervalSince(since) >= 45 {
-            missed = index
+        if now.timeIntervalSince(since) >= 45, suspected == nil {
+            suspected = index
         }
     }
 
     /// Takes in the leg's departure on `target`'s board from its PartLiveTracker, which only reports the vehicle
     /// it follows (passed from `busIDs`, or the first one live), nil while the board does not list it. A stop's
-    /// board lists a vehicle with the stop it left last (not this one) until it leaves this stop, then drops it.
+    /// board lists a vehicle with the stop it left last (not this one) until it leaves this stop, then drops it. Some
+    /// boards drop it by the clock while it is still on the way, so the stop a board lists it at wins over that.
     mutating func receive(_ connection: Connection?, at target: TripTrackerTarget, of journey: Journey, now: Date) {
         let index = target.part
         let stops = journey.parts?[index].legStops ?? []
@@ -192,20 +239,111 @@ struct TripLiveData: Codable, Equatable {
             delays[index] = delay
             busIDs[index] = connection.busID
             listed[target] = Date(timeIntervalSince1970: connection.departureTimeRaw)
+            if target.stop == 0 {
+                let name = connection.lastStopName.replacingOccurrences(of: "Bratislava, ", with: "")
+                lastStops[index] = name.isEmpty || name == "none" ? nil : name
+            }
             // A loop line passes a stop twice, so take the one nearest before this stop.
             let left = stops.indices.last { $0 < target.stop && sameStop(stops[$0].name, connection.lastStopName) }
-            if let left { passedStops[index] = max(passedStops[index] ?? left, left) }
-        } else if target.stop > 0, target.stop < stops.count {
+            if let left { passedStops[index] = left }
+        } else {
+            if target.stop == 0 {
+                lastStops[index] = nil
+            }
+            guard target.stop > 0, target.stop < stops.count else { return }
             let delay = TimeInterval(journey.delays(live: delays)[index] ?? 0)
             if let due = listed[target] {
                 // Dropped from the board: it left this stop, unless the board only reconnected before it was due.
-                if now >= due { passedStops[index] = max(passedStops[index] ?? target.stop, target.stop) }
+                if now >= due {
+                    passedStops[index] = max(passedStops[index] ?? target.stop, target.stop)
+                    dropped[index] = max(dropped[index] ?? target.stop, target.stop)
+                }
             } else if now >= stops[target.stop].time + delay + 180 {
                 // Never listed here and long past due (the board-matching tolerance): the vehicle went by unseen
                 // or the boards stopped listing it. Count by the delayed timetable until a board lists it again.
                 passedStops[index] = nil
             }
         }
+    }
+
+    /// Takes in the change at hand once its next vehicle's departure passed (or its board's time, if later). Live delays
+    /// that made it impossible miss that vehicle: it left before the one arriving could get the traveller there. A tight
+    /// change whose next vehicle is not live, or a likely missed one whose arriving vehicle is not live, is asked about
+    /// once the trip has them on the next vehicle; a tight one that may have worked out 2 minutes after its departure,
+    /// so the location can show them on it first.
+    mutating func receiveChanges(of journey: Journey, now: Date) {
+        guard missed == nil, let parts = journey.parts else { return }
+        let delays = journey.delays(live: self.delays)
+        let phase = journey.progress(at: now, delays: delays).phase
+        let buffers = journey.transferBuffers(delays: delays)
+        for index in buffers.keys.sorted() {
+            // Riding to the change, or on paper already on the next vehicle; not while asking about another ride.
+            guard let buffer = buffers[index], buffer.isTight, !kept.contains(index), !boarded.contains(index),
+                  suspected == nil || suspected == index,
+                  let arriving = parts[..<index].lastIndex(where: { $0.routeType != 64 }),
+                  phase == .ride(arriving) || phase == .ride(index)
+            else { continue }
+            let departure = max(
+                parts[index].startDeparture + TimeInterval(delays[index] ?? 0),
+                listed[TripTrackerTarget(part: index, stop: 0)] ?? .distantPast
+            )
+            guard now >= departure else { continue }
+            let isLive = self.delays[index] != nil
+            if buffer.isLikelyMissed, isLive, self.delays[arriving] != nil {
+                missed = index
+                missedChange = true
+                suspected = nil
+                return
+            }
+            if suspected == nil, phase == .ride(index), now >= departure + (buffer.isLikelyMissed ? 0 : 120),
+               !isLive || buffer.isLikelyMissed
+            {
+                suspected = index
+            }
+        }
+    }
+
+    /// The ride the trip offers other connections for, without them yet: the one missed, the one asked about, or the
+    /// next one while live delays make the change to it impossible and the traveller rides or waits for the one before.
+    func missedRide(on journey: Journey, now: Date) -> TripMissed? {
+        let delays = journey.delays(live: self.delays)
+        if let missed {
+            let change = missedChange ? journey.arrival(before: missed, delays: delays) : nil
+            return TripMissed(
+                part: missed, boarded: boarded.contains(missed), arriving: change?.part, at: change?.at
+            )
+        }
+        if let suspected {
+            return TripMissed(part: suspected, boarded: boarded.contains(suspected), kind: .suspected)
+        }
+        let phase = journey.progress(at: now, delays: delays).phase
+        guard let index = journey.upcomingChange(phase), !kept.contains(index),
+              journey.transferBuffers(delays: delays)[index]?.isLikelyMissed == true,
+              let change = journey.arrival(before: index, delays: delays)
+        else { return nil }
+        return TripMissed(part: index, boarded: false, kind: .unreachable, arriving: change.part, at: change.at)
+    }
+}
+
+extension TripLiveData {
+    /// Fields an earlier version did not save start empty, so its trip still restores.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init()
+        delays = try container.decodeIfPresent([Int: Int].self, forKey: .delays) ?? [:]
+        busIDs = try container.decodeIfPresent([Int: String].self, forKey: .busIDs) ?? [:]
+        passedStops = try container.decodeIfPresent([Int: Int].self, forKey: .passedStops) ?? [:]
+        listed = try container.decodeIfPresent([TripTrackerTarget: Date].self, forKey: .listed) ?? [:]
+        located = try container.decodeIfPresent([Int: Int].self, forKey: .located) ?? [:]
+        boarded = try container.decodeIfPresent(Set<Int>.self, forKey: .boarded) ?? []
+        offRide = try container.decodeIfPresent([Int: Date].self, forKey: .offRide) ?? [:]
+        missed = try container.decodeIfPresent(Int.self, forKey: .missed)
+        kept = try container.decodeIfPresent(Set<Int>.self, forKey: .kept) ?? []
+        dropped = try container.decodeIfPresent([Int: Int].self, forKey: .dropped) ?? [:]
+        lastStops = try container.decodeIfPresent([Int: String].self, forKey: .lastStops) ?? [:]
+        movedAt = try container.decodeIfPresent([Int: Date].self, forKey: .movedAt) ?? [:]
+        suspected = try container.decodeIfPresent(Int.self, forKey: .suspected)
+        missedChange = try container.decodeIfPresent(Bool.self, forKey: .missedChange) ?? false
     }
 }
 
@@ -263,16 +401,18 @@ extension Journey {
         )
     }
 
-    /// The live boards to watch: the boarding stop until the vehicle leaves, then the next stop it reaches,
-    /// plus the next vehicle's boarding stop while a change lies ahead.
-    func trackerTargets(for progress: TripProgress) -> [TripTrackerTarget] {
+    /// The live boards to watch: the boarding stop until the vehicle leaves, then the next stop it reaches (past the
+    /// furthest one in `dropped` that dropped it, by part index), plus the next vehicle's boarding stop while a change
+    /// lies ahead.
+    func trackerTargets(for progress: TripProgress, dropped: [Int: Int] = [:]) -> [TripTrackerTarget] {
         switch progress.phase {
         case .board(let index), .change(let index):
             return [TripTrackerTarget(part: index, stop: 0)]
         case .ride(let index):
             guard let part = parts?[index] else { return [] }
             let last = part.legStops.count - 1
-            var stop = min(progress.nextStop ?? last, last)
+            // A board that dropped it by the clock keeps dropping it: the next one lists where it is.
+            var stop = min(max(progress.nextStop ?? last, dropped[index].map { $0 + 1 } ?? 0), last)
             // A vehicle ending its run is no departure, so the terminus board will not list it.
             if stop == last, let headsign = part.tripHeadsign, terminates(headsign: headsign, at: part.endStopName) {
                 stop -= 1
@@ -287,22 +427,31 @@ extension Journey {
         }
     }
 
-    /// The Live Activity content at `now`, and the alert due that is not in `alerted` yet. `fix` adds the walk to the
-    /// next stop; `missed` replaces the steps with the other connections.
+    /// The Live Activity content at `now`, and the alert due that is not in `alerted` yet. `vehicleStops` (by part
+    /// index) shows where the vehicle to board is; `fix` adds the walk to the next stop. A missed or suspected ride
+    /// replaces the steps with the other connections or the question; an unreachable one adds the soonest connection.
     func update(
-        at now: Date, delays: [Int: Int], passedStops: [Int: Int] = [:], alerted: Set<String> = [],
-        fix: TripFix? = nil, missed: TripMissed? = nil
+        at now: Date, delays: [Int: Int], passedStops: [Int: Int] = [:], vehicleStops: [Int: String] = [:],
+        alerted: Set<String> = [], fix: TripFix? = nil, missed: TripMissed? = nil
     ) -> TripUpdate {
         let progress = progress(at: now, delays: delays, passedStops: passedStops)
-        var state = missed.map { missedState($0, delays: delays, alerted: alerted) }
-            ?? state(for: progress, at: now, delays: delays, alerted: alerted, fix: fix)
+        var state: TripActivityAttributes.ContentState
+        if let missed, missed.kind != .unreachable {
+            state = missedState(missed, delays: delays, alerted: alerted)
+        } else {
+            state = self.state(
+                for: progress, at: now, delays: delays, vehicleStops: vehicleStops, alerted: alerted, fix: fix
+            )
+            state.alternative = missed?.alternatives?.best?.offer(asking: false)
+        }
         let alert = alert(for: progress, state: state, at: now, delays: delays, missed: missed)
         if let alert { state.alerted.insert(alert.key) }
         return TripUpdate(progress: progress, state: state, alert: alert)
     }
 
     private func state(
-        for progress: TripProgress, at now: Date, delays: [Int: Int], alerted: Set<String>, fix: TripFix?
+        for progress: TripProgress, at now: Date, delays: [Int: Int], vehicleStops: [Int: String],
+        alerted: Set<String>, fix: TripFix?
     ) -> TripActivityAttributes.ContentState {
         let parts = parts ?? []
         let lastTransit = parts.indices.last { parts[$0].routeType != 64 }
@@ -336,13 +485,16 @@ extension Journey {
         {
             warning = .mayMiss
         }
+        // Where the vehicle to board is, while its board lists it live.
+        let vehicleStop = boarding(progress.phase).flatMap { vehicleStops[$0] }
         func content(
             _ step: TripActivityAttributes.ContentState.Step, line: String? = nil, title: String, detail: String,
             time: Date, delay: Int? = nil, progress: Double? = nil, compact: String, minimal: String
         ) -> TripActivityAttributes.ContentState {
             TripActivityAttributes.ContentState(
                 step: step, line: line, title: title, detail: detail, time: time, delay: delay, progress: progress,
-                compact: compact, minimal: minimal, warning: warning, alerted: alerted
+                compact: compact, minimal: minimal, warning: warning,
+                lastStop: vehicleStop, alerted: alerted
             )
         }
 
@@ -421,50 +573,63 @@ extension Journey {
         }
     }
 
-    /// The other connections in place of the steps, the soonest arrival first.
+    /// The other connections in place of the steps, the soonest arrival first; for a suspected ride, the question
+    /// whether the traveller is on it.
     private func missedState(_ missed: TripMissed, delays: [Int: Int], alerted: Set<String>)
         -> TripActivityAttributes.ContentState
     {
         let part = parts?[missed.part]
         let line = part?.routeShortName
+        let asks = missed.kind == .suspected
         let best = missed.alternatives?.best
-        let ride = best?.parts?.first { $0.routeType != 64 }
+        let ride = best?.firstRide
         let leaves = ride.map { $0.startDeparture.expected(delaySeconds: $0.delaySeconds) }
-        let detail: String
-        if let ride, let leaves {
-            detail = "Take \(ride.routeShortName ?? "the next vehicle") at \(timeStringFromDate(leaves)) from "
-                + [ride.startStopName ?? "the stop", ride.startStopCode].compactMap { $0 }.joined(separator: " ")
+        let title: String
+        if asks {
+            let vehicle = line.map { "the \($0)" } ?? "the vehicle"
+            title = missed.boarded ? "Still on \(vehicle)?" : "Did you catch \(vehicle)?"
         } else {
-            detail = missed.alternatives == nil ? "Finding other connections…" : "No other connections found"
+            title = missed.boarded ? "Off the route" : "Missed \(line ?? "the vehicle")"
         }
+        let detail = best?.offer(asking: asks)
+            ?? (missed.alternatives == nil ? "Finding other connections…" : "No other connections found")
         return TripActivityAttributes.ContentState(
-            step: .missed, line: ride?.routeShortName ?? line,
-            title: missed.boarded ? "Off the route" : "Missed \(line ?? "the vehicle")", detail: detail,
+            step: asks ? .question : .missed, line: asks ? line : ride?.routeShortName ?? line, title: title,
+            detail: detail,
             // Until there is another one, when the missed vehicle left.
             time: leaves ?? part.map { $0.startDeparture.expected(delaySeconds: delays[missed.part]) } ?? .distantPast,
-            compact: "Missed", minimal: "!", alerted: alerted
+            compact: asks ? "On it?" : "Missed", minimal: asks ? "?" : "!", alerted: alerted
         )
     }
 
-    /// The most urgent alert due: a missed ride, a likely missed change, the walk to a vehicle that may leave first,
-    /// the platform at a change, then getting off.
+    /// The most urgent alert due: a missed ride or the question whether the traveller is on one, a likely missed
+    /// change, the walk to a vehicle that may leave first, the platform at a change, then getting off.
     private func alert(
         for progress: TripProgress, state: TripActivityAttributes.ContentState, at now: Date, delays: [Int: Int],
         missed: TripMissed?
     ) -> TripAlert? {
-        if let missed {
-            // Once the search answered, so the alert says what to take.
-            let alert = TripAlert(key: "lost-\(missed.part)", title: state.title, body: state.detail)
-            return missed.alternatives == nil || state.alerted.contains(alert.key) ? nil : alert
+        if let missed, missed.kind != .unreachable {
+            let alert = TripAlert(
+                key: (missed.kind == .suspected ? "ask-" : "lost-") + "\(missed.part)", title: state.title,
+                body: state.detail
+            )
+            // Once the search answered, so the alert says what to take. Once a change alerted as likely missed, with
+            // the same connection, its next vehicle leaving needs no second alert.
+            let told = missed.arriving != nil && state.alerted.contains("missed-\(missed.part)")
+            return missed.alternatives == nil || told || state.alerted.contains(alert.key) ? nil : alert
         }
         let parts = parts ?? []
         var due = [TripAlert]()
-        if state.warning == .likelyMissedChange, let index = upcomingChange(progress.phase) {
+        if state.warning == .likelyMissedChange, let index = upcomingChange(progress.phase),
+           // With other connections searched, once the search answered, so it names the soonest one.
+           missed?.part != index || missed?.alternatives != nil
+        {
             let part = parts[index]
             let departure = part.startDeparture.expected(delaySeconds: delays[index])
             due.append(TripAlert(
                 key: "missed-\(index)", title: "Change likely missed",
-                body: "\(part.routeShortName ?? "The next vehicle") leaves \(part.startStopName ?? "the stop") "
+                body: state.alternative
+                    ?? "\(part.routeShortName ?? "The next vehicle") leaves \(part.startStopName ?? "the stop") "
                     + "at \(timeStringFromDate(departure))"
             ))
         }
@@ -490,7 +655,7 @@ extension Journey {
     }
 
     /// The change ahead: the vehicle after the current or awaited one.
-    private func upcomingChange(_ phase: TripProgress.Phase) -> Int? {
+    func upcomingChange(_ phase: TripProgress.Phase) -> Int? {
         switch phase {
         case .board(let index), .ride(let index): return nextTransit(after: index)
         case .change(let index): return index
@@ -509,6 +674,23 @@ extension Journey {
     private func nextTransit(after index: Int) -> Int? {
         guard let parts else { return nil }
         return parts.indices.first { $0 > index && parts[$0].routeType != 64 }
+    }
+
+    /// The ride arriving at the change to part `index`, and when it gets there, `delays` (seconds, by part index)
+    /// included.
+    func arrival(before index: Int, delays: [Int: Int]) -> (part: Int, at: Date)? {
+        guard let parts, let arriving = parts[..<index].lastIndex(where: { $0.routeType != 64 }) else { return nil }
+        return (arriving, parts[arriving].endArrival.expected(delaySeconds: delays[arriving]))
+    }
+
+    /// "Take 83 at 14:49 from Hronská C", or "Or take …" `asking` whether the traveller is on the trip's ride: its
+    /// first ride, the search's delay included.
+    func offer(asking: Bool) -> String? {
+        guard let ride = firstRide else { return nil }
+        let line = ride.routeShortName ?? "the next vehicle"
+        let time = timeStringFromDate(ride.startDeparture.expected(delaySeconds: ride.delaySeconds))
+        let stop = [ride.startStopName ?? "the stop", ride.startStopCode].compactMap { $0 }.joined(separator: " ")
+        return asking ? "Or take \(line) at \(time) from \(stop)" : "Take \(line) at \(time) from \(stop)"
     }
 }
 
@@ -551,6 +733,16 @@ struct RidePlacement {
     /// Within 250 m of the line (a quarter of the gap between far stops) plus the location's accuracy: the streets
     /// curve between stops.
     let onLine: Bool
+    /// The line's direction there, degrees clockwise from north.
+    let heading: Double
+
+    /// Whether `course` (degrees clockwise from north; nil when unknown) goes along the line rather than back: within
+    /// 90° of its direction, as the streets curve away from the straight line between stops.
+    func heads(_ course: Double?) -> Bool {
+        guard let course else { return true }
+        let turn = (course - heading).truncatingRemainder(dividingBy: 360)
+        return abs(turn) <= 90 || abs(turn) >= 270
+    }
 
     /// Metres along to `stop`, a stop index with the fraction on to the next stop.
     func meters(atStop stop: Double) -> Double {
@@ -567,7 +759,7 @@ extension Part {
         let points = legStops.compactMap { $0.gps?.meters(from: fix.gps) }
         guard points.count == legStops.count, points.count > 1 else { return nil }
         var stops = [0.0]
-        var best: (rank: (Int, Double), along: Double, stop: Double)?
+        var best: (rank: (Int, Double), along: Double, stop: Double, heading: Double)?
         for index in 1 ..< points.count {
             let (a, b) = (points[index - 1], points[index])
             let (dx, dy) = (b.x - a.x, b.y - a.y)
@@ -578,12 +770,15 @@ extension Part {
             let at = Double(index - 1) + t
             let rank = off <= tolerance ? (0, abs(at - stop)) : (1, off - tolerance)
             if best.map({ rank < $0.rank }) ?? true {
-                best = (rank, stops[index - 1] + t * length, at)
+                let heading = atan2(dx, dy) * 180 / .pi
+                best = (rank, stops[index - 1] + t * length, at, heading < 0 ? heading + 360 : heading)
             }
             stops.append(stops[index - 1] + length)
         }
         guard let best else { return nil }
-        return RidePlacement(stops: stops, along: best.along, stop: best.stop, onLine: best.rank.0 == 0)
+        return RidePlacement(
+            stops: stops, along: best.along, stop: best.stop, onLine: best.rank.0 == 0, heading: best.heading
+        )
     }
 }
 
@@ -610,7 +805,7 @@ func scheduledTripReminderMinutes(reminder: Int, start: Int, hasActivity: Bool) 
 }
 
 extension Journey {
-    private var firstRide: Part? {
+    fileprivate var firstRide: Part? {
         parts?.first { $0.routeType != 64 }
     }
 

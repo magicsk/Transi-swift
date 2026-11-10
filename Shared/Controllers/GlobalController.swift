@@ -67,6 +67,8 @@ struct GlobalController {
         fetchSessionToken()
         VirtualTableLiveActivityController.activateExistingActitivites()
         tripLiveActivity.restore()
+        // After the restore, so an answer from the trip Live Activity that relaunched the app finds its trip.
+        TripQuestion.answer = { await tripLiveActivity.answer(stillOn: $0) }
         tripSchedule.sync()
         if timetableDatabase.isOfflineEnabled {
             _ = timetableDatabase.openDatabases()

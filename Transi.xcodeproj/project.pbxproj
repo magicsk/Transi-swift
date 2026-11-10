@@ -161,6 +161,8 @@
 		A1C5E0F12B3D4A6E8F901201 /* TripScheduleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E0F12B3D4A6E8F901202 /* TripScheduleController.swift */; };
 		DAB3FC92F30F4FA6B939E816 /* TripLiveActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA11E9CCDDF47E698080B05 /* TripLiveActivityController.swift */; };
 		A1C5E0F12B3D4A6E8F901203 /* ScheduledTripsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E0F12B3D4A6E8F901204 /* ScheduledTripsSheet.swift */; };
+		B7E21C4A9D3F4E5A8C6B1D02 /* TripQuestionIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E21C4A9D3F4E5A8C6B1D01 /* TripQuestionIntent.swift */; };
+		B7E21C4A9D3F4E5A8C6B1D03 /* TripQuestionIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E21C4A9D3F4E5A8C6B1D01 /* TripQuestionIntent.swift */; };
 		0B44975AC9BD4BE0A56ED202 /* StartTripButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 452F8E6699EF4D0F83B53AB4 /* StartTripButton.swift */; };
 /* End PBXBuildFile section */
 
@@ -310,6 +312,7 @@
 		A1C5E0F12B3D4A6E8F901202 /* TripScheduleController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripScheduleController.swift; sourceTree = "<group>"; };
 		DCA11E9CCDDF47E698080B05 /* TripLiveActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripLiveActivityController.swift; sourceTree = "<group>"; };
 		A1C5E0F12B3D4A6E8F901204 /* ScheduledTripsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduledTripsSheet.swift; sourceTree = "<group>"; };
+		B7E21C4A9D3F4E5A8C6B1D01 /* TripQuestionIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripQuestionIntent.swift; sourceTree = "<group>"; };
 		452F8E6699EF4D0F83B53AB4 /* StartTripButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartTripButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -575,10 +578,19 @@
 			path = "Transi Watch App";
 			sourceTree = "<group>";
 		};
+		B7E21C4A9D3F4E5A8C6B1D04 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				B7E21C4A9D3F4E5A8C6B1D01 /* TripQuestionIntent.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
 		DAD0CEAA29CB9B9800A43CC6 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
 				DA737DDE2B8FA7590093FAC6 /* Icons */,
+				B7E21C4A9D3F4E5A8C6B1D04 /* Intents */,
 				DAB467F42B7A488500B45A1C /* Providers */,
 				DAC95A092B77A905005E93C7 /* Controllers */,
 				DABAE4072ACC23B800D66159 /* Views */,
@@ -785,6 +797,7 @@
 			files = (
 				A1C5E0F12B3D4A6E8F901203 /* ScheduledTripsSheet.swift in Sources */,
 				0B44975AC9BD4BE0A56ED202 /* StartTripButton.swift in Sources */,
+				B7E21C4A9D3F4E5A8C6B1D02 /* TripQuestionIntent.swift in Sources */,
 				A1C5E0F12B3D4A6E8F901201 /* TripScheduleController.swift in Sources */,
 				DAB3FC92F30F4FA6B939E816 /* TripLiveActivityController.swift in Sources */,
 				90505F7AB9054555B073A116 /* TripProgress.swift in Sources */,
@@ -904,6 +917,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				80D48C58F1134B7BB5F50FB4 /* TripActivityLiveActivity.swift in Sources */,
+				B7E21C4A9D3F4E5A8C6B1D03 /* TripQuestionIntent.swift in Sources */,
 				722E5E531CD74725AF173901 /* TripActivityAttributes.swift in Sources */,
 				DA4DDA5F2B8BF9F500E8DFCA /* LineText.swift in Sources */,
 				DAD16F312C1B085700E620C4 /* VirtualTableActivityLiveView.swift in Sources */,

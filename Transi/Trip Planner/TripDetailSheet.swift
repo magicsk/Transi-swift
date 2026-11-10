@@ -514,7 +514,9 @@ private struct TripSummaryView: View {
         guard let liveStep else { return Text(verbatim: "") }
         return (liveStep.line.map { Text("Line \($0), ") } ?? Text(verbatim: ""))
             + Text(verbatim: "\(liveStep.title), \(liveStep.detail). ")
+            + (liveStep.lastStop.map { Text("Vehicle at or past \($0). ") } ?? Text(verbatim: ""))
             + (liveStep.warningText.map { Text(verbatim: "\($0). ") } ?? Text(verbatim: ""))
+            + (liveStep.alternative.map { Text(verbatim: "\($0). ") } ?? Text(verbatim: ""))
     }
 
     @ViewBuilder
@@ -576,17 +578,29 @@ private struct LiveStepView: View {
                 LineText(line, badgeSize)
             } else {
                 Image(systemName: state.step == .arrived ? "checkmark.circle.fill"
-                    : state.step == .missed ? "exclamationmark.triangle.fill" : "figure.walk")
+                    : state.step == .missed ? "exclamationmark.triangle.fill"
+                    : state.step == .question ? "questionmark.circle.fill" : "figure.walk")
                     .font(.title3.weight(.semibold))
-                    .foregroundColor(state.step == .arrived ? .green : state.step == .missed ? .orange : .accentColor)
+                    .foregroundColor(state.step == .arrived ? .green
+                        : state.step == .missed || state.step == .question ? .orange : .accentColor)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(state.title).font(.headline)
                 Text(state.detail).font(.subheadline).foregroundColor(.secondary)
+                if let lastStop = state.lastStop {
+                    // As the table shows the vehicle's last stop.
+                    HStack(spacing: 5) {
+                        StopIcon(color: .accent, scale: 1.3).accessibilityHidden(true)
+                        Text(lastStop).font(.subheadline)
+                    }
+                }
                 if let warning = state.warningText {
                     Label(warning, systemImage: "exclamationmark.triangle.fill")
                         .font(.footnote.weight(.semibold))
                         .foregroundColor(state.warning == .likelyMissedChange ? .red : .orange)
+                }
+                if let alternative = state.alternative {
+                    Text(alternative).font(.footnote).foregroundColor(.secondary)
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
@@ -594,8 +608,9 @@ private struct LiveStepView: View {
     }
 }
 
-/// Once the location showed the traveller off a ride: the other connections from where they are, to follow one
-/// instead, or keep following the trip.
+/// A ride the traveller is not on: the other connections, to follow one instead, or keep following the trip. While the
+/// trip only suspects it, the question whether they are on it; while live delays make the change to it impossible, the
+/// other connections from the change stop beside the steps.
 private struct MissedRideView: View {
     let missed: TripMissed
     let journey: Journey
@@ -603,13 +618,61 @@ private struct MissedRideView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        let line = journey.parts?[missed.part].routeShortName ?? ""
+        if missed.kind == .suspected {
+            question
+        } else {
+            connections
+        }
+    }
+
+    private var line: String { journey.parts?[missed.part].routeShortName ?? "" }
+
+    /// "Still on the 49?" or "Did you catch the 49?", as the Live Activity and the alert ask.
+    private var question: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(
-                missed.boarded
-                    ? "You're away from the route of the \(line). Follow another connection from where you are:"
-                    : "The \(line) left without you. Follow another connection from where you are:"
-            )
+            Text(missed.boarded ? "Still on the \(line)?" : "Did you catch the \(line)?")
+                .font(.headline)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("Your location suggests you may not be on it.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
+            layout {
+                Button {
+                    GlobalController.tripLiveActivity.keepFollowing()
+                } label: {
+                    Text("I'm on it").frame(maxWidth: .infinity)
+                }
+                .accessibilityHint("Goes on with this trip's steps.")
+                Button {
+                    GlobalController.tripLiveActivity.confirmMissed()
+                } label: {
+                    Text("Other connections").frame(maxWidth: .infinity)
+                }
+                .accessibilityHint("Offers other connections to your destination.")
+            }
+            .buttonStyle(.bordered)
+        }
+        .padding(.vertical, 6)
+    }
+
+    private var connections: some View {
+        // The stop the vehicle arriving late gets the traveller to.
+        let changeStop = missed.arriving.flatMap { journey.parts?[$0].endStopName } ?? ""
+        return VStack(alignment: .leading, spacing: 12) {
+            Group {
+                if missed.kind == .unreachable {
+                    Text("Live delays leave no time to change to the \(line). Other connections from \(changeStop):")
+                } else if missed.arriving != nil {
+                    Text("The \(line) left before you could get there. Follow another connection from \(changeStop):")
+                } else if missed.boarded {
+                    Text("You're away from the route of the \(line). Follow another connection from where you are:")
+                } else {
+                    Text("The \(line) left without you. Follow another connection from where you are:")
+                }
+            }
             .font(.subheadline)
             .fixedSize(horizontal: false, vertical: true)
             if let alternatives = missed.alternatives {
@@ -628,14 +691,17 @@ private struct MissedRideView: View {
                         .foregroundColor(.secondary)
                 }
             }
-            Button {
-                GlobalController.tripLiveActivity.keepFollowing()
-            } label: {
-                Text("Keep following this trip")
-                    .frame(maxWidth: .infinity)
+            // An unreachable change keeps the trip's steps anyway.
+            if missed.kind == .missed {
+                Button {
+                    GlobalController.tripLiveActivity.keepFollowing()
+                } label: {
+                    Text("Keep following this trip")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .accessibilityHint("Goes on with this trip's steps.")
             }
-            .buttonStyle(.bordered)
-            .accessibilityHint("Goes on with this trip's steps.")
         }
         .padding(.vertical, 6)
     }
