@@ -76,6 +76,13 @@ extension Journey {
         }
         return names
     }
+
+    /// Whether the trip can start now: from half an hour before its first step, a walk included. Earlier it can only
+    /// be scheduled. The trip detail drops the button once the journey has arrived, its delays included.
+    func canStart(at now: Date = Date()) -> Bool {
+        guard let first = parts?.first else { return false }
+        return first.startDeparture <= now.addingTimeInterval(30 * 60)
+    }
 }
 
 extension Part {

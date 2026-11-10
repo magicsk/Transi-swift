@@ -33,6 +33,8 @@ struct SettingsView: View {
     @AppStorage(Stored.passZones) var passZones = "100,101"
     @AppStorage(Stored.passNetworkWide) var passNetworkWide = false
     @AppStorage(Stored.passBankCard) var passBankCard = false
+    @AppStorage(Stored.tripReminderMinutes) var tripReminderMinutes = 15
+    @AppStorage(Stored.tripStartMinutes) var tripStartMinutes = 15
 
     @State private var showStopPicker = false
     @State private var pickedStop: Stop = .empty
@@ -65,6 +67,10 @@ struct SettingsView: View {
                 notificationTriggersSection
                 timetablesSection
                 tripPlannerSection
+                // Only where a trip can be followed, as for its start button.
+                if UIDevice.current.userInterfaceIdiom == .phone, !ProcessInfo.processInfo.isiOSAppOnMac {
+                    scheduledTripsSection
+                }
                 passSection
                 aboutSection
                 // Below the about row, so it doesn't appear under a finger still tapping that row. Kept while an API
@@ -183,6 +189,36 @@ struct SettingsView: View {
                         timetableDatabase.checkAndUpdate()
                     }
                 }
+        }
+    }
+
+    // MARK: - Scheduled Trips
+
+    /// Half an hour at most, where a trip can start from.
+    private static let scheduledTripMinutes = [5, 10, 15, 20, 30]
+
+    private var scheduledTripsSection: some View {
+        Section {
+            Picker("Reminder", selection: $tripReminderMinutes) {
+                // Before iOS 26 the reminder is the only way a scheduled trip starts.
+                if #available(iOS 26.0, *) {
+                    Text("Off").tag(0)
+                }
+                ForEach(Self.scheduledTripMinutes, id: \.self) { Text("\($0) min before").tag($0) }
+            }
+            if #available(iOS 26.0, *) {
+                Picker("Start trip", selection: $tripStartMinutes) {
+                    ForEach(Self.scheduledTripMinutes, id: \.self) { Text("\($0) min before").tag($0) }
+                }
+            }
+        } header: {
+            Text("Scheduled trips")
+        } footer: {
+            if #available(iOS 26.0, *) {
+                Text("A scheduled trip appears on the Lock Screen by itself. Tap it to follow the trip live. These apply to trips you schedule from now on.")
+            } else {
+                Text("Tap the reminder to start following the trip. This applies to trips you schedule from now on.")
+            }
         }
     }
 

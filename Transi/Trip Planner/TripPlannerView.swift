@@ -15,6 +15,7 @@ struct TripPlannerView: View {
     @State private var lastField = ""
     @State private var showStopList = false
     @State private var dateDialog = false
+    @State private var showScheduledTrips = false
     @State private var path = [Journey]()
     /// A journey to show once the planner's sheets have gone, so the detail can present its own.
     @State private var journeyAfterSheets: Journey?
@@ -49,6 +50,7 @@ struct TripPlannerView: View {
                     .padding(.top, -10.0)
                     .padding(.bottom, 10.0)
                     CurrentTripButton(show: show)
+                    ScheduledTripsButton { showScheduledTrips = true }
                     ZStack {
                         VStack(spacing: .zero) {
                             if tripPlannerController.recentSearches.count > 1 {
@@ -107,6 +109,9 @@ struct TripPlannerView: View {
             .sheet(isPresented: $showStopList, onDismiss: showJourneyAfterSheets) {
                 StopListView(stop: self.$stop, isPresented: self.$showStopList)
             }
+            .sheet(isPresented: $showScheduledTrips, onDismiss: showJourneyAfterSheets) {
+                ScheduledTripsSheet()
+            }
             .alert(
                 isPresented: $tripPlannerController.error.isNotNil(),
                 error: tripPlannerController.error
@@ -123,7 +128,7 @@ struct TripPlannerView: View {
                         GlobalController.appState.pendingJourney = nil
                     }
                 }
-                guard showSettings || dateDialog || showStopList else {
+                guard showSettings || dateDialog || showStopList || showScheduledTrips else {
                     show(journey)
                     return
                 }
@@ -132,6 +137,7 @@ struct TripPlannerView: View {
                 showSettings = false
                 dateDialog = false
                 showStopList = false
+                showScheduledTrips = false
             }
             .onChange(of: stop) { stop in
                 if lastField == "from" {
@@ -258,40 +264,72 @@ private struct CurrentTripButton: View {
 
     var body: some View {
         if let journey = tripLiveActivity.journey {
-            Button {
+            PlannerEntry(
+                icon: "dot.radiowaves.left.and.right", title: Text("Current trip"),
+                subtitle: Text("\(journey.parts?.first?.startStopName ?? "Start") → \(journey.parts?.last?.endStopName ?? "End")")
+            ) {
                 show(journey)
-            } label: {
-                HStack(spacing: 12.0) {
-                    Image(systemName: "dot.radiowaves.left.and.right")
-                        .font(.title3.weight(.semibold))
-                        .foregroundColor(.accentColor)
-                        .accessibilityHidden(true)
-                    VStack(alignment: .leading, spacing: 2.0) {
-                        Text("Current trip")
-                            .font(.headline)
-                        Text("\(journey.parts?.first?.startStopName ?? "Start") → \(journey.parts?.last?.endStopName ?? "End")")
+            }
+            .accessibilityHint("Shows the trip on the map, step by step")
+        }
+    }
+}
+
+/// Opens the scheduled trips, while there are any.
+private struct ScheduledTripsButton: View {
+    @StateObject private var tripSchedule = GlobalController.tripSchedule
+    let open: () -> Void
+
+    var body: some View {
+        if !tripSchedule.trips.isEmpty {
+            PlannerEntry(
+                icon: "calendar.badge.clock", title: Text("Scheduled trips: \(tripSchedule.trips.count)"), action: open
+            )
+            .accessibilityHint("Shows them, where you can cancel them")
+        }
+    }
+}
+
+/// A full-width entry above the planner's results.
+private struct PlannerEntry: View {
+    let icon: String
+    let title: Text
+    var subtitle: Text? = nil
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12.0) {
+                Image(systemName: icon)
+                    .font(.title3.weight(.semibold))
+                    .foregroundColor(.accentColor)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2.0) {
+                    title
+                        .font(.headline)
+                    if let subtitle {
+                        subtitle
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
-                    .fixedSize(horizontal: false, vertical: true)
-                    Spacer(minLength: 8.0)
-                    Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundColor(.tertiaryLabel)
-                        .accessibilityHidden(true)
                 }
-                .padding(.horizontal, 16.0)
-                .padding(.vertical, 12.0)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.secondarySystemGroupedBackground)
-                .cornerRadius(26.0)
-                .contentShape(Rectangle())
+                .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8.0)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundColor(.tertiaryLabel)
+                    .accessibilityHidden(true)
             }
-            .buttonStyle(.plain)
             .padding(.horizontal, 16.0)
-            .padding(.bottom, 10.0)
-            .accessibilityHint("Shows the trip on the map, step by step")
+            .padding(.vertical, 12.0)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.secondarySystemGroupedBackground)
+            .cornerRadius(26.0)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16.0)
+        .padding(.bottom, 10.0)
     }
 }
 

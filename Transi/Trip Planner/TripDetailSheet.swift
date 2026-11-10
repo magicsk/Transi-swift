@@ -52,8 +52,8 @@ struct TripDetailSheet: View {
                             .listRowBackground(cardBackground)
                     }
                     if journey.rideCount > 0 {
-                        // Journey actions, one full-width button per line. Checked every minute, so the start
-                        // enables itself an hour before departure and the actions go once the journey arrives.
+                        // Journey actions, one full-width button per line. Checked every minute, so scheduling turns
+                        // into starting half an hour before departure and the actions go once the journey arrives.
                         TimelineView(.everyMinute) { context in
                             let hasArrived = journey.progress(at: context.date, delays: delays).phase == .arrived
                             VStack(spacing: 12) {

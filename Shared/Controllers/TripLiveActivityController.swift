@@ -52,6 +52,8 @@ final class TripLiveActivityController: ObservableObject {
             let activity = try Activity.request(
                 attributes: TripActivityAttributes(), contentState: update.state, pushType: nil
             )
+            // Only once it runs, so a trip that could not start stays scheduled.
+            GlobalController.tripSchedule.cancel(journey: journey)
             follow(journey, activityId: activity.id, state: update.state)
         } catch {
             #if DEBUG
@@ -66,16 +68,24 @@ final class TripLiveActivityController: ObservableObject {
         Task { await TripLiveActivityController.activity(activityId)?.end(dismissalPolicy: .immediate) }
     }
 
-    /// Follows the trip activity again after the app relaunched, and ends trip activities without a saved journey.
+    /// Follows the activity a scheduled trip started by itself, in place of the trip followed so far.
+    func follow(_ journey: Journey, startedAs activity: Activity<TripActivityAttributes>) {
+        end()
+        follow(journey, activityId: activity.id, state: activity.contentState)
+    }
+
+    /// Follows the trip activity again after the app relaunched, and ends trip activities without a saved journey
+    /// that no scheduled trip owns either.
     func restore() {
         let saved = UserDefaults.standard.retrieve(
             object: [String: SavedTrip].self, forKey: Stored.tripLiveActivities
         ) ?? [:]
+        let scheduled = Set(GlobalController.tripSchedule.trips.compactMap(\.activityId))
         for activity in Activity<TripActivityAttributes>.activities where Self.isRunning(activity) {
             if journey == nil, let trip = saved[activity.id] {
                 awaitsLiveData = true
                 follow(trip.journey, live: trip.live, activityId: activity.id, state: activity.contentState)
-            } else {
+            } else if !scheduled.contains(activity.id) {
                 let id = activity.id
                 Task { await TripLiveActivityController.activity(id)?.end(dismissalPolicy: .immediate) }
             }

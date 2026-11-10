@@ -29,8 +29,13 @@ struct TransiApp: App {
                         selection = 0
                     case .activeTrip:
                         selection = 0
+                        // A tap on a scheduled trip's Live Activity is what starts following it.
+                        GlobalController.tripSchedule.sync(opened: true)
                         // Just the planner once the trip is no longer followed.
                         GlobalController.appState.pendingJourney = GlobalController.tripLiveActivity.journey
+                    case .journey(let journey):
+                        selection = 0
+                        GlobalController.appState.pendingJourney = journey
                     case .table(let stopId, let expandConnection):
                         selection = 1
                         if let exp = expandConnection {

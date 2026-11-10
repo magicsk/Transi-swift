@@ -28,6 +28,7 @@ struct GlobalController {
     static let virtualTable = VirtualTableController()
     static let tripPlanner = TripPlannerController()
     static let tripLiveActivity = TripLiveActivityController()
+    static let tripSchedule = TripScheduleController()
     static let timetableDatabase = TimetableDatabase()
     static let ticketCatalogue = TicketCatalogueProvider()
 
@@ -59,11 +60,14 @@ struct GlobalController {
     var sessionTokenError = false
 
     static func appLaunch() {
+        // Before launch finishes, or the tap that launched the app is lost.
+        UNUserNotificationCenter.current().delegate = tripSchedule
         registerForNotifications()
         registerUserDefaults()
         fetchSessionToken()
         VirtualTableLiveActivityController.activateExistingActitivites()
         tripLiveActivity.restore()
+        tripSchedule.sync()
         if timetableDatabase.isOfflineEnabled {
             _ = timetableDatabase.openDatabases()
             timetableDatabase.checkAndUpdate()
@@ -99,6 +103,8 @@ struct GlobalController {
                     _ = timetableDatabase.openDatabases()
                     timetableDatabase.checkAndUpdate()
                 }
+                tripSchedule.sync(opened: true)
+                tripSchedule.runTappedReminder()
             default:
                 break
         }
@@ -149,6 +155,8 @@ struct GlobalController {
             Stored.passZones: "100,101",
             Stored.passNetworkWide: false,
             Stored.passBankCard: false,
+            Stored.tripReminderMinutes: 15,
+            Stored.tripStartMinutes: 15,
         ])
     }
 
@@ -180,12 +188,12 @@ struct GlobalController {
 
     // UNUserNotificationCenter calls can block on a synchronous XPC reply from usernotificationsd,
     // so they run off the main thread, in call order, on this serial queue.
-    private static let notificationQueue = DispatchQueue(label: "eu.magicsk.transi.notifications")
+    static let notificationQueue = DispatchQueue(label: "eu.magicsk.transi.notifications")
 
     private static func registerForNotifications() {
         notificationQueue.async {
             let category = UNNotificationCategory(identifier: "Transi", actions: [], intentIdentifiers: [])
-            UNUserNotificationCenter.current().setNotificationCategories([category])
+            UNUserNotificationCenter.current().setNotificationCategories([category, TripScheduleController.category])
             UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in
             }
         }

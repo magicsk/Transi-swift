@@ -11,6 +11,7 @@ enum NavigationDestination {
     case trip
     /// The detail of the trip the Live Activity follows, in the planner.
     case activeTrip
+    case journey(Journey)
     case table(stopId: Int, expandConnection: String? = nil)
     case timetable(line: String? = nil)
     case map(stopId: Int)

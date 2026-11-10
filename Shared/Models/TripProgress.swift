@@ -600,6 +600,46 @@ extension StopGps {
     }
 }
 
+/// Minutes before departure a scheduled trip's reminder fires; nil for none. A scheduled Live Activity alerts by itself
+/// when it starts, so a reminder at that minute would only repeat it. Without one the reminder is the only way to start.
+func scheduledTripReminderMinutes(reminder: Int, start: Int, hasActivity: Bool) -> Int? {
+    if hasActivity {
+        return reminder > 0 && reminder != start ? reminder : nil
+    }
+    return reminder > 0 ? reminder : start
+}
+
+extension Journey {
+    private var firstRide: Part? {
+        parts?.first { $0.routeType != 64 }
+    }
+
+    /// What a scheduled Live Activity shows until the traveller opens the app, the first that can keep it updated: the
+    /// first ride at its clock time, as a countdown would stand still.
+    var scheduledState: TripActivityAttributes.ContentState? {
+        guard let ride = firstRide else { return nil }
+        let time = timeStringFromDate(ride.startDeparture)
+        return TripActivityAttributes.ContentState(
+            step: .board, line: ride.routeShortName, title: "Board at \(ride.startStopName ?? "the stop")",
+            detail: [ride.startStopCode.map { "Platform \($0)" }, "Tap to follow live"].compactMap { $0 }
+                .joined(separator: " · "),
+            time: ride.startDeparture, compact: time, minimal: time
+        )
+    }
+
+    /// The alert `minutes` before the journey's first step, a walk included.
+    func reminderText(minutes: Int) -> (title: String, body: String)? {
+        guard let ride = firstRide else { return nil }
+        return (
+            String(format: NSLocalizedString("Leave in %d min", comment: ""), minutes),
+            String(
+                format: NSLocalizedString("Line %@ from %@ at %@. Tap to follow your trip live.", comment: ""),
+                ride.routeShortName ?? "", ride.startStopName ?? "", timeStringFromDate(ride.startDeparture)
+            )
+        )
+    }
+}
+
 /// "80 m", "350 m", "1.2 km".
 private func distanceText(_ meters: Double) -> String {
     meters < 950 ? "\(Int((meters / 10).rounded()) * 10) m" : String(format: "%.1f km", meters / 1000)

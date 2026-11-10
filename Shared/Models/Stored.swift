@@ -41,4 +41,9 @@ struct Stored {
     static let passBankCard = "pass_bank_card"
     /// The followed trip Live Activity's journey, keyed by activity id.
     static let tripLiveActivities = "trip_live_activities"
+    static let scheduledTrips = "scheduled_trips"
+    /// Minutes before a scheduled trip's departure; 0 turns the reminder off.
+    static let tripReminderMinutes = "trip_reminder_minutes"
+    /// Minutes before a scheduled trip's departure that its Live Activity starts.
+    static let tripStartMinutes = "trip_start_minutes"
 }
