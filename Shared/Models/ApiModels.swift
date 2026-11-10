@@ -166,6 +166,29 @@ struct TimetableShape: Codable {
         return components.string
     }
 
+    /// Loads the shape at `endpoint` with `fetch`, asking again `retryDelay` seconds after each network error (offline,
+    /// a timeout), as on a followed trip that loses its signal, for as long as `isWanted()`. The server's error or a
+    /// malformed answer is final. Completes on the main queue, and only with a shape.
+    static func load(
+        _ endpoint: String, retryDelay: TimeInterval = 30, while isWanted: @escaping () -> Bool,
+        fetch: @escaping (String, @escaping (Result<TimetableShape, Error>) -> Void) -> Void,
+        completion: @escaping (TimetableShape) -> Void
+    ) {
+        fetch(endpoint) { result in
+            switch result {
+            case .success(let shape):
+                DispatchQueue.main.async { completion(shape) }
+            case .failure(let error as URLError) where error.code != .cancelled:
+                DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay) {
+                    guard isWanted() else { return }
+                    load(endpoint, retryDelay: retryDelay, while: isWanted, fetch: fetch, completion: completion)
+                }
+            case .failure:
+                break
+            }
+        }
+    }
+
     /// The ride through `stops`, the ones requested, with each known segment in place of the straight line between
     /// its two stops; straight throughout unless there is a segment for each two consecutive stops.
     func path(through stops: [StopGps]) -> [StopGps] {

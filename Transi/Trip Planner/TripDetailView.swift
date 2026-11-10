@@ -584,7 +584,8 @@ final class TripDetailMapViewController: UIViewController, MKMapViewDelegate, UI
 
     /// The ride along the roads and tracks once its shape loaded for its stops' positions, which needs the ride's stop
     /// list with a position for every stop; its two ends alone match the wrong stretch. The first draw with the list
-    /// requests it, once per map: without the list, offline or on an error the ride stays straight.
+    /// requests it, once per map, and asks again while offline: without the list, until then or on the server's error
+    /// the ride stays straight.
     private func shapedPath(of part: Part) -> [CLLocationCoordinate2D]? {
         let rideStops = part.stops ?? []
         let stops = rideStops.compactMap(\.gps)
@@ -595,8 +596,9 @@ final class TripDetailMapViewController: UIViewController, MKMapViewDelegate, UI
             return shape.path(through: stops).map(\.coordinate)
         }
         if shapeRequests.insert(endpoint).inserted {
-            fetchMagicApi(endpoint: endpoint, type: TimetableShape.self) { [weak self] result in
-                guard case .success(let shape) = result else { return }
+            TimetableShape.load(endpoint, while: { [weak self] in self != nil }) {
+                fetchMagicApi(endpoint: $0, type: TimetableShape.self, completion: $1)
+            } completion: { [weak self] shape in
                 Self.shapes[endpoint] = shape
                 // Stops that loaded meanwhile look up their own request, so this one never replaces theirs.
                 guard let self else { return }
