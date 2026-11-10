@@ -380,4 +380,28 @@ assert(TimetableShape.endpoint(line: "N 72&", stops: [StopGps.example, StopGps(l
 assert(TimetableShape.endpoint(line: "S+", stops: [StopGps.example, StopGps.example])?.contains("line=S%2B&") == true,
        "A + in the line stays a +")
 print("PASS: \(shapeCases.count + 1) ride shapes joined with straight lines, and the shape request")
+
+// A shape request that fails offline asks again until it loads; the server's error or a malformed answer is final.
+func loadShape(_ failures: [Error], wanted: Int = .max) -> (shape: TimetableShape?, requests: Int) {
+    var answers = failures.map { Result<TimetableShape, Error>.failure($0) } + [.success(decodedShape)]
+    var requests = 0
+    var loaded: TimetableShape?
+    TimetableShape.load("/timetable/shape", retryDelay: 0, while: { requests < wanted }) { _, answer in
+        requests += 1
+        // URLSession completes off the main queue.
+        let result = answers.removeFirst()
+        DispatchQueue.global().async { answer(result) }
+    } completion: { loaded = $0 }
+    let deadline = Date().addingTimeInterval(0.5)
+    while loaded == nil && Date() < deadline { RunLoop.main.run(until: Date().addingTimeInterval(0.01)) }
+    return (loaded, requests)
+}
+let offline = NSError(domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet)
+let backOnline = loadShape([offline, URLError(.timedOut), URLError(.networkConnectionLost)])
+assert(backOnline.shape?.segments.count == 3 && backOnline.requests == 4, "Asks again until back online")
+let malformed = loadShape([DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "HTML"))])
+assert(malformed.shape == nil && malformed.requests == 1 && loadShape([URLError(.cancelled)]).requests == 1,
+       "The server's error, a malformed answer or a cancel is final")
+assert(loadShape([offline, offline], wanted: 1).shape == nil, "Stops asking once the map is gone")
+print("PASS: ride shapes load once back online, and a server's error is final")
 SWIFT
