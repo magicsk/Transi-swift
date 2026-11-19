@@ -276,12 +276,13 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         fetchMagicApi(endpoint: "/timetable/trip?\(encodedQuery)", type: ServerTrip.self, timeout: MAGIC_API_FALLBACK_TIMEOUT) { [weak self] result in
             guard let self, self.isCurrentSearch(generation) else { return }
             switch result {
-            case let .success(serverTrip):
+            case let .success(serverTrip) where append || !serverTrip.journeys.isEmpty:
                 handleJourneys(serverTrip.journeys)
             case .failure where append:
                 self.loadingMore = false
-            case .failure:
-                // Our server is down or broken: the local engine when it has timetables, else the online APIs.
+            default:
+                // Our server is down, broken, or found nothing (a stop it can't resolve, a date past its timetables):
+                // the local engine when it has timetables, else the online APIs.
                 if GlobalController.timetableDatabase.isReady {
                     self.fetchOfflineTrip(from: from, to: to, generation: generation)
                 } else if !self.fetchOnlineTrip(source: .initial, from: from, to: to, generation: generation) {
