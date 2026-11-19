@@ -169,6 +169,7 @@ struct TimetableView: View {
             case let .success(departures):
                 handleDepartures(departures.all)
             case .failure:
+                if route.source == .server { timetableDb.serverTimetablesFailed = true }
                 self.departures = []
                 self.loading = false
                 self.timetableError = true
@@ -209,7 +210,12 @@ struct TimetableView: View {
             case let .success(directions):
                 self.directions = directions.all
                 self.selectedDirection = directions.all.first ?? .initial
+                if directions.all.isEmpty {
+                    noTimetable = true
+                    loading = false
+                }
             case .failure:
+                if route.source == .server { timetableDb.serverTimetablesFailed = true }
                 self.directionsError = true
             }
         }

@@ -86,6 +86,7 @@ struct TimetableDetailView: View {
             case let .success(timetableDetails):
                 groupDetailsIntoHourMinutes(timetableDetails.all)
             case .failure:
+                if route.source == .server { timetableDb.serverTimetablesFailed = true }
                 error = true
             }
         }

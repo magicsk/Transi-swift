@@ -27,6 +27,9 @@ class TimetableDatabase: ObservableObject {
     /// Schedule sha256 of the newest published database seen; nil until a manifest arrives. Kept with the manifest
     /// check time, so a relaunch inside the check's skip window still knows. Read and written on the main thread.
     private(set) var latestScheduleSha = UserDefaults.standard.string(forKey: Stored.timetableLatestScheduleSha)
+    /// A route timetable from our server failed this session, so the line list switches to the B API. Main thread.
+    // ponytail: sticky until relaunch; retry our server on a timer if outages turn out short.
+    var serverTimetablesFailed = false
 
     private var baseDb: SQLiteDatabase?
     private var scheduleDb: SQLiteDatabase?

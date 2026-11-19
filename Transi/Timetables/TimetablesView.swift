@@ -87,6 +87,7 @@ struct TimetablesView: View {
                     .padding(.horizontal, 24.0)
                 }
                 .navigationTitle("Timetables")
+                .onAppear(perform: reloadAfterServerFailure)
                 .navigationDestination(isPresented: $navigateInsideFromUrl) {
                     TimetableView(urlNavigateDestination)
                 }
@@ -145,6 +146,8 @@ struct TimetablesView: View {
                 guard isCurrentSource() else { return }
                 categorizeRoutes(routes)
             }
+        } else if timetableDb.serverTimetablesFailed {
+            fetchBApiRoutes(isCurrentSource: isCurrentSource)
         } else {
             // Our server first; the B API only when it fails.
             fetchMagicApi(endpoint: "/timetable/routes", type: Timetables.self, timeout: MAGIC_API_FALLBACK_TIMEOUT) { result in
@@ -174,6 +177,14 @@ struct TimetablesView: View {
                 }
             }
         }
+    }
+
+    /// A line from our server failed to load, so the list it came from is replaced by the B API's on the next visit.
+    private func reloadAfterServerFailure() {
+        let routes = [category.trams, category.trolleybuses, category.buses, category.nightlines, category.trains, category.regionalbuses]
+        guard timetableDb.serverTimetablesFailed, routes.joined().contains(where: { $0.source == .server }) else { return }
+        category.clear()
+        fetchTimetables(force: true)
     }
 
     private var categoryIsEmpty: Bool {
