@@ -120,6 +120,13 @@ enum OfflineRoutingCheck {
         if context.footpaths.allSatisfy(\.isEmpty) {
             failures.append("context: expected footpaths")
         }
+        // The calendar's weekday columns, Monday 2 to Sunday 8 March 2026.
+        for (offset, column) in ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].enumerated() {
+            let day = parser.date(from: "2026-03-0\(2 + offset)T12:00:00+01:00")!
+            if OfflineRoutingContext.dayOfWeekColumn(for: day) != column {
+                failures.append("context: 2026-03-0\(2 + offset) is not a \(column)")
+            }
+        }
 
         let checkCases = selected.isEmpty ? cases : cases.filter { selected.contains($0.label) }
 

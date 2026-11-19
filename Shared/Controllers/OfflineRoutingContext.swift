@@ -246,7 +246,7 @@ struct OfflineRoutingContext {
         Int(floor(value / cellSize))
     }
 
-    private static func dayOfWeekColumn(for date: Date) -> String {
+    static func dayOfWeekColumn(for date: Date) -> String {
         switch bratislavaCalendar().component(.weekday, from: date) {
         case 1: return "sunday"
         case 2: return "monday"
