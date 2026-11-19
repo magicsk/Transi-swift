@@ -505,7 +505,7 @@ private struct TripSummaryView: View {
             .accessibilityLabel(
                 liveStepText
                     + Text("\(minutes) min, \(day)\(spokenTime(first.startDeparture, delaySeconds: startDelay)) to \(spokenTime(last.endArrival, delaySeconds: endDelay)), ")
-                    + changesText + Text(", ") + walkText + Text(", ") + zonesText
+                    + changesText + Text(", ") + walkText + (hasZones ? Text(", ") + zonesText : Text(""))
             )
         }
     }
@@ -525,9 +525,14 @@ private struct TripSummaryView: View {
         if journey.walkMinutes > 0 {
             chip(walkText)
         }
-        if !journey.zoneNames.isEmpty || journey.zones?.isEmpty == false {
+        if hasZones {
             chip(zonesText)
         }
+    }
+
+    /// Trains and cross-border stops have no fare zone; the chip and the spoken summary leave zones out then.
+    private var hasZones: Bool {
+        !journey.zoneNames.isEmpty || journey.zones?.isEmpty == false
     }
 
     /// One line in a capsule; wrapped in a rounded rectangle at accessibility text sizes, so it is never cut off.
