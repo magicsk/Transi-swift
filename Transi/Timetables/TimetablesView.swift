@@ -10,6 +10,9 @@ import WrappingHStack
 
 struct TimetablesView: View {
     @ObservedObject var timetableDb = GlobalController.timetableDatabase
+    /// The trip planner can keep the database ready while offline timetables are off, so readiness alone doesn't tell
+    /// when the catalog's source changes; route ids differ between the two sources.
+    @AppStorage(Stored.offlineTimetables) private var offlineTimetables = false
     @State var category = CategorizedTimetables()
     @State var loading = true
     @State var error = false
@@ -101,6 +104,9 @@ struct TimetablesView: View {
                     fetchTimetables(force: true)
                 }
             }
+            .onChange(of: offlineTimetables) { _ in
+                fetchTimetables(force: true)
+            }
             .onReceive(GlobalController.appState.$pendingTimetableLine.compactMap { $0 }) { line in
                 GlobalController.appState.pendingTimetableLine = nil
                 openFromUrl = line
@@ -130,8 +136,12 @@ struct TimetablesView: View {
         guard force || categoryIsEmpty else { return }
         loading = true
 
-        if timetableDb.isOfflineEnabled && timetableDb.isReady {
+        let offline = timetableDb.isOfflineEnabled && timetableDb.isReady
+        // A reply from the source the catalog no longer uses is dropped, so its route ids never mix in.
+        let isCurrentSource = { (timetableDb.isOfflineEnabled && timetableDb.isReady) == offline }
+        if offline {
             timetableDb.queryRoutes { routes in
+                guard isCurrentSource() else { return }
                 categorizeRoutes(routes)
             }
         } else {
@@ -139,6 +149,7 @@ struct TimetablesView: View {
                 fetchBApi(endpoint: "/mobile/v1/route/12/", type: Timetables.self) { result in
                     switch result {
                     case let .success(timetables):
+                        guard isCurrentSource() else { return }
                         categorizeRoutes(timetables.routes)
                     case .failure:
                         DispatchQueue.main.async {
