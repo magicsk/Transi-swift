@@ -1,0 +1,302 @@
+[
+ {
+  "label": "q0",
+  "from": "Kapucínska",
+  "to": "Komárovská",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "126",
+  "fromStation": "1302",
+  "toId": "139",
+  "toStation": "1384"
+ },
+ {
+  "label": "q1",
+  "from": "Landererova",
+  "to": "Znievska",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "275",
+  "fromStation": "1709",
+  "toId": "447",
+  "toStation": "1707"
+ },
+ {
+  "label": "q2",
+  "from": "Vajnorská",
+  "to": "Lipského",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "517",
+  "fromStation": "1299",
+  "toId": "170",
+  "toStation": "1541"
+ },
+ {
+  "label": "q3",
+  "from": "Ondrejovova",
+  "to": "Nad lúčkami",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "241",
+  "fromStation": "1381",
+  "toId": "213",
+  "toStation": "1281"
+ },
+ {
+  "label": "q4",
+  "from": "Šafárikovo nám.",
+  "to": "Pajštúnska",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "359",
+  "fromStation": "1245",
+  "toId": "390",
+  "toStation": "2442"
+ },
+ {
+  "label": "q5",
+  "from": "Šustekova",
+  "to": "Bzovícka",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "374",
+  "fromStation": "1676",
+  "toId": "26",
+  "toStation": "1511"
+ },
+ {
+  "label": "q6",
+  "from": "Stn. P. Biskupice",
+  "to": "Kutlíkova",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "462",
+  "fromStation": "1670",
+  "toId": "383",
+  "toStation": "1505"
+ },
+ {
+  "label": "q7",
+  "from": "Pažítková",
+  "to": "Ekonom. univerzita",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "255",
+  "fromStation": "1341",
+  "toId": "66",
+  "toStation": "1478"
+ },
+ {
+  "label": "q8",
+  "from": "Pri kríži",
+  "to": "29. augusta",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "278",
+  "fromStation": "1270",
+  "toId": "401",
+  "toStation": "1337"
+ },
+ {
+  "label": "q9",
+  "from": "Malá scéna",
+  "to": "Valašská",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "185",
+  "fromStation": "1557",
+  "toId": "408",
+  "toStation": "1369"
+ },
+ {
+  "label": "q10",
+  "from": "Súmračná",
+  "to": "Bulíkova",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "357",
+  "fromStation": "1308",
+  "toId": "24",
+  "toStation": "1677"
+ },
+ {
+  "label": "q11",
+  "from": "Valašská",
+  "to": "Centrum",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "408",
+  "fromStation": "1369",
+  "toId": "124",
+  "toStation": "1243"
+ },
+ {
+  "label": "q12",
+  "from": "Tbiliská",
+  "to": "Hálkova",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "377",
+  "fromStation": "1720",
+  "toId": "75",
+  "toStation": "1708"
+ },
+ {
+  "label": "q13",
+  "from": "Šípová",
+  "to": "Pri sade",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "363",
+  "fromStation": "1661",
+  "toId": "4396",
+  "toStation": "1481"
+ },
+ {
+  "label": "q14",
+  "from": "Odborárska",
+  "to": "Milana Marečka",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "240",
+  "fromStation": "1296",
+  "toId": "196",
+  "toStation": "1534"
+ },
+ {
+  "label": "q15",
+  "from": "Sabinovská",
+  "to": "Horné Krčace",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "314",
+  "fromStation": "1400",
+  "toId": "86",
+  "toStation": "1276"
+ },
+ {
+  "label": "q16",
+  "from": "Pod stanicou",
+  "to": "Švabinského",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "274",
+  "fromStation": "1238",
+  "toId": "375",
+  "toStation": "1680"
+ },
+ {
+  "label": "q17",
+  "from": "Mliekarenská",
+  "to": "Ovsište",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "200",
+  "fromStation": "1393",
+  "toId": "246",
+  "toStation": "1679"
+ },
+ {
+  "label": "q18",
+  "from": "Gercenova",
+  "to": "Dubová",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "520",
+  "fromStation": "1704",
+  "toId": "61",
+  "toStation": "1609"
+ },
+ {
+  "label": "q19",
+  "from": "Zámocká",
+  "to": "Miletičova",
+  "iso": "2026-11-23T08:00:00+01:00",
+  "fromId": "434",
+  "fromStation": "1357",
+  "toId": "197",
+  "toStation": "1324"
+ },
+ {
+  "label": "q20",
+  "from": "Kvačalova",
+  "to": "Sad Janka Kráľa",
+  "iso": "2026-11-23T17:30:00+01:00",
+  "fromId": "159",
+  "fromStation": "1377",
+  "toId": "315",
+  "toStation": "1267"
+ },
+ {
+  "label": "q21",
+  "from": "Slovany",
+  "to": "Nám. Ľ. Štúra",
+  "iso": "2026-11-23T17:30:00+01:00",
+  "fromId": "156",
+  "fromStation": "1459",
+  "toId": "220",
+  "toStation": "1246"
+ },
+ {
+  "label": "q22",
+  "from": "Malá scéna",
+  "to": "Bárdošova",
+  "iso": "2026-11-23T17:30:00+01:00",
+  "fromId": "185",
+  "fromStation": "1557",
+  "toId": "8",
+  "toStation": "1330"
+ },
+ {
+  "label": "q23",
+  "from": "Vyšehradská",
+  "to": "Poštová",
+  "iso": "2026-11-23T17:30:00+01:00",
+  "fromId": "425",
+  "fromStation": "1701",
+  "toId": "270",
+  "toStation": "1242"
+ },
+ {
+  "label": "q24",
+  "from": "Slovinská",
+  "to": "Studenohorská",
+  "iso": "2026-11-23T17:30:00+01:00",
+  "fromId": "328",
+  "fromStation": "1398",
+  "toId": "355",
+  "toStation": "1415"
+ },
+ {
+  "label": "q25",
+  "from": "Žitavská",
+  "to": "Hodonínska",
+  "iso": "2026-11-23T17:30:00+01:00",
+  "fromId": "458",
+  "fromStation": "1388",
+  "toId": "235",
+  "toStation": "1412"
+ },
+ {
+  "label": "q26",
+  "from": "Lamač",
+  "to": "Dulovo nám.",
+  "iso": "2026-11-23T17:30:00+01:00",
+  "fromId": "163",
+  "fromStation": "1417",
+  "toId": "63",
+  "toStation": "1649"
+ },
+ {
+  "label": "q27",
+  "from": "Podháj",
+  "to": "Košická",
+  "iso": "2026-11-23T17:30:00+01:00",
+  "fromId": "265",
+  "fromStation": "1414",
+  "toId": "144",
+  "toStation": "1338"
+ },
+ {
+  "label": "q28",
+  "from": "Líščie nivy",
+  "to": "Botanická záhrada",
+  "iso": "2026-11-23T17:30:00+01:00",
+  "fromId": "208",
+  "fromStation": "1304",
+  "toId": "18",
+  "toStation": "1284"
+ },
+ {
+  "label": "q29",
+  "from": "29. augusta",
+  "to": "MiÚ P. Biskupice",
+  "iso": "2026-11-23T17:30:00+01:00",
+  "fromId": "401",
+  "fromStation": "1337",
+  "toId": "248",
+  "toStation": "1763"
+ }
+]
