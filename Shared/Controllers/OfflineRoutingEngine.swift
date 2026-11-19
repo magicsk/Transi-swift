@@ -12,7 +12,6 @@ class OfflineRoutingEngine {
     private static let maxArriveByJourneySeconds = 2 * 60 * 60
     /// The previous service day's trips run past midnight until about this time.
     private static let earlyMorningSearchThresholdSeconds = 5 * 60 * 60
-    private static let secondsPerDay = 24 * 60 * 60
     /// A query needs at most the previous, requested and next service day.
     private static let contextCacheLimit = 3
     private static let contextCacheLock = NSLock()
@@ -85,7 +84,8 @@ class OfflineRoutingEngine {
         maxWalkDuration: Int
     ) -> [OfflineJourneyCandidate] {
         let dayStart = Self.bratislavaCalendar.startOfDay(for: date)
-        let seconds = localServiceDaySeconds(for: date)
+        let serviceDayStart = OfflineRoutingContext.serviceDayStart(for: dayStart)
+        let seconds = Int(date.timeIntervalSince(serviceDayStart))
         let departures: ClosedRange<Int>
         let latestArrival: Int?
         switch arrivalDeparture {
@@ -99,10 +99,11 @@ class OfflineRoutingEngine {
 
         var candidates = [OfflineJourneyCandidate]()
         for dayOffset in -1...1 {
-            if dayOffset == -1 && departures.lowerBound >= Self.earlyMorningSearchThresholdSeconds { continue }
-            if dayOffset == 1 && departures.upperBound < Self.secondsPerDay { continue }
-            let shift = -dayOffset * Self.secondsPerDay
             let serviceDate = Self.bratislavaCalendar.date(byAdding: .day, value: dayOffset, to: dayStart)!
+            // Converts to that day's seconds; a day around a clock change is not 24 hours long.
+            let shift = Int(serviceDayStart.timeIntervalSince(OfflineRoutingContext.serviceDayStart(for: serviceDate)))
+            if dayOffset == -1 && departures.lowerBound >= Self.earlyMorningSearchThresholdSeconds { continue }
+            if dayOffset == 1 && departures.upperBound < -shift { continue }
             let router = OfflineTimetableRouter(context: routingContext(date: serviceDate, maxWalkDuration: maxWalkDuration))
             candidates += router.route(
                 originStopIds: fromStopIds,
@@ -112,7 +113,7 @@ class OfflineRoutingEngine {
                 maxTransfers: maxTransfers
             )
         }
-        candidates = normalize(candidates, relativeTo: dayStart)
+        candidates = normalize(candidates, relativeTo: serviceDayStart)
         if arrivalDeparture == .arrival {
             // Earlier arrivals belong to the next page.
             candidates = candidates.filter { $0.arrivalSeconds > seconds - window }
@@ -335,13 +336,6 @@ class OfflineRoutingEngine {
         case .arrival:
             return lhs.departureSeconds > rhs.departureSeconds
         }
-    }
-
-    private func localServiceDaySeconds(for date: Date) -> Int {
-        let components = Self.bratislavaCalendar.dateComponents([.hour, .minute, .second], from: date)
-        return (components.hour ?? 0) * 3600 +
-            (components.minute ?? 0) * 60 +
-            (components.second ?? 0)
     }
 
     private static var bratislavaCalendar: Calendar {

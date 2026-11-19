@@ -3,6 +3,7 @@ import Foundation
 /// One service day's timetable, indexed for `OfflineTimetableRouter`. Stops and trips are
 /// referred to by their index in `stops` and `trips`.
 struct OfflineRoutingContext {
+    /// Time zero of the day's service-day seconds, see `serviceDayStart(for:)`.
     let dayStart: Date
     let stops: [OfflineStop]
     let stopIndexById: [String: Int32]
@@ -32,7 +33,7 @@ struct OfflineRoutingContext {
             }
         }
         return OfflineRoutingContext(
-            dayStart: dayStart,
+            dayStart: serviceDayStart(for: dayStart),
             stops: stops,
             stopIndexById: stopIndexById,
             trips: trips,
@@ -40,6 +41,12 @@ struct OfflineRoutingContext {
             routesAtStop: routesAtStop,
             footpaths: buildFootpaths(stops: stops, maxWalkDuration: maxWalkDuration)
         )
+    }
+
+    /// GTFS times count from noon minus 12 hours of the service day: midnight, except on the days
+    /// the clocks change, which have 23 or 25 hours.
+    static func serviceDayStart(for date: Date) -> Date {
+        bratislavaCalendar().date(bySettingHour: 12, minute: 0, second: 0, of: date)!.addingTimeInterval(-12 * 60 * 60)
     }
 
     /// The `stop_times` arrival expression. Databases built before arrival times were kept have
