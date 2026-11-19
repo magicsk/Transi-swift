@@ -105,6 +105,7 @@ struct TimetablesView: View {
                 }
             }
             .onChange(of: offlineTimetables) { _ in
+                category.clear()
                 fetchTimetables(force: true)
             }
             .onReceive(GlobalController.appState.$pendingTimetableLine.compactMap { $0 }) { line in
@@ -153,6 +154,7 @@ struct TimetablesView: View {
                         categorizeRoutes(timetables.routes)
                     case .failure:
                         DispatchQueue.main.async {
+                            guard isCurrentSource() else { return }
                             loading = false
                             error = true
                         }
@@ -206,6 +208,7 @@ struct TimetablesView: View {
         }
         loading = false
         if let route = foundRoute {
+            openFromUrl = ""
             urlNavigateDestination = route
             navigateInsideFromUrl = true
         }
