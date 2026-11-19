@@ -180,7 +180,7 @@ struct TimetableView: View {
                 handleDepartures(departures)
             }
         case .server:
-            fetchMagicApi(endpoint: route.serverEndpoint("departures", direction: selectedDirection, date: selectedDate), type: Departures.self, completion: handleResult)
+            fetchMagicApi(endpoint: route.serverEndpoint("departures", direction: selectedDirection, date: selectedDate), type: Departures.self, timeout: MAGIC_API_FALLBACK_TIMEOUT, completion: handleResult)
         case .bApi:
             DispatchQueue.global(qos: .userInitiated).async { [self] in
                 fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(selectedDirection.id)/\(selectedDate.toString())/0/1440/", type: Departures.self, completion: handleResult)
@@ -224,7 +224,7 @@ struct TimetableView: View {
                 }
             }
         case .server:
-            fetchMagicApi(endpoint: "/timetable/routes/\(route.id)/directions", type: Directions.self, completion: handleResult)
+            fetchMagicApi(endpoint: "/timetable/routes/\(route.id)/directions", type: Directions.self, timeout: MAGIC_API_FALLBACK_TIMEOUT, completion: handleResult)
         case .bApi:
             DispatchQueue.global(qos: .userInitiated).async { [self] in
                 fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/directions", type: Directions.self, completion: handleResult)

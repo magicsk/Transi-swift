@@ -95,7 +95,7 @@ struct TimetableDetailView: View {
                 groupDetailsIntoHourMinutes(details)
             }
         case let (.server, stopCode?):
-            fetchMagicApi(endpoint: route.serverEndpoint("stop-departures", direction: direction, date: selectedDate, stopId: stopCode), type: TimetableDetails.self, completion: handleResult)
+            fetchMagicApi(endpoint: route.serverEndpoint("stop-departures", direction: direction, date: selectedDate, stopId: stopCode), type: TimetableDetails.self, timeout: MAGIC_API_FALLBACK_TIMEOUT, completion: handleResult)
         case (.bApi, _):
             DispatchQueue.global(qos: .userInitiated).async { [self] in
                 fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(direction.id)/\(selectedDate.toString())/\(departure.id)/", type: TimetableDetails.self, completion: handleResult)

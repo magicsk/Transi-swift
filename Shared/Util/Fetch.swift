@@ -55,10 +55,14 @@ func fetchData<T: Decodable & Sendable>(
     .resume()
 }
 
+/// Seconds our server gets before a request that has a fallback source gives up (URLSession waits 60 s by default).
+let MAGIC_API_FALLBACK_TIMEOUT: TimeInterval = 10
+
 func fetchMagicApi<T: Decodable & Sendable>(
-    endpoint: String, type: T.Type, completion: @escaping (Result<T, Error>) -> Void
+    endpoint: String, type: T.Type, timeout: TimeInterval? = nil, completion: @escaping (Result<T, Error>) -> Void
 ) {
-    let request = URLRequest(url: URL(string: "\(GlobalController.magicApiBaseUrl)\(endpoint)")!)
+    var request = URLRequest(url: URL(string: "\(GlobalController.magicApiBaseUrl)\(endpoint)")!)
+    if let timeout { request.timeoutInterval = timeout }
     fetchData(request: request, type: type, completion: completion)
 }
 

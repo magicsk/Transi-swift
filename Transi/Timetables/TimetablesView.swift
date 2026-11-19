@@ -147,7 +147,7 @@ struct TimetablesView: View {
             }
         } else {
             // Our server first; the B API only when it fails.
-            fetchMagicApi(endpoint: "/timetable/routes", type: Timetables.self) { result in
+            fetchMagicApi(endpoint: "/timetable/routes", type: Timetables.self, timeout: MAGIC_API_FALLBACK_TIMEOUT) { result in
                 guard isCurrentSource() else { return }
                 if case let .success(timetables) = result {
                     categorizeRoutes(timetables.routes.map { var route = $0; route.source = .server; return route })

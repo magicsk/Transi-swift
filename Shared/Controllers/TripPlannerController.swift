@@ -274,7 +274,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         ] + (arrivingAfter.map { [URLQueryItem(name: "arriving_after", value: $0.formatted(.iso8601))] } ?? [])
         // URLComponents leaves "+" alone, which servers read as a space.
         let encodedQuery = query.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B") ?? ""
-        fetchMagicApi(endpoint: "/timetable/trip?\(encodedQuery)", type: ServerTrip.self) { [weak self] result in
+        fetchMagicApi(endpoint: "/timetable/trip?\(encodedQuery)", type: ServerTrip.self, timeout: MAGIC_API_FALLBACK_TIMEOUT) { [weak self] result in
             guard let self, self.isCurrentSearch(generation) else { return }
             switch result {
             case let .success(serverTrip):
