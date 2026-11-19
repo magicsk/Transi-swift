@@ -5,7 +5,14 @@ import fs from 'node:fs';
 const rd = (f) => Object.fromEntries(fs.readFileSync(f, 'utf8').trim().split('\n').map(JSON.parse).map((x) => [x.label, x]));
 const qs = JSON.parse(fs.readFileSync('queries.json', 'utf8')), off = rd(process.argv[2] ?? 'offline.jsonl'), on = rd('online.jsonl');
 const base = process.argv[3] ? rd(process.argv[3]) : null;
-const t = (s) => new Date(s).getTime() / 1000, hm = (s) => new Date(s).toLocaleTimeString('sv-SE', { timeZone: 'Europe/Bratislava' }).slice(0, 5);
+// imhd times carry no zone and are Bratislava wall-clock time; read them as such whatever the host's zone.
+const bratislavaOffset = (d) => new Date(d.toLocaleString('sv-SE', { timeZone: 'Europe/Bratislava' }).replace(' ', 'T') + 'Z') - d;
+const t = (s) => {
+  if (/(Z|[+-]\d\d:?\d\d)$/.test(s)) return new Date(s).getTime() / 1000;
+  const wall = new Date(`${s.replace(' ', 'T')}Z`);
+  return (wall - bratislavaOffset(wall)) / 1000;
+};
+const hm = (s) => new Date(t(s) * 1000).toLocaleTimeString('sv-SE', { timeZone: 'Europe/Bratislava' }).slice(0, 5);
 const fmt = (js) => js.map((j) => `${hm(j.dep)}-${hm(j.arr)} ${j.lines.join('>')}${j.src ? `(${j.src})` : ''}`).join(' | ');
 const covers = (j, p) => t(j.dep) >= t(p.dep) - 60 && t(j.arr) <= t(p.arr) + 60 && j.lines.length <= p.lines.length;
 const best = (js) => Math.min(...js.map((j) => t(j.arr)));
@@ -17,7 +24,7 @@ for (const q of qs) {
   const inWin = (w) => (j) => t(j.dep) >= q0 - 60 && t(j.dep) <= q0 + w;
   const online = [...n.r.map((j) => ({ ...j, src: 'R' })), ...n.i.map((j) => ({ ...j, src: 'I' }))].filter((j) => j.dep && j.arr && inWin(3600)(j));
   const pareto = online.filter((a) => !online.some((b) => b !== a && t(b.dep) >= t(a.dep) && t(b.arr) <= t(a.arr) && b.lines.length <= a.lines.length && (t(b.dep) > t(a.dep) || t(b.arr) < t(a.arr) || b.lines.length < a.lines.length)));
-  const uniq = [...new Map(pareto.map((j) => [`${hm(j.dep)}-${hm(j.arr)}`, j])).values()];
+  const uniq = [...new Map(pareto.map((j) => [`${hm(j.dep)}-${hm(j.arr)}-${j.lines.length}`, j])).values()];
   for (const w of [900, 3600]) {
     const target = uniq.filter(inWin(w));
     cov[w][0] += target.filter((p) => o.journeys.some((j) => covers(j, p))).length;
