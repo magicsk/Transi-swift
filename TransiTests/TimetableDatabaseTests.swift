@@ -20,7 +20,7 @@ final class TimetableDatabaseTests: XCTestCase {
         components.month = 3
         components.day = 7
         let date = Calendar.current.date(from: components)!
-        
+
         XCTAssertEqual(timetableDb.dayOfWeekColumn(for: date), "saturday")
     }
 }

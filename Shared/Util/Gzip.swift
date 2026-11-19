@@ -18,7 +18,7 @@ func decompressGzipToFile(from compressedData: Data, to destinationURL: URL) thr
     if FileManager.default.fileExists(atPath: destinationURL.path) {
         try? FileManager.default.removeItem(at: destinationURL)
     }
-    
+
     FileManager.default.createFile(atPath: destinationURL.path, contents: nil)
     guard let fileHandle = try? FileHandle(forWritingTo: destinationURL) else {
         throw GzipError.fileHandleCreationFailed
@@ -39,11 +39,11 @@ func decompressGzipToFile(from compressedData: Data, to destinationURL: URL) thr
 
         let chunkSize = 65536
         let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: chunkSize)
-        defer { 
+        defer {
             buffer.deallocate()
             inflateEnd(&stream)
         }
-        
+
         var status: Int32
         repeat {
             stream.avail_out = uInt(chunkSize)
