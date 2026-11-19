@@ -49,8 +49,8 @@ assert(ride.endArrival == Date(timeIntervalSinceReferenceDate: 816_766_980.5) &&
 assert(ride.startStopGps == StopGps(lon: 17.21, lat: 48.11) && ride.tripHeadsign == "Hlavná stanica")
 assert(ride.stops?.count == 2 && ride.stops?[0].stopId == 123 && ride.stops?[1].isRequestStop == true)
 assert(decode(ServerTrip.self, #"{"journeys":[]}"#).journeys.isEmpty)
-// An error reply must fail, so the planner falls back.
-assert((try? decoder.decode(ServerTrip.self, from: Data(#"{"error":"Unknown stop"}"#.utf8))) == nil)
+// An error reply (e.g. the 404 for a stop name the server can't resolve) must fail, so the planner falls back.
+assert((try? decoder.decode(ServerTrip.self, from: Data(#"{"error":"Unknown stop: Hronská"}"#.utf8))) == nil)
 
 let routes = decode(Timetables.self, """
 {"routes":[{"route_id":42,"short_name":"9","long_name":"Karlova Ves - Ružinov","description":null,
