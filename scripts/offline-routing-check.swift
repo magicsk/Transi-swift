@@ -224,6 +224,27 @@ enum OfflineRoutingCheck {
             }
         }
 
+        // Loading more arrive-by results continues after the list's last arrival, widening forward where service
+        // is sparse; it never returns the journeys arriving by the bound, which the list already shows.
+        if selected.isEmpty {
+            let bound = parser.date(from: "2026-11-22T11:00:00+01:00")!
+            let page = OfflineRoutingEngine(scheduleDb: scheduleDb, baseDb: baseDb).planTrip(
+                fromName: "Hlavná stanica",
+                toName: "Bílkove Humence, Kostol",
+                date: bound,
+                arrivalDeparture: .arrival,
+                maxTransfers: maxTransfers,
+                maxWalkDuration: maxWalkDuration,
+                imhdStops: imhdStops,
+                arrivingAfter: bound
+            )
+            let arrivals = page.compactMap { $0.parts?.last?.endArrival }
+            print("arrive_by_next_page: count=\(page.count)")
+            if arrivals.isEmpty || arrivals.contains(where: { $0 <= bound }) {
+                failures.append("arrive_by_next_page: expected journeys arriving after \(bound), got \(arrivals)")
+            }
+        }
+
         if !failures.isEmpty {
             for failure in failures {
                 fputs("FAIL: \(failure)\n", stderr)
