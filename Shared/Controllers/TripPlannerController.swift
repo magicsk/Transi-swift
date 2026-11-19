@@ -215,7 +215,8 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             date: searchDate,
             arrivalDeparture: arrivalDeparture,
             maxTransfers: UserDefaults.standard.integer(forKey: Stored.tripMaxTransfers),
-            maxWalkDuration: UserDefaults.standard.integer(forKey: Stored.tripMaxWalkDuration)
+            maxWalkDuration: UserDefaults.standard.integer(forKey: Stored.tripMaxWalkDuration),
+            arrivingAfter: append && arrivalDeparture == .arrival ? searchDate : nil
         ) { [weak self] journeys in
             guard let self = self else { return }
 
@@ -227,7 +228,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                     let existing = self.trip.journey ?? []
                     let existingSet = Set(existing)
                     let newJourneys = journeys.filter { !existingSet.contains($0) }
-                    self.advanceOfflineSearchDate(after: searchDate, journeys: journeys)
+                    self.advanceOfflineSearchDate(after: searchDate, journeys: journeys, continuing: true)
                     guard !newJourneys.isEmpty else { return }
                     self.trip.journey = self.sortedJourneys(existing + newJourneys)
                     self.cacheTripForCurrentSearch(self.trip)
@@ -236,7 +237,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                     self.error = .noJourneys
                 } else {
                     self.error = nil // Clear any previous errors
-                    self.advanceOfflineSearchDate(after: searchDate, journeys: journeys)
+                    self.advanceOfflineSearchDate(after: searchDate, journeys: journeys, continuing: false)
                     let newTrip = Trip(journey: self.sortedJourneys(journeys))
                     self.trip = newTrip
                     self.cacheTripForCurrentSearch(newTrip)
@@ -247,9 +248,10 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
 
     /// Start the next offline page where this page's search window ended, so no journey is
     /// skipped. A window widened for sparse service ends after its last journey. Like online
-    /// paging, arrive-by pages move forward too: the next one covers the window of arrivals
-    /// after this one, so its journeys list below.
-    private func advanceOfflineSearchDate(after searchDate: Date, journeys: [Journey]) {
+    /// paging, arrive-by pages move forward too: the next date is the lower bound of the next
+    /// page's arrivals (the first page's covered up to the requested time), so its journeys
+    /// list below.
+    private func advanceOfflineSearchDate(after searchDate: Date, journeys: [Journey], continuing: Bool) {
         let window = TimeInterval(OfflineRoutingEngine.searchWindowSeconds)
         let widestWindow = TimeInterval(OfflineRoutingEngine.maxSearchWindowSeconds)
         switch arrivalDeparture {
@@ -258,8 +260,12 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             nextOfflineSearchDate = latestDeparture.map { max(searchDate + window, $0 + 1) }
                 ?? searchDate + widestWindow
         case .arrival:
-            let latestArrival = journeys.compactMap { $0.parts?.last?.endArrival }.max() ?? searchDate
-            nextOfflineSearchDate = max(searchDate, latestArrival) + window
+            let latestArrival = journeys.compactMap { $0.parts?.last?.endArrival }.max()
+            if continuing {
+                nextOfflineSearchDate = latestArrival.map { max(searchDate + window, $0) } ?? searchDate + widestWindow
+            } else {
+                nextOfflineSearchDate = max(searchDate, latestArrival ?? searchDate)
+            }
         }
     }
 
@@ -694,7 +700,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         nextOfflineSearchDate = nil
         let offlineJourneys = trip.journey?.filter { $0.id.hasPrefix("o-") } ?? []
         if !offlineJourneys.isEmpty {
-            advanceOfflineSearchDate(after: arrivalDepartureDate, journeys: offlineJourneys)
+            advanceOfflineSearchDate(after: arrivalDepartureDate, journeys: offlineJourneys, continuing: false)
         }
     }
 

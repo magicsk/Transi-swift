@@ -33,7 +33,8 @@ class OfflineRoutingEngine {
         arrivalDeparture: ArrivalDeparture,
         maxTransfers: Int,
         maxWalkDuration: Int,
-        imhdStops: [Stop]
+        imhdStops: [Stop],
+        arrivingAfter: Date? = nil
     ) -> [Journey] {
         let resolver = OfflineStopResolver(baseDb: baseDb)
         let fromStopIds = resolver.resolveStops(named: fromName).map(\.id)
@@ -43,10 +44,12 @@ class OfflineRoutingEngine {
         var window = Self.searchWindowSeconds
         var candidates = [OfflineJourneyCandidate]()
         while true {
+            // An arrive-by page that continues a list keeps its lower bound and widens forward, so it
+            // never returns journeys from before it, which the list already shows or sorts above.
             candidates = search(
                 fromStopIds: fromStopIds,
                 toStopIds: toStopIds,
-                date: date,
+                date: arrivingAfter.map { $0 + TimeInterval(window) } ?? date,
                 window: window,
                 arrivalDeparture: arrivalDeparture,
                 maxTransfers: maxTransfers,
