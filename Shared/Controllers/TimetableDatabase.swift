@@ -24,9 +24,9 @@ class TimetableDatabase: ObservableObject {
     @Published var downloadProgress: Double?
     @Published var downloadDetail: String?
     @Published var isReady = false
-    /// Schedule sha256 of the newest published database seen this session; nil until a manifest arrives.
-    /// Read and written on the main thread.
-    private(set) var latestScheduleSha: String?
+    /// Schedule sha256 of the newest published database seen; nil until a manifest arrives. Kept with the manifest
+    /// check time, so a relaunch inside the check's skip window still knows. Read and written on the main thread.
+    private(set) var latestScheduleSha = UserDefaults.standard.string(forKey: Stored.timetableLatestScheduleSha)
 
     private var baseDb: SQLiteDatabase?
     private var scheduleDb: SQLiteDatabase?
@@ -169,6 +169,7 @@ class TimetableDatabase: ObservableObject {
             switch result {
             case let .success(manifest):
                 self.latestScheduleSha = manifest.databases.schedule.sha256
+                UserDefaults.standard.set(self.latestScheduleSha, forKey: Stored.timetableLatestScheduleSha)
                 UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: Stored.timetableLastCheckTimestamp)
                 DispatchQueue.global(qos: .userInitiated).async {
                     self.processManifest(manifest)
