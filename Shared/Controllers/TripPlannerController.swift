@@ -124,16 +124,26 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
 
         let generation = generation(for: source)
 
-        if source == .initial && UserDefaults.standard.bool(forKey: Stored.offlineTripPlanner) && GlobalController.timetableDatabase.isReady {
-            fetchOfflineTrip(from: selectedFrom, to: selectedTo, generation: generation)
+        if source == .initial {
+            // The local engine when it's on and has the newest timetables, else our server (which falls back to the
+            // local engine or the online APIs when it fails).
+            let database = GlobalController.timetableDatabase
+            let useLocal = UserDefaults.standard.bool(forKey: Stored.offlineTripPlanner) && database.isReady && database.isLatest
+            fetchOfflineTrip(from: selectedFrom, to: selectedTo, generation: generation, onServer: !useLocal)
             return
         }
 
+        fetchOnlineTrip(source: source, from: selectedFrom, to: selectedTo, generation: generation)
+    }
+
+    /// The R-API and I-API search. Returns false when a stop has no station, so nothing was fetched.
+    @discardableResult
+    private func fetchOnlineTrip(source: FetchSource, from selectedFrom: Stop, to selectedTo: Stop, generation: Int) -> Bool {
         guard let params = prepareFetchParameters(
             source: source,
             from: selectedFrom,
             to: selectedTo
-        ) else { return }
+        ) else { return false }
         let stops = GlobalController.stopsListProvider.stops
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -162,9 +172,12 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                 )
             }
         }
+        return true
     }
 
-    private func fetchOfflineTrip(from: Stop, to: Stop, generation: Int, append: Bool = false) {
+    /// A planner search by stop names, on our server (`s-` journeys) or the local engine (`o-` journeys). Both page
+    /// the same way; a continuing page asks the source its first page came from.
+    private func fetchOfflineTrip(from: Stop, to: Stop, generation: Int, append: Bool = false, onServer: Bool = false) {
         let searchDate: Date
         if append {
             guard !loadingMore, let nextDate = nextOfflineSearchDate else { return }
@@ -209,15 +222,11 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             return
         }
 
-        GlobalController.timetableDatabase.queryOfflineTrip(
-            fromName: resolvedFromName,
-            toName: resolvedToName,
-            date: searchDate,
-            arrivalDeparture: arrivalDeparture,
-            maxTransfers: UserDefaults.standard.integer(forKey: Stored.tripMaxTransfers),
-            maxWalkDuration: UserDefaults.standard.integer(forKey: Stored.tripMaxWalkDuration),
-            arrivingAfter: append && arrivalDeparture == .arrival ? searchDate : nil
-        ) { [weak self] journeys in
+        let maxTransfers = UserDefaults.standard.integer(forKey: Stored.tripMaxTransfers)
+        let maxWalkDuration = UserDefaults.standard.integer(forKey: Stored.tripMaxWalkDuration)
+        let arrivingAfter = append && arrivalDeparture == .arrival ? searchDate : nil
+
+        let handleJourneys = { [weak self] (journeys: [Journey]) in
             guard let self = self else { return }
 
             DispatchQueue.main.async {
@@ -241,6 +250,44 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                     let newTrip = Trip(journey: self.sortedOfflineJourneys(journeys))
                     self.trip = newTrip
                     self.cacheTripForCurrentSearch(newTrip)
+                }
+            }
+        }
+
+        guard onServer else {
+            GlobalController.timetableDatabase.queryOfflineTrip(
+                fromName: resolvedFromName, toName: resolvedToName, date: searchDate, arrivalDeparture: arrivalDeparture,
+                maxTransfers: maxTransfers, maxWalkDuration: maxWalkDuration, arrivingAfter: arrivingAfter,
+                completion: handleJourneys
+            )
+            return
+        }
+
+        var query = URLComponents()
+        query.queryItems = [
+            URLQueryItem(name: "from", value: resolvedFromName),
+            URLQueryItem(name: "to", value: resolvedToName),
+            URLQueryItem(name: "date", value: searchDate.formatted(.iso8601)),
+            URLQueryItem(name: "mode", value: arrivalDeparture.rawValue),
+            URLQueryItem(name: "max_transfers", value: String(maxTransfers)),
+            URLQueryItem(name: "max_walk", value: String(maxWalkDuration)),
+        ] + (arrivingAfter.map { [URLQueryItem(name: "arriving_after", value: $0.formatted(.iso8601))] } ?? [])
+        // URLComponents leaves "+" alone, which servers read as a space.
+        let encodedQuery = query.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B") ?? ""
+        fetchMagicApi(endpoint: "/timetable/trip?\(encodedQuery)", type: ServerTrip.self) { [weak self] result in
+            guard let self, self.isCurrentSearch(generation) else { return }
+            switch result {
+            case let .success(serverTrip):
+                handleJourneys(serverTrip.journeys)
+            case .failure where append:
+                self.loadingMore = false
+            case .failure:
+                // Our server is down or broken: the local engine when it has timetables, else the online APIs.
+                if GlobalController.timetableDatabase.isReady {
+                    self.fetchOfflineTrip(from: from, to: to, generation: generation)
+                } else if !self.fetchOnlineTrip(source: .initial, from: from, to: to, generation: generation) {
+                    self.loading = false
+                    self.error = .noJourneys
                 }
             }
         }
@@ -589,13 +636,13 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func loadMoreTripsIfNeeded(_ journey: Journey) {
-        let lastOfflineJourney = trip.journey?.last(where: { $0.id.hasPrefix("o-") })
+        let lastOfflineJourney = trip.journey?.last(where: { $0.id.hasPrefix("o-") || $0.id.hasPrefix("s-") })
         if journey.id == lastOfflineJourney?.id {
             #if DEBUG
             print("fetching more offline")
             #endif
             let generation = searchGenerationLock.withLock { searchGeneration }
-            fetchOfflineTrip(from: from, to: to, generation: generation, append: true)
+            fetchOfflineTrip(from: from, to: to, generation: generation, append: true, onServer: journey.id.hasPrefix("s-"))
             return
         }
 
@@ -708,7 +755,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             .last(where: { $0.id.hasPrefix("i-") })?
             .parts?.first?.startDeparture.addingTimeInterval(60)
         nextOfflineSearchDate = nil
-        let offlineJourneys = trip.journey?.filter { $0.id.hasPrefix("o-") } ?? []
+        let offlineJourneys = trip.journey?.filter { $0.id.hasPrefix("o-") || $0.id.hasPrefix("s-") } ?? []
         if !offlineJourneys.isEmpty {
             advanceOfflineSearchDate(after: arrivalDepartureDate, journeys: offlineJourneys, continuing: false)
         }

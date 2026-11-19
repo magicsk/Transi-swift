@@ -24,6 +24,9 @@ class TimetableDatabase: ObservableObject {
     @Published var downloadProgress: Double?
     @Published var downloadDetail: String?
     @Published var isReady = false
+    /// Schedule sha256 of the newest published database seen this session; nil until a manifest arrives.
+    /// Read and written on the main thread.
+    private(set) var latestScheduleSha: String?
 
     private var baseDb: SQLiteDatabase?
     private var scheduleDb: SQLiteDatabase?
@@ -55,6 +58,11 @@ class TimetableDatabase: ObservableObject {
 
     var shouldMaintainOfflineDatabase: Bool {
         isOfflineEnabled || isPlannerOfflineEnabled
+    }
+
+    /// Whether the local database is the newest one known: it matches the latest manifest, or none was fetched.
+    var isLatest: Bool {
+        latestScheduleSha.map { $0 == UserDefaults.standard.string(forKey: Stored.timetableScheduleDbSha) } ?? true
     }
 
     private var allowsCellularDatabaseUpdates: Bool {
@@ -160,6 +168,7 @@ class TimetableDatabase: ObservableObject {
             guard let self else { return }
             switch result {
             case let .success(manifest):
+                self.latestScheduleSha = manifest.databases.schedule.sha256
                 UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: Stored.timetableLastCheckTimestamp)
                 DispatchQueue.global(qos: .userInitiated).async {
                     self.processManifest(manifest)

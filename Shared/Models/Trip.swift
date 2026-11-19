@@ -12,6 +12,11 @@ struct Trip: Codable, Hashable {
     var journey: [Journey]?
 }
 
+/// Our server's trip planner reply (`/timetable/trip`).
+struct ServerTrip: Codable {
+    var journeys: [Journey]
+}
+
 struct Journey: Codable, Hashable, AppEntity {
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "Journey"
     static var defaultQuery = JourneyQuery()
