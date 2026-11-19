@@ -82,6 +82,10 @@ func getHeaderText(_ parts: [Part], _ zones: [String]?) -> Text {
         let duration = timeDiffFromDates(first.startDeparture, last.endArrival)
         let numOfZones = zones?.count ?? 0
         let timeDateSection = dayStringUnlessToday(first.startDeparture).map { "\($0) \(startTime)" } ?? startTime
+        // Trains and cross-border stops have no fare zone; "0 zones" would read as free.
+        if numOfZones == 0 {
+            return Text("\(timeDateSection) | \(duration) min")
+        }
         return Text("\(timeDateSection) | \(duration) min | ^[\(numOfZones) zone](inflect: true)")
     } else {
         return Text("Error")
