@@ -46,7 +46,7 @@ struct Stored {
     /// Minutes before a scheduled trip's departure that its Live Activity starts.
     static let tripStartMinutes = "trip_start_minutes"
     static let timetableLastCheckTimestamp = "timetable_last_check_timestamp"
-    /// Schedule sha256 from the newest timetable manifest seen.
-    static let timetableLatestScheduleSha = "timetable_latest_schedule_sha"
+    /// Base and schedule sha256 ("base:schedule") from the newest timetable manifest seen.
+    static let timetableLatestShas = "timetable_latest_shas"
     static let timetableAllowCellularUpdates = "timetable_allow_cellular_updates"
 }

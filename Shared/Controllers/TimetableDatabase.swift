@@ -24,9 +24,9 @@ class TimetableDatabase: ObservableObject {
     @Published var downloadProgress: Double?
     @Published var downloadDetail: String?
     @Published var isReady = false
-    /// Schedule sha256 of the newest published database seen; nil until a manifest arrives. Kept with the manifest
-    /// check time, so a relaunch inside the check's skip window still knows. Read and written on the main thread.
-    private(set) var latestScheduleSha = UserDefaults.standard.string(forKey: Stored.timetableLatestScheduleSha)
+    /// Both sha256 of the newest published databases seen, as "base:schedule"; nil until a manifest arrives. Kept with
+    /// the manifest check time, so a relaunch inside the check's skip window still knows. Main thread only.
+    private(set) var latestShas = UserDefaults.standard.string(forKey: Stored.timetableLatestShas)
     /// A route timetable from our server failed this session, so the line list switches to the B API. Main thread.
     // ponytail: sticky until relaunch; retry our server on a timer if outages turn out short.
     var serverTimetablesFailed = false
@@ -65,7 +65,11 @@ class TimetableDatabase: ObservableObject {
 
     /// Whether the local database is the newest one known: it matches the latest manifest, or none was fetched.
     var isLatest: Bool {
-        latestScheduleSha.map { $0 == UserDefaults.standard.string(forKey: Stored.timetableScheduleDbSha) } ?? true
+        latestShas.map {
+            let defaults = UserDefaults.standard
+            let stored = "\(defaults.string(forKey: Stored.timetableBaseDbSha) ?? ""):\(defaults.string(forKey: Stored.timetableScheduleDbSha) ?? "")"
+            return $0 == stored
+        } ?? true
     }
 
     private var allowsCellularDatabaseUpdates: Bool {
@@ -171,8 +175,8 @@ class TimetableDatabase: ObservableObject {
             guard let self else { return }
             switch result {
             case let .success(manifest):
-                self.latestScheduleSha = manifest.databases.schedule.sha256
-                UserDefaults.standard.set(self.latestScheduleSha, forKey: Stored.timetableLatestScheduleSha)
+                self.latestShas = "\(manifest.databases.base.sha256):\(manifest.databases.schedule.sha256)"
+                UserDefaults.standard.set(self.latestShas, forKey: Stored.timetableLatestShas)
                 UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: Stored.timetableLastCheckTimestamp)
                 DispatchQueue.global(qos: .userInitiated).async {
                     self.processManifest(manifest)
