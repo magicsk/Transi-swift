@@ -195,19 +195,18 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             }
         }
 
-        // Resolve "Actual location" (id=-1) to the nearest known stop's name so the
-        // offline engine can find a matching GTFS stop. Mirrors what the online path
-        // does via getNearestStationId / getNearestStopId.
+        // Resolve "Actual location" (id=-1) to the nearest plannable stop's name, the stop the online path plans
+        // from too; the nearest stop can be a railway station the planners don't know.
         let resolvedFromName: String
         if from.id == -1 {
-            let nearestId = GlobalController.getNearestStopId()
+            let nearestId = GlobalController.getNearestPlannableStopId()
             resolvedFromName = GlobalController.getStopById(nearestId)?.name ?? ""
         } else {
             resolvedFromName = from.name ?? ""
         }
         let resolvedToName: String
         if to.id == -1 {
-            let nearestId = GlobalController.getNearestStopId()
+            let nearestId = GlobalController.getNearestPlannableStopId()
             resolvedToName = GlobalController.getStopById(nearestId)?.name ?? ""
         } else {
             resolvedToName = to.name ?? ""
