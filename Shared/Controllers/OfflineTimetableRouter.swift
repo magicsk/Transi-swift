@@ -161,7 +161,8 @@ final class OfflineTimetableRouter {
     }
 
     private func insertZone(of stop: Int32, into zones: inout Set<String>) {
-        if let zone = context.stops[Int(stop)].zone, !zone.isEmpty {
+        // The feed writes "-" for stops without a zone.
+        if let zone = context.stops[Int(stop)].zone, !zone.isEmpty, zone != "-" {
             zones.insert(zone)
         }
     }
