@@ -230,10 +230,15 @@ private final class Search {
     private var originWalk: [Int32: Endpoint]
     /// Walk from each stop to the named destination, or -1.
     private var egress: [Int32]
-    private var egressAnchor: [Int32]
+    /// Index into `destinations` of each stop, or -1.
+    private var destinationIndex: [Int32]
     /// Indexed `round * stopCount + stop`; round k never arrives later than round k - 1.
     private var arrival: [Int32]
     private var label: [Label]
+    /// The earliest ride arrival at each destination stop by round, indexed `round * destinations.count + destination`.
+    /// Kept apart from `label`, which a walk to the stop can replace although the ride still ends with the final walk.
+    private var finalArrival: [Int32]
+    private var finalRide: [Ride?]
     /// Best arrival at the destination with at most k rides after the previous run, by round.
     private var bestByRound: [Int32]
     private var isMarked: [Bool]
@@ -250,13 +255,15 @@ private final class Search {
         arrivalBound = latestArrival + 1
         originWalk = Dictionary(uniqueKeysWithValues: origins.map { ($0.stop, $0) })
         egress = Array(repeating: -1, count: stopCount)
-        egressAnchor = Array(repeating: -1, count: stopCount)
-        for destination in destinations {
+        destinationIndex = Array(repeating: -1, count: stopCount)
+        for (index, destination) in destinations.enumerated() {
             egress[Int(destination.stop)] = destination.walk
-            egressAnchor[Int(destination.stop)] = destination.anchor
+            destinationIndex[Int(destination.stop)] = Int32(index)
         }
         arrival = Array(repeating: Self.unreached, count: (rounds + 1) * stopCount)
         label = Array(repeating: .unreached, count: (rounds + 1) * stopCount)
+        finalArrival = Array(repeating: Self.unreached, count: (rounds + 1) * destinations.count)
+        finalRide = Array(repeating: nil, count: (rounds + 1) * destinations.count)
         bestByRound = Array(repeating: latestArrival + 1, count: rounds + 1)
         isMarked = Array(repeating: false, count: stopCount)
         wasMarked = Array(repeating: false, count: stopCount)
@@ -305,7 +312,7 @@ private final class Search {
         for round in 1...rounds {
             let best = bestDestination(round)
             if best.arrival < fewerRides && best.arrival < bestByRound[round] {
-                journeys.append(legs(round: round, destination: best.stop))
+                journeys.append(legs(round: round, destination: best.destination, byRide: best.byRide))
             }
             fewerRides = min(fewerRides, best.arrival)
             bestByRound[round] = fewerRides
@@ -324,12 +331,17 @@ private final class Search {
             let stop = route.stops[position]
             if trip >= 0 {
                 let time = route.arrivals[trip * stopCount + position]
-                if time < bound,
-                   improve(round, stop, time, .ride(Ride(route: Int32(routeIndex), trip: Int32(trip), board: Int32(board), alight: Int32(position)))) {
-                    mark(stop, in: &marked)
-                    let walk = egress[Int(stop)]
-                    if walk >= 0 {
-                        bound = min(bound, time + walk)
+                if time < bound {
+                    let ride = Ride(route: Int32(routeIndex), trip: Int32(trip), board: Int32(board), alight: Int32(position))
+                    if improve(round, stop, time, .ride(ride)) {
+                        mark(stop, in: &marked)
+                    }
+                    // A ride to a stop the rider could walk to from the origin by then is no journey.
+                    let destination = Int(destinationIndex[Int(stop)])
+                    if destination >= 0, time < arrival[Int(stop)], time < finalArrival[round * destinations.count + destination] {
+                        finalArrival[round * destinations.count + destination] = time
+                        finalRide[round * destinations.count + destination] = ride
+                        bound = min(bound, time + egress[Int(stop)])
                     }
                 }
             }
@@ -407,33 +419,37 @@ private final class Search {
         return time
     }
 
-    /// The earliest arrival at the named destination with this round's labels. Arrivals without a
-    /// ride do not count, nor a walk that would need a second walk to reach the named stop.
-    private func bestDestination(_ round: Int) -> (arrival: Int32, stop: Int32) {
-        var best = (arrival: Self.unreached, stop: Int32(-1))
-        for destination in destinations {
+    /// The earliest arrival at the named destination in this round: a ride to a destination stop
+    /// and its walk to the named stop, or a walk that ends at a named stop. Arrivals without a ride
+    /// do not count, nor a walk that would need a second walk to reach the named stop.
+    private func bestDestination(_ round: Int) -> (arrival: Int32, destination: Int, byRide: Bool) {
+        var best = (arrival: Self.unreached, destination: -1, byRide: false)
+        for (index, destination) in destinations.enumerated() {
+            let byRide = finalArrival[round * destinations.count + index] + destination.walk
+            if byRide < best.arrival {
+                best = (byRide, index, true)
+            }
             let time = arrival[round * stopCount + Int(destination.stop)]
-            guard time + destination.walk < best.arrival else { continue }
-            switch source(round, destination.stop) {
-            case .ride:
-                best = (time + destination.walk, destination.stop)
-            case .walk where destination.walk == 0:
-                best = (time, destination.stop)
-            default:
-                continue
+            if destination.walk == 0, time < best.arrival, case .walk = source(round, destination.stop) {
+                best = (time, index, false)
             }
         }
         return best
     }
 
-    private func legs(round: Int, destination: Int32) -> [Leg] {
+    private func legs(round: Int, destination index: Int, byRide: Bool) -> [Leg] {
         var reversed = [Leg]()
         var round = round
-        var stop = destination
-        let walk = egress[Int(destination)]
-        if walk > 0 {
-            let time = arrival[round * stopCount + Int(destination)]
-            reversed.append(.walk(from: destination, to: egressAnchor[Int(destination)], start: time, end: time + walk))
+        let destination = destinations[index]
+        var stop = destination.stop
+        if byRide, let ride = finalRide[round * destinations.count + index] {
+            let time = finalArrival[round * destinations.count + index]
+            if destination.walk > 0 {
+                reversed.append(.walk(from: stop, to: destination.anchor, start: time, end: time + destination.walk))
+            }
+            reversed.append(.ride(ride))
+            stop = context.routes[Int(ride.route)].stops[Int(ride.board)]
+            round -= 1
         }
         while round >= 0 {
             switch label[round * stopCount + Int(stop)] {
