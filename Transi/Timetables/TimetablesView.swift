@@ -146,18 +146,30 @@ struct TimetablesView: View {
                 categorizeRoutes(routes)
             }
         } else {
-            DispatchQueue.global(qos: .userInitiated).async { [self] in
-                fetchBApi(endpoint: "/mobile/v1/route/12/", type: Timetables.self) { result in
-                    switch result {
-                    case let .success(timetables):
+            // Our server first; the B API only when it fails.
+            fetchMagicApi(endpoint: "/timetable/routes", type: Timetables.self) { result in
+                guard isCurrentSource() else { return }
+                if case let .success(timetables) = result {
+                    categorizeRoutes(timetables.routes.map { var route = $0; route.source = .server; return route })
+                } else {
+                    fetchBApiRoutes(isCurrentSource: isCurrentSource)
+                }
+            }
+        }
+    }
+
+    private func fetchBApiRoutes(isCurrentSource: @escaping () -> Bool) {
+        DispatchQueue.global(qos: .userInitiated).async { [self] in
+            fetchBApi(endpoint: "/mobile/v1/route/12/", type: Timetables.self) { result in
+                switch result {
+                case let .success(timetables):
+                    guard isCurrentSource() else { return }
+                    categorizeRoutes(timetables.routes)
+                case .failure:
+                    DispatchQueue.main.async {
                         guard isCurrentSource() else { return }
-                        categorizeRoutes(timetables.routes)
-                    case .failure:
-                        DispatchQueue.main.async {
-                            guard isCurrentSource() else { return }
-                            loading = false
-                            error = true
-                        }
+                        loading = false
+                        error = true
                     }
                 }
             }

@@ -30,6 +30,14 @@ struct Timetables: Codable, Hashable {
 }
 
 struct Route: Codable, Hashable, Identifiable {
+    /// Where a route came from. Its ids only mean something to that source, so its directions and departures are
+    /// always asked from it.
+    enum Source {
+        case offline
+        case server
+        case bApi
+    }
+
     var id: Int { routeId }
     private var routeId: Int
     var shortName: String
@@ -38,8 +46,14 @@ struct Route: Codable, Hashable, Identifiable {
     var routeType: Int
     var color: String?
     var textColor: String?
+    /// Not encoded, so B API and server routes decode the same way; set by whoever fetched the list.
+    var source = Source.bApi
 
-    init(routeId: Int, shortName: String, longName: String, description: String? = nil, routeType: Int, color: String? = nil, textColor: String? = nil) {
+    private enum CodingKeys: String, CodingKey {
+        case routeId, shortName, longName, description, routeType, color, textColor
+    }
+
+    init(routeId: Int, shortName: String, longName: String, description: String? = nil, routeType: Int, color: String? = nil, textColor: String? = nil, source: Source = .bApi) {
         self.routeId = routeId
         self.shortName = shortName
         self.longName = longName
@@ -47,9 +61,26 @@ struct Route: Codable, Hashable, Identifiable {
         self.routeType = routeType
         self.color = color
         self.textColor = textColor
+        self.source = source
     }
 
     static let empty = Route(routeId: 0, shortName: "", longName: "", routeType: 0)
+}
+
+extension Route {
+    /// Our server's `/timetable/routes/<id>/<path>` endpoint with the direction and date the offline queries take.
+    func serverEndpoint(_ path: String, direction: Direction, date: Date, stopId: String? = nil) -> String {
+        var components = URLComponents()
+        components.path = "/timetable/routes/\(id)/\(path)"
+        components.queryItems = [
+            URLQueryItem(name: "direction_id", value: String(direction.id)),
+            URLQueryItem(name: "direction", value: direction.name),
+            URLQueryItem(name: "date", value: date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())),
+        ] + (stopId.map { [URLQueryItem(name: "stop_id", value: $0)] } ?? [])
+        // URLComponents leaves "+" alone, which servers read as a space.
+        components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
+        return components.string ?? ""
+    }
 }
 
 struct Directions: Codable, Hashable {

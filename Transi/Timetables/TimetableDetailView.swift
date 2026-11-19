@@ -81,21 +81,28 @@ struct TimetableDetailView: View {
         guard departures.isEmpty else { return }
         loading = true
 
-        if timetableDb.isOfflineEnabled && timetableDb.isReady, let stopCode = departure.stopCode {
+        let handleResult = { [self] (result: Result<TimetableDetails, Error>) in
+            switch result {
+            case let .success(timetableDetails):
+                groupDetailsIntoHourMinutes(timetableDetails.all)
+            case .failure:
+                error = true
+            }
+        }
+        switch (route.source, departure.stopCode) {
+        case let (.offline, stopCode?):
             timetableDb.queryTimetableDetail(routeRowid: route.id, directionId: direction.id, directionName: direction.name, date: selectedDate, gtfsStopId: stopCode) { [self] details in
                 groupDetailsIntoHourMinutes(details)
             }
-        } else {
+        case let (.server, stopCode?):
+            fetchMagicApi(endpoint: route.serverEndpoint("stop-departures", direction: direction, date: selectedDate, stopId: stopCode), type: TimetableDetails.self, completion: handleResult)
+        case (.bApi, _):
             DispatchQueue.global(qos: .userInitiated).async { [self] in
-                fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(direction.id)/\(selectedDate.toString())/\(departure.id)/", type: TimetableDetails.self) { result in
-                    switch result {
-                    case let .success(timetableDetails):
-                        groupDetailsIntoHourMinutes(timetableDetails.all)
-                    case .failure:
-                        error = true
-                    }
-                }
+                fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(direction.id)/\(selectedDate.toString())/\(departure.id)/", type: TimetableDetails.self, completion: handleResult)
             }
+        case (_, nil):
+            // A GTFS stop without an id can't be looked up, and its route's ids mean nothing to the B API.
+            error = true
         }
     }
 

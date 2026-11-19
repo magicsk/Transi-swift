@@ -164,22 +164,26 @@ struct TimetableView: View {
         noTimetable = false
         loading = true
 
-        if timetableDb.isOfflineEnabled && timetableDb.isReady {
+        let handleResult = { [self] (result: Result<Departures, Error>) in
+            switch result {
+            case let .success(departures):
+                handleDepartures(departures.all)
+            case .failure:
+                self.departures = []
+                self.loading = false
+                self.timetableError = true
+            }
+        }
+        switch route.source {
+        case .offline:
             timetableDb.queryDepartures(routeRowid: route.id, directionId: selectedDirection.id, directionName: selectedDirection.name, date: selectedDate) { [self] departures in
                 handleDepartures(departures)
             }
-        } else {
+        case .server:
+            fetchMagicApi(endpoint: route.serverEndpoint("departures", direction: selectedDirection, date: selectedDate), type: Departures.self, completion: handleResult)
+        case .bApi:
             DispatchQueue.global(qos: .userInitiated).async { [self] in
-                fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(selectedDirection.id)/\(selectedDate.toString())/0/1440/", type: Departures.self) { result in
-                    switch result {
-                    case let .success(departures):
-                        handleDepartures(departures.all)
-                    case .failure:
-                        self.departures = []
-                        self.loading = false
-                        self.timetableError = true
-                    }
-                }
+                fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/departures/\(selectedDirection.id)/\(selectedDate.toString())/0/1440/", type: Departures.self, completion: handleResult)
             }
         }
     }
@@ -200,7 +204,17 @@ struct TimetableView: View {
     func fetchDirections() {
         guard directions.isEmpty else { return }
 
-        if timetableDb.isOfflineEnabled && timetableDb.isReady {
+        let handleResult = { [self] (result: Result<Directions, Error>) in
+            switch result {
+            case let .success(directions):
+                self.directions = directions.all
+                self.selectedDirection = directions.all.first ?? .initial
+            case .failure:
+                self.directionsError = true
+            }
+        }
+        switch route.source {
+        case .offline:
             timetableDb.queryDirections(routeRowid: route.id) { [self] dirs in
                 directions = dirs
                 selectedDirection = dirs.first ?? .initial
@@ -209,17 +223,11 @@ struct TimetableView: View {
                     loading = false
                 }
             }
-        } else {
+        case .server:
+            fetchMagicApi(endpoint: "/timetable/routes/\(route.id)/directions", type: Directions.self, completion: handleResult)
+        case .bApi:
             DispatchQueue.global(qos: .userInitiated).async { [self] in
-                fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/directions", type: Directions.self) { result in
-                    switch result {
-                    case let .success(directions):
-                        self.directions = directions.all
-                        self.selectedDirection = directions.all.first ?? .initial
-                    case .failure:
-                        self.directionsError = true
-                    }
-                }
+                fetchBApi(endpoint: "/mobile/v1/route/\(route.id)/directions", type: Directions.self, completion: handleResult)
             }
         }
     }

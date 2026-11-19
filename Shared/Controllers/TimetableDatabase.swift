@@ -576,7 +576,7 @@ class TimetableDatabase: ObservableObject {
                 let color = row["route_color"] as? String
                 let textColor = row["route_text_color"] as? String
 
-                return Route(routeId: rowid, shortName: shortName, longName: longName, routeType: routeType, color: color, textColor: textColor)
+                return Route(routeId: rowid, shortName: shortName, longName: longName, routeType: routeType, color: color, textColor: textColor, source: .offline)
             }
 
             DispatchQueue.main.async { completion(routes) }
