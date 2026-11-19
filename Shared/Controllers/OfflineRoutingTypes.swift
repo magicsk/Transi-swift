@@ -1,10 +1,5 @@
 import Foundation
 
-enum OfflineRoutingMode {
-    case departure
-    case arrival
-}
-
 enum OfflineWalk {
     /// Effective speed in m/s over straight-line distance. Real paths detour
     /// around blocks and climb hills, so this is deliberately slower than an
