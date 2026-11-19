@@ -226,8 +226,9 @@ enum OfflineRoutingCheck {
 
         // Loading more arrive-by results continues after the list's last arrival, widening forward where service
         // is sparse; it never returns the journeys arriving by the bound, which the list already shows.
-        if selected.isEmpty {
-            let bound = parser.date(from: "2026-11-22T11:00:00+01:00")!
+        if selected.isEmpty,
+           let bound = parser.date(from: "2026-11-22T11:00:00+01:00"),
+           !activeServiceIds(feed: "regional", on: bound, scheduleDb: scheduleDb).isEmpty {
             let page = OfflineRoutingEngine(scheduleDb: scheduleDb, baseDb: baseDb).planTrip(
                 fromName: "Hlavná stanica",
                 toName: "Bílkove Humence, Kostol",
