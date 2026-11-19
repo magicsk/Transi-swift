@@ -231,8 +231,8 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
 
         var fromStopId = from.id
         var toStopId = to.id
-        if fromStopId == -1 { fromStopId = GlobalController.getNearestStopId() }
-        if toStopId == -1 { toStopId = GlobalController.getNearestStopId() }
+        if fromStopId == -1 { fromStopId = GlobalController.getNearestPlannableStopId() }
+        if toStopId == -1 { toStopId = GlobalController.getNearestPlannableStopId() }
 
         let maxTransfers = UserDefaults.standard.integer(forKey: Stored.tripMaxTransfers)
         let maxWalkDuration = UserDefaults.standard.integer(forKey: Stored.tripMaxWalkDuration)

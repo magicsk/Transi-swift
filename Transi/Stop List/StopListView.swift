@@ -17,22 +17,29 @@ struct StopListView: View {
     @Binding var stop: Stop
     @State var searchText = ""
     @State private var cachedFilteredStops: [Stop]? = nil
+    /// Only stops the trip planner can route between: not railway stations outside IDS BK.
+    let plannable: Bool
 
     let fuse = Fuse()
 
     init(
         coordinator: ContentView.Coordinator = .init(.init(selectedIndex: .constant(0))),
         stop: Binding<Stop> = .constant(.empty),
-        isPresented: Binding<Bool> = .constant(false)
+        isPresented: Binding<Bool> = .constant(false),
+        plannable: Bool = false
     ) {
         self.coordinator = coordinator
         _isPresented = isPresented
         _stop = stop
+        self.plannable = plannable
+    }
+
+    private var stops: [Stop] {
+        plannable ? stopsListProvider.stops.filter { $0.stationId != nil } : stopsListProvider.stops
     }
 
     private var displayedItems: [Stop] {
         if let cachedFilteredStops = cachedFilteredStops { return cachedFilteredStops }
-        let stops = stopsListProvider.stops
         let favoriteIds = Set(stopsListProvider.favoriteStopIds)
         // Actual location (id -1) stays first, then favorites, keeping the provider's order.
         let pinned = stops.filter { $0.id < 0 || favoriteIds.contains($0.id) }
@@ -46,7 +53,7 @@ struct StopListView: View {
             return
         }
         let pattern = fuse.createPattern(from: text.normalize())
-        let scoredStops = stopsListProvider.stops.map { stop -> Stop in
+        let scoredStops = stops.map { stop -> Stop in
             var newStop = stop
             let score = (stop.id < 0) ? -2 : fuse.search(pattern, in: stop.normalizedName)?.score
             newStop.score = score

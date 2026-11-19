@@ -184,9 +184,15 @@ class VirtualTableController: ObservableObject {
             guard let self = self, self.currentStop.id == stop.id else { return }
             self.connectionsProcessingQueue.async { [weak self] in
                 guard let self = self else { return }
-                // A failed refresh, as while ŽSR is down, leaves the board's own trains with IDS BK's delays.
-                self.internalTrains = (stop.id, trains ?? [])
-                self.trainsLoaded = true
+                // A failed refresh, as while ŽSR is down, leaves the board's own trains with IDS BK's delays. A station
+                // with no board keeps its last trains, and isn't empty before they load.
+                if let trains {
+                    self.internalTrains = (stop.id, trains)
+                    self.trainsLoaded = true
+                } else if stop.hasBoard {
+                    self.internalTrains = (stop.id, [])
+                    self.trainsLoaded = true
+                }
                 self.sortAndPublishConnections()
             }
         }
@@ -238,7 +244,7 @@ class VirtualTableController: ObservableObject {
                 self.connections = connectionsForPublish
                 if self.socket.status == .connected {
                     self.socketStatus = .connected
-                    if currentLoadedStatus > 1 && trainsLoaded {
+                    if (currentLoadedStatus > 1 || !self.currentStop.hasBoard) && trainsLoaded {
                         self.connectionsEmpty = isEmpty
                     }
                 } else {

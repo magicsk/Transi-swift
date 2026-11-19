@@ -107,7 +107,7 @@ struct TripPlannerView: View {
                 TripPlannerDatePicker($dateDialog)
             }
             .sheet(isPresented: $showStopList, onDismiss: showJourneyAfterSheets) {
-                StopListView(stop: self.$stop, isPresented: self.$showStopList)
+                StopListView(stop: self.$stop, isPresented: self.$showStopList, plannable: true)
             }
             .sheet(isPresented: $showScheduledTrips, onDismiss: showJourneyAfterSheets) {
                 ScheduledTripsSheet()

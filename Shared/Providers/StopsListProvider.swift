@@ -55,7 +55,8 @@ class StopsListProvider: ObservableObject {
     }
 
     func fetchStops() {
-        fetchMagicApi(endpoint: "/stops?v", type: StopsVersion.self) { stopsVersionResult in
+        // `trains` adds the railway stations outside IDS BK, which only this version can show.
+        fetchMagicApi(endpoint: "/stops?v&trains", type: StopsVersion.self) { stopsVersionResult in
             switch stopsVersionResult {
                 case .success(let stopsVersion):
                     #if DEBUG
@@ -69,7 +70,7 @@ class StopsListProvider: ObservableObject {
                         #if DEBUG
                         print("getting new stops json")
                         #endif
-                        fetchMagicApi(endpoint: "/stops", type: [Stop].self) { stopsResult in
+                        fetchMagicApi(endpoint: "/stops?trains", type: [Stop].self) { stopsResult in
                             switch stopsResult {
                                 case .success(let newStops):
                                     DispatchQueue.main.async {

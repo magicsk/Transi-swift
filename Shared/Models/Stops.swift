@@ -23,6 +23,10 @@ struct Stop: Codable, Identifiable, Hashable {
     var normalizedName: String {
         return self.name?.normalize() ?? ""
     }
+    /// Railway stations outside IDS BK come only with their train departures: no city board, no IDS BK departures.
+    var hasBoard: Bool {
+        type != "train" || stationId != nil
+    }
 
     static let example = Stop(id: 94, stationId: 1386, name: "Hronská", platformLabels: [PlatformLabel(id: "240", label: "A"), PlatformLabel(id: "241", label: "B")])
     static let empty = Stop(id: 0)

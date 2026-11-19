@@ -278,7 +278,8 @@ final class TripLiveActivityController: ObservableObject {
             from = stops.stop(stationId: change.endStationId, name: change.endStopName, platform: change.endStopCode)
         } else if let fix {
             // Measured from the fix: the list is sorted by the location only some time after it updates.
-            from = stops.filter { $0.id > 0 }
+            // Only a stop the planner can route from: not a railway station outside IDS BK.
+            from = stops.filter { $0.id > 0 && $0.stationId != nil }
                 .compactMap { stop in stop.gps.map { (stop: stop, meters: fix.gps.distance(to: $0)) } }
                 .min { $0.meters < $1.meters }?.stop
         } else {

@@ -26,15 +26,18 @@ struct MapBottomSheetView: View {
                     HStack(alignment: .center) {
                         Text(virtualTableController.currentStop.name ?? "Loading...").font(.system(size: 32.0, weight: .bold))
                         Spacer()
-                        Button(action: {
-                            changeTab(0)
-                            dismiss()
-                            GlobalController.tripPlanner.fetchTripToActualStop()
-                        }) {
-                            Image(systemName: "arrow.triangle.turn.up.right.circle.fill")
-                                .font(.system(size: 32))
-                                .foregroundStyle(Color.secondaryLabel, Color.tertiarySystemBackground)
-                                .cornerRadius(1000)
+                        // The trip planner can't route to railway stations outside IDS BK.
+                        if virtualTableController.currentStop.stationId != nil {
+                            Button(action: {
+                                changeTab(0)
+                                dismiss()
+                                GlobalController.tripPlanner.fetchTripToActualStop()
+                            }) {
+                                Image(systemName: "arrow.triangle.turn.up.right.circle.fill")
+                                    .font(.system(size: 32))
+                                    .foregroundStyle(Color.secondaryLabel, Color.tertiarySystemBackground)
+                                    .cornerRadius(1000)
+                            }
                         }
                         Button(action: {
                             dismiss()

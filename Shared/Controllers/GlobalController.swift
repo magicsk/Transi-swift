@@ -248,8 +248,17 @@ struct GlobalController {
         return stopsListProvider.stops.first(where: { $0.id > 0 })?.id ?? 20
     }
 
+    /// The trip planner routes between IDS BK stations; railway stations elsewhere in the country have none.
+    private static var nearestPlannableStop: Stop? {
+        stopsListProvider.stops.first(where: { $0.id > 0 && $0.stationId != nil })
+    }
+
+    static func getNearestPlannableStopId() -> Int {
+        return nearestPlannableStop?.id ?? 20
+    }
+
     static func getNearestStationId() -> Int {
-        return stopsListProvider.stops.first(where: { $0.id > 0 })?.stationId ?? 0
+        return nearestPlannableStop?.stationId ?? 0
     }
 
     static func getStopById(_ id: Int) -> Stop? {
