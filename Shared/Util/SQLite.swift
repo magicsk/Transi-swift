@@ -39,12 +39,35 @@ class SQLiteDatabase {
     }
 
     func query(_ sql: String, params: [Any] = []) -> [[String: Any]] {
+        var results = [[String: Any]]()
+        forEachRow(sql, params: params) { row in
+            var values = [String: Any]()
+            for col in 0 ..< row.columnCount {
+                let name = String(cString: sqlite3_column_name(row.stmt, col))
+                switch sqlite3_column_type(row.stmt, col) {
+                case SQLITE_INTEGER:
+                    values[name] = row.int(col)
+                case SQLITE_FLOAT:
+                    values[name] = row.double(col)
+                case SQLITE_TEXT:
+                    values[name] = row.string(col)
+                default:
+                    values[name] = nil as Any?
+                }
+            }
+            results.append(values)
+        }
+        return results
+    }
+
+    /// Steps through the result rows without building dictionaries; read columns by index with the typed getters.
+    func forEachRow(_ sql: String, params: [Any] = [], _ body: (SQLiteRow) -> Void) {
         var stmt: OpaquePointer?
         let status = sqlite3_prepare_v2(db, sql, -1, &stmt, nil)
         if status != SQLITE_OK {
             let errmsg = String(cString: sqlite3_errmsg(db))
             print("SQLite Prepare Error: \(errmsg) for SQL: \(sql)")
-            return []
+            return
         }
         defer { sqlite3_finalize(stmt) }
 
@@ -64,26 +87,11 @@ class SQLiteDatabase {
             }
         }
 
-        var results = [[String: Any]]()
-        let colCount = sqlite3_column_count(stmt)
+        guard let stmt else { return }
+        let row = SQLiteRow(stmt: stmt, columnCount: sqlite3_column_count(stmt))
         while sqlite3_step(stmt) == SQLITE_ROW {
-            var row = [String: Any]()
-            for col in 0 ..< colCount {
-                let name = String(cString: sqlite3_column_name(stmt, col))
-                switch sqlite3_column_type(stmt, col) {
-                case SQLITE_INTEGER:
-                    row[name] = Int(sqlite3_column_int64(stmt, col))
-                case SQLITE_FLOAT:
-                    row[name] = sqlite3_column_double(stmt, col)
-                case SQLITE_TEXT:
-                    row[name] = String(cString: sqlite3_column_text(stmt, col))
-                default:
-                    row[name] = nil as Any?
-                }
-            }
-            results.append(row)
+            body(row)
         }
-        return results
     }
 
     private static func fingerprint(for path: String) -> SQLiteDatabaseFingerprint {
@@ -91,5 +99,24 @@ class SQLiteDatabase {
         let size = (attributes?[.size] as? NSNumber)?.uint64Value ?? 0
         let modificationTime = (attributes?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
         return SQLiteDatabaseFingerprint(path: path, size: size, modificationTime: modificationTime)
+    }
+}
+
+/// The current row of `SQLiteDatabase.forEachRow`; only valid inside the callback.
+struct SQLiteRow {
+    fileprivate let stmt: OpaquePointer
+    let columnCount: Int32
+
+    func int(_ column: Int32) -> Int {
+        Int(sqlite3_column_int64(stmt, column))
+    }
+
+    func double(_ column: Int32) -> Double {
+        sqlite3_column_double(stmt, column)
+    }
+
+    /// Nil for NULL.
+    func string(_ column: Int32) -> String? {
+        sqlite3_column_text(stmt, column).map { String(cString: $0) }
     }
 }

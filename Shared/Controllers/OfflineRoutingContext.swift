@@ -1,15 +1,17 @@
 import Foundation
 
+/// One service day's timetable, indexed for `OfflineTimetableRouter`. Stops and trips are
+/// referred to by their index in `stops` and `trips`.
 struct OfflineRoutingContext {
-    let serviceDate: Date
     let dayStart: Date
-    let stopsById: [String: OfflineStop]
-    let zonesByStopId: [String: String]
-    let tripsByKey: [String: OfflineTrip]
-    let stopTimesByStopId: [String: [OfflineStopTime]]
-    let reverseStopTimesByStopId: [String: [OfflineStopTime]]
-    let walkLinksByStopId: [String: [OfflineWalkLink]]
-    let activeServiceIdsByFeed: [String: Set<String>]
+    let stops: [OfflineStop]
+    let stopIndexById: [String: Int32]
+    let trips: [OfflineTrip]
+    let routes: [OfflineRoute]
+    /// The routes serving each stop, with the stop's position on the route.
+    let routesAtStop: [[OfflineRouteStop]]
+    /// Stops within the walk limit of each stop, nearest first.
+    let footpaths: [[OfflineFootpath]]
 
     static func build(scheduleDb: SQLiteDatabase, baseDb: SQLiteDatabase, date: Date, maxWalkDuration: Int) -> OfflineRoutingContext {
         let calendar = bratislavaCalendar()
@@ -17,60 +19,60 @@ struct OfflineRoutingContext {
         let dateString = gtfsDateString(for: dayStart)
         let dayColumn = dayOfWeekColumn(for: dayStart)
         let stops = loadStops(baseDb: baseDb)
+        var stopIndexById = [String: Int32](minimumCapacity: stops.count)
+        for (index, stop) in stops.enumerated() {
+            stopIndexById[stop.id] = Int32(index)
+        }
         let active = activeServiceIdsByFeed(scheduleDb: scheduleDb, date: dateString, dayColumn: dayColumn)
-        let trips = loadTrips(scheduleDb: scheduleDb, activeServiceIdsByFeed: active)
-        let sortedStops = stops.values.sorted(by: stopSort)
-        let walkLinks = buildWalkLinks(stops: sortedStops, maxWalkDuration: maxWalkDuration)
-        var stopTimesByStop = [String: [OfflineStopTime]]()
-        for trip in trips.values {
-            for stopTime in trip.stopTimes {
-                stopTimesByStop[stopTime.stopId, default: []].append(stopTime)
+        let (trips, routes) = loadRoutes(scheduleDb: scheduleDb, activeServiceIdsByFeed: active, stopIndexById: stopIndexById)
+        var routesAtStop = Array(repeating: [OfflineRouteStop](), count: stops.count)
+        for (routeIndex, route) in routes.enumerated() {
+            for (position, stop) in route.stops.enumerated() {
+                routesAtStop[Int(stop)].append(OfflineRouteStop(route: Int32(routeIndex), position: Int32(position)))
             }
         }
-        for stopId in stopTimesByStop.keys {
-            stopTimesByStop[stopId]?.sort(by: stopTimeSort)
-        }
-        var reverseStopTimesByStop = stopTimesByStop
-        for stopId in reverseStopTimesByStop.keys {
-            reverseStopTimesByStop[stopId]?.sort(by: reverseStopTimeSort)
-        }
         return OfflineRoutingContext(
-            serviceDate: dayStart,
             dayStart: dayStart,
-            stopsById: stops,
-            zonesByStopId: Dictionary(uniqueKeysWithValues: stops.compactMap { key, stop in stop.zone.map { (key, $0) } }),
-            tripsByKey: trips,
-            stopTimesByStopId: stopTimesByStop,
-            reverseStopTimesByStopId: reverseStopTimesByStop,
-            walkLinksByStopId: walkLinks,
-            activeServiceIdsByFeed: active
+            stops: stops,
+            stopIndexById: stopIndexById,
+            trips: trips,
+            routes: routes,
+            routesAtStop: routesAtStop,
+            footpaths: buildFootpaths(stops: stops, maxWalkDuration: maxWalkDuration)
         )
     }
 
-    private static func loadStops(baseDb: SQLiteDatabase) -> [String: OfflineStop] {
-        let rows = baseDb.query("SELECT stop_id, feed, stop_name, stop_lat, stop_lon, platform_code, zone_id FROM stops")
-        var stops = [String: OfflineStop]()
-        for row in rows {
-            guard let id = row["stop_id"] as? String,
-                  let feed = row["feed"] as? String,
-                  let name = row["stop_name"] as? String,
-                  let lat = row["stop_lat"] as? Double,
-                  let lon = row["stop_lon"] as? Double else { continue }
-            stops[id] = OfflineStop(
+    /// The `stop_times` arrival expression. Databases built before arrival times were kept have
+    /// no such column; arrival equals departure there, as it does where the column is NULL.
+    static func arrivalTimeColumn(scheduleDb: SQLiteDatabase) -> String {
+        let hasArrivalTimes = scheduleDb.query("PRAGMA table_info(stop_times)").contains { $0["name"] as? String == "arrival_time" }
+        return hasArrivalTimes ? "COALESCE(st.arrival_time, st.departure_time)" : "st.departure_time"
+    }
+
+    private static func loadStops(baseDb: SQLiteDatabase) -> [OfflineStop] {
+        var stops = [OfflineStop]()
+        baseDb.forEachRow("SELECT stop_id, feed, stop_name, stop_lat, stop_lon, platform_code, zone_id FROM stops ORDER BY stop_id, feed") { row in
+            guard let id = row.string(0), let feed = row.string(1), let name = row.string(2) else { return }
+            stops.append(OfflineStop(
                 id: id,
                 feed: feed,
                 name: name,
-                normalizedName: normalizeStopName(name),
-                lat: lat,
-                lon: lon,
-                platform: row["platform_code"] as? String,
-                zone: row["zone_id"] as? String
-            )
+                lat: row.double(3),
+                lon: row.double(4),
+                platform: row.string(5),
+                zone: row.string(6)
+            ))
         }
         return stops
     }
 
-    private static func loadTrips(scheduleDb: SQLiteDatabase, activeServiceIdsByFeed: [String: Set<String>]) -> [String: OfflineTrip] {
+    /// The day's trips, and the routes they form: trips with the same stop sequence, split so
+    /// that none overtakes an earlier one.
+    private static func loadRoutes(
+        scheduleDb: SQLiteDatabase,
+        activeServiceIdsByFeed: [String: Set<String>],
+        stopIndexById: [String: Int32]
+    ) -> (trips: [OfflineTrip], routes: [OfflineRoute]) {
         var clauses = [String]()
         var params = [Any]()
         for feed in ["city", "regional", "trains"] {
@@ -80,41 +82,91 @@ struct OfflineRoutingContext {
             params.append(feed)
             params.append(contentsOf: sortedIds)
         }
-        guard !clauses.isEmpty else { return [:] }
-        let rows = scheduleDb.query("""
-            SELECT st.trip_id, st.feed, st.stop_sequence, st.stop_id, st.departure_time,
-                   t.service_id, t.trip_headsign, r.route_short_name, r.route_type
+        guard !clauses.isEmpty else { return ([], []) }
+
+        // An ORDER BY would sort every row in a temporary B-tree. Rows normally arrive grouped by
+        // trip and in stop order (the stop_times primary key), so group them here and sort only a
+        // trip that is not.
+        var trips = [OfflineTrip]()
+        var stopTimes = [[(sequence: Int, stop: Int32, departure: Int32, arrival: Int32)]]()
+        var tripIndexByKey = [String: Int]()
+        var currentFeed = ""
+        var currentTripId = ""
+        var current = -1
+        scheduleDb.forEachRow("""
+            SELECT st.feed, st.trip_id, st.stop_id, st.departure_time, \(arrivalTimeColumn(scheduleDb: scheduleDb)),
+                   st.stop_sequence, t.trip_headsign, r.route_short_name, r.route_type
             FROM stop_times st
             JOIN trips t ON st.trip_id = t.trip_id AND st.feed = t.feed
             JOIN base.routes r ON t.route_id = r.route_id AND t.feed = r.feed
             WHERE \(clauses.joined(separator: " OR "))
-            ORDER BY st.feed, st.trip_id, st.stop_sequence
-        """, params: params)
-
-        var grouped = [String: (id: String, feed: String, service: String, headsign: String, route: String, type: Int, stopTimes: [OfflineStopTime])]()
-        for row in rows {
-            guard let tripId = row["trip_id"] as? String,
-                  let feed = row["feed"] as? String,
-                  let seq = row["stop_sequence"] as? Int,
-                  let stopId = row["stop_id"] as? String,
-                  let dep = row["departure_time"] as? Int,
-                  let service = row["service_id"] as? String,
-                  let headsign = row["trip_headsign"] as? String,
-                  let route = row["route_short_name"] as? String,
-                  let type = row["route_type"] as? Int else { continue }
-            let key = "\(feed):\(tripId)"
-            let st = OfflineStopTime(tripKey: key, stopId: stopId, sequence: seq, arrival: dep, departure: dep)
-            if grouped[key] == nil {
-                grouped[key] = (tripId, feed, service, headsign, route, type, [])
+        """, params: params) { row in
+            guard let feed = row.string(0),
+                  let tripId = row.string(1),
+                  let stop = row.string(2).flatMap({ stopIndexById[$0] }),
+                  let headsign = row.string(6),
+                  let routeShortName = row.string(7) else { return }
+            if feed != currentFeed || tripId != currentTripId {
+                currentFeed = feed
+                currentTripId = tripId
+                let key = "\(feed):\(tripId)"
+                if let index = tripIndexByKey[key] {
+                    current = index
+                } else {
+                    current = trips.count
+                    tripIndexByKey[key] = current
+                    trips.append(OfflineTrip(key: key, routeShortName: routeShortName, routeType: row.int(8), headsign: headsign))
+                    stopTimes.append([])
+                }
             }
-            grouped[key]?.stopTimes.append(st)
+            stopTimes[current].append((row.int(5), stop, Int32(row.int(3)), Int32(row.int(4))))
         }
 
-        return Dictionary(uniqueKeysWithValues: grouped.map { key, value in
-            let sorted = value.stopTimes.sorted(by: tripStopTimeSort)
-            let boardingCapKey = "\(value.feed)|\(value.route)|\(value.headsign)"
-            return (key, OfflineTrip(key: key, id: value.id, feed: value.feed, routeShortName: value.route, boardingCapKey: boardingCapKey, routeType: value.type, headsign: value.headsign, serviceId: value.service, stopTimes: sorted))
-        })
+        // Group by stop sequence, in trip order so route indices do not depend on hashing.
+        var patternIndex = [[Int32]: Int]()
+        var patterns = [(stops: [Int32], trips: [Int])]()
+        var timetables = [(departures: [Int32], arrivals: [Int32])]()
+        for (trip, var times) in stopTimes.enumerated() {
+            if !zip(times, times.dropFirst()).allSatisfy({ $0.sequence < $1.sequence }) {
+                times.sort { $0.sequence < $1.sequence }
+            }
+            timetables.append((times.map(\.departure), times.map(\.arrival)))
+            guard times.count > 1 else { continue }
+            let stops = times.map(\.stop)
+            if let index = patternIndex[stops] {
+                patterns[index].trips.append(trip)
+            } else {
+                patternIndex[stops] = patterns.count
+                patterns.append((stops, [trip]))
+            }
+        }
+        var routes = [OfflineRoute]()
+        for pattern in patterns {
+            let sorted = pattern.trips.sorted { (timetables[$0].departures[0], $0) < (timetables[$1].departures[0], $1) }
+            var groups = [[Int]]()
+            for trip in sorted {
+                let times = timetables[trip]
+                let group = groups.firstIndex { group in
+                    let last = timetables[group[group.count - 1]]
+                    return zip(last.departures, times.departures).allSatisfy { $0 <= $1 }
+                        && zip(last.arrivals, times.arrivals).allSatisfy { $0 <= $1 }
+                }
+                if let group {
+                    groups[group].append(trip)
+                } else {
+                    groups.append([trip])
+                }
+            }
+            for group in groups {
+                routes.append(OfflineRoute(
+                    stops: pattern.stops,
+                    trips: group.map { Int32($0) },
+                    departures: group.flatMap { timetables[$0].departures },
+                    arrivals: group.flatMap { timetables[$0].arrivals }
+                ))
+            }
+        }
+        return (trips, routes)
     }
 
     private static func activeServiceIdsByFeed(scheduleDb: SQLiteDatabase, date: String, dayColumn: String) -> [String: Set<String>] {
@@ -137,51 +189,41 @@ struct OfflineRoutingContext {
         return result
     }
 
-    private static func buildWalkLinks(stops: [OfflineStop], maxWalkDuration: Int) -> [String: [OfflineWalkLink]] {
-        guard maxWalkDuration > 0 else { return [:] }
+    private static func buildFootpaths(stops: [OfflineStop], maxWalkDuration: Int) -> [[OfflineFootpath]] {
+        var footpaths = Array(repeating: [OfflineFootpath](), count: stops.count)
+        guard maxWalkDuration > 0 else { return footpaths }
         let limit = maxWalkDuration * 60
         let maxMeters = Double(limit) * OfflineWalk.metersPerSecond
         let cellSize = maxMeters / 111_000.0
-        var buckets = [WalkGridKey: [IndexedStop]]()
+        var buckets = [WalkGridKey: [Int]]()
         for (index, stop) in stops.enumerated() {
-            buckets[gridKey(lat: stop.lat, lon: stop.lon, cellSize: cellSize), default: []].append(IndexedStop(index: index, stop: stop))
+            buckets[gridKey(lat: stop.lat, lon: stop.lon, cellSize: cellSize), default: []].append(index)
         }
 
-        var links = [String: [OfflineWalkLink]]()
-        for stop in stops {
+        for (index, stop) in stops.enumerated() {
             let latDelta = maxMeters / 111_000.0
             let lonDelta = maxMeters / max(1.0, 111_000.0 * cos(stop.lat * .pi / 180))
             let minLatCell = gridCoord(stop.lat - latDelta, cellSize: cellSize)
             let maxLatCell = gridCoord(stop.lat + latDelta, cellSize: cellSize)
             let minLonCell = gridCoord(stop.lon - lonDelta, cellSize: cellSize)
             let maxLonCell = gridCoord(stop.lon + lonDelta, cellSize: cellSize)
-            var candidates = [IndexedStop]()
             for latCell in minLatCell...maxLatCell {
                 for lonCell in minLonCell...maxLonCell {
-                    candidates.append(contentsOf: buckets[WalkGridKey(lat: latCell, lon: lonCell)] ?? [])
+                    for otherIndex in buckets[WalkGridKey(lat: latCell, lon: lonCell)] ?? [] {
+                        let other = stops[otherIndex]
+                        guard otherIndex != index,
+                              abs(other.lat - stop.lat) < latDelta,
+                              abs(other.lon - stop.lon) < lonDelta else { continue }
+                        let seconds = OfflineWalk.seconds(forMeters: haversineMeters(lat1: stop.lat, lon1: stop.lon, lat2: other.lat, lon2: other.lon))
+                        if seconds <= limit {
+                            footpaths[index].append(OfflineFootpath(stop: Int32(otherIndex), seconds: Int32(seconds)))
+                        }
+                    }
                 }
             }
-            candidates.sort { $0.index < $1.index }
-            for candidate in candidates {
-                let other = candidate.stop
-                guard other.id != stop.id,
-                      abs(other.lat - stop.lat) < latDelta,
-                      abs(other.lon - stop.lon) < lonDelta else { continue }
-                let seconds = OfflineWalk.seconds(forMeters: haversineMeters(lat1: stop.lat, lon1: stop.lon, lat2: other.lat, lon2: other.lon))
-                if seconds <= limit {
-                    links[stop.id, default: []].append(OfflineWalkLink(fromStopId: stop.id, toStopId: other.id, seconds: seconds))
-                }
-            }
+            footpaths[index].sort { ($0.seconds, $0.stop) < ($1.seconds, $1.stop) }
         }
-        for stopId in links.keys {
-            links[stopId]?.sort(by: walkLinkSort)
-        }
-        return links
-    }
-
-    private struct IndexedStop {
-        let index: Int
-        let stop: OfflineStop
+        return footpaths
     }
 
     private struct WalkGridKey: Hashable {
@@ -226,44 +268,6 @@ struct OfflineRoutingContext {
         formatter.timeZone = bratislavaTimeZone()
         formatter.dateFormat = "yyyyMMdd"
         return formatter.string(from: date)
-    }
-
-    private static func stopSort(_ lhs: OfflineStop, _ rhs: OfflineStop) -> Bool {
-        if lhs.id != rhs.id { return lhs.id < rhs.id }
-        return lhs.feed < rhs.feed
-    }
-
-    private static func stopTimeSort(_ lhs: OfflineStopTime, _ rhs: OfflineStopTime) -> Bool {
-        if lhs.departure != rhs.departure { return lhs.departure < rhs.departure }
-        if lhs.tripKey != rhs.tripKey { return lhs.tripKey < rhs.tripKey }
-        if lhs.sequence != rhs.sequence { return lhs.sequence < rhs.sequence }
-        return lhs.stopId < rhs.stopId
-    }
-
-    private static func reverseStopTimeSort(_ lhs: OfflineStopTime, _ rhs: OfflineStopTime) -> Bool {
-        if lhs.arrival != rhs.arrival { return lhs.arrival > rhs.arrival }
-        if lhs.tripKey != rhs.tripKey { return lhs.tripKey < rhs.tripKey }
-        if lhs.sequence != rhs.sequence { return lhs.sequence < rhs.sequence }
-        return lhs.stopId < rhs.stopId
-    }
-
-    private static func tripStopTimeSort(_ lhs: OfflineStopTime, _ rhs: OfflineStopTime) -> Bool {
-        if lhs.sequence != rhs.sequence { return lhs.sequence < rhs.sequence }
-        if lhs.departure != rhs.departure { return lhs.departure < rhs.departure }
-        return lhs.stopId < rhs.stopId
-    }
-
-    private static func walkLinkSort(_ lhs: OfflineWalkLink, _ rhs: OfflineWalkLink) -> Bool {
-        if lhs.seconds != rhs.seconds { return lhs.seconds < rhs.seconds }
-        return lhs.toStopId < rhs.toStopId
-    }
-
-    private static func normalizeStopName(_ name: String) -> String {
-        name.replacingOccurrences(of: "Bratislava, ", with: "")
-            .replacingOccurrences(of: "Rovinka, ", with: "")
-            .replacingOccurrences(of: "Dunajská Lužná, ", with: "")
-            .replacingOccurrences(of: "Miloslavov, ", with: "")
-            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "sk_SK"))
     }
 
     private static func haversineMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double) -> Double {

@@ -21,7 +21,6 @@ struct OfflineStop: Hashable {
     let id: String
     let feed: String
     let name: String
-    let normalizedName: String
     let lat: Double
     let lon: Double
     let platform: String?
@@ -30,48 +29,47 @@ struct OfflineStop: Hashable {
     var gps: StopGps { StopGps(lon: lon, lat: lat) }
 }
 
-struct OfflineStopTime {
-    let tripKey: String
-    let stopId: String
-    let sequence: Int
-    let arrival: Int
-    let departure: Int
-}
-
 struct OfflineTrip {
+    /// "feed:trip_id"
     let key: String
-    let id: String
-    let feed: String
     let routeShortName: String
-    let boardingCapKey: String
     let routeType: Int
     let headsign: String
-    let serviceId: String
-    let stopTimes: [OfflineStopTime]
 }
 
-struct OfflineWalkLink: Hashable {
-    let fromStopId: String
-    let toStopId: String
-    let seconds: Int
+/// Trips that serve the same stop sequence, earliest first, none overtaking another,
+/// so a route scan can board the first catchable trip and ride it to every later stop.
+struct OfflineRoute {
+    /// Stop indices in visiting order.
+    let stops: [Int32]
+    /// Trip indices, earliest first.
+    let trips: [Int32]
+    /// Service-day seconds, one row of `stops.count` per trip.
+    let departures: [Int32]
+    let arrivals: [Int32]
 }
 
-struct OfflineRoutingLabel: Hashable {
-    let stopId: String
-    let time: Int
-    let transfers: Int
-    let walkSeconds: Int
-    let previousIndex: Int?
-    let tripKey: String?
-    let boardStopId: String?
-    let alightStopId: String?
-    let boardTime: Int?
-    let alightTime: Int?
-    let walkLink: OfflineWalkLink?
+struct OfflineRouteStop {
+    let route: Int32
+    let position: Int32
+}
+
+struct OfflineFootpath {
+    let stop: Int32
+    let seconds: Int32
+}
+
+/// One ride of a journey; times are service-day seconds.
+struct OfflineRide: Hashable {
+    let tripKey: String
+    let boardStopId: String
+    let alightStopId: String
+    let boardTime: Int
+    let alightTime: Int
 }
 
 struct OfflineJourneyCandidate {
-    let labels: [OfflineRoutingLabel]
+    let rides: [OfflineRide]
     let parts: [Part]
     let zones: Set<String>
     let arrivalSeconds: Int

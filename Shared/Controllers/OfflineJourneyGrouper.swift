@@ -15,7 +15,7 @@ final class OfflineJourneyGrouper {
         .sorted { rank($0.representative, $1.representative) }
     }
 
-    private static let maxTransferWaitSeconds = 60 * 60
+    private static let maxTransferWaitSeconds = 2 * 60 * 60
 
     private func prune(_ candidates: [OfflineJourneyCandidate]) -> [OfflineJourneyCandidate] {
         let withoutLoops = candidates.filter {
@@ -24,7 +24,7 @@ final class OfflineJourneyGrouper {
         let source = withoutLoops.isEmpty ? candidates : withoutLoops
         let nonDominated = source.filter { candidate in
             !source.contains { other in
-                other.labels != candidate.labels && dominates(other, candidate)
+                other.rides != candidate.rides && dominates(other, candidate)
             }
         }
         let useful = nonDominated.isEmpty ? source : nonDominated
@@ -87,22 +87,17 @@ final class OfflineJourneyGrouper {
     }
 
     private func dominates(_ lhs: OfflineJourneyCandidate, _ rhs: OfflineJourneyCandidate) -> Bool {
-        // Walk differences under two minutes should not keep an otherwise
-        // worse journey alive (e.g. an extra transfer to save a few seconds
-        // of platform walking), so compare walks in coarse buckets.
-        let lhsWalk = lhs.walkSeconds / 120
-        let rhsWalk = rhs.walkSeconds / 120
         guard endpointKey(lhs) == endpointKey(rhs),
               lhs.departureSeconds >= rhs.departureSeconds,
               lhs.arrivalSeconds <= rhs.arrivalSeconds,
-              lhs.transferCount <= rhs.transferCount,
-              lhsWalk <= rhsWalk else {
+              lhs.transferCount <= rhs.transferCount else {
             return false
         }
+        // Walking only breaks ties: a journey an hour slower must not survive to save a few minutes of walking.
         return lhs.departureSeconds > rhs.departureSeconds ||
             lhs.arrivalSeconds < rhs.arrivalSeconds ||
             lhs.transferCount < rhs.transferCount ||
-            lhsWalk < rhsWalk
+            lhs.walkSeconds < rhs.walkSeconds
     }
 
     private func endpointKey(_ candidate: OfflineJourneyCandidate) -> EndpointKey {

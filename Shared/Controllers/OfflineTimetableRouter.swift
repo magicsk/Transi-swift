@@ -1,861 +1,467 @@
 import Foundation
 
+/// Range RAPTOR (Delling, Pajor, Werneck: "Round-Based Public Transit Routing", 2012) over one
+/// service day. Every departure from the origin inside the requested range is searched, latest
+/// first, reusing the labels of the later departures, so each run only explores what leaving
+/// earlier improves. Round k holds the earliest arrival at each stop with at most k rides; the
+/// result is the Pareto set over later departure, earlier arrival and fewer rides.
 final class OfflineTimetableRouter {
-    private typealias FrontierEntry = (index: Int, label: OfflineRoutingLabel)
-
-    private let maxCandidatesPerStopPerRound = 4
-    private let maxReturnedCandidates = 60
-    private let maxBoardingsPerStopExpansion = 80
-    private let maxScannedStopTimesPerExpansion = 50
-    private let maxWalkOriginsPerExpansion = 16
-    private let maxWalkOriginsPerStopName = 2
-    private let maxBoardingsPerLineExpansion = 3
+    /// Minimum time to change vehicles at the same stop. Changes between stops walk at least a minute.
+    static let transferBufferSeconds: Int32 = 30
 
     private let context: OfflineRoutingContext
-    private let reverseWalkLinksByStopId: [String: [OfflineWalkLink]]
 
     init(context: OfflineRoutingContext) {
         self.context = context
-        self.reverseWalkLinksByStopId = Self.buildReverseWalkLinks(context.walkLinksByStopId)
     }
 
-    func routeDeparture(
-        originStopIds: Set<String>,
-        destinationStopIds: Set<String>,
-        departureSeconds: Int,
-        maxTransfers: Int,
-        finalDestinationStopIds: Set<String>? = nil,
-        terminalWalkLinksByStopId: [String: [OfflineWalkLink]] = [:]
+    /// Journeys from the stops named like the origin to those named like the destination that
+    /// leave inside `departures` and, when given, arrive by `latestArrival` (service-day seconds).
+    /// Stops within the context's walk limit of a named stop count as well, with the walk added.
+    /// A journey leaves as late as it can: its departure is the first boarding minus the walk to it.
+    func route(
+        originStopIds: [String],
+        destinationStopIds: [String],
+        departures: ClosedRange<Int>,
+        latestArrival: Int?,
+        maxTransfers: Int
     ) -> [OfflineJourneyCandidate] {
-        let terminalDestinationStopIds = finalDestinationStopIds ?? destinationStopIds
-        guard !originStopIds.isEmpty, !terminalDestinationStopIds.isEmpty else { return [] }
-
-        let transferLimit = max(0, maxTransfers)
-        var labels = [OfflineRoutingLabel]()
-        var bestByRound = Array(repeating: [String: [FrontierEntry]](), count: transferLimit + 2)
-        var frontier = [FrontierEntry]()
-
-        for stopId in originStopIds.sorted() {
-            let label = OfflineRoutingLabel(
-                stopId: stopId,
-                time: departureSeconds,
-                transfers: 0,
-                walkSeconds: 0,
-                previousIndex: nil,
-                tripKey: nil,
-                boardStopId: nil,
-                alightStopId: nil,
-                boardTime: nil,
-                alightTime: nil,
-                walkLink: nil
-            )
-            labels.append(label)
-            let index = labels.count - 1
-            let entry = (index: index, label: label)
-            bestByRound[0][stopId] = [entry]
-            frontier.append(entry)
-        }
-
+        let origins = endpoints(around: originStopIds)
+        let destinations = endpoints(around: destinationStopIds)
+        guard !origins.isEmpty, !destinations.isEmpty else { return [] }
+        let search = Search(
+            context: context,
+            origins: origins,
+            destinations: destinations,
+            rounds: max(0, maxTransfers) + 1,
+            latestArrival: latestArrival.map { Int32(clamping: $0) } ?? Search.unreached - 1
+        )
         var candidates = [OfflineJourneyCandidate]()
-        for round in 0...transferLimit {
-            let expanded = expandDeparture(
-                frontier: frontier,
-                round: round,
-                labels: &labels,
-                bestByRound: &bestByRound,
-                destinationStopIds: destinationStopIds,
-                finalDestinationStopIds: terminalDestinationStopIds,
-                terminalWalkLinksByStopId: terminalWalkLinksByStopId,
-                candidates: &candidates
-            )
-            frontier = expanded
-            if frontier.isEmpty { break }
-        }
-
-        trim(&candidates, by: departureSort)
-        return candidates.sorted(by: departureSort)
-    }
-
-    func routeArrival(
-        originStopIds: Set<String>,
-        destinationStopIds: Set<String>,
-        arrivalSeconds: Int,
-        maxTransfers: Int,
-        finalDestinationStopIds: Set<String>? = nil,
-        earliestArrivalSeconds: Int? = nil
-    ) -> [OfflineJourneyCandidate] {
-        let terminalDestinationStopIds = finalDestinationStopIds ?? destinationStopIds
-        guard !originStopIds.isEmpty, !destinationStopIds.isEmpty, !terminalDestinationStopIds.isEmpty else { return [] }
-
-        let transferLimit = max(0, maxTransfers)
-        var labels = [OfflineRoutingLabel]()
-        var bestByRound = Array(repeating: [String: [FrontierEntry]](), count: transferLimit + 2)
-        var frontier = [FrontierEntry]()
-
-        for stopId in terminalDestinationStopIds.sorted() {
-            let label = OfflineRoutingLabel(
-                stopId: stopId,
-                time: arrivalSeconds,
-                transfers: 0,
-                walkSeconds: 0,
-                previousIndex: nil,
-                tripKey: nil,
-                boardStopId: nil,
-                alightStopId: nil,
-                boardTime: nil,
-                alightTime: nil,
-                walkLink: nil
-            )
-            labels.append(label)
-            let index = labels.count - 1
-            let entry = (index: index, label: label)
-            bestByRound[0][stopId] = [entry]
-            frontier.append(entry)
-        }
-
-        var candidates = [OfflineJourneyCandidate]()
-        for round in 0...transferLimit {
-            let expanded = expandArrival(
-                frontier: frontier,
-                round: round,
-                labels: &labels,
-                bestByRound: &bestByRound,
-                originStopIds: originStopIds,
-                destinationStopIds: destinationStopIds,
-                earliestArrivalSeconds: earliestArrivalSeconds,
-                candidates: &candidates
-            )
-            frontier = expanded
-            if frontier.isEmpty { break }
-        }
-
-        trim(&candidates, by: arrivalSort)
-        return candidates.sorted(by: arrivalSort)
-    }
-
-    private static func buildReverseWalkLinks(_ walkLinksByStopId: [String: [OfflineWalkLink]]) -> [String: [OfflineWalkLink]] {
-        var result = [String: [OfflineWalkLink]]()
-        for links in walkLinksByStopId.values {
-            for link in links {
-                result[link.toStopId, default: []].append(link)
-            }
-        }
-        for stopId in result.keys {
-            result[stopId]?.sort(by: reverseWalkLinkSort)
-        }
-        return result
-    }
-
-    private static func reverseWalkLinkSort(_ lhs: OfflineWalkLink, _ rhs: OfflineWalkLink) -> Bool {
-        if lhs.seconds != rhs.seconds { return lhs.seconds < rhs.seconds }
-        return lhs.fromStopId < rhs.fromStopId
-    }
-
-    private func expandDeparture(
-        frontier: [FrontierEntry],
-        round: Int,
-        labels: inout [OfflineRoutingLabel],
-        bestByRound: inout [[String: [FrontierEntry]]],
-        destinationStopIds: Set<String>,
-        finalDestinationStopIds: Set<String>,
-        terminalWalkLinksByStopId: [String: [OfflineWalkLink]],
-        candidates: inout [OfflineJourneyCandidate]
-    ) -> [FrontierEntry] {
-        var next = [FrontierEntry]()
-        for entry in frontier {
-            let origins = walkingOrigins(from: entry.label)
-            for origin in origins {
-                var scannedStopTimes = 0
-                var boardings = 0
-                var boardingsByLine = [String: Int]()
-                for stopTime in departingStopTimes(from: origin.stopId, atOrAfter: origin.time) {
-                    if scannedStopTimes >= maxScannedStopTimesPerExpansion || boardings >= maxBoardingsPerStopExpansion {
-                        break
-                    }
-                    scannedStopTimes += 1
-                    if stopTime.tripKey == entry.label.tripKey {
-                        continue
-                    }
-                    guard let trip = context.tripsByKey[stopTime.tripKey],
-                          let boardIndex = stopTimeIndex(in: trip, matching: stopTime) else {
-                        continue
-                    }
-                    let capKey = trip.boardingCapKey
-                    let lineBoardings = boardingsByLine[capKey, default: 0]
-                    if lineBoardings >= maxBoardingsPerLineExpansion {
-                        continue
-                    }
-                    boardingsByLine[capKey] = lineBoardings + 1
-                    boardings += 1
-                    for alight in trip.stopTimes[(boardIndex + 1)...] {
-                        let newLabel = OfflineRoutingLabel(
-                            stopId: alight.stopId,
-                            time: alight.arrival,
-                            transfers: round,
-                            walkSeconds: origin.walkSeconds,
-                            previousIndex: entry.index,
-                            tripKey: trip.key,
-                            boardStopId: stopTime.stopId,
-                            alightStopId: alight.stopId,
-                            boardTime: stopTime.departure,
-                            alightTime: alight.arrival,
-                            walkLink: origin.walkLink
-                        )
-                        let nextRound = min(round + 1, bestByRound.count - 1)
-                        let newIndex = labels.count
-                        let newEntry = (index: newIndex, label: newLabel)
-                        if finalDestinationStopIds.contains(alight.stopId) {
-                            labels.append(newLabel)
-                            if let candidate = buildCandidate(terminal: newLabel, allLabels: labels) {
-                                appendDepartureCandidate(candidate, to: &candidates)
-                            }
-                            continue
-                        }
-                        if let terminalWalkLinks = terminalWalkLinksByStopId[alight.stopId] {
-                            labels.append(newLabel)
-                            for link in terminalWalkLinks {
-                                let terminalLabel = OfflineRoutingLabel(
-                                    stopId: link.toStopId,
-                                    time: alight.arrival + link.seconds,
-                                    transfers: round,
-                                    walkSeconds: newLabel.walkSeconds + link.seconds,
-                                    previousIndex: newIndex,
-                                    tripKey: nil,
-                                    boardStopId: nil,
-                                    alightStopId: nil,
-                                    boardTime: nil,
-                                    alightTime: nil,
-                                    walkLink: link
-                                )
-                                labels.append(terminalLabel)
-                                if let candidate = buildCandidate(terminal: terminalLabel, allLabels: labels) {
-                                    appendDepartureCandidate(candidate, to: &candidates)
-                                }
-                            }
-                            continue
-                        }
-                        if destinationStopIds.contains(alight.stopId) {
-                            continue
-                        }
-                        guard let removedEntries = admit(newEntry, into: &bestByRound, round: nextRound) else {
-                            continue
-                        }
-                        labels.append(newLabel)
-                        removeEntries(removedEntries, from: &next)
-                        removeCandidates(endingAt: removedEntries, from: &candidates)
-                        next.append(newEntry)
-                    }
+        for departure in departureTimes(from: origins, in: departures) {
+            // A journey that boards later than this run's departure leaves after the range: it is the next page's.
+            for legs in search.run(departure: departure) {
+                let candidate = makeCandidate(legs)
+                if candidate.departureSeconds <= departures.upperBound {
+                    candidates.append(candidate)
                 }
             }
         }
-        return next
+        return candidates
     }
 
-    private func expandArrival(
-        frontier: [FrontierEntry],
-        round: Int,
-        labels: inout [OfflineRoutingLabel],
-        bestByRound: inout [[String: [FrontierEntry]]],
-        originStopIds: Set<String>,
-        destinationStopIds: Set<String>,
-        earliestArrivalSeconds: Int?,
-        candidates: inout [OfflineJourneyCandidate]
-    ) -> [FrontierEntry] {
-        var next = [FrontierEntry]()
-        for entry in frontier {
-            let isInitialDestinationExpansion = entry.label.previousIndex == nil
-            let finalDestinationCandidates = isInitialDestinationExpansion ? destinationStopIds : nil
-            let destinations = reverseWalkingDestinations(
-                from: entry.label,
-                limitedTo: finalDestinationCandidates
-            )
-            let lowerArrivalBound = isInitialDestinationExpansion ? earliestArrivalSeconds : nil
-            for destination in destinations {
-                if originStopIds.contains(destination.stopId), let walkLink = destination.walkLink {
-                    let terminalLabel = OfflineRoutingLabel(
-                        stopId: destination.stopId,
-                        time: destination.time,
-                        transfers: round,
-                        walkSeconds: destination.walkSeconds,
-                        previousIndex: entry.index,
-                        tripKey: nil,
-                        boardStopId: nil,
-                        alightStopId: nil,
-                        boardTime: nil,
-                        alightTime: nil,
-                        walkLink: walkLink
-                    )
-                    labels.append(terminalLabel)
-                    if let candidate = buildReverseCandidate(terminal: terminalLabel, allLabels: labels) {
-                        appendArrivalCandidate(candidate, to: &candidates)
-                    }
-                    continue
-                }
-                var scannedStopTimes = 0
-                var boardings = 0
-                var boardingsByLine = [String: Int]()
-                for stopTime in arrivingStopTimes(to: destination.stopId, atOrBefore: destination.time) {
-                    if let lowerArrivalBound, stopTime.arrival < lowerArrivalBound {
-                        break
-                    }
-                    if scannedStopTimes >= maxScannedStopTimesPerExpansion || boardings >= maxBoardingsPerStopExpansion {
-                        break
-                    }
-                    scannedStopTimes += 1
-                    if stopTime.tripKey == entry.label.tripKey {
-                        continue
-                    }
-                    guard let trip = context.tripsByKey[stopTime.tripKey] else {
-                        continue
-                    }
-                    let capKey = trip.boardingCapKey
-                    let lineBoardings = boardingsByLine[capKey, default: 0]
-                    if lineBoardings >= maxBoardingsPerLineExpansion {
-                        continue
-                    }
-                    guard let alightIndex = stopTimeIndex(in: trip, matching: stopTime),
-                          alightIndex > trip.stopTimes.startIndex else {
-                        continue
-                    }
-                    boardingsByLine[capKey] = lineBoardings + 1
-                    boardings += 1
-                    for board in trip.stopTimes[..<alightIndex].reversed() {
-                        let newLabel = OfflineRoutingLabel(
-                            stopId: board.stopId,
-                            time: board.departure,
-                            transfers: round,
-                            walkSeconds: destination.walkSeconds,
-                            previousIndex: entry.index,
-                            tripKey: trip.key,
-                            boardStopId: board.stopId,
-                            alightStopId: stopTime.stopId,
-                            boardTime: board.departure,
-                            alightTime: stopTime.arrival,
-                            walkLink: destination.walkLink
-                        )
-                        let nextRound = min(round + 1, bestByRound.count - 1)
-                        let newIndex = labels.count
-                        let newEntry = (index: newIndex, label: newLabel)
-                        if originStopIds.contains(board.stopId) {
-                            labels.append(newLabel)
-                            if let candidate = buildReverseCandidate(terminal: newLabel, allLabels: labels) {
-                                appendArrivalCandidate(candidate, to: &candidates)
-                            }
-                            continue
-                        }
-                        guard let removedEntries = admitReverse(newEntry, into: &bestByRound, round: nextRound) else {
-                            continue
-                        }
-                        labels.append(newLabel)
-                        removeEntries(removedEntries, from: &next)
-                        removeReverseCandidates(startingAt: removedEntries, from: &candidates)
-                        next.append(newEntry)
-                    }
+    /// The named stops (no walk) and every stop within walking distance of one, with its shortest walk.
+    private func endpoints(around stopIds: [String]) -> [Endpoint] {
+        let named = stopIds.compactMap { context.stopIndexById[$0] }.sorted()
+        var byStop = [Int32: Endpoint]()
+        for stop in named {
+            byStop[stop] = Endpoint(stop: stop, walk: 0, anchor: stop)
+        }
+        for anchor in named {
+            for footpath in context.footpaths[Int(anchor)] where footpath.seconds < byStop[footpath.stop]?.walk ?? .max {
+                byStop[footpath.stop] = Endpoint(stop: footpath.stop, walk: footpath.seconds, anchor: anchor)
+            }
+        }
+        return byStop.values.sorted { $0.stop < $1.stop }
+    }
+
+    /// Every time a rider can leave to board some trip at an origin, inside the range, latest first.
+    private func departureTimes(from origins: [Endpoint], in range: ClosedRange<Int>) -> [Int32] {
+        var times = Set<Int32>()
+        for origin in origins {
+            let earliest = Int32(clamping: range.lowerBound) + origin.walk
+            let latest = Int32(clamping: range.upperBound) + origin.walk
+            for routeStop in context.routesAtStop[Int(origin.stop)] {
+                let route = context.routes[Int(routeStop.route)]
+                let stopCount = route.stops.count
+                let position = Int(routeStop.position)
+                guard position < stopCount - 1 else { continue }
+                var row = firstTrip(in: route, at: position, departingAtOrAfter: earliest, before: route.trips.count)
+                while row < route.trips.count, route.departures[row * stopCount + position] <= latest {
+                    times.insert(route.departures[row * stopCount + position] - origin.walk)
+                    row += 1
                 }
             }
         }
-        return next
+        return times.sorted(by: >)
     }
 
-    private func appendDepartureCandidate(_ candidate: OfflineJourneyCandidate, to candidates: inout [OfflineJourneyCandidate]) {
-        candidates.append(candidate)
-        if candidates.count > maxReturnedCandidates * 2 {
-            trim(&candidates, by: departureSort)
-        }
-    }
-
-    private func appendArrivalCandidate(_ candidate: OfflineJourneyCandidate, to candidates: inout [OfflineJourneyCandidate]) {
-        candidates.append(candidate)
-        if candidates.count > maxReturnedCandidates * 2 {
-            trim(&candidates, by: arrivalSort)
-        }
-    }
-
-    private func trim(
-        _ candidates: inout [OfflineJourneyCandidate],
-        by areInIncreasingOrder: (OfflineJourneyCandidate, OfflineJourneyCandidate) -> Bool
-    ) {
-        guard candidates.count > maxReturnedCandidates else { return }
-        // Cutting purely by the sort order would keep only the dense cluster
-        // of earliest-arriving permutations and starve the result of later
-        // departures and slower-but-simpler journeys, so shed dominated
-        // candidates first.
-        let nonDominated = candidates.filter { candidate in
-            !candidates.contains { other in
-                other.labels != candidate.labels && candidateDominates(other, candidate)
-            }
-        }
-        if !nonDominated.isEmpty {
-            candidates = nonDominated
-        }
-        guard candidates.count > maxReturnedCandidates else { return }
-        candidates.sort(by: areInIncreasingOrder)
-        candidates.removeSubrange(maxReturnedCandidates...)
-    }
-
-    private func candidateDominates(_ lhs: OfflineJourneyCandidate, _ rhs: OfflineJourneyCandidate) -> Bool {
-        guard lhs.departureSeconds >= rhs.departureSeconds,
-              lhs.arrivalSeconds <= rhs.arrivalSeconds,
-              lhs.transferCount <= rhs.transferCount,
-              lhs.walkSeconds <= rhs.walkSeconds else {
-            return false
-        }
-        return lhs.departureSeconds > rhs.departureSeconds ||
-            lhs.arrivalSeconds < rhs.arrivalSeconds ||
-            lhs.transferCount < rhs.transferCount ||
-            lhs.walkSeconds < rhs.walkSeconds
-    }
-
-    private func departingStopTimes(from stopId: String, atOrAfter time: Int) -> ArraySlice<OfflineStopTime> {
-        guard let stopTimes = context.stopTimesByStopId[stopId], !stopTimes.isEmpty else {
-            return ArraySlice<OfflineStopTime>()
-        }
-        var low = stopTimes.startIndex
-        var high = stopTimes.endIndex
-        while low < high {
-            let mid = low + (high - low) / 2
-            if stopTimes[mid].departure < time {
-                low = mid + 1
-            } else {
-                high = mid
-            }
-        }
-        return stopTimes[low...]
-    }
-
-    private func arrivingStopTimes(to stopId: String, atOrBefore time: Int) -> ArraySlice<OfflineStopTime> {
-        guard let stopTimes = context.reverseStopTimesByStopId[stopId], !stopTimes.isEmpty else {
-            return ArraySlice<OfflineStopTime>()
-        }
-        var low = stopTimes.startIndex
-        var high = stopTimes.endIndex
-        while low < high {
-            let mid = low + (high - low) / 2
-            if stopTimes[mid].arrival > time {
-                low = mid + 1
-            } else {
-                high = mid
-            }
-        }
-        guard low < stopTimes.endIndex else {
-            return ArraySlice<OfflineStopTime>()
-        }
-        return stopTimes[low...]
-    }
-
-    private func stopTimeIndex(in trip: OfflineTrip, matching stopTime: OfflineStopTime) -> Int? {
-        var low = trip.stopTimes.startIndex
-        var high = trip.stopTimes.endIndex
-        while low < high {
-            let mid = low + (high - low) / 2
-            if trip.stopTimes[mid].sequence < stopTime.sequence {
-                low = mid + 1
-            } else {
-                high = mid
-            }
-        }
-        guard low < trip.stopTimes.endIndex,
-              trip.stopTimes[low].sequence == stopTime.sequence,
-              trip.stopTimes[low].stopId == stopTime.stopId else {
-            return nil
-        }
-        return low
-    }
-
-    private struct WalkOrigin {
-        let stopId: String
-        let time: Int
-        let walkSeconds: Int
-        let walkLink: OfflineWalkLink?
-    }
-
-    private func walkingOrigins(from label: OfflineRoutingLabel) -> [WalkOrigin] {
-        var result = [
-            WalkOrigin(
-                stopId: label.stopId,
-                time: label.time,
-                walkSeconds: label.walkSeconds,
-                walkLink: nil
-            )
-        ]
-        for link in diverseWalkLinks(context.walkLinksByStopId[label.stopId] ?? [], stopIdFor: { $0.toStopId }) {
-            result.append(WalkOrigin(
-                stopId: link.toStopId,
-                time: label.time + link.seconds,
-                walkSeconds: label.walkSeconds + link.seconds,
-                walkLink: link
-            ))
-        }
-        return result
-    }
-
-    /// Walk links are sorted nearest-first, so a flat prefix gets exhausted by
-    /// the sibling platforms of large hubs before reaching any other stop.
-    /// Cap links per destination stop name so distinct stops stay reachable.
-    private func diverseWalkLinks(
-        _ links: [OfflineWalkLink],
-        stopIdFor: (OfflineWalkLink) -> String
-    ) -> [OfflineWalkLink] {
-        var result = [OfflineWalkLink]()
-        var linksPerName = [String: Int]()
-        for link in links {
-            if result.count >= maxWalkOriginsPerExpansion { break }
-            let stopId = stopIdFor(link)
-            let name = context.stopsById[stopId]?.name ?? stopId
-            let count = linksPerName[name, default: 0]
-            if count >= maxWalkOriginsPerStopName { continue }
-            linksPerName[name] = count + 1
-            result.append(link)
-        }
-        return result
-    }
-
-    private func reverseWalkingDestinations(
-        from label: OfflineRoutingLabel,
-        limitedTo allowedStopIds: Set<String>? = nil
-    ) -> [WalkOrigin] {
-        var result = [WalkOrigin]()
-        if allowedStopIds?.contains(label.stopId) != false {
-            result.append(WalkOrigin(
-                stopId: label.stopId,
-                time: label.time,
-                walkSeconds: label.walkSeconds,
-                walkLink: nil
-            ))
-        }
-        let links = diverseWalkLinks(
-            (reverseWalkLinksByStopId[label.stopId] ?? [])
-                .filter { allowedStopIds?.contains($0.fromStopId) != false },
-            stopIdFor: { $0.fromStopId }
-        )
-        for link in links {
-            result.append(WalkOrigin(
-                stopId: link.fromStopId,
-                time: label.time - link.seconds,
-                walkSeconds: label.walkSeconds + link.seconds,
-                walkLink: link
-            ))
-        }
-        return result
-    }
-
-    private func admit(
-        _ entry: FrontierEntry,
-        into bestByRound: inout [[String: [FrontierEntry]]],
-        round: Int
-    ) -> [FrontierEntry]? {
-        let stopId = entry.label.stopId
-        var entries = bestByRound[round][stopId] ?? []
-        if entries.contains(where: { dominates($0.label, entry.label) }) {
-            return nil
-        }
-        let previousEntries = entries
-        entries.removeAll { dominates(entry.label, $0.label) }
-        entries.append(entry)
-        entries.sort(by: frontierSort)
-        let keptEntries = Array(entries.prefix(maxCandidatesPerStopPerRound))
-        guard keptEntries.contains(where: { $0.index == entry.index }) else {
-            return nil
-        }
-        let keptIndices = Set(keptEntries.map { $0.index })
-        let removed = previousEntries.filter { !keptIndices.contains($0.index) }
-        bestByRound[round][stopId] = keptEntries
-        return removed
-    }
-
-    private func admitReverse(
-        _ entry: FrontierEntry,
-        into bestByRound: inout [[String: [FrontierEntry]]],
-        round: Int
-    ) -> [FrontierEntry]? {
-        let stopId = entry.label.stopId
-        var entries = bestByRound[round][stopId] ?? []
-        if entries.contains(where: { reverseDominates($0.label, entry.label) }) {
-            return nil
-        }
-        let previousEntries = entries
-        entries.removeAll { reverseDominates(entry.label, $0.label) }
-        entries.append(entry)
-        entries.sort(by: reverseFrontierSort)
-        let keptEntries = Array(entries.prefix(maxCandidatesPerStopPerRound))
-        guard keptEntries.contains(where: { $0.index == entry.index }) else {
-            return nil
-        }
-        let keptIndices = Set(keptEntries.map { $0.index })
-        let removed = previousEntries.filter { !keptIndices.contains($0.index) }
-        bestByRound[round][stopId] = keptEntries
-        return removed
-    }
-
-    private func removeEntries(_ removedEntries: [FrontierEntry], from frontier: inout [FrontierEntry]) {
-        guard !removedEntries.isEmpty else { return }
-        let removedIndices = Set(removedEntries.map { $0.index })
-        frontier.removeAll { removedIndices.contains($0.index) }
-    }
-
-    private func removeCandidates(endingAt removedEntries: [FrontierEntry], from candidates: inout [OfflineJourneyCandidate]) {
-        guard !removedEntries.isEmpty else { return }
-        let removedLabels = Set(removedEntries.map { $0.label })
-        candidates.removeAll { candidate in
-            guard let terminal = candidate.labels.last else { return false }
-            return removedLabels.contains(terminal)
-        }
-    }
-
-    private func removeReverseCandidates(startingAt removedEntries: [FrontierEntry], from candidates: inout [OfflineJourneyCandidate]) {
-        guard !removedEntries.isEmpty else { return }
-        let removedLabels = Set(removedEntries.map { $0.label })
-        candidates.removeAll { candidate in
-            candidate.labels.contains { removedLabels.contains($0) }
-        }
-    }
-
-    private func dominates(_ lhs: OfflineRoutingLabel, _ rhs: OfflineRoutingLabel) -> Bool {
-        lhs.time <= rhs.time &&
-            lhs.transfers <= rhs.transfers &&
-            lhs.walkSeconds <= rhs.walkSeconds
-    }
-
-    private func reverseDominates(_ lhs: OfflineRoutingLabel, _ rhs: OfflineRoutingLabel) -> Bool {
-        lhs.time >= rhs.time &&
-            lhs.transfers <= rhs.transfers &&
-            lhs.walkSeconds <= rhs.walkSeconds
-    }
-
-    private func buildCandidate(terminal: OfflineRoutingLabel, allLabels: [OfflineRoutingLabel]) -> OfflineJourneyCandidate? {
-        var chain = [OfflineRoutingLabel]()
-        var current: OfflineRoutingLabel? = terminal
-        while let label = current {
-            chain.append(label)
-            if let previous = label.previousIndex {
-                current = allLabels[previous]
-            } else {
-                current = nil
-            }
-        }
-        chain.reverse()
-        let parts = mapParts(labels: chain)
-        guard let first = parts.first, let last = parts.last else { return nil }
-        let transitPartCount = parts.filter { $0.routeType != 64 }.count
-        return OfflineJourneyCandidate(
-            labels: chain,
-            parts: parts,
-            zones: zones(for: chain),
-            arrivalSeconds: Int(last.endArrival.timeIntervalSince(context.dayStart)),
-            departureSeconds: Int(first.startDeparture.timeIntervalSince(context.dayStart)),
-            transferCount: max(0, transitPartCount - 1),
-            walkSeconds: chain.last?.walkSeconds ?? 0
-        )
-    }
-
-    private func buildReverseCandidate(terminal: OfflineRoutingLabel, allLabels: [OfflineRoutingLabel]) -> OfflineJourneyCandidate? {
-        var chain = [OfflineRoutingLabel]()
-        var current: OfflineRoutingLabel? = terminal
-        while let label = current {
-            chain.append(label)
-            if let previous = label.previousIndex {
-                current = allLabels[previous]
-            } else {
-                current = nil
-            }
-        }
-        let parts = mapReverseParts(labels: chain)
-        guard let first = parts.first, let last = parts.last else { return nil }
-        let transitPartCount = parts.filter { $0.routeType != 64 }.count
-        return OfflineJourneyCandidate(
-            labels: chain,
-            parts: parts,
-            zones: zones(for: chain),
-            arrivalSeconds: Int(last.endArrival.timeIntervalSince(context.dayStart)),
-            departureSeconds: Int(first.startDeparture.timeIntervalSince(context.dayStart)),
-            transferCount: max(0, transitPartCount - 1),
-            walkSeconds: chain.first?.walkSeconds ?? 0
-        )
-    }
-
-    private func mapParts(labels: [OfflineRoutingLabel]) -> [Part] {
+    private func makeCandidate(_ legs: [Leg]) -> OfflineJourneyCandidate {
         var parts = [Part]()
-        for (index, label) in labels.enumerated() {
-            if let link = label.walkLink,
-               index > 0,
-               let from = context.stopsById[link.fromStopId],
-               let to = context.stopsById[link.toStopId] {
-                let previous = labels[index - 1]
-                let walkArrival = previous.time + link.seconds
+        var rides = [OfflineRide]()
+        var zones = Set<String>()
+        var walkSeconds = 0
+        for leg in legs {
+            switch leg {
+            case let .walk(from, to, start, end):
+                let fromStop = context.stops[Int(from)]
+                let toStop = context.stops[Int(to)]
                 parts.append(Part(
-                    startStopName: from.name,
-                    endStopName: to.name,
-                    startStopCode: from.platform,
-                    endStopCode: to.platform,
-                    startDeparture: context.dayStart.addingTimeInterval(TimeInterval(previous.time)),
-                    endArrival: context.dayStart.addingTimeInterval(TimeInterval(walkArrival)),
+                    startStopName: fromStop.name,
+                    endStopName: toStop.name,
+                    startStopCode: fromStop.platform,
+                    endStopCode: toStop.platform,
+                    startDeparture: date(start),
+                    endArrival: date(end),
                     routeType: 64,
                     tripHeadsign: "Walk",
                     routeShortName: nil,
-                    startStopGps: from.gps,
-                    endStopGps: to.gps
+                    startStopGps: fromStop.gps,
+                    endStopGps: toStop.gps
                 ))
-            }
-            guard let tripKey = label.tripKey,
-                  let trip = context.tripsByKey[tripKey],
-                  let board = label.boardStopId.flatMap({ context.stopsById[$0] }),
-                  let alight = label.alightStopId.flatMap({ context.stopsById[$0] }),
-                  let boardTime = label.boardTime,
-                  let alightTime = label.alightTime else {
-                continue
-            }
-            parts.append(Part(
-                startStopName: board.name,
-                endStopName: alight.name,
-                startStopCode: board.platform,
-                endStopCode: alight.platform,
-                startDeparture: context.dayStart.addingTimeInterval(TimeInterval(boardTime)),
-                endArrival: context.dayStart.addingTimeInterval(TimeInterval(alightTime)),
-                routeType: trip.routeType,
-                tripHeadsign: trip.headsign,
-                routeShortName: trip.routeShortName,
-                startStopGps: board.gps,
-                endStopGps: alight.gps
-            ))
-        }
-        return parts
-    }
-
-    private func mapReverseParts(labels: [OfflineRoutingLabel]) -> [Part] {
-        var parts = [Part]()
-        for label in labels {
-            if label.tripKey == nil {
-                if let link = label.walkLink,
-                   let from = context.stopsById[link.fromStopId],
-                   let to = context.stopsById[link.toStopId] {
-                    parts.append(Part(
-                        startStopName: from.name,
-                        endStopName: to.name,
-                        startStopCode: from.platform,
-                        endStopCode: to.platform,
-                        startDeparture: context.dayStart.addingTimeInterval(TimeInterval(label.time)),
-                        endArrival: context.dayStart.addingTimeInterval(TimeInterval(label.time + link.seconds)),
-                        routeType: 64,
-                        tripHeadsign: "Walk",
-                        routeShortName: nil,
-                        startStopGps: from.gps,
-                        endStopGps: to.gps
-                    ))
-                }
-                continue
-            }
-            guard let tripKey = label.tripKey,
-                  let trip = context.tripsByKey[tripKey],
-                  let board = label.boardStopId.flatMap({ context.stopsById[$0] }),
-                  let alight = label.alightStopId.flatMap({ context.stopsById[$0] }),
-                  let boardTime = label.boardTime,
-                  let alightTime = label.alightTime else {
-                continue
-            }
-            parts.append(Part(
-                startStopName: board.name,
-                endStopName: alight.name,
-                startStopCode: board.platform,
-                endStopCode: alight.platform,
-                startDeparture: context.dayStart.addingTimeInterval(TimeInterval(boardTime)),
-                endArrival: context.dayStart.addingTimeInterval(TimeInterval(alightTime)),
-                routeType: trip.routeType,
-                tripHeadsign: trip.headsign,
-                routeShortName: trip.routeShortName,
-                startStopGps: board.gps,
-                endStopGps: alight.gps
-            ))
-            if let link = label.walkLink,
-               let from = context.stopsById[link.fromStopId],
-               let to = context.stopsById[link.toStopId] {
+                walkSeconds += Int(end - start)
+                insertZone(of: from, into: &zones)
+                insertZone(of: to, into: &zones)
+            case let .ride(ride):
+                let route = context.routes[Int(ride.route)]
+                let trip = context.trips[Int(route.trips[Int(ride.trip)])]
+                let row = Int(ride.trip) * route.stops.count
+                let board = context.stops[Int(route.stops[Int(ride.board)])]
+                let alight = context.stops[Int(route.stops[Int(ride.alight)])]
+                let boardTime = route.departures[row + Int(ride.board)]
+                let alightTime = route.arrivals[row + Int(ride.alight)]
                 parts.append(Part(
-                    startStopName: from.name,
-                    endStopName: to.name,
-                    startStopCode: from.platform,
-                    endStopCode: to.platform,
-                    startDeparture: context.dayStart.addingTimeInterval(TimeInterval(alightTime)),
-                    endArrival: context.dayStart.addingTimeInterval(TimeInterval(alightTime + link.seconds)),
-                    routeType: 64,
-                    tripHeadsign: "Walk",
-                    routeShortName: nil,
-                    startStopGps: from.gps,
-                    endStopGps: to.gps
+                    startStopName: board.name,
+                    endStopName: alight.name,
+                    startStopCode: board.platform,
+                    endStopCode: alight.platform,
+                    startDeparture: date(boardTime),
+                    endArrival: date(alightTime),
+                    routeType: trip.routeType,
+                    tripHeadsign: trip.headsign,
+                    routeShortName: trip.routeShortName,
+                    startStopGps: board.gps,
+                    endStopGps: alight.gps
                 ))
+                rides.append(OfflineRide(
+                    tripKey: trip.key,
+                    boardStopId: board.id,
+                    alightStopId: alight.id,
+                    boardTime: Int(boardTime),
+                    alightTime: Int(alightTime)
+                ))
+                for position in Int(ride.board)...Int(ride.alight) {
+                    insertZone(of: route.stops[position], into: &zones)
+                }
             }
         }
-        return parts
+        let dayStart = context.dayStart
+        return OfflineJourneyCandidate(
+            rides: rides,
+            parts: parts,
+            zones: zones,
+            arrivalSeconds: parts.last.map { Int($0.endArrival.timeIntervalSince(dayStart)) } ?? 0,
+            departureSeconds: parts.first.map { Int($0.startDeparture.timeIntervalSince(dayStart)) } ?? 0,
+            transferCount: max(0, rides.count - 1),
+            walkSeconds: walkSeconds
+        )
     }
 
-    private func zones(for labels: [OfflineRoutingLabel]) -> Set<String> {
-        var result = Set<String>()
-        for label in labels {
-            insertZone(label.stopId, into: &result)
-            if let link = label.walkLink {
-                insertZone(link.fromStopId, into: &result)
-                insertZone(link.toStopId, into: &result)
-            }
-            guard let tripKey = label.tripKey,
-                  let trip = context.tripsByKey[tripKey],
-                  let boardStopId = label.boardStopId,
-                  let alightStopId = label.alightStopId,
-                  let boardTime = label.boardTime,
-                  let alightTime = label.alightTime else {
-                continue
-            }
-            guard let boardIndex = trip.stopTimes.firstIndex(where: { $0.stopId == boardStopId && $0.departure == boardTime }),
-                  let alightIndex = trip.stopTimes.firstIndex(where: { $0.stopId == alightStopId && $0.arrival == alightTime && $0.sequence > trip.stopTimes[boardIndex].sequence }) else {
-                insertZone(boardStopId, into: &result)
-                insertZone(alightStopId, into: &result)
-                continue
-            }
-            for stopTime in trip.stopTimes[boardIndex...alightIndex] {
-                insertZone(stopTime.stopId, into: &result)
-            }
-        }
-        return result
+    private func date(_ seconds: Int32) -> Date {
+        context.dayStart.addingTimeInterval(TimeInterval(seconds))
     }
 
-    private func insertZone(_ stopId: String, into zones: inout Set<String>) {
-        if let zone = context.zonesByStopId[stopId], !zone.isEmpty {
+    private func insertZone(of stop: Int32, into zones: inout Set<String>) {
+        if let zone = context.stops[Int(stop)].zone, !zone.isEmpty {
             zones.insert(zone)
         }
     }
+}
 
-    private func departureSort(_ lhs: OfflineJourneyCandidate, _ rhs: OfflineJourneyCandidate) -> Bool {
-        let lhsDuration = durationSeconds(lhs)
-        let rhsDuration = durationSeconds(rhs)
-        if lhsDuration != rhsDuration { return lhsDuration < rhsDuration }
-        if lhs.transferCount != rhs.transferCount { return lhs.transferCount < rhs.transferCount }
-        if lhs.walkSeconds != rhs.walkSeconds { return lhs.walkSeconds < rhs.walkSeconds }
-        if lhs.arrivalSeconds != rhs.arrivalSeconds { return lhs.arrivalSeconds < rhs.arrivalSeconds }
-        return lhs.departureSeconds < rhs.departureSeconds
+private struct Endpoint {
+    let stop: Int32
+    /// Seconds between the stop and `anchor`, the named stop it is reached from or walked to.
+    let walk: Int32
+    let anchor: Int32
+}
+
+/// A ride on one trip of a route; positions index `OfflineRoute.stops`.
+private struct Ride {
+    let route: Int32
+    /// Row of the trip in the route.
+    let trip: Int32
+    let board: Int32
+    let alight: Int32
+}
+
+private enum Leg {
+    case walk(from: Int32, to: Int32, start: Int32, end: Int32)
+    case ride(Ride)
+}
+
+/// How a stop's arrival in one round was reached.
+private enum Label {
+    case unreached
+    case origin
+    /// The same arrival as with one ride fewer.
+    case inherited
+    case ride(Ride)
+    /// Walked from where the ride alighted. The ride is kept here so the path stays intact
+    /// even when that stop's own label later improves.
+    case walk(from: Int32, after: Ride)
+}
+
+/// The first trip row below `end` that leaves `position` at or after `time`, or `end` when none does.
+private func firstTrip(in route: OfflineRoute, at position: Int, departingAtOrAfter time: Int32, before end: Int) -> Int {
+    let stopCount = route.stops.count
+    var low = 0
+    var high = end
+    while low < high {
+        let mid = (low + high) / 2
+        if route.departures[mid * stopCount + position] < time {
+            low = mid + 1
+        } else {
+            high = mid
+        }
+    }
+    return low
+}
+
+/// The rRAPTOR labels of one query; `run` is called with ever earlier departures.
+private final class Search {
+    static let unreached = Int32.max / 2
+
+    private let context: OfflineRoutingContext
+    private let origins: [Endpoint]
+    private let destinations: [Endpoint]
+    private let rounds: Int
+    private let stopCount: Int
+    /// Arrivals at the named destination must be earlier than this.
+    private let arrivalBound: Int32
+    private var originWalk: [Int32: Endpoint]
+    /// Walk from each stop to the named destination, or -1.
+    private var egress: [Int32]
+    private var egressAnchor: [Int32]
+    /// Indexed `round * stopCount + stop`; round k never arrives later than round k - 1.
+    private var arrival: [Int32]
+    private var label: [Label]
+    /// Best arrival at the destination with at most k rides after the previous run, by round.
+    private var bestByRound: [Int32]
+    private var isMarked: [Bool]
+    private var wasMarked: [Bool]
+    /// Earliest marked position per route, -1 when the route is not queued.
+    private var routeStart: [Int32]
+
+    init(context: OfflineRoutingContext, origins: [Endpoint], destinations: [Endpoint], rounds: Int, latestArrival: Int32) {
+        self.context = context
+        self.origins = origins
+        self.destinations = destinations
+        self.rounds = rounds
+        stopCount = context.stops.count
+        arrivalBound = latestArrival + 1
+        originWalk = Dictionary(uniqueKeysWithValues: origins.map { ($0.stop, $0) })
+        egress = Array(repeating: -1, count: stopCount)
+        egressAnchor = Array(repeating: -1, count: stopCount)
+        for destination in destinations {
+            egress[Int(destination.stop)] = destination.walk
+            egressAnchor[Int(destination.stop)] = destination.anchor
+        }
+        arrival = Array(repeating: Self.unreached, count: (rounds + 1) * stopCount)
+        label = Array(repeating: .unreached, count: (rounds + 1) * stopCount)
+        bestByRound = Array(repeating: latestArrival + 1, count: rounds + 1)
+        isMarked = Array(repeating: false, count: stopCount)
+        wasMarked = Array(repeating: false, count: stopCount)
+        routeStart = Array(repeating: -1, count: context.routes.count)
     }
 
-    private func arrivalSort(_ lhs: OfflineJourneyCandidate, _ rhs: OfflineJourneyCandidate) -> Bool {
-        let lhsDuration = durationSeconds(lhs)
-        let rhsDuration = durationSeconds(rhs)
-        if lhsDuration != rhsDuration { return lhsDuration < rhsDuration }
-        if lhs.transferCount != rhs.transferCount { return lhs.transferCount < rhs.transferCount }
-        if lhs.walkSeconds != rhs.walkSeconds { return lhs.walkSeconds < rhs.walkSeconds }
-        if lhs.departureSeconds != rhs.departureSeconds { return lhs.departureSeconds > rhs.departureSeconds }
-        return lhs.arrivalSeconds < rhs.arrivalSeconds
+    /// One RAPTOR run leaving at `departure`; returns the legs of every journey that improves
+    /// the arrival for its number of rides over all later departures.
+    func run(departure: Int32) -> [[Leg]] {
+        var marked = [Int32]()
+        for origin in origins where improve(0, origin.stop, departure + origin.walk, .origin) {
+            mark(origin.stop, in: &marked)
+        }
+        var bound = arrivalBound
+        for round in 1...rounds {
+            if marked.isEmpty { break }
+            bound = min(bound, bestDestination(round).arrival)
+            for stop in marked {
+                isMarked[Int(stop)] = false
+                wasMarked[Int(stop)] = true
+                for routeStop in context.routesAtStop[Int(stop)] {
+                    let route = Int(routeStop.route)
+                    if routeStart[route] < 0 || routeStop.position < routeStart[route] {
+                        routeStart[route] = routeStop.position
+                    }
+                }
+            }
+            let boardable = marked
+            marked.removeAll(keepingCapacity: true)
+            for stop in boardable {
+                for routeStop in context.routesAtStop[Int(stop)] where routeStart[Int(routeStop.route)] >= 0 {
+                    scan(route: Int(routeStop.route), round: round, bound: &bound, marked: &marked)
+                }
+            }
+            for stop in boardable {
+                wasMarked[Int(stop)] = false
+            }
+            walk(round: round, bound: &bound, marked: &marked)
+        }
+        for stop in marked {
+            isMarked[Int(stop)] = false
+        }
+
+        var journeys = [[Leg]]()
+        var fewerRides = arrivalBound
+        for round in 1...rounds {
+            let best = bestDestination(round)
+            if best.arrival < fewerRides && best.arrival < bestByRound[round] {
+                journeys.append(legs(round: round, destination: best.stop))
+            }
+            fewerRides = min(fewerRides, best.arrival)
+            bestByRound[round] = fewerRides
+        }
+        return journeys
     }
 
-    private func durationSeconds(_ candidate: OfflineJourneyCandidate) -> Int {
-        candidate.arrivalSeconds - candidate.departureSeconds
+    private func scan(route routeIndex: Int, round: Int, bound: inout Int32, marked: inout [Int32]) {
+        let route = context.routes[routeIndex]
+        let stopCount = route.stops.count
+        let start = Int(routeStart[routeIndex])
+        routeStart[routeIndex] = -1
+        var trip = -1
+        var board = 0
+        for position in start..<stopCount {
+            let stop = route.stops[position]
+            if trip >= 0 {
+                let time = route.arrivals[trip * stopCount + position]
+                if time < bound,
+                   improve(round, stop, time, .ride(Ride(route: Int32(routeIndex), trip: Int32(trip), board: Int32(board), alight: Int32(position)))) {
+                    mark(stop, in: &marked)
+                    let walk = egress[Int(stop)]
+                    if walk >= 0 {
+                        bound = min(bound, time + walk)
+                    }
+                }
+            }
+            guard position < stopCount - 1, wasMarked[Int(stop)] else { continue }
+            let ready = readyTime(round - 1, stop)
+            if trip >= 0 && route.departures[trip * stopCount + position] < ready { continue }
+            let end = trip >= 0 ? trip : route.trips.count
+            let earlier = firstTrip(in: route, at: position, departingAtOrAfter: ready, before: end)
+            if earlier < end {
+                trip = earlier
+                board = position
+            }
+        }
     }
 
-    private func frontierSort(_ lhs: FrontierEntry, _ rhs: FrontierEntry) -> Bool {
-        if lhs.label.time != rhs.label.time { return lhs.label.time < rhs.label.time }
-        if lhs.label.transfers != rhs.label.transfers { return lhs.label.transfers < rhs.label.transfers }
-        if lhs.label.walkSeconds != rhs.label.walkSeconds { return lhs.label.walkSeconds < rhs.label.walkSeconds }
-        return lhs.label.stopId < rhs.label.stopId
+    /// One walk from every stop a ride reached this round. Walks only follow rides, so a journey
+    /// never walks twice in a row and the walk to the named destination comes from the ride too.
+    private func walk(round: Int, bound: inout Int32, marked: inout [Int32]) {
+        let sources = marked.compactMap { stop -> (stop: Int32, time: Int32, ride: Ride)? in
+            let index = round * stopCount + Int(stop)
+            guard case let .ride(ride) = label[index] else { return nil }
+            return (stop, arrival[index], ride)
+        }
+        for source in sources {
+            for footpath in context.footpaths[Int(source.stop)] {
+                let time = source.time + footpath.seconds
+                if time >= bound { break }
+                if improve(round, footpath.stop, time, .walk(from: source.stop, after: source.ride)) {
+                    mark(footpath.stop, in: &marked)
+                    if egress[Int(footpath.stop)] == 0 {
+                        bound = min(bound, time)
+                    }
+                }
+            }
+        }
     }
 
-    private func reverseFrontierSort(_ lhs: FrontierEntry, _ rhs: FrontierEntry) -> Bool {
-        if lhs.label.time != rhs.label.time { return lhs.label.time > rhs.label.time }
-        if lhs.label.transfers != rhs.label.transfers { return lhs.label.transfers < rhs.label.transfers }
-        if lhs.label.walkSeconds != rhs.label.walkSeconds { return lhs.label.walkSeconds < rhs.label.walkSeconds }
-        return lhs.label.stopId < rhs.label.stopId
+    /// Sets the arrival if it is earlier, and carries it to the rounds above that arrive later.
+    private func improve(_ round: Int, _ stop: Int32, _ time: Int32, _ newLabel: Label) -> Bool {
+        let index = round * stopCount + Int(stop)
+        guard time < arrival[index] else { return false }
+        arrival[index] = time
+        label[index] = newLabel
+        var above = index + stopCount
+        while above < arrival.count, time < arrival[above] {
+            arrival[above] = time
+            label[above] = .inherited
+            above += stopCount
+        }
+        return true
+    }
+
+    private func mark(_ stop: Int32, in marked: inout [Int32]) {
+        if !isMarked[Int(stop)] {
+            isMarked[Int(stop)] = true
+            marked.append(stop)
+        }
+    }
+
+    /// The label that set this round's arrival, looking through inherited ones.
+    private func source(_ round: Int, _ stop: Int32) -> Label {
+        var round = round
+        while round > 0, case .inherited = label[round * stopCount + Int(stop)] {
+            round -= 1
+        }
+        return label[round * stopCount + Int(stop)]
+    }
+
+    /// When a rider at the stop can board: arriving by ride needs the transfer buffer.
+    private func readyTime(_ round: Int, _ stop: Int32) -> Int32 {
+        let time = arrival[round * stopCount + Int(stop)]
+        if case .ride = source(round, stop) {
+            return time + OfflineTimetableRouter.transferBufferSeconds
+        }
+        return time
+    }
+
+    /// The earliest arrival at the named destination with this round's labels. Arrivals without a
+    /// ride do not count, nor a walk that would need a second walk to reach the named stop.
+    private func bestDestination(_ round: Int) -> (arrival: Int32, stop: Int32) {
+        var best = (arrival: Self.unreached, stop: Int32(-1))
+        for destination in destinations {
+            let time = arrival[round * stopCount + Int(destination.stop)]
+            guard time + destination.walk < best.arrival else { continue }
+            switch source(round, destination.stop) {
+            case .ride:
+                best = (time + destination.walk, destination.stop)
+            case .walk where destination.walk == 0:
+                best = (time, destination.stop)
+            default:
+                continue
+            }
+        }
+        return best
+    }
+
+    private func legs(round: Int, destination: Int32) -> [Leg] {
+        var reversed = [Leg]()
+        var round = round
+        var stop = destination
+        let walk = egress[Int(destination)]
+        if walk > 0 {
+            let time = arrival[round * stopCount + Int(destination)]
+            reversed.append(.walk(from: destination, to: egressAnchor[Int(destination)], start: time, end: time + walk))
+        }
+        while round >= 0 {
+            switch label[round * stopCount + Int(stop)] {
+            case .inherited:
+                round -= 1
+            case let .ride(ride):
+                reversed.append(.ride(ride))
+                stop = context.routes[Int(ride.route)].stops[Int(ride.board)]
+                round -= 1
+            case let .walk(from, ride):
+                let route = context.routes[Int(ride.route)]
+                let alighted = route.arrivals[Int(ride.trip) * route.stops.count + Int(ride.alight)]
+                reversed.append(.walk(from: from, to: stop, start: alighted, end: arrival[round * stopCount + Int(stop)]))
+                reversed.append(.ride(ride))
+                stop = route.stops[Int(ride.board)]
+                round -= 1
+            case .origin:
+                // Leave as late as possible: walk so as to reach the first trip as it departs.
+                if let origin = originWalk[stop], origin.walk > 0, case let .ride(first)? = reversed.last {
+                    let route = context.routes[Int(first.route)]
+                    let boards = route.departures[Int(first.trip) * route.stops.count + Int(first.board)]
+                    reversed.append(.walk(from: origin.anchor, to: stop, start: boards - origin.walk, end: boards))
+                }
+                return reversed.reversed()
+            case .unreached:
+                return reversed.reversed()
+            }
+        }
+        return reversed.reversed()
     }
 }
