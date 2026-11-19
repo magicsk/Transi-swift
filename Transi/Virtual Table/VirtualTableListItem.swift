@@ -25,7 +25,7 @@ struct VirtualTableListItem: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 12.0) {
             HStack {
                 VStack {
                     LineText(connection.line, 20.0)
@@ -68,11 +68,17 @@ struct VirtualTableListItem: View {
                 }
             }
             .foregroundColor(.label)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                withAnimation {
-                    expanded.toggle()
-                }
+            // Details live in this row, not a row of their own, so a live reorder moves them together.
+            if expanded {
+                VirtualTableConnectionDetail(connection, vehicleInfo, true)
+            }
+        }
+        // Keeps the header in place while the row's height animates instead of centering it.
+        .frame(maxHeight: .infinity, alignment: .top)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation {
+                expanded.toggle()
             }
         }
         .onAppear {
@@ -122,14 +128,10 @@ struct VirtualTableListItem: View {
         .alignmentGuide(.listRowSeparatorLeading) { _ in
             55
         }
-        .listRowSeparator(expanded ? .hidden : .automatic, edges: .bottom)
         .onChange(of: expanded) { expanded in
             if expanded == true {
                 GlobalController.virtualTable.lastExpandedConnection = connection
             }
-        }
-        if expanded {
-            VirtualTableConnectionDetail(connection, vehicleInfo, true)
         }
     }
 }
