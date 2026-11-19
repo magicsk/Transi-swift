@@ -133,7 +133,7 @@ func colorFromLineNum(_ lineNum: String) -> Color? {
         case "►":
             return Color.secondaryLabel
         default:
-            if lineNum.starts(with: "S") || lineNum.starts(with: "R") { return Color.train }
+            if lineNum.starts(with: "S") || lineNum.starts(with: "R") || isNamedTrain(lineNum) { return Color.train }
             if lineNum.starts(with: "AT") { return Color.AT_train }
             if lineNum.starts(with: "N") { return Color.night }
             if lineNum.starts(with: "X") { return Color.replacement }
@@ -208,7 +208,7 @@ func textColorFromLineNum(_ lineNum: String) -> Color? {
 
 func isRounded(_ lineNum: String) -> Bool {
     let lineInt = Int(lineNum) ?? 99
-    if lineInt < 20 || isTrain(lineNum) {
+    if lineInt < 20 || isTrain(lineNum) || isNamedTrain(lineNum) {
         return true
     } else {
         return false
@@ -219,9 +219,4 @@ func isRounded(_ lineNum: String) -> Bool {
 func isCityLine(_ lineNum: String) -> Bool {
     if lineNum.starts(with: "N") || lineNum.starts(with: "X") { return true }
     return (1..<200).contains(Int(lineNum) ?? 0)
-}
-
-/// Trains: S and R lines (like "S20", "R 805") and AT lines into Austria.
-func isTrain(_ lineNum: String) -> Bool {
-    lineNum.starts(with: "S") || lineNum.starts(with: "R") || lineNum.starts(with: "AT")
 }

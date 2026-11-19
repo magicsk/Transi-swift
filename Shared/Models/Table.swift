@@ -88,7 +88,9 @@ extension Connection {
     func matchesLiveActivityReference(_ reference: LiveActivityConnectionReference) -> Bool {
         guard stopId == reference.stopId else { return false }
         if id == reference.connectionId { return true }
-        return line == reference.line && departureTimeCP == reference.departureTimeCP
+        // A train row's id names its train: another row of its line, like the board's timetable one, is not it.
+        return !reference.connectionId.hasPrefix(trainDepartureIdPrefix) && line == reference.line
+            && departureTimeCP == reference.departureTimeCP
     }
 }
 
@@ -275,5 +277,81 @@ extension Connection {
         lastStopName = connection.lastStation ?? "none"
         stuck = false
         expanded = false
+    }
+}
+
+// MARK: - Train departures
+
+/// Trains: S and R lines (like "S20", "R 805") and AT lines into Austria.
+func isTrain(_ lineNum: String) -> Bool {
+    lineNum.starts(with: "S") || lineNum.starts(with: "R") || lineNum.starts(with: "AT")
+}
+
+/// Trains named by category and number as on station boards, like "Ex 604" or "Os 3015": the only line names
+/// with a space. The train departures name trains without an IDS BK line so, and unlike those lines (`isTrain`),
+/// not every one takes IDS BK tickets.
+func isNamedTrain(_ lineNum: String) -> Bool {
+    lineNum.contains(" ")
+}
+
+// Every train leaving a railway station, from the national timetable with ŽSR's live delays.
+struct TrainDeparturesResponse: Decodable {
+    let departures: [TrainDeparture]
+}
+
+struct TrainDeparture: Decodable {
+    let train: String
+    /// The IDS BK line ("S20") when the train has one, else its category and number ("Ex 604").
+    let line: String
+    let headsign: String
+    /// Scheduled, in seconds since 1970.
+    let departure: TimeInterval
+    /// Minutes, nil until the train reports to ŽSR.
+    let delay: Int?
+    let lastStation: String?
+
+    /// Departs `delay` minutes after its schedule, or by the timetable while the delay is unknown.
+    func connection(at stopId: Int) -> Connection {
+        let scheduled = (departure / 60).rounded() * 60
+        let type = delay == nil ? "cp" : "online"
+        let raw = scheduled + TimeInterval((delay ?? 0) * 60)
+        let time = Date(timeIntervalSince1970: raw).formatted(date: .omitted, time: .shortened)
+        return Connection(
+            id: "\(trainDepartureIdPrefix)\(train):\(Int(departure))", line: line, platform: -1, stopId: stopId,
+            busID: "0:0", headsign: headsign, departureTimeCP: scheduled, departureTime: time, departureTimeRaw: raw,
+            departureTimeRemaining: getDepartureTimeRemainingText(time, raw, type),
+            departureTimeRemainingShortened: getShortDepartureTimeRemainingText(time, raw, type),
+            delay: delay ?? 0, delayText: getDelayText(delay ?? 0, type), type: type, currentStopId: -1,
+            lastStopId: -1, lastStopName: lastStation ?? "none", stuck: false
+        )
+    }
+}
+
+/// Train rows' ids start with it: a Live Activity follows such a row until the train departures, not the
+/// socket's board, lose it.
+let trainDepartureIdPrefix = "train:"
+
+// At a railway station the train departures list every train, by number, with ŽSR's delay, so they take the
+// place of the board's and IDS BK's train rows, up to their last train, whose time the board may have up to
+// 3 minutes later. Without them, or past that, the board keeps its own. A row live from IDS BK stays too while
+// ŽSR has no delay for its train (still abroad, or waiting at its first station), in place of the timetable-only
+// train. A train stays until a minute after it leaves.
+func mergeTrainDepartures(
+    _ departures: [TrainDeparture], at stopId: Int, into board: [Connection], now: TimeInterval
+) -> [Connection] {
+    guard let lastTrain = departures.map(\.departure).max() else { return board }
+    let trains = departures.map { $0.connection(at: stopId) }.filter { $0.departureTimeRaw > now - 60 }
+    let kept = board.filter { row in
+        !(isTrain(row.line) || isNamedTrain(row.line)) || row.departureTimeCP > lastTrain + 180
+            || row.type == "online" && !trains.contains { train in train.type == "online" && isSameDeparture(train, row) }
+    }
+    let shown = trains.filter { train in !kept.contains { row in row.standsIn(for: train) } }
+    return kept + shown
+}
+
+extension Connection {
+    /// A train row live from IDS BK takes the place of `train` while ŽSR has no delay for it.
+    func standsIn(for train: Connection) -> Bool {
+        type == "online" && (isTrain(line) || isNamedTrain(line)) && isSameDeparture(self, train)
     }
 }

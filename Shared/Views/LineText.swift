@@ -24,6 +24,8 @@ struct LineText: View {
             .foregroundStyle(textColorFromLineNum(lineNum)!)
             .offset(x: isDirectionSign ? 1.0 : 0.0, y: isDirectionSign ? -2.5 : 0.0)
             .lineLimit(1)
+            // Train names like "Ex 604" shrink to fit the table's line column.
+            .minimumScaleFactor(0.4)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.vertical,  size * 0.14)
             .padding(.horizontal,isDirectionSign ? size * 0.55 : size * 0.21)

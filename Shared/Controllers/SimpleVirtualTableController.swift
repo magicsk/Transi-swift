@@ -34,8 +34,12 @@ class SimpleVirtualTableController: ObservableObject {
         label: "eu.magicsk.transi.simpleConnectionsProcessingQueue")
 
     var connections = [Connection]()
+    /// `connections` before the train departures took the place of the board's trains, for a train followed by
+    /// the board's name or minute. Read on the main thread.
+    private(set) var board = [Connection]()
     private var internalConnections = [Connection]()
     private var internalRegionalConnections = [Connection]()
+    private var internalTrains = [TrainDeparture]()
     var vehicleInfo = [VehicleInfo]()
     var socketStatus = "unknown"
     var currentStop: Int
@@ -73,6 +77,7 @@ class SimpleVirtualTableController: ObservableObject {
         Task {
             await self.fetchRegionalLiveDepartures()
         }
+        fetchTrainDepartures()
         updater = Timer.publish(every: 10, on: .main, in: .common)
         updaterSubscription = updater?.autoconnect().sink(receiveValue: { [weak self] _ in
             self?.updateConnections()
@@ -84,6 +89,7 @@ class SimpleVirtualTableController: ObservableObject {
                 Task {
                     await self?.fetchRegionalLiveDepartures()
                 }
+                self?.fetchTrainDepartures()
             })
     }
 
@@ -99,23 +105,40 @@ class SimpleVirtualTableController: ObservableObject {
     private func updateConnections() {
         let liveActivities = updatesLiveActivities ? VirtualTableLiveActivityController.listAllTabActivities() : []
         for index in connections.indices {
-            let connection = connections[index]
-            let oldDepartureTime = connection.departureTimeRemaining
-            var updatedConnection = connection
-            updatedConnection.departureTimeRemaining = getDepartureTimeRemainingText(
-                connection.departureTime, connection.departureTimeRaw, connection.type
-            )
-            updatedConnection.departureTimeRemainingShortened = getShortDepartureTimeRemainingText(
-                connection.departureTime, connection.departureTimeRaw, connection.type
-            )
-
-            guard oldDepartureTime != updatedConnection.departureTimeRemaining else { continue }
+            let updatedConnection = countedDown(connections[index])
+            guard connections[index].departureTimeRemaining != updatedConnection.departureTimeRemaining else { continue }
             connections[index] = updatedConnection
             updateLiveActivities(
                 matching: updatedConnection,
                 in: liveActivities
             )
         }
+        // An activity no row lists right now, on a board row a listed train hides or on a train while its refresh
+        // fails, counts down from what it shows.
+        for liveActivity in liveActivities where liveActivity.stopId == currentStop
+            && !connections.contains(where: { $0.matchesLiveActivityReference(liveActivity.reference) })
+        {
+            guard let shown = VirtualTableLiveActivityController.shownState(liveActivity.id) else { continue }
+            let connection = countedDown(shown.connection)
+            guard connection.departureTimeRemaining != shown.connection.departureTimeRemaining else { continue }
+            Task {
+                await VirtualTableLiveActivityController.updateActivity(
+                    id: liveActivity.id, connection: connection, vehicleInfo: shown.vehicleInfo
+                )
+            }
+        }
+    }
+
+    /// `connection` with its countdown at now.
+    private func countedDown(_ connection: Connection) -> Connection {
+        var connection = connection
+        connection.departureTimeRemaining = getDepartureTimeRemainingText(
+            connection.departureTime, connection.departureTimeRaw, connection.type
+        )
+        connection.departureTimeRemainingShortened = getShortDepartureTimeRemainingText(
+            connection.departureTime, connection.departureTimeRaw, connection.type
+        )
+        return connection
     }
 
     private func fetchRegionalLiveDepartures() async {
@@ -160,11 +183,25 @@ class SimpleVirtualTableController: ObservableObject {
         }
     }
 
+    private func fetchTrainDepartures() {
+        guard let stop = GlobalController.getStopById(currentStop) else { return }
+        fetchTrains(at: stop) { [weak self] trains in
+            self?.connectionsProcessingQueue.async { [weak self] in
+                guard let self = self else { return }
+                // A failed refresh leaves the board's own trains; only a fresh list ends a train's Live Activity.
+                self.internalTrains = trains ?? []
+                self.sortAndPublishConnections(endMissingActivities: false, endMissingTrainActivities: trains != nil)
+            }
+        }
+    }
+
     private func getRegionalConnection(_ connection: Connection) -> Connection? {
         return internalRegionalConnections.first(where: { isSameDeparture($0, connection, within: 0) })
     }
 
-    private func sortAndPublishConnections(endMissingActivities: Bool) {
+    /// `endMissingActivities` ends Live Activities whose row left the socket's board, and
+    /// `endMissingTrainActivities` those whose train left the train departures: each is whole for its own rows.
+    private func sortAndPublishConnections(endMissingActivities: Bool, endMissingTrainActivities: Bool = false) {
         var connectionsForPublish = internalConnections.map { connection in
             if connection.type != "online", var regionalConnection = getRegionalConnection(connection) {
                 regionalConnection.platform = connection.platform
@@ -182,6 +219,10 @@ class SimpleVirtualTableController: ObservableObject {
                 }
         }
         connectionsForPublish.append(contentsOf: newRegionalConnections)
+        let board = connectionsForPublish
+        connectionsForPublish = mergeTrainDepartures(
+            internalTrains, at: currentStop, into: connectionsForPublish, now: Date().timeIntervalSince1970
+        )
 
         connectionsForPublish.sort { a, b in
             if a.departureTimeRaw == b.departureTimeRaw {
@@ -194,25 +235,46 @@ class SimpleVirtualTableController: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.connections = connectionsForPublish
+            self.board = board
             self.socketStatus = "connected"
             // Only the socket's board ends missing activities: unlike the regional departures, it is whole.
             if endMissingActivities { self.awaitsSocketBoardSince = nil }
-            self.updateLiveActivities(endMissingActivities: endMissingActivities)
+            self.updateLiveActivities(
+                endMissingActivities: endMissingActivities, endMissingTrainActivities: endMissingTrainActivities
+            )
             self.onUpdate?()
         }
     }
 
-    private func updateLiveActivities(endMissingActivities: Bool) {
+    private func updateLiveActivities(endMissingActivities: Bool, endMissingTrainActivities: Bool) {
         guard updatesLiveActivities else { return }
         let liveActivities = VirtualTableLiveActivityController.listAllTabActivities()
             .filter { $0.stopId == currentStop }
         for liveActivity in liveActivities {
-            if let connection = connections.first(where: {
-                $0.matchesLiveActivityReference(liveActivity.reference)
-            }) {
+            if let connection = connections.first(where: { $0.matchesLiveActivityReference(liveActivity.reference) }) {
                 updateLiveActivities(matching: connection, in: [liveActivity])
-            } else if endMissingActivities {
-                Task { await VirtualTableLiveActivityController.endActivity(liveActivity.id) }
+            } else if let row = board.first(where: { $0.matchesLiveActivityReference(liveActivity.reference) }) {
+                // One followed on a board row keeps it under a train listed by another name or minute.
+                updateLiveActivities(matching: countedDown(row), in: [liveActivity])
+            } else if liveActivity.connectionId.hasPrefix(trainDepartureIdPrefix),
+                      let shown = VirtualTableLiveActivityController.shownState(liveActivity.id),
+                      let row = connections.first(where: { $0.standsIn(for: shown.connection) })
+            {
+                // A followed train ŽSR has no delay for yet shows as the live IDS BK row standing in for it.
+                Task {
+                    await VirtualTableLiveActivityController.updateActivity(
+                        id: liveActivity.id, connection: row, vehicleInfo: shown.vehicleInfo
+                    )
+                }
+            } else {
+                // A train's activity ends once fresh train departures lack it or, while they fail (as while ŽSR
+                // is down), a minute after the departure it last showed.
+                let ends = liveActivity.connectionId.hasPrefix(trainDepartureIdPrefix)
+                    ? endMissingTrainActivities
+                        || VirtualTableLiveActivityController.shownState(liveActivity.id)?.connection.departureTimeRaw
+                        ?? 0 < Date().timeIntervalSince1970 - 60
+                    : endMissingActivities
+                if ends { Task { await VirtualTableLiveActivityController.endActivity(liveActivity.id) } }
             }
         }
     }

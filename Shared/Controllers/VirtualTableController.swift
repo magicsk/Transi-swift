@@ -28,6 +28,11 @@ class VirtualTableController: ObservableObject {
     @Published var connections = [Connection]()
     private var internalConnections = [Connection]()
     private var internalRegionalConnections = [Connection]()
+    /// The trains leaving the stop with this id.
+    private var internalTrains = (stopId: 0, departures: [TrainDeparture]())
+    /// Whether this board's train departures loaded, or failed to, since it last started; until then an
+    /// empty board isn't final at a railway station.
+    private var trainsLoaded = false
     @Published var vehicleInfo = [VehicleInfo]()
     @Published var changeLocation = true
     @Published var currentStop: Stop = .empty
@@ -71,10 +76,12 @@ class VirtualTableController: ObservableObject {
     private func startUpdater() {
         stopUpdater()
         loadedStatus = 0
+        connectionsProcessingQueue.async { [weak self] in self?.trainsLoaded = false }
         updateConnections()
         Task {
             await self.fetchRegionalLiveDepartures()
         }
+        fetchTrainDepartures()
         updater = Timer.publish(every: 10, on: .main, in: .common)
         updaterSubscription = updater?.autoconnect().sink(receiveValue: { [weak self] _ in
             self?.updateConnections()
@@ -86,6 +93,7 @@ class VirtualTableController: ObservableObject {
                 Task {
                     await self?.fetchRegionalLiveDepartures()
                 }
+                self?.fetchTrainDepartures()
             })
     }
 
@@ -170,6 +178,20 @@ class VirtualTableController: ObservableObject {
         }
     }
 
+    private func fetchTrainDepartures() {
+        let stop = currentStop
+        fetchTrains(at: stop) { [weak self] trains in
+            guard let self = self, self.currentStop.id == stop.id else { return }
+            self.connectionsProcessingQueue.async { [weak self] in
+                guard let self = self else { return }
+                // A failed refresh, as while ŽSR is down, leaves the board's own trains with IDS BK's delays.
+                self.internalTrains = (stop.id, trains ?? [])
+                self.trainsLoaded = true
+                self.sortAndPublishConnections()
+            }
+        }
+    }
+
     private func getRegionalConnection(_ connection: Connection) -> Connection? {
         return internalRegionalConnections.first(where: { isSameDeparture($0, connection, within: 0) })
     }
@@ -193,6 +215,10 @@ class VirtualTableController: ObservableObject {
                     }
             }
             connectionsForPublish.append(contentsOf: newRegionalConnections)
+            connectionsForPublish = mergeTrainDepartures(
+                self.internalTrains.departures, at: self.internalTrains.stopId, into: connectionsForPublish,
+                now: Date().timeIntervalSince1970
+            )
 
             connectionsForPublish.sort { a, b in
                 if a.departureTimeRaw == b.departureTimeRaw {
@@ -205,13 +231,14 @@ class VirtualTableController: ObservableObject {
             let isEmpty = connectionsForPublish.isEmpty && self.internalConnections.isEmpty
                 && self.internalRegionalConnections.isEmpty
             let currentLoadedStatus = self.loadedStatus
+            let trainsLoaded = self.trainsLoaded
 
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.connections = connectionsForPublish
                 if self.socket.status == .connected {
                     self.socketStatus = .connected
-                    if currentLoadedStatus > 1 {
+                    if currentLoadedStatus > 1 && trainsLoaded {
                         self.connectionsEmpty = isEmpty
                     }
                 } else {
@@ -417,6 +444,7 @@ class VirtualTableController: ObservableObject {
                     connectionsProcessingQueue.async { [weak self] in
                         self?.internalConnections = [Connection]()
                         self?.internalRegionalConnections = [Connection]()
+                        self?.internalTrains = (0, [])
                     }
                     disconnect(reconnect: true)
                 }
@@ -435,5 +463,14 @@ class VirtualTableController: ObservableObject {
         guard currentStop.name == nil, let stop = GlobalController.getStopById(currentStop.id) else { return }
         currentStop = stop
         disconnect(reconnect: true)
+    }
+}
+
+/// Trains leaving `stop`, with ŽSR's live delays, on the main thread: none away from railway stations,
+/// nil when the request fails.
+func fetchTrains(at stop: Stop, completion: @escaping ([TrainDeparture]?) -> Void) {
+    guard stop.type == "train" else { return completion([]) }
+    fetchMagicApi(endpoint: "/trains/departures/\(stop.id)", type: TrainDeparturesResponse.self) { result in
+        completion(try? result.get().departures)
     }
 }

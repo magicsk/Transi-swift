@@ -64,9 +64,10 @@ final class PartLiveTracker {
             // Until the whole board loads, a vehicle missing from it may only be missing from the regional
             // departures, and a regional row could take the place of the city vehicle followed.
             guard let self, let controller, controller.hasWholeBoard else { return }
+            // The board's own row, when the train departures list its train by another name or minute.
             let connection = part.liveConnection(
                 in: controller.connections, platform: platform, scheduled: scheduled, busID: self.busID
-            )
+            ) ?? part.liveConnection(in: controller.board, platform: platform, scheduled: scheduled, busID: self.busID)
             if self.busID == nil, let connection, connection.type == "online" {
                 self.busID = connection.busID
             }

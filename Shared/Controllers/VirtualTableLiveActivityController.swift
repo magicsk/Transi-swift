@@ -123,6 +123,11 @@ enum VirtualTableLiveActivityController {
         }
     }
 
+    /// What the activity shows; nil once it ended.
+    static func shownState(_ id: String) -> VirtualTableActivityAttributes.ContentState? {
+        Activity<VirtualTableActivityAttributes>.activities.first(where: { $0.id == id })?.contentState
+    }
+
     static func updateActivity(id: String, connection: Connection, vehicleInfo: VehicleInfo?) async {
         let activity = Activity<VirtualTableActivityAttributes>.activities.first(where: { $0.id == id })
         let oldConnection = activity?.contentState.connection

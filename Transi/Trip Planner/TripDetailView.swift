@@ -527,7 +527,7 @@ final class TripDetailMapViewController: UIViewController, MKMapViewDelegate, UI
             let color = UIColor(colorFromLineNum(line) ?? .gray)
             // Where a stop has no platform letter, as at train stations.
             let vehicle = UIImage(
-                systemName: isTrain(line) ? "train.side.front.car" : isRounded(line) ? "tram.fill" : "bus.fill"
+                systemName: isTrain(line) || isNamedTrain(line) ? "train.side.front.car" : isRounded(line) ? "tram.fill" : "bus.fill"
             )
             for stop in (part.stops ?? []).dropFirst().dropLast() {
                 if let gps = stop.gps {
