@@ -11,7 +11,6 @@ struct CheckCase {
     let requiredLines: Set<String>
     let minUniqueLineSignatures: Int
     let requiredActiveFeed: String?
-    let forbidsFinalWalk: Bool
     let maxDepartureSpanSeconds: Int?
 
     init(
@@ -25,7 +24,6 @@ struct CheckCase {
         requiredLines: Set<String>,
         minUniqueLineSignatures: Int = 0,
         requiredActiveFeed: String? = nil,
-        forbidsFinalWalk: Bool = false,
         maxDepartureSpanSeconds: Int? = nil
     ) {
         self.label = label
@@ -38,27 +36,30 @@ struct CheckCase {
         self.requiredLines = requiredLines
         self.minUniqueLineSignatures = minUniqueLineSignatures
         self.requiredActiveFeed = requiredActiveFeed
-        self.forbidsFinalWalk = forbidsFinalWalk
         self.maxDepartureSpanSeconds = maxDepartureSpanSeconds
     }
 }
 
 let cases: [CheckCase] = [
-    CheckCase(label: "short_city", from: "Hronská", to: "Most SNP", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["70"], minUniqueLineSignatures: 2),
-    CheckCase(label: "medium_city", from: "Zlaté piesky", to: "Hlavná stanica", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 4, maxMs: 5000, requiredLines: ["61"]),
-    CheckCase(label: "train_station_pair", from: "Hlavná stanica", to: "Stn. Petržalka", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["93"]),
-    CheckCase(label: "regional_bus", from: "Autobusová stanica", to: "Rovinka, Obecný úrad", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["725", "727", "737"], requiredActiveFeed: "regional"),
-    CheckCase(label: "regional_train", from: "Hlavná stanica", to: "Pezinok, Žel. stanica", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 4, maxMs: 5000, requiredLines: ["R50", "S50"]),
-    CheckCase(label: "long_suburban", from: "Most SNP", to: "Senec, Žel. stanica", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 4, maxMs: 5000, requiredLines: ["S60", "620"]),
-    CheckCase(label: "late_short", from: "Hronská", to: "Most SNP", iso: "2026-06-12T23:30:00+02:00", mode: .departure, minJourneys: 2, maxMs: 5000, requiredLines: ["N70"]),
-    CheckCase(label: "arrival_city", from: "Hronská", to: "Most SNP", iso: "2026-06-12T08:40:00+02:00", mode: .arrival, minJourneys: 3, maxMs: 5000, requiredLines: ["70"]),
-    CheckCase(label: "overnight_departure", from: "Hronská", to: "Most SNP", iso: "2026-06-13T00:30:00+02:00", mode: .departure, minJourneys: 1, maxMs: 5000, requiredLines: ["N33", "N70", "N72"]),
-    CheckCase(label: "overnight_arrival", from: "Hronská", to: "Most SNP", iso: "2026-06-13T00:45:00+02:00", mode: .arrival, minJourneys: 1, maxMs: 5000, requiredLines: ["N70"]),
-    CheckCase(label: "early_morning_departure", from: "Hronská", to: "Most SNP", iso: "2026-06-13T04:59:00+02:00", mode: .departure, minJourneys: 1, maxMs: 5000, requiredLines: ["72"]),
-    CheckCase(label: "hill_destination_direct", from: "Hodžovo nám.", to: "Hrad", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 2, maxMs: 5000, requiredLines: ["47"], forbidsFinalWalk: true),
-    CheckCase(label: "hill_destination_hub", from: "Hlavná stanica", to: "Hrad", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 3, maxMs: 5000, requiredLines: ["44"], forbidsFinalWalk: true),
-    CheckCase(label: "brodna_krce_afternoon", from: "Brodná", to: "Krče", iso: "2026-07-13T15:00:00+02:00", mode: .departure, minJourneys: 6, maxMs: 5000, requiredLines: ["21", "92"], maxDepartureSpanSeconds: 2 * 60 * 60),
-    CheckCase(label: "hronska_zochova", from: "Hronská", to: "Zochova", iso: "2026-06-12T08:00:00+02:00", mode: .departure, minJourneys: 3, maxMs: 5000, requiredLines: ["72"]),
+    CheckCase(label: "short_city", from: "Hronská", to: "Most SNP", iso: "2026-11-20T08:00:00+01:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["70"], minUniqueLineSignatures: 2),
+    CheckCase(label: "medium_city", from: "Zlaté piesky", to: "Hlavná stanica", iso: "2026-11-20T08:00:00+01:00", mode: .departure, minJourneys: 4, maxMs: 5000, requiredLines: ["61"]),
+    CheckCase(label: "train_station_pair", from: "Hlavná stanica", to: "Stn. Petržalka", iso: "2026-11-20T08:00:00+01:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["93"]),
+    CheckCase(label: "regional_bus", from: "Autobusová stanica", to: "Rovinka, Obecný úrad", iso: "2026-11-20T08:00:00+01:00", mode: .departure, minJourneys: 5, maxMs: 5000, requiredLines: ["725", "727", "737"], requiredActiveFeed: "regional"),
+    // The hour from 08:00 has three Pareto connections (S60>540, 61>3>S50, R50); the previous router found three too.
+    CheckCase(label: "regional_train", from: "Hlavná stanica", to: "Pezinok, Žel. stanica", iso: "2026-11-20T08:00:00+01:00", mode: .departure, minJourneys: 3, maxMs: 5000, requiredLines: ["R50", "S50"]),
+    CheckCase(label: "long_suburban", from: "Most SNP", to: "Senec, Žel. stanica", iso: "2026-11-20T08:00:00+01:00", mode: .departure, minJourneys: 4, maxMs: 5000, requiredLines: ["S60", "620"]),
+    // N70 and N72 both leave Hronská A at 00:02 and reach Hodžovo nám. B at 00:20, so either is the same journey.
+    CheckCase(label: "late_short", from: "Hronská", to: "Most SNP", iso: "2026-11-20T23:30:00+01:00", mode: .departure, minJourneys: 2, maxMs: 5000, requiredLines: ["N70", "N72"]),
+    CheckCase(label: "arrival_city", from: "Hronská", to: "Most SNP", iso: "2026-11-20T08:40:00+01:00", mode: .arrival, minJourneys: 3, maxMs: 5000, requiredLines: ["70"]),
+    CheckCase(label: "overnight_departure", from: "Hronská", to: "Most SNP", iso: "2026-11-21T00:30:00+01:00", mode: .departure, minJourneys: 1, maxMs: 5000, requiredLines: ["N33", "N70", "N72"]),
+    CheckCase(label: "overnight_arrival", from: "Hronská", to: "Most SNP", iso: "2026-11-21T00:45:00+01:00", mode: .arrival, minJourneys: 1, maxMs: 5000, requiredLines: ["N70", "N72"]),
+    CheckCase(label: "early_morning_departure", from: "Hronská", to: "Most SNP", iso: "2026-11-21T04:59:00+01:00", mode: .departure, minJourneys: 1, maxMs: 5000, requiredLines: ["72"]),
+    // Journeys may end with a walk even where the destination has service (a ride to Zochova and the
+    // walk up can arrive before the next direct bus), so these only require the direct lines.
+    CheckCase(label: "hill_destination_direct", from: "Hodžovo nám.", to: "Hrad", iso: "2026-11-20T08:00:00+01:00", mode: .departure, minJourneys: 2, maxMs: 5000, requiredLines: ["47"]),
+    CheckCase(label: "hill_destination_hub", from: "Hlavná stanica", to: "Hrad", iso: "2026-11-20T08:00:00+01:00", mode: .departure, minJourneys: 3, maxMs: 5000, requiredLines: ["44"]),
+    CheckCase(label: "brodna_krce_afternoon", from: "Brodná", to: "Krče", iso: "2026-11-23T15:00:00+01:00", mode: .departure, minJourneys: 6, maxMs: 5000, requiredLines: ["21", "92"], maxDepartureSpanSeconds: 2 * 60 * 60),
+    CheckCase(label: "hronska_zochova", from: "Hronská", to: "Zochova", iso: "2026-11-20T08:00:00+01:00", mode: .departure, minJourneys: 3, maxMs: 5000, requiredLines: ["72"]),
 ]
 
 @main
@@ -102,30 +103,30 @@ enum OfflineRoutingCheck {
         let maxWalkDuration = Int(environment["TRANSI_MAX_WALK_DURATION"] ?? "") ?? 15
         let skipFixedExpectations = environment["TRANSI_SKIP_EXPECTATIONS"] == "1"
 
-        guard let contextDate = parser.date(from: overrideIso ?? "2026-06-12T08:00:00+02:00") else {
+        guard let contextDate = parser.date(from: overrideIso ?? "2026-11-20T08:00:00+01:00") else {
             fputs("FAIL: invalid TRANSI_CHECK_ISO \(overrideIso ?? "")\n", stderr)
             exit(1)
         }
         let context = OfflineRoutingContext.build(scheduleDb: scheduleDb, baseDb: baseDb, date: contextDate, maxWalkDuration: maxWalkDuration)
-        if context.tripsByKey.isEmpty {
+        if context.trips.isEmpty {
             failures.append("context: expected active trips")
         }
-        if context.stopsById.isEmpty {
+        if context.stops.isEmpty {
             failures.append("context: expected stops")
         }
-        if context.stopTimesByStopId.isEmpty {
-            failures.append("context: expected stop time index")
+        if context.routes.isEmpty {
+            failures.append("context: expected routes")
         }
-        if context.walkLinksByStopId.isEmpty {
-            failures.append("context: expected walk link index")
+        if context.footpaths.allSatisfy(\.isEmpty) {
+            failures.append("context: expected footpaths")
         }
 
         let checkCases = selected.isEmpty ? cases : cases.filter { selected.contains($0.label) }
 
         let resolver = OfflineStopResolver(baseDb: baseDb)
-        let hlavna = resolver.resolveStops(named: "Hlavná stanica", maxWalkDuration: maxWalkDuration)
-        let petrzalka = resolver.resolveStops(named: "Stn. Petržalka", maxWalkDuration: maxWalkDuration)
-        let pezinok = resolver.resolveStops(named: "Pezinok, Žel. stanica", maxWalkDuration: maxWalkDuration)
+        let hlavna = resolver.resolveStops(named: "Hlavná stanica")
+        let petrzalka = resolver.resolveStops(named: "Stn. Petržalka")
+        let pezinok = resolver.resolveStops(named: "Pezinok, Žel. stanica")
         let resolverChecks: [(String, [OfflineStop], String)] = [
             ("Hlavná stanica", hlavna, "Bratislava hl.st."),
             ("Stn. Petržalka", petrzalka, "Bratislava-Petržalka"),
@@ -207,9 +208,6 @@ enum OfflineRoutingCheck {
                let departureSpan = departureSpanSeconds(in: journeys),
                departureSpan > maxDepartureSpanSeconds {
                 failures.append("\(check.label): departure span \(departureSpan)s > \(maxDepartureSpanSeconds)s")
-            }
-            if check.forbidsFinalWalk, let finalWalkSignature = finalWalkSignature(in: journeys) {
-                failures.append("\(check.label): final walk journey \(finalWalkSignature)")
             }
             if check.mode == .departure, let firstDeparture, firstDeparture < date {
                 failures.append("\(check.label): first departure \(firstDeparture) is before requested \(date)")
@@ -373,21 +371,6 @@ enum OfflineRoutingCheck {
                 other.id != candidate.id && dominates(other, candidate, mode: mode)
             }) {
                 return candidate.signature
-            }
-        }
-        return nil
-    }
-
-    private static func finalWalkSignature(in journeys: [Journey]) -> String? {
-        for journey in journeys {
-            let parts = journey.parts ?? []
-            if parts.last?.routeType == 64 {
-                return parts.map { part -> String in
-                    let line = part.routeShortName ?? "walk"
-                    let start = part.startStopName ?? "?"
-                    let end = part.endStopName ?? "?"
-                    return "\(line):\(start)->\(end)"
-                }.joined(separator: " | ")
             }
         }
         return nil
