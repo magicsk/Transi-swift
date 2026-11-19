@@ -2,7 +2,7 @@ import Foundation
 
 class OfflineRoutingEngine {
     /// Departure searches find the journeys leaving within this window after the requested time,
-    /// arrive-by searches those arriving within it before. The next page starts where it ended.
+    /// arrive-by searches those arriving within it before. The next page covers the window after it.
     static let searchWindowSeconds = 60 * 60
     /// A window with fewer journeys than this is doubled, up to `maxSearchWindowSeconds`.
     private static let minimumWindowJourneyCount = 3

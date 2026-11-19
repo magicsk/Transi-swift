@@ -246,7 +246,9 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     /// Start the next offline page where this page's search window ended, so no journey is
-    /// skipped or repeated. A window widened for sparse service ends after its last journey.
+    /// skipped. A window widened for sparse service ends after its last journey. Like online
+    /// paging, arrive-by pages move forward too: the next one covers the window of arrivals
+    /// after this one, so its journeys list below.
     private func advanceOfflineSearchDate(after searchDate: Date, journeys: [Journey]) {
         let window = TimeInterval(OfflineRoutingEngine.searchWindowSeconds)
         let widestWindow = TimeInterval(OfflineRoutingEngine.maxSearchWindowSeconds)
@@ -256,9 +258,8 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             nextOfflineSearchDate = latestDeparture.map { max(searchDate + window, $0 + 1) }
                 ?? searchDate + widestWindow
         case .arrival:
-            let earliestArrival = journeys.compactMap { $0.parts?.last?.endArrival }.min()
-            nextOfflineSearchDate = earliestArrival.map { min(searchDate - window, $0 - 1) }
-                ?? searchDate - widestWindow
+            let latestArrival = journeys.compactMap { $0.parts?.last?.endArrival }.max() ?? searchDate
+            nextOfflineSearchDate = max(searchDate, latestArrival) + window
         }
     }
 
