@@ -86,18 +86,26 @@ final class OfflineJourneyGrouper {
         return false
     }
 
+    /// Times compare in whole minutes, as the list shows them: a variant leaving a few seconds later
+    /// with more changes or walking looks the same and only adds noise.
     private func dominates(_ lhs: OfflineJourneyCandidate, _ rhs: OfflineJourneyCandidate) -> Bool {
+        let lhsDeparture = minute(lhs.departureSeconds), rhsDeparture = minute(rhs.departureSeconds)
+        let lhsArrival = minute(lhs.arrivalSeconds), rhsArrival = minute(rhs.arrivalSeconds)
         guard endpointKey(lhs) == endpointKey(rhs),
-              lhs.departureSeconds >= rhs.departureSeconds,
-              lhs.arrivalSeconds <= rhs.arrivalSeconds,
+              lhsDeparture >= rhsDeparture,
+              lhsArrival <= rhsArrival,
               lhs.transferCount <= rhs.transferCount else {
             return false
         }
         // Walking only breaks ties: a journey an hour slower must not survive to save a few minutes of walking.
-        return lhs.departureSeconds > rhs.departureSeconds ||
-            lhs.arrivalSeconds < rhs.arrivalSeconds ||
+        return lhsDeparture > rhsDeparture ||
+            lhsArrival < rhsArrival ||
             lhs.transferCount < rhs.transferCount ||
             lhs.walkSeconds < rhs.walkSeconds
+    }
+
+    private func minute(_ seconds: Int) -> Int {
+        Int((Double(seconds) / 60).rounded(.down))
     }
 
     private func endpointKey(_ candidate: OfflineJourneyCandidate) -> EndpointKey {
