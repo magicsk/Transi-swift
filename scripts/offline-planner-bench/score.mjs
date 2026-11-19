@@ -1,12 +1,13 @@
 // Scores bench output against online.jsonl (R = IDSBK raptor, I = imhd): node score.mjs offline.jsonl [baseline.jsonl]
-// An offline journey covers an online one when it leaves no more than 1 min earlier and arrives no more than 1 min later.
+// An offline journey covers an online one when it leaves no more than 1 min earlier, arrives no more than 1 min later
+// and has no more rides. Like the router, a journey dominates another only with no more rides.
 import fs from 'node:fs';
 const rd = (f) => Object.fromEntries(fs.readFileSync(f, 'utf8').trim().split('\n').map(JSON.parse).map((x) => [x.label, x]));
 const qs = JSON.parse(fs.readFileSync('queries.json', 'utf8')), off = rd(process.argv[2] ?? 'offline.jsonl'), on = rd('online.jsonl');
 const base = process.argv[3] ? rd(process.argv[3]) : null;
 const t = (s) => new Date(s).getTime() / 1000, hm = (s) => new Date(s).toLocaleTimeString('sv-SE', { timeZone: 'Europe/Bratislava' }).slice(0, 5);
 const fmt = (js) => js.map((j) => `${hm(j.dep)}-${hm(j.arr)} ${j.lines.join('>')}${j.src ? `(${j.src})` : ''}`).join(' | ');
-const covers = (j, p) => t(j.dep) >= t(p.dep) - 60 && t(j.arr) <= t(p.arr) + 60;
+const covers = (j, p) => t(j.dep) >= t(p.dep) - 60 && t(j.arr) <= t(p.arr) + 60 && j.lines.length <= p.lines.length;
 const best = (js) => Math.min(...js.map((j) => t(j.arr)));
 const tally = (d, into) => into[d < -60 ? 'earlier' : d > 60 ? 'later' : 'same']++;
 const cov = { 900: [0, 0], 3600: [0, 0] }, vsOnline = { earlier: 0, same: 0, later: 0 }, vsBase = { earlier: 0, same: 0, later: 0 };
@@ -15,7 +16,7 @@ for (const q of qs) {
   const q0 = t(q.iso), o = off[q.label], n = on[q.label];
   const inWin = (w) => (j) => t(j.dep) >= q0 - 60 && t(j.dep) <= q0 + w;
   const online = [...n.r.map((j) => ({ ...j, src: 'R' })), ...n.i.map((j) => ({ ...j, src: 'I' }))].filter((j) => j.dep && j.arr && inWin(3600)(j));
-  const pareto = online.filter((a) => !online.some((b) => b !== a && t(b.dep) >= t(a.dep) && t(b.arr) <= t(a.arr) && (t(b.dep) > t(a.dep) || t(b.arr) < t(a.arr) || b.lines.length < a.lines.length)));
+  const pareto = online.filter((a) => !online.some((b) => b !== a && t(b.dep) >= t(a.dep) && t(b.arr) <= t(a.arr) && b.lines.length <= a.lines.length && (t(b.dep) > t(a.dep) || t(b.arr) < t(a.arr) || b.lines.length < a.lines.length)));
   const uniq = [...new Map(pareto.map((j) => [`${hm(j.dep)}-${hm(j.arr)}`, j])).values()];
   for (const w of [900, 3600]) {
     const target = uniq.filter(inWin(w));
