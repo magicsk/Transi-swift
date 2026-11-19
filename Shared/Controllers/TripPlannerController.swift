@@ -274,7 +274,8 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
     private func sortedOfflineJourneys(_ journeys: [Journey]) -> [Journey] {
         guard arrivalDeparture == .arrival else { return sortedJourneys(journeys) }
         return journeys.sorted {
-            ($0.parts?.last?.endArrival ?? .distantFuture) < ($1.parts?.last?.endArrival ?? .distantFuture)
+            let lhs = $0.parts?.last?.endArrival ?? .distantFuture, rhs = $1.parts?.last?.endArrival ?? .distantFuture
+            return lhs != rhs ? lhs < rhs : journeyStartDate($0) > journeyStartDate($1)
         }
     }
 
