@@ -22,7 +22,8 @@ class SQLiteDatabase {
     init?(path: String) {
         self.path = URL(fileURLWithPath: path).standardizedFileURL.path
         self.fingerprint = Self.fingerprint(for: self.path)
-        if sqlite3_open_v2(path, &db, SQLITE_OPEN_READWRITE, nil) != SQLITE_OK {
+        // Searches may run at once on one connection; the full mutex serializes them.
+        if sqlite3_open_v2(path, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX, nil) != SQLITE_OK {
             sqlite3_close(db)
             return nil
         }
