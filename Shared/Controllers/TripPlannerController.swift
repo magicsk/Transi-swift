@@ -230,7 +230,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                     let newJourneys = journeys.filter { !existingSet.contains($0) }
                     self.advanceOfflineSearchDate(after: searchDate, journeys: journeys, continuing: true)
                     guard !newJourneys.isEmpty else { return }
-                    self.trip.journey = self.sortedJourneys(existing + newJourneys)
+                    self.trip.journey = self.sortedOfflineJourneys(existing + newJourneys)
                     self.cacheTripForCurrentSearch(self.trip)
                 } else if journeys.isEmpty {
                     self.trip = Trip()
@@ -238,7 +238,7 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                 } else {
                     self.error = nil // Clear any previous errors
                     self.advanceOfflineSearchDate(after: searchDate, journeys: journeys, continuing: false)
-                    let newTrip = Trip(journey: self.sortedJourneys(journeys))
+                    let newTrip = Trip(journey: self.sortedOfflineJourneys(journeys))
                     self.trip = newTrip
                     self.cacheTripForCurrentSearch(newTrip)
                 }
@@ -266,6 +266,15 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             } else {
                 nextOfflineSearchDate = max(searchDate, latestArrival ?? searchDate)
             }
+        }
+    }
+
+    /// Arrive-by offline pages are cut by arrival time, so the list follows arrival too: a later page never lands
+    /// above rows already shown.
+    private func sortedOfflineJourneys(_ journeys: [Journey]) -> [Journey] {
+        guard arrivalDeparture == .arrival else { return sortedJourneys(journeys) }
+        return journeys.sorted {
+            ($0.parts?.last?.endArrival ?? .distantFuture) < ($1.parts?.last?.endArrival ?? .distantFuture)
         }
     }
 
