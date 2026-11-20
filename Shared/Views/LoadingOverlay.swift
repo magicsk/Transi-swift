@@ -40,15 +40,11 @@ struct LoadingOverlay<Content: View, Error: LocalizedError>: View {
                 .animation(.easeInOut(duration: 0.25), value: delayedLoadingAnimation ? loadingAnimation : loading)
         }
         .onChange(of: loading) { _ in
-            if loading {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                    if loading {
-                        loadingAnimation = true
-                    }
-                }
-            } else {
-                loadingAnimation = false
-            }
+            showLoadingAnimationIfStillLoading()
+        }
+        // Screens open with loading already true, which onChange never sees.
+        .onAppear {
+            showLoadingAnimationIfStillLoading()
         }
         .alert(isPresented: $error, error: errorText) { _ in
             Button("Cancel") {
@@ -61,6 +57,20 @@ struct LoadingOverlay<Content: View, Error: LocalizedError>: View {
             if let message = error.failureReason {
                 Text(message)
             }
+        }
+    }
+}
+
+extension LoadingOverlay {
+    private func showLoadingAnimationIfStillLoading() {
+        if loading {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                if loading {
+                    loadingAnimation = true
+                }
+            }
+        } else {
+            loadingAnimation = false
         }
     }
 }

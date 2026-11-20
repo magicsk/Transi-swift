@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftUIIntrospect
+import WrappingHStack
 
 struct TimetableDetailView: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
@@ -19,6 +20,7 @@ struct TimetableDetailView: View {
     @State var departures: [HourMinute] = []
     @State var loading = true
     @State var error = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(_ route: Route, _ direction: Direction, _ departure: DirectionDeparture, _ selectedDate: Date) {
         self.route = route
@@ -35,33 +37,45 @@ struct TimetableDetailView: View {
                     HStack(alignment: .center, spacing: 20.0) {
                         LineText(route.shortName)
                         VStack(alignment: .leading) {
-                            Text(direction.name).font(.system(size: 26.0, weight: .bold)).lineLimit(1)
+                            Text(direction.name)
+                                .font(.title2.bold())
+                                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                                .minimumScaleFactor(0.8)
                             HStack(alignment: .center, spacing: 5.0) {
                                 Image("stop").padding(.leading, -5.0)
-                                Text(departure.name).font(.system(size: 16.0))
+                                Text(departure.name).font(.callout)
                             }
                         }
                     }
                     .padding(.horizontal, 20.0)
-                    List(departures) { departure in
-                        HStack {
-                            Label {
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack {
-                                        ForEach(enumerating: departure.minutes) { minute in
-                                            Text(minute)
-                                        }
-                                    }
-                                }
-                            } icon: {
-                                Text(String(departure.hour).leftPadding(toLength: 2, withPad: "0"))
-                                    .fontWeight(.bold)
-                                    .padding(0.0)
+                    let list = List(departures) { departure in
+                        let hour = String(departure.hour % 24).leftPadding(toLength: 2, withPad: "0")
+                        Label {
+                            // Wrapped, not scrolled sideways: a busy hour hid its later departures off the row.
+                            WrappingHStack(departure.minutes) { minute in
+                                // Equal-width digits keep the minutes in columns from hour to hour.
+                                Text(minute).monospacedDigit()
                             }
+                        } icon: {
+                            Text(hour)
+                                .fontWeight(.bold)
+                                .padding(0.0)
                         }
+                        // One element per hour, each departure read as a time rather than a bare number.
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(
+                            (departure.hour >= 24 ? "Next day, " : "")
+                                + departure.minutes.map { "\(hour):\($0)" }.joined(separator: ", ")
+                        )
                     }
                     .introspect(.list(style: .insetGrouped), on: .iOS(.v16, .v17, .v18)) { list in
                         list.contentInset.top = -25.0
+                    }
+                    // The inset above has no match from iOS 26 on.
+                    if #available(iOS 26.0, *) {
+                        list.contentMargins(.top, 0, for: .scrollContent)
+                    } else {
+                        list
                     }
                 }
             }
@@ -110,7 +124,8 @@ struct TimetableDetailView: View {
     private func groupDetailsIntoHourMinutes(_ details: [TimetableDetail]) {
         departures.removeAll()
         for detail in details {
-            let hour = (detail.t / 60) % 24
+            // Not wrapped to 0–23: a night trip at 24:15 belongs after 23:xx, not with the morning's 00:xx.
+            let hour = detail.t / 60
             let minute = String(detail.t % 60).leftPadding(toLength: 2, withPad: "0")
             if let idx = departures.firstIndex(where: { $0.hour == hour }) {
                 departures[idx].minutes.append(minute)

@@ -34,53 +34,24 @@ struct TimetablesView: View {
                             .padding(.bottom, 5)
                     }
                     VStack(alignment: .leading, spacing: 5.0) {
-                        Text("Trams").font(.system(size: 24.0, weight: .semibold))
-                        WrappingHStack(category.trams) { route in
-                            NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0
-                                )
+                        section("Trams", category.trams)
+                        section("Trolleybuses", category.trolleybuses)
+                        section("Buses", category.buses)
+                        section("Night lines", category.nightlines)
+                        section("Trains", category.trains)
+                        section("Regional Buses", category.regionalbuses)
+                        // Cancelling the failed-load alert used to leave six empty headings and no way to try again.
+                        if categoryIsEmpty && !loading {
+                            VStack(spacing: 8.0) {
+                                Text("Timetables couldn't be loaded.")
+                                    .foregroundColor(.secondaryLabel)
+                                Button("Retry") {
+                                    fetchTimetables()
+                                }
+                                .buttonStyle(.bordered)
                             }
-                        }
-                        Text("Trolleybuses").font(.system(size: 24.0, weight: .semibold))
-                        WrappingHStack(category.trolleybuses) { route in
-                            NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0
-                                )
-                            }
-                        }
-                        Text("Buses").font(.system(size: 24.0, weight: .semibold))
-                        WrappingHStack(category.buses) { route in
-                            NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0
-                                )
-                            }
-                        }
-                        Text("Night lines").font(.system(size: 24.0, weight: .semibold))
-                        WrappingHStack(category.nightlines) { route in
-                            NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0
-                                )
-                            }
-                        }
-                        Text("Trains").font(.system(size: 24.0, weight: .semibold))
-                        WrappingHStack(category.trains) { route in
-                            NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0
-                                )
-                            }
-                        }
-                        Text("Regional Buses").font(.system(size: 24.0, weight: .semibold))
-                        WrappingHStack(category.regionalbuses) { route in
-                            NavigationLink(destination: TimetableView(route)) {
-                                LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
-                                    .vertical, 5.0
-                                )
-                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 40.0)
                         }
                     }
                     .padding(.bottom, 10.0)
@@ -185,6 +156,29 @@ struct TimetablesView: View {
         guard timetableDb.serverTimetablesFailed, routes.joined().contains(where: { $0.source == .server }) else { return }
         category.clear()
         fetchTimetables(force: true)
+    }
+
+    /// A category's heading and its lines, or nothing while it has none.
+    @ViewBuilder
+    private func section(_ title: String, _ routes: [Route]) -> some View {
+        if !routes.isEmpty {
+            Text(title).font(.title2.weight(.semibold)).accessibilityAddTraits(.isHeader)
+            // Spacing trimmed by the padding added for the tap targets, so the badges keep their gaps and density.
+            WrappingHStack(routes, spacing: .constant(4.0)) { route in
+                NavigationLink(destination: TimetableView(route)) {
+                    LineText(route.shortName, 22.0).padding(.horizontal, 2.0).padding(
+                        .vertical, 5.0
+                    )
+                    // Narrow badges were smaller than a finger; padding instead of a minimum width keeps the gaps even.
+                    .padding(.horizontal, 2.0)
+                    .frame(minHeight: 44.0)
+                    .contentShape(Rectangle())
+                }
+                .accessibilityLabel("Line \(route.shortName)")
+            }
+            // Gives back the 2 pt each edge badge gained, so rows wrap and align as before.
+            .padding(.horizontal, -2.0)
+        }
     }
 
     private var categoryIsEmpty: Bool {
