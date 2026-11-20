@@ -108,6 +108,18 @@ class VirtualTableController: ObservableObject {
 
     private func updateConnections() {
         //  print("update")
+        // Without a connection nothing removes the rows that left; drop those over a minute past. Connected, the socket
+        // decides: a stuck vehicle can keep a past estimate and still be coming.
+        if socket.status != .connected {
+            let gone = Date().timeIntervalSince1970 - 60
+            if connections.contains(where: { $0.departureTimeRaw < gone }) {
+                connections.removeAll { $0.departureTimeRaw < gone }
+                connectionsProcessingQueue.async { [weak self] in
+                    self?.internalConnections.removeAll { $0.departureTimeRaw < gone }
+                    self?.internalRegionalConnections.removeAll { $0.departureTimeRaw < gone }
+                }
+            }
+        }
         for index in connections.indices {
             let connection = connections[index]
             let oldTimeRemaining = connection.departureTimeRemaining
@@ -153,6 +165,9 @@ class VirtualTableController: ObservableObject {
         ) { [weak self] result in
             // A reply for the stop shown before a switch would land on the new stop's board.
             guard let self = self, self.currentStop.id == stop.id else { return }
+
+            // The board moved to another stop while this was loading; these departures aren't its.
+            guard stop.id == self.currentStop.id else { return }
 
             switch result {
             case .success(let response):
@@ -268,6 +283,8 @@ class VirtualTableController: ObservableObject {
     }
 
     func connect() {
+        // Back from the background the last board is stale until fresh data arrives, or for good while offline.
+        updateConnections()
         if socket.status == .connected {
             #if DEBUG
             print("Socket already connected, requesting fresh data...")
@@ -294,6 +311,9 @@ class VirtualTableController: ObservableObject {
             }
             return
         }
+        // A socket still connecting subscribes to the current stop on cack anyway. Dropping it mid-handshake
+        // stalls the watch's long-polling engine until the ping times out, about 50 s.
+        if reconnect && socket.status == .connecting { return }
         self.reconnect = reconnect
         socket.disconnect()
     }
@@ -328,7 +348,11 @@ class VirtualTableController: ObservableObject {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.connected = false
-                self.stopUpdater()
+                // The countdown keeps ticking while reconnecting, so the board doesn't freeze on old minutes; only the
+                // regional refresh waits for the connection.
+                self.updaterRegionalConnectionsSubscription?.cancel()
+                self.updaterRegionalConnectionsSubscription = nil
+                self.updaterRegionalConnections = nil
                 if self.reconnect {
                     self.reconnect = false
                     self.connect()
@@ -452,8 +476,9 @@ class VirtualTableController: ObservableObject {
         if stopId == -1 {
             switchLocationChanging(true)
         } else {
+            // Also when the board already shows it: picking the stop it follows pins it there.
+            if !switchOnly { switchLocationChanging(false) }
             if currentStop.id != stopId {
-                if !switchOnly { switchLocationChanging(false) }
                 currentStop.id = stopId
                 if let currentStop = GlobalController.getStopById(stopId) {
                     self.currentStop = currentStop
