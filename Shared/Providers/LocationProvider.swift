@@ -19,10 +19,15 @@ class LocationProvider: NSObject, CLLocationManagerDelegate {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestAlwaysAuthorization()
         locationManager.distanceFilter = 50.0
+        #if os(iOS)
+        locationManager.requestAlwaysAuthorization()
         locationManager.showsBackgroundLocationIndicator = false
         locationManager.allowsBackgroundLocationUpdates = true
+        #else
+        // The watch finds the nearest stop only while open.
+        locationManager.requestWhenInUseAuthorization()
+        #endif
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

@@ -57,18 +57,20 @@ class VirtualTableController: ObservableObject {
         } else {
             readInfoTexts = []
         }
-        manager = SocketManager(
-            socketURL: URL(string: GlobalController.iApiBaseUrl)!,
-            config: [
-                .path("/rt/sio2"),
-                .version(.three),
-                .log(false),
-                .reconnects(true),
-                .reconnectAttempts(-1),
-                .reconnectWaitMax(1),
-                .reconnectWait(1),
-            ]
-        )
+        var config: SocketIOClientConfiguration = [
+            .path("/rt/sio2"),
+            .version(.three),
+            .log(false),
+            .reconnects(true),
+            .reconnectAttempts(-1),
+            .reconnectWaitMax(1),
+            .reconnectWait(1),
+        ]
+        #if os(watchOS)
+        // watchOS allows WebSockets only to audio and VoIP apps, so the watch long-polls over HTTP.
+        config.insert(.forcePolling(true))
+        #endif
+        manager = SocketManager(socketURL: URL(string: GlobalController.iApiBaseUrl)!, config: config)
         socket = manager.defaultSocket
         startListeners()
     }

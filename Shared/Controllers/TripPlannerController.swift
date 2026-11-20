@@ -16,6 +16,8 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
     let arrivalDepartureCustomDate: Bool
     var trip: Trip?
     var tripSavedAt: Date?
+    /// When it was searched; nil for searches saved before this was kept.
+    var searchedAt: Date?
 
     var id: String { "\(from.id):\(to.id)" }
     var cacheID: String {
@@ -33,6 +35,7 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
         case arrivalDepartureCustomDate
         case trip
         case tripSavedAt
+        case searchedAt
     }
 
     init(
@@ -42,7 +45,8 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
         arrivalDepartureDate: Date = Date(),
         arrivalDepartureCustomDate: Bool = false,
         trip: Trip? = nil,
-        tripSavedAt: Date? = nil
+        tripSavedAt: Date? = nil,
+        searchedAt: Date? = nil
     ) {
         self.from = from
         self.to = to
@@ -51,6 +55,7 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
         self.arrivalDepartureCustomDate = arrivalDepartureCustomDate
         self.trip = trip
         self.tripSavedAt = tripSavedAt
+        self.searchedAt = searchedAt
     }
 
     init(from decoder: Decoder) throws {
@@ -71,6 +76,7 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
         ) ?? false
         trip = try container.decodeIfPresent(Trip.self, forKey: .trip)
         tripSavedAt = try container.decodeIfPresent(Date.self, forKey: .tripSavedAt)
+        searchedAt = try container.decodeIfPresent(Date.self, forKey: .searchedAt)
     }
 
 }
@@ -748,7 +754,8 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
             to: savedTo,
             arrivalDeparture: arrivalDeparture,
             arrivalDepartureDate: arrivalDepartureDate,
-            arrivalDepartureCustomDate: arrivalDepartureCustomDate
+            arrivalDepartureCustomDate: arrivalDepartureCustomDate,
+            searchedAt: Date()
         )
 
         recentSearches.removeAll { $0.id == search.id }
@@ -766,6 +773,32 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                 && Set(recentSearches.map(\.id)).count == recentSearches.count
         )
     }
+
+    #if os(watchOS)
+    /// Adds the iPhone's recent searches to the watch's, newest first; a pair searched on both keeps the newer one.
+    func mergeRecentSearches(_ others: [RecentTripSearch]) {
+        recentSearchQueue.async {
+            let defaults = UserDefaults.standard
+            let own = defaults.retrieve(object: [RecentTripSearch].self, forKey: Stored.tripRecentSearches) ?? []
+            var seen = Set<String>()
+            // Searches saved before `searchedAt` was kept fall back to when their results were saved; without either
+            // they go last, keeping their order.
+            let merged = Array(
+                (own + others).enumerated()
+                    .sorted {
+                        let (a, b) = ($0.element.searchedAt ?? $0.element.tripSavedAt ?? .distantPast,
+                                      $1.element.searchedAt ?? $1.element.tripSavedAt ?? .distantPast)
+                        return a != b ? a > b : $0.offset < $1.offset
+                    }
+                    .map(\.element)
+                    .filter { seen.insert($0.id).inserted }
+                    .prefix(Self.recentSearchLimit)
+            )
+            defaults.save(customObject: merged, forKey: Stored.tripRecentSearches)
+            DispatchQueue.main.async { self.recentSearches = merged }
+        }
+    }
+    #endif
 
     private func cacheTripForCurrentSearch(_ trip: Trip) {
         let currentID = RecentTripSearch(from: from, to: to, trip: nil).id

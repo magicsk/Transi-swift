@@ -27,10 +27,13 @@ struct GlobalController {
     static let stopsListProvider = StopsListProvider()
     static let virtualTable = VirtualTableController()
     static let tripPlanner = TripPlannerController()
+    #if os(iOS)
     static let tripLiveActivity = TripLiveActivityController()
     static let tripSchedule = TripScheduleController()
+    #endif
     static let timetableDatabase = TimetableDatabase()
     static let ticketCatalogue = TicketCatalogueProvider()
+    static let watchSync = WatchSyncController()
 
     private static let tokenLock = NSLock()
     private static var _sessionToken = ""
@@ -60,16 +63,21 @@ struct GlobalController {
     var sessionTokenError = false
 
     static func appLaunch() {
+        #if os(iOS)
         // Before launch finishes, or the tap that launched the app is lost.
         UNUserNotificationCenter.current().delegate = tripSchedule
         registerForNotifications()
+        #endif
         registerUserDefaults()
         fetchSessionToken()
+        watchSync.activate()
+        #if os(iOS)
         VirtualTableLiveActivityController.activateExistingActitivites()
         tripLiveActivity.restore()
         // After the restore, so an answer from the trip Live Activity that relaunched the app finds its trip.
         TripQuestion.answer = { await tripLiveActivity.answer(stillOn: $0) }
         tripSchedule.sync()
+        #endif
         if timetableDatabase.shouldMaintainOfflineDatabase {
             _ = timetableDatabase.openDatabases()
             timetableDatabase.checkAndUpdate()
@@ -78,10 +86,14 @@ struct GlobalController {
 
     static func scenePhaseChange(_ phase: ScenePhase) {
         appState.phase = phase
+        #if os(iOS)
         _ = VirtualTableLiveActivityController.listAllTabActivities()
+        #endif
         switch phase {
             case .background:
                 virtualTable.disconnect()
+                watchSync.sendState()
+                #if os(iOS)
                 if shouldRunInBackground {
                     // A followed trip checks where the traveller is, which needs the full accuracy.
                     if !TripLiveActivityController.followsTrip {
@@ -90,6 +102,9 @@ struct GlobalController {
                 } else {
                     locationProvider.stopUpdatingLocation()
                 }
+                #else
+                locationProvider.stopUpdatingLocation()
+                #endif
             case .active:
                 locationProvider.startUpdatingLocation()
                 // A followed trip keeps the full accuracy in the background, so no fresh fix may come to switch the
@@ -105,13 +120,16 @@ struct GlobalController {
                     _ = timetableDatabase.openDatabases()
                     timetableDatabase.checkAndUpdate()
                 }
+                #if os(iOS)
                 tripSchedule.sync(opened: true)
                 tripSchedule.runTappedReminder()
+                #endif
             default:
                 break
         }
     }
 
+    #if os(iOS)
     static func startBackgroundMode() {
         shouldRunInBackground = true
         if locationProvider.locationManager.authorizationStatus != .authorizedAlways {
@@ -134,6 +152,7 @@ struct GlobalController {
             }
         }
     }
+    #endif
 
     private static func registerUserDefaults() {
         UserDefaults.standard.register(defaults: [
@@ -189,6 +208,7 @@ struct GlobalController {
         }
     }
 
+    #if os(iOS)
     // UNUserNotificationCenter calls can block on a synchronous XPC reply from usernotificationsd,
     // so they run off the main thread, in call order, on this serial queue.
     static let notificationQueue = DispatchQueue(label: "eu.magicsk.transi.notifications")
@@ -229,6 +249,7 @@ struct GlobalController {
             }
         }
     }
+    #endif
 
     static func getSessionToken() -> String {
         tokenLock.lock()

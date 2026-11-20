@@ -6,9 +6,12 @@
 //
 
 import SwiftUI
+#if os(iOS)
 import SwiftUIX
+#endif
 
-extension Color {     
+extension Color {
+    #if os(iOS)
     // MARK: - Text Colors
     static let lightText = Color(UIColor.lightText)
     static let darkText = Color(UIColor.darkText)
@@ -59,6 +62,18 @@ extension Color {
     static let systemRed = Color(UIColor.systemRed)
     static let systemTeal = Color(UIColor.systemTeal)
     static let systemIndigo = Color(UIColor.systemIndigo)
+    #else
+    // watchOS has no semantic UIColors, so the shared views get their SwiftUI equivalents.
+    static let label = Color.primary
+    static let secondaryLabel = Color.secondary
+    static let systemGray = Color.gray
+    static let systemBlue = Color.blue
+    static let systemPurple = Color.purple
+    static let systemGreen = Color.green
+    static let systemYellow = Color.yellow
+    static let systemOrange = Color.orange
+    static let systemRed = Color.red
+    #endif
 
     // MARK: Line Colors
     static let l1 = Color(hexadecimal: "ec691f")
@@ -135,3 +150,17 @@ extension Color {
     static let regio = Color(hexadecimal: "bfbfb9")
     static let ldefault = Color(hexadecimal: "52595c")
 }
+
+#if !os(iOS)
+extension Color {
+    /// SwiftUIX's initializer, for the watch targets that don't link it: an RGB hex string like "ec691f".
+    init(hexadecimal: String) {
+        let value = UInt64(hexadecimal, radix: 16) ?? 0
+        self.init(
+            red: Double((value >> 16) & 0xFF) / 255,
+            green: Double((value >> 8) & 0xFF) / 255,
+            blue: Double(value & 0xFF) / 255
+        )
+    }
+}
+#endif

@@ -181,12 +181,21 @@ class StopsListProvider: ObservableObject {
     }
 
     func toggleFavorite(_ stopId: Int) {
-        if let index = favoriteStopIds.firstIndex(of: stopId) {
-            favoriteStopIds.remove(at: index)
+        var ids = favoriteStopIds
+        if let index = ids.firstIndex(of: stopId) {
+            ids.remove(at: index)
         } else {
-            favoriteStopIds.append(stopId)
+            ids.append(stopId)
         }
-        UserDefaults.standard.set(favoriteStopIds, forKey: Stored.favoriteStopIds)
+        setFavorites(ids, updatedAt: Date().timeIntervalSince1970)
+        GlobalController.watchSync.sendState()
+    }
+
+    /// Main thread. Saves the favorites with when they changed, which the iPhone and watch compare to sync them.
+    func setFavorites(_ ids: [Int], updatedAt: TimeInterval) {
+        favoriteStopIds = ids
+        UserDefaults.standard.set(ids, forKey: Stored.favoriteStopIds)
+        UserDefaults.standard.set(updatedAt, forKey: Stored.favoriteStopIdsUpdatedAt)
     }
 
     func getStopIdFromName(_ stopName: String) -> Int? {

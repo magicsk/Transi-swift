@@ -25,6 +25,10 @@ struct Stored {
     static let timetableScheduleDbSha = "timetable_schedule_db_sha"
     static let defaultStopId = "default_stop_id"
     static let favoriteStopIds = "favorite_stop_ids"
+    /// When the favorites last changed here or came from the paired iPhone or watch; 0 before either.
+    static let favoriteStopIdsUpdatedAt = "favorite_stop_ids_updated_at"
+    /// Whether favorites were ever exchanged with the paired iPhone or watch.
+    static let favoriteStopIdsSynced = "favorite_stop_ids_synced"
     static let liveActivityThreshold = "live_activity_threshold"
     static let notifyOnTimeChange = "notify_on_time_change"
     static let notifyOnDelayChange = "notify_on_delay_change"

@@ -8,13 +8,25 @@
 import SwiftUI
 
 struct ContentView: View {
+    /// A new id drops whatever was pushed, so a link opens on the departures.
+    @State private var navigationID = UUID()
+
     var body: some View {
-        Text("Temporarily disabled")
+        NavigationStack {
+            DeparturesView()
+        }
+        .id(navigationID)
+        .onOpenURL { url in
+            // transi://table/<stop id>, from the widget; -1 follows the nearest stop.
+            guard url.host == "table", url.pathComponents.count >= 2, let stopId = Int(url.pathComponents[1]) else {
+                return
+            }
+            navigationID = UUID()
+            GlobalController.virtualTable.changeStop(stopId)
+        }
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
+#Preview {
+    ContentView()
 }
