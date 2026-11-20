@@ -12,7 +12,11 @@ import WidgetKit
 struct TripActivityLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TripActivityAttributes.self) { context in
-            TripActivityLiveView(state: context.state)
+            if #available(iOS 18.0, *) {
+                TripActivityLiveViewWithActivityFamily(state: context.state)
+            } else {
+                TripActivityLiveView(state: context.state)
+            }
         } dynamicIsland: { context in
             let state = context.state
             return DynamicIsland {
@@ -46,6 +50,66 @@ struct TripActivityLiveActivity: Widget {
             }
             .widgetURL(URL(string: "transi://trip/active"))
         }
+        .supplementalActivityFamiliesIfAvailable()
+    }
+}
+
+/// The Lock Screen banner everywhere except the watch Smart Stack, which gets the compact layout.
+@available(iOS 18.0, *)
+private struct TripActivityLiveViewWithActivityFamily: View {
+    @Environment(\.activityFamily) private var activityFamily
+
+    let state: TripActivityAttributes.ContentState
+
+    var body: some View {
+        if activityFamily == .small {
+            TripActivityLiveViewSmall(state: state)
+        } else {
+            TripActivityLiveView(state: state)
+        }
+    }
+}
+
+/// The watch Smart Stack: the step with its time, the detail, ride progress and change warning, sized for the watch.
+@available(iOS 18.0, *)
+private struct TripActivityLiveViewSmall: View {
+    let state: TripActivityAttributes.ContentState
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4.0) {
+            HStack(spacing: 6.0) {
+                TripStepIcon(state: state, size: 16.0)
+                Text(state.title).font(.system(size: 14.0, weight: .semibold))
+                    .lineLimit(1).minimumScaleFactor(0.8)
+                Spacer(minLength: 2.0)
+                Text(state.time, style: .time).font(.system(size: 14.0, weight: .bold)).monospacedDigit()
+                    .fixedSize()
+            }
+            // The detail stays (it names the platform); in the short Smart Stack slot a warning takes the
+            // progress bar's place, so it is never the row cut off.
+            HStack(alignment: .firstTextBaseline, spacing: 4.0) {
+                Text(state.detail).font(.system(size: 12.0)).foregroundStyle(.secondary).lineLimit(1)
+                Spacer(minLength: 2.0)
+                if let delay = state.delay {
+                    Text(getDelayText(delay, "online")).font(.system(size: 12.0, weight: .semibold))
+                        .foregroundColor(getDelayColor(delay, "online"))
+                        .lineLimit(1).fixedSize()
+                }
+            }
+            if let warning = state.warningText {
+                Label(warning, systemImage: "exclamationmark.triangle.fill")
+                    .font(.system(size: 12.0, weight: .semibold))
+                    .foregroundStyle(state.warning == .likelyMissedChange ? Color.systemRed : Color.systemOrange)
+                    .lineLimit(1)
+            } else if let progress = state.progress {
+                ProgressView(value: progress).tint(state.line.flatMap(colorFromLineNum))
+            }
+        }
+        .padding(10.0)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(state.accessibilitySummary)
+        .activityBackgroundTint(Color.black.opacity(0.85))
+        .widgetURL(URL(string: "transi://trip/active"))
     }
 }
 
