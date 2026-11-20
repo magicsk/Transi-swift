@@ -44,10 +44,15 @@ struct TripPlannerList: View {
                                     }
                                 }
                             }
+                            // One sentence per journey instead of loose numbers, asset names and a doubled marquee.
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(journeyAccessibilityLabel(parts, journey.zones))
                         }
                         .accessibilityHint("Shows the route on a map with every stop")
                     } header: {
                         getHeaderText(parts, journey.zones)
+                            // The row's label starts with the same summary.
+                            .accessibilityHidden(true)
                     }
                     .onAppear {
                         loadMoreTripsIfNeeded(journey)
@@ -74,6 +79,33 @@ struct TripPlannerList: View {
             }
         }
     }
+}
+
+/// "Departs 18:09, 21 min, 2 zones. Line 84 to Pri kríži, from Hodžovo nám. platform C at 18:09, to Pri kríži platform F
+/// at 18:30."
+func journeyAccessibilityLabel(_ parts: [Part], _ zones: [String]?) -> String {
+    guard let first = parts.first, let last = parts.last else { return "" }
+    let start = timeStringFromDate(first.startDeparture)
+    let day = dayStringUnlessToday(first.startDeparture).map { "\($0) " } ?? ""
+    var summary = "Departs \(day)\(start), \(timeDiffFromDates(first.startDeparture, last.endArrival)) min"
+    if let count = zones?.count, count > 0 {
+        summary += count == 1 ? ", 1 zone" : ", \(count) zones"
+    }
+    func platform(_ code: String?) -> String {
+        guard let code, !code.isEmpty else { return "" }
+        return " platform \(code)"
+    }
+    let steps = parts.enumerated().map { index, part -> String in
+        if part.routeType == 64 {
+            // The row adds the platform unless the walk stays at one stop or ends the journey.
+            let showsPlatform = part.startStopName != part.endStopName && index < parts.count - 1
+            return "Walk \(TripPlannerWalkListItem.text(for: part))\(showsPlatform ? platform(part.endStopCode) : "")"
+        }
+        return "Line \(part.routeShortName ?? "") to \(part.tripHeadsign ?? ""), from \(part.startStopName ?? "")"
+            + "\(platform(part.startStopCode)) at \(timeStringFromDate(part.startDeparture)), to \(part.endStopName ?? "")"
+            + "\(platform(part.endStopCode)) at \(timeStringFromDate(part.endArrival))"
+    }
+    return ([summary] + steps).joined(separator: ". ")
 }
 
 func getHeaderText(_ parts: [Part], _ zones: [String]?) -> Text {

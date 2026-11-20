@@ -23,9 +23,7 @@ struct TripPlannerWalkListItem: View {
                 .font(.system(size: 25.0))
                 .foregroundColor(.accent)
                 .frame(minWidth: 46.0)
-            Text(
-                "\(walkingMinutes) min to \(sameStop ? "platform \(part.endStopCode ?? "X")" : part.endStopName ?? "Error")"
-            )
+            Text(Self.text(for: part))
             .padding(.leading, 7.0)
             if !(sameStop || last) {
                 TripPlannerStopCodeView(code: part.endStopCode)
@@ -33,15 +31,21 @@ struct TripPlannerWalkListItem: View {
         }.padding(.vertical, 3.0)
     }
 
-    private var walkingMinutes: Int {
+    /// "3 min to Záluhy", shown in the row and read in the journey's VoiceOver label.
+    static func text(for part: Part) -> String {
+        let sameStop = part.startStopName == part.endStopName
+        return "\(walkingMinutes(part)) min to \(sameStop ? "platform \(part.endStopCode ?? "X")" : part.endStopName ?? "Error")"
+    }
+
+    private static func walkingMinutes(_ part: Part) -> Int {
         let minutes = max(0, Int(part.endArrival.timeIntervalSince(part.startDeparture) / 60))
-        if isDifferentWalkingEndpoint && minutes < 1 {
+        if isDifferentWalkingEndpoint(part) && minutes < 1 {
             return 1
         }
         return minutes
     }
 
-    private var isDifferentWalkingEndpoint: Bool {
+    private static func isDifferentWalkingEndpoint(_ part: Part) -> Bool {
         if part.startStopName != part.endStopName {
             return true
         }

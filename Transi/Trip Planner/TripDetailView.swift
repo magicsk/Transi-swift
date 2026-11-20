@@ -61,7 +61,7 @@ final class TripDetailMapViewController: UIViewController, MKMapViewDelegate, UI
     private let model: TripDetailModel
     private let tiles = TransportTiles()
     private let mapView = MKMapView()
-    private let sheet: UIHostingController<TripDetailSheet>
+    private let sheet: TripDetailSheetController
     private let panel = UIVisualEffectView()
     private let followButton = UIButton(configuration: .filled())
     private var subscriptions = Set<AnyCancellable>()
@@ -114,8 +114,9 @@ final class TripDetailMapViewController: UIViewController, MKMapViewDelegate, UI
 
     init(model: TripDetailModel) {
         self.model = model
-        sheet = UIHostingController(rootView: TripDetailSheet(model: model))
+        sheet = TripDetailSheetController(rootView: TripDetailSheet(model: model))
         super.init(nibName: nil, bundle: nil)
+        sheet.escape = { [weak self] in self?.goBack?() }
     }
 
     @available(*, unavailable)
@@ -905,6 +906,17 @@ final class TripDetailMapViewController: UIViewController, MKMapViewDelegate, UI
             circle.lineWidth = lineWidth
             circle.stroke()
         }
+    }
+}
+
+/// The detail's modal sheet. VoiceOver's two-finger scrub goes back from it, as it does from every other screen.
+private final class TripDetailSheetController: UIHostingController<TripDetailSheet> {
+    var escape: (() -> Void)?
+
+    override func accessibilityPerformEscape() -> Bool {
+        guard let escape else { return false }
+        escape()
+        return true
     }
 }
 

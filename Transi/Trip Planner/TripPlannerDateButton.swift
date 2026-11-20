@@ -25,13 +25,17 @@ struct TripPlannerDateButton: View {
 
     var body: some View {
         Button(action: {dateDialog = true}) {
-            Text(customDate ? Self.formatter.string(from: date) : "now")
+            Text(customDate ? Self.formatter.string(from: date) : "Now")
                 .padding(.vertical, 6.0)
                 .frame(maxWidth: .infinity)
                 .background(.secondarySystemGroupedBackground)
                 .cornerRadius(26.0)
                 .padding(.leading, 10.0)
+                // A full-size tap target around the smaller pill.
+                .frame(minHeight: 44.0)
+                .contentShape(Rectangle())
         }
+        .accessibilityLabel("Time, \(customDate ? Self.formatter.string(from: date) : "now")")
     }
 }
 
