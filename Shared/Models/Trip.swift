@@ -129,6 +129,15 @@ struct Part: Codable, Hashable {
     )
 }
 
+extension Part {
+    /// Not arrived yet, and departing within the hour or already departed: while its vehicle's live
+    /// departure and delay are this leg's. A known delay (seconds) moves the end to the expected arrival.
+    func isLive(at now: Date = Date(), delaySeconds: Int? = nil) -> Bool {
+        endArrival.addingTimeInterval(TimeInterval(max(delaySeconds ?? 0, 0))) > now
+            && startDeparture < now.addingTimeInterval(3600)
+    }
+}
+
 struct PartStop: Codable, Hashable {
     var name: String
     /// Platform letter.

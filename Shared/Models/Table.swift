@@ -155,10 +155,12 @@ func getDelayText(_ delay: Int, _ type: String) -> String {
     }
 }
 
+/// What is left until the departure at `now`: "3 min", "<1 min", "now", or the clock time after an hour; "~" marks
+/// timetable-only departures.
 func getDepartureTimeRemainingText(
-    _ departureTime: String, _ departureTimeRaw: TimeInterval, _ type: String
+    _ departureTime: String, _ departureTimeRaw: TimeInterval, _ type: String, now: Date = Date()
 ) -> String {
-    let departureTimeRemainingRaw = Int(departureTimeRaw - Date().timeIntervalSince1970)
+    let departureTimeRemainingRaw = Int(departureTimeRaw - now.timeIntervalSince1970)
     let timeInMins = departureTimeRemainingRaw / 60
     let departureTimeRemaining =
         departureTimeRemainingRaw > 59
@@ -172,9 +174,9 @@ func getDepartureTimeRemainingText(
 }
 
 func getShortDepartureTimeRemainingText(
-    _ departureTime: String, _ departureTimeRaw: TimeInterval, _: String
+    _ departureTime: String, _ departureTimeRaw: TimeInterval, _: String, now: Date = Date()
 ) -> String {
-    let departureTimeRemainingRaw = Int(departureTimeRaw - Date().timeIntervalSince1970)
+    let departureTimeRemainingRaw = Int(departureTimeRaw - now.timeIntervalSince1970)
     let timeInMins = departureTimeRemainingRaw / 60
     let shortenedFullTime = ":" + (departureTime.components(separatedBy: ":").last ?? "?")
     return departureTimeRemainingRaw > 59

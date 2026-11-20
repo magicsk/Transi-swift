@@ -7,7 +7,6 @@
 
 import Foundation
 
-let S_USER_AGENT = "ProdProd/204 CFNetwork/3826.600.41 Darwin/24.6.0"
 let G_USER_AGENT =
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
 

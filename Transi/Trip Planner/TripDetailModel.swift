@@ -89,13 +89,6 @@ extension Part {
     var minutes: Int {
         minutesBetween(startDeparture, endArrival)
     }
-
-    /// Not arrived yet, and departing within the hour or already departed: while its vehicle's live
-    /// departure and delay are this leg's. A known delay (seconds) moves the end to the expected arrival.
-    func isLive(at now: Date = Date(), delaySeconds: Int? = nil) -> Bool {
-        endArrival.addingTimeInterval(TimeInterval(max(delaySeconds ?? 0, 0))) > now
-            && startDeparture < now.addingTimeInterval(3600)
-    }
 }
 
 enum MapFocus: Equatable {
