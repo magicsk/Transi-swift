@@ -74,6 +74,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
         super.viewDidAppear(animated)
     }
 
+    /// The stop sheet covers the window, so it would stay over the tab a swipe action or a Live Activity opens.
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        if presentedViewController != nil {
+            sheetNavController?.dismiss(animated: false)
+            mapView.deselectAnnotation(selectedAnnotation, animated: false)
+        }
+    }
+
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if mapLoaded {
@@ -221,6 +230,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, UISheetPresentatio
             UIImage(systemName: mapView.userTrackingMode == .none ? "location" : "location.fill"),
             for: .normal
         )
+        locationButton.accessibilityLabel = "Follow my location"
+        locationButton.accessibilityValue = mapView.userTrackingMode == .none ? "Off" : "On"
     }
 
     @objc func focusLocation() {

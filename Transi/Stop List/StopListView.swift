@@ -71,7 +71,7 @@ struct StopListView: View {
             Color.systemGroupedBackground.edgesIgnoringSafeArea(.all)
             VStack(alignment: .leading) {
                 if isPresented == true {
-                    Text("Search").font(.system(size: 36.0, weight: .bold))
+                    Text("Search").font(.largeTitle.bold())
                         .padding(.leading, 24.0)
                         .padding(.top, 45.0)
                         .padding(.bottom, -0.1)
@@ -94,11 +94,14 @@ struct StopListView: View {
                             StopListIcon(stop.type)
                         }
                         .contentShape(Rectangle())
+                        .accessibilityAddTraits(.isButton)
                         .onTapGesture {
                             if isPresented == true {
                                 self.stop = stop
                                 self.isPresented = false
                             } else {
+                                // Picking a stop pins it, even the one already shown; "Actual location" follows again.
+                                GlobalController.virtualTable.switchLocationChanging(false)
                                 GlobalController.virtualTable.changeStop(stop.id)
                                 coordinator.parent.selectedIndex = 1
                             }
@@ -145,6 +148,10 @@ struct StopListView: View {
         }
         .onChange(of: coordinator.searchText) { newValue in
             if !isPresented { performSearch(newValue) }
+        }
+        // A search typed before the stop list loaded found nothing; run it again on the loaded list.
+        .onChange(of: stopsListProvider.stops.count) { _ in
+            performSearch(isPresented ? searchText : coordinator.searchText)
         }
         .onChange(of: isPresented) { newValue in
             if !newValue {
