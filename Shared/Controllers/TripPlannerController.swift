@@ -12,7 +12,7 @@ struct RecentTripSearch: Codable, Equatable, Identifiable {
     let from: Stop
     let to: Stop
     let arrivalDeparture: ArrivalDeparture
-    let arrivalDepartureDate: Date
+    var arrivalDepartureDate: Date
     let arrivalDepartureCustomDate: Bool
     var trip: Trip?
     var tripSavedAt: Date?
@@ -84,6 +84,22 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
     @Published var arrivalDeparture: ArrivalDeparture = .departure
     @Published var arrivalDepartureDate = Date()
     @Published var arrivalDepartureCustomDate = false
+    /// A restored search made for "Now" shows its saved time with its saved results, but the next search runs from now,
+    /// not from that time.
+    var restoredNowSearch = false
+    /// When the current search ran; the date sheet can change `arrivalDepartureDate` before its results arrive.
+    private var searchRanAt = Date()
+
+    private static func iApiFormatter(_ format: String) -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "Europe/Bratislava")
+        formatter.dateFormat = format
+        return formatter
+    }
+
+    private static let iApiDateFormatter = iApiFormatter("yyyy-MM-dd")
+    private static let iApiTimeFormatter = iApiFormatter("HH:mm")
     @Published var loading: Bool = false
     @Published var loadingMore: Bool = false
     @Published var error: TripError?
@@ -118,8 +134,15 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         }
 
         if source == .initial && recordSearch {
+            if restoredNowSearch {
+                restoredNowSearch = false
+                arrivalDepartureCustomDate = false
+            }
             if !arrivalDepartureCustomDate { arrivalDepartureDate = Date() }
             rememberCurrentSearch()
+        }
+        if source == .initial {
+            searchRanAt = arrivalDepartureDate
         }
 
         let generation = generation(for: source)
@@ -398,8 +421,10 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         }
 
         if includeIApi {
-            let searchDateFormatted = String(iApiDate.formatted(.iso8601).split(separator: "T")[0])
-            let searchTime = iApiDate.formatted(Date.FormatStyle().hour().minute(.twoDigits))
+            // Both in Bratislava time: the ISO date was UTC, a day behind just after midnight, and the time followed
+            // the device's 12-hour setting.
+            let searchDateFormatted = Self.iApiDateFormatter.string(from: iApiDate)
+            let searchTime = Self.iApiTimeFormatter.string(from: iApiDate)
 
             var iApiEndpoint = URLComponents(string: "/ba/api/cepo")!
             iApiEndpoint.queryItems = [
@@ -539,7 +564,8 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
 
             if source == .initial && newUnifiedJourneys.isEmpty {
                 self.trip = Trip()
-                self.error = .noJourneys
+                // Every request failed: "no connections" would wrongly suggest another time.
+                self.error = rResult == nil && iResult == nil ? .basic : .noJourneys
                 return
             }
 
@@ -679,14 +705,23 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         arrivalDeparture = search.arrivalDeparture
         arrivalDepartureDate = search.arrivalDepartureDate
         arrivalDepartureCustomDate = true
+        restoredNowSearch = !search.arrivalDepartureCustomDate
         if let cachedTrip = search.trip {
             _ = generation(for: .initial)
+            // Loading more of these results saves the search again, with this time.
+            searchRanAt = search.arrivalDepartureDate
             trip = cachedTrip
             loading = false
             loadingMore = false
             error = nil
             preparePagination(for: cachedTrip)
         } else {
+            // Its saved results expired, so a "Now" search looks again from now.
+            if restoredNowSearch {
+                restoredNowSearch = false
+                arrivalDepartureCustomDate = false
+                arrivalDepartureDate = Date()
+            }
             fetchTrip(recordSearch: false)
         }
     }
@@ -736,6 +771,10 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
         let currentID = RecentTripSearch(from: from, to: to, trip: nil).id
         guard let index = recentSearches.firstIndex(where: { $0.id == currentID }) else { return }
         recentSearches[index].trip = trip
+        // A "Now" search redone later is saved with the time it ran at, which it shows when restored.
+        if !recentSearches[index].arrivalDepartureCustomDate {
+            recentSearches[index].arrivalDepartureDate = searchRanAt
+        }
         let savedAt = Date()
         recentSearches[index].tripSavedAt = savedAt
         let searches = recentSearches
@@ -811,8 +850,17 @@ class TripPlannerController: NSObject, ObservableObject, CLLocationManagerDelega
                     self.from = restoredSearch.from
                     self.to = restoredSearch.to
                     self.arrivalDeparture = restoredSearch.arrivalDeparture
-                    self.arrivalDepartureDate = restoredSearch.arrivalDepartureDate
-                    self.arrivalDepartureCustomDate = true
+                    if restoredSearch.trip == nil && !restoredSearch.arrivalDepartureCustomDate {
+                        // Its results expired: nothing to show a past time for, so it reads "Now" again.
+                        self.arrivalDepartureDate = Date()
+                        self.arrivalDepartureCustomDate = false
+                        self.restoredNowSearch = false
+                    } else {
+                        self.arrivalDepartureDate = restoredSearch.arrivalDepartureDate
+                        self.arrivalDepartureCustomDate = true
+                        self.restoredNowSearch = !restoredSearch.arrivalDepartureCustomDate
+                        self.searchRanAt = restoredSearch.arrivalDepartureDate
+                    }
                     self.trip = restoredSearch.trip ?? Trip()
                 } else if let legacyTrip {
                     self.trip = legacyTrip
