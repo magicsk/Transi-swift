@@ -77,6 +77,8 @@ extension Changelog {
 
 struct ChangelogView: View {
     @Environment(\.dismiss) private var dismiss
+    /// Grows with the icon, which would otherwise run into the heading at the largest text sizes.
+    @ScaledMetric(relativeTo: .title) private var iconWidth = 44.0
     let changelog: Changelog
 
     var body: some View {
@@ -112,11 +114,12 @@ struct ChangelogView: View {
             Image(systemName: category.icon)
                 .font(.title)
                 .foregroundStyle(.tint)
-                .frame(width: 44)
+                .frame(width: iconWidth)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 10) {
                 Text(category.title)
                     .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
                 ForEach(Array(category.items.enumerated()), id: \.offset) { _, item in
                     Text((try? AttributedString(markdown: item)) ?? AttributedString(item))
                         .font(.subheadline)
@@ -125,7 +128,6 @@ struct ChangelogView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .accessibilityElement(children: .combine)
     }
 }
 
