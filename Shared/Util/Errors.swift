@@ -20,12 +20,12 @@ enum TripError: LocalizedError {
         }
     }
     
-    var errorMessage: String? {
+    var failureReason: String? {
         switch self {
         case .basic:
             return "Please try again later."
         case .noJourneys:
-            return "In next 2 hours there are not routes available, try different time or other type of transport."
+            return "No connections were found around this time. Try a different time."
         }
     }
 }

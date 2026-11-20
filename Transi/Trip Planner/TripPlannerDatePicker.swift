@@ -11,6 +11,8 @@ struct TripPlannerDatePicker: View {
     @StateObject var tripPlannerController = GlobalController.tripPlanner
     @Binding private var dateDialog: Bool
     @State private var adDate: Date
+    /// The wheel writes to the planner as it turns; a swipe down keeps that date, so it fetches like Done.
+    @State private var unfetchedChange = false
     @State private var sheetContentHeight = 270.0
     /// Keeps Now and Done off the sheet's edge where it has no bottom safe area: floating on iPad and the Mac, or on
     /// iPhones with a Home button.
@@ -18,7 +20,10 @@ struct TripPlannerDatePicker: View {
 
     init(_ dateDialog: Binding<Bool>) {
         _dateDialog = dateDialog
-        _adDate = State(initialValue: GlobalController.tripPlanner.arrivalDepartureDate)
+        // A "Now" search starts the wheel at the current time, not at when it last ran.
+        let planner = GlobalController.tripPlanner
+        let custom = planner.arrivalDepartureCustomDate && !planner.restoredNowSearch
+        _adDate = State(initialValue: custom ? planner.arrivalDepartureDate : Date())
     }
     
     var body: some View {
@@ -26,7 +31,7 @@ struct TripPlannerDatePicker: View {
             Text(
                 tripPlannerController.arrivalDeparture == ArrivalDeparture.arrival ? "Arrival" : "Departure"
             )
-            .font(.system(size: 24.0, weight: .semibold))
+            .font(.title2.weight(.semibold))
             .padding(.top, 5.0)
             DatePicker(
                 "Select date",
@@ -38,19 +43,28 @@ struct TripPlannerDatePicker: View {
             .onChange(of: adDate) { _ in
                 tripPlannerController.arrivalDepartureDate = adDate
                 tripPlannerController.arrivalDepartureCustomDate = true
+                tripPlannerController.restoredNowSearch = false
+                unfetchedChange = true
             }
             HStack {
                 Spacer()
-                Button("Now") {
+                Button {
+                    unfetchedChange = false
                     tripPlannerController.arrivalDepartureCustomDate = false
                     tripPlannerController.arrivalDepartureDate = Date()
                     dateDialog = false
                     tripPlannerController.fetchTrip()
+                } label: {
+                    // Not just the glyphs: a near miss landed on the wheel and changed the date.
+                    Text("Now").frame(minWidth: 44.0, minHeight: 44.0).contentShape(Rectangle())
                 }
                 Spacer()
-                Button("Done") {
+                Button {
+                    unfetchedChange = false
                     dateDialog = false
                     tripPlannerController.fetchTrip()
+                } label: {
+                    Text("Done").fontWeight(.semibold).frame(minWidth: 44.0, minHeight: 44.0).contentShape(Rectangle())
                 }
                 Spacer()
             }
@@ -76,5 +90,10 @@ struct TripPlannerDatePicker: View {
             }
         }
         .presentationDetents([.height(sheetContentHeight)])
+        .onDisappear {
+            if unfetchedChange {
+                tripPlannerController.fetchTrip()
+            }
+        }
     }
 }

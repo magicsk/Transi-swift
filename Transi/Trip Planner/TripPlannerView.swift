@@ -107,7 +107,17 @@ struct TripPlannerView: View {
                 TripPlannerDatePicker($dateDialog)
             }
             .sheet(isPresented: $showStopList, onDismiss: showJourneyAfterSheets) {
-                StopListView(stop: self.$stop, isPresented: self.$showStopList, plannable: true)
+                // Applied on every pick, not on a change of `stop`: re-picking the last stop, say to retry a failed
+                // search, was ignored.
+                StopListView(stop: Binding(get: { stop }, set: { picked in
+                    stop = picked
+                    if lastField == "from" {
+                        tripPlannerController.from = picked
+                    } else {
+                        tripPlannerController.to = picked
+                    }
+                    tripPlannerController.fetchTrip()
+                }), isPresented: self.$showStopList, plannable: true)
             }
             .sheet(isPresented: $showScheduledTrips, onDismiss: showJourneyAfterSheets) {
                 ScheduledTripsSheet()
@@ -138,14 +148,6 @@ struct TripPlannerView: View {
                 dateDialog = false
                 showStopList = false
                 showScheduledTrips = false
-            }
-            .onChange(of: stop) { stop in
-                if lastField == "from" {
-                    tripPlannerController.from = stop
-                } else {
-                    tripPlannerController.to = stop
-                }
-                tripPlannerController.fetchTrip()
             }
             .onChange(of: tripPlannerController.arrivalDeparture) { _ in
                 Self.feedbackGenerator.impactOccurred()
@@ -245,12 +247,25 @@ struct TripPlannerView: View {
     }
 
     private var emptyTripPlanner: some View {
-        VStack {
+        let stopsChosen = tripPlannerController.from.name?.isEmpty == false
+            && tripPlannerController.to.name?.isEmpty == false
+        return VStack {
             Image(systemName: "signpost.right.and.left")
                 .font(.system(size: 96.0, weight: .light))
                 .foregroundColor(.tertiaryLabel)
                 .padding(.bottom, 2.5)
-            Text("Plan your first trip.").foregroundColor(.secondaryLabel)
+            // Also shown after a failed or empty search, or once saved results expired, with both stops filled in.
+            if stopsChosen {
+                Text("No connections to show.").foregroundColor(.secondaryLabel)
+                Button("Search") {
+                    tripPlannerController.fetchTrip()
+                }
+                .buttonStyle(.bordered)
+                .padding(.top, 4.0)
+                .disabled(tripPlannerController.loading)
+            } else {
+                Text("Choose where to go.").foregroundColor(.secondaryLabel)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
