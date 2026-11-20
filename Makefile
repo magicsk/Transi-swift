@@ -3,7 +3,7 @@ all: clean build fakesign ipa
 build: 
 				xcodebuild -project Transi.xcodeproj \
 															-scheme Transi \
-															-sdk iphoneos \
+															-destination 'generic/platform=iOS' \
 															archive -archivePath ./archive \
 															CODE_SIGNING_REQUIRED=NO \
 															AD_HOC_CODE_SIGNING_ALLOWED=YES \
