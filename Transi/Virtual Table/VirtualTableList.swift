@@ -19,12 +19,9 @@ struct VirtualTableList: View {
     var body: some View {
         ZStack {
             if !virtualTableController.connections.isEmpty {
-                if displaySocketStatus {
-                    ConnectionStatusBar(status: virtualTableController.socketStatus)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets())
-                }
-                List(virtualTableController.connections) { connection in
+                List {
+                    Section {
+                        ForEach(virtualTableController.connections) { connection in
                             let vehicleInfo = vehicleInfoByIssi[connection.busID]
                             let isLast = virtualTableController.connections.last?.id == connection.id
                             VirtualTableListItem(
@@ -33,6 +30,15 @@ struct VirtualTableList: View {
                                 vehicleInfo,
                                 isLast: isLast
                             ).id(connection.id)
+                        }
+                    } header: {
+                        // In the list's content: behind the opaque list it can't be seen, and as a safe area inset
+                        // its height changes make the large title blink.
+                        if displaySocketStatus {
+                            ConnectionStatusBar(status: virtualTableController.socketStatus)
+                                .textCase(nil)
+                        }
+                    }
                 }
                 .listStyle(.insetGrouped)
                 .animation(.default, value: virtualTableController.connections.map(\.id))
@@ -41,17 +47,19 @@ struct VirtualTableList: View {
                         virtualTableController.disconnect(reconnect: true)
                     }
                 }
-            } else if virtualTableController.socketStatus != .connected {
-                VStack {
-                    Spacer()
-                    LoadingIndicator()
-                    Spacer()
-                }
-            } else if virtualTableController.connectionsEmpty {
+            } else if virtualTableController.socketStatus == .connected && virtualTableController.connectionsEmpty {
                 VStack {
                     Spacer()
                     NoDeparturesIcon()
                     Text("There are no departures at this time.").foregroundColor(.secondaryLabel)
+                    Spacer()
+                }
+            } else {
+                // Also while connected and the departures are still loading, which used to leave the board blank.
+                VStack {
+                    Spacer()
+                    // Offline this never ends, so say what it waits for.
+                    LoadingIndicator(text: virtualTableController.socketStatus == .connected ? "Loading…" : "Connecting…")
                     Spacer()
                 }
             }
@@ -66,12 +74,16 @@ private struct ConnectionStatusBar: View {
     @State private var animating = false
     @State private var showText: Bool
     @State private var showLine: Bool
+    /// The status now, for the delayed show and hide below to check.
+    @State private var latestStatus: SocketIOStatus
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(status: SocketIOStatus) {
         self.status = status
         let visible = status != .connected
         _showText = State(initialValue: visible)
         _showLine = State(initialValue: visible)
+        _latestStatus = State(initialValue: status)
     }
 
     var body: some View {
@@ -79,8 +91,8 @@ private struct ConnectionStatusBar: View {
             if showLine {
                 VStack(spacing: 0) {
                     if showText {
-                        Text(status.description)
-                            .font(.system(size: 10))
+                        Text(status == .connected ? "Connected" : status == .connecting ? "Connecting…" : "Disconnected")
+                            .font(.caption2)
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity)
                             .padding(.bottom, 4)
@@ -94,6 +106,15 @@ private struct ConnectionStatusBar: View {
                                     .fill(Color.gray.opacity(0.6))
                                     .frame(width: geo.size.width * 0.3)
                                     .offset(x: animating ? geo.size.width * 0.7 : 0)
+                                    // Started here, not when the status changes: the bar shows a second later, and a
+                                    // segment inserted after its animation began stays parked at the end.
+                                    .onAppear {
+                                        guard !reduceMotion else { return }
+                                        withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                                            animating = true
+                                        }
+                                    }
+                                    .onDisappear { animating = false }
                             } else if status != .connected {
                                 Rectangle().fill(Color.red.opacity(0.5))
                             }
@@ -107,34 +128,26 @@ private struct ConnectionStatusBar: View {
             }
         }
         .onChange(of: status) { newStatus in
+            latestStatus = newStatus
             if newStatus == .connected {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     showText = false
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    // Dropped again meanwhile: keep the bar.
+                    guard latestStatus == .connected else { return }
                     withAnimation(.easeInOut(duration: 0.3)) {
                         showLine = false
                     }
                 }
             } else {
-                withAnimation {
-                    showLine = true
-                    showText = true
-                }
-                if newStatus == .connecting {
-                    animating = false
-                    withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                        animating = true
+                // A quick reconnect, like a pull to refresh, shouldn't push the list down and back up.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    guard latestStatus != .connected else { return }
+                    withAnimation {
+                        showLine = true
+                        showText = true
                     }
-                } else {
-                    withAnimation(.default) { animating = false }
-                }
-            }
-        }
-        .onAppear {
-            if status == .connecting {
-                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                    animating = true
                 }
             }
         }
