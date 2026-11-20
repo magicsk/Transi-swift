@@ -16,6 +16,8 @@ struct VirtualTableListItem: View {
     var isLast: Bool
     @State var date = Date()
     @State var expanded: Bool = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(_ connection: Connection, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?, isLast: Bool)
     {
@@ -35,19 +37,26 @@ struct VirtualTableListItem: View {
                 VStack {
                     HStack {
                         VStack(alignment: .leading, spacing: .zero) {
-                            MarqueeText(
-                                text: connection.headsign,
-                                font: UIFont.systemFont(ofSize: 16.0, weight: .medium),
-                                leftFade: 0,
-                                rightFade: 0,
-                                startDelay: 1
-                            )
+                            // Wraps where a scrolling marquee would be hard to read or move too much.
+                            if reduceMotion || dynamicTypeSize.isAccessibilitySize {
+                                Text(connection.headsign)
+                                    .font(Font(headsignFont))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            } else {
+                                MarqueeText(
+                                    text: connection.headsign,
+                                    font: headsignFont,
+                                    leftFade: 0,
+                                    rightFade: 0,
+                                    startDelay: 1
+                                )
+                            }
                             if connection.lastStopName != "none" && !expanded {
                                 HStack(spacing: 4.0) {
                                     StopIcon()
                                     Text(connection.lastStopName)
-                                        .font(.system(size: 10.0, weight: .light))
-                                        .foregroundColor(.systemGray)
+                                        .font(.caption)
+                                        .foregroundColor(.secondaryLabel)
                                 }
                                 .padding(.leading, 1.5)
                             }
@@ -63,12 +72,23 @@ struct VirtualTableListItem: View {
                             }
                             RemainingTime(connection.departureTimeRemaining)
                             Text(getPlatformLabel(platformLabels, connection.platform))
-                                .font(.system(size: 16.0, weight: .light)).width(22.0)
+                                .font(.callout.weight(.light))
+                                .frame(minWidth: 22.0)
                         }
                     }
                 }
             }
             .foregroundColor(.label)
+            // One element, not loose fragments such as a lone platform letter.
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(accessibilityText)
+            .accessibilityHint(expanded ? "Hides vehicle details" : "Shows vehicle details")
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction {
+                withAnimation {
+                    expanded.toggle()
+                }
+            }
             // Details live in this row, not a row of their own, so a live reorder moves them together.
             if expanded {
                 VirtualTableConnectionDetail(connection, vehicleInfo, true)
@@ -150,6 +170,45 @@ struct VirtualTableListItem: View {
                 GlobalController.virtualTable.lastExpandedConnection = connection
             }
         }
+    }
+
+    /// Grows with the text size, like the remaining time beside it.
+    private var headsignFont: UIFont {
+        UIFontMetrics(forTextStyle: .callout).scaledFont(
+            for: .systemFont(ofSize: 16.0, weight: .medium),
+            compatibleWith: UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(dynamicTypeSize))
+        )
+    }
+
+    private var accessibilityText: String {
+        let remaining = connection.departureTimeRemaining
+        // "~" marks a time from the timetable, without a live vehicle.
+        let scheduled = remaining.hasPrefix("~")
+        let time = scheduled ? String(remaining.dropFirst()) : remaining
+        var spokenTime: String
+        switch time {
+        case "now": spokenTime = "departing now"
+        case "<1 min": spokenTime = "in less than a minute"
+        default: spokenTime = time.contains(":") ? "at \(time)" : "in \(time)"
+        }
+        if scheduled {
+            spokenTime += " by timetable"
+        }
+        // "Kramáre ► Červený most" runs via Kramáre; VoiceOver would read the arrow's name.
+        let headsign = connection.headsign.replacingOccurrences(of: " ► ", with: ", then ")
+        // "►" stands in for a line number on some departures.
+        var text = connection.line == "►" ? "To \(headsign), \(spokenTime)" : "Line \(connection.line) to \(headsign), \(spokenTime)"
+        let platform = getPlatformLabel(platformLabels, connection.platform)
+        if !platform.isEmpty {
+            text += ", platform \(platform)"
+        }
+        if connection.lastStopName != "none" {
+            text += ", last seen at \(connection.lastStopName)"
+        }
+        if connection.stuck {
+            text += ", vehicle is not moving"
+        }
+        return text
     }
 }
 

@@ -39,12 +39,16 @@ struct VirtualTableView: View {
                             virtualTableController.markInfoTextsRead()
                             showInfoTexts = true
                         } label: {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(
-                                    virtualTableController.unreadInfoCount > 0 ? .orange : .gray
-                                )
+                            // Filled while there is news, so it doesn't rely on colour alone.
+                            let unread = virtualTableController.unreadInfoCount > 0
+                            Image(systemName: unread ? "exclamationmark.triangle.fill" : "exclamationmark.triangle")
+                                .foregroundColor(unread ? .orange : .gray)
                         }
                         .padding(.horizontal, 5.0)
+                        .accessibilityLabel("Service information")
+                        .accessibilityValue(
+                            virtualTableController.unreadInfoCount > 0 ? "\(virtualTableController.unreadInfoCount) unread" : ""
+                        )
                         if #available(iOS 18.0, *) {
                             infoTextButton
                                 .matchedTransitionSource(id: "infoTexts", in: namespace)
@@ -59,6 +63,7 @@ struct VirtualTableView: View {
                             Image(systemName: "map")
                         }
                         .padding(.horizontal, 5.0)
+                        .accessibilityLabel("Show stop on map")
                     }
                 }
             }
@@ -72,7 +77,7 @@ struct VirtualTableView: View {
                                     .font(.largeTitle)
                                     .foregroundColor(.gray)
                                     .padding(.bottom, 8)
-                                Text("There are no service information available now.")
+                                Text("There is no service information right now.")
                                     .foregroundColor(.secondaryLabel)
                                     .multilineTextAlignment(.center)
                                 Spacer()
