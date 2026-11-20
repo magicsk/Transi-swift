@@ -5,6 +5,7 @@
 //  Created by magic_sk on 09/04/2023.
 //
 
+import ActivityKit
 import MarqueeText
 import SwiftUI
 
@@ -85,45 +86,61 @@ struct VirtualTableListItem: View {
             expanded = expanded ? true : connection.expanded
         }
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
-            Button {
-                try! VirtualTableLiveActivityController.startActivity(connection, vehicleInfo)
-            } label: {
-                Label("Notify", systemImage: "bell.fill")
+            // Requesting an activity throws while Live Activities are off for the app.
+            if ActivityAuthorizationInfo().areActivitiesEnabled {
+                Button {
+                    _ = try? VirtualTableLiveActivityController.startActivity(connection, vehicleInfo)
+                } label: {
+                    Label("Notify", systemImage: "bell.fill")
+                }
+                .tint(.blue)
+                .labelStyle(.iconOnly)
             }
-            .tint(.blue)
-            .labelStyle(.iconOnly)
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
                 let url = URL(string: "transi://table/\(connection.stopId)/\(connection.id)")
                 let av = UIActivityViewController(activityItems: [url!], applicationActivities: nil)
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                    windowScene.windows.first?.rootViewController?.present(
-                        av, animated: true, completion: nil)
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   var top = windowScene.windows.first?.rootViewController
+                {
+                    // From the map's stop sheet the root is already presenting, and an iPad needs an anchor.
+                    while let presented = top.presentedViewController { top = presented }
+                    av.popoverPresentationController?.sourceView = top.view
+                    av.popoverPresentationController?.sourceRect = CGRect(
+                        x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0
+                    )
+                    top.present(av, animated: true, completion: nil)
                 }
             } label: {
                 Label("Share", systemImage: "square.and.arrow.up")
             }
             .tint(.yellow)
             .labelStyle(.iconOnly)
-            Button {
-                if let stopId = GlobalController.stopsListProvider.getStopIdFromName(
-                    connection.lastStopName)
-                {
-                    GlobalController.appState.pendingNavigation = .map(stopId: stopId)
+            // Only with a last-seen stop to show; without one the button did nothing.
+            if connection.lastStopName != "none" {
+                Button {
+                    if let stopId = GlobalController.stopsListProvider.getStopIdFromName(
+                        connection.lastStopName)
+                    {
+                        GlobalController.appState.pendingNavigation = .map(stopId: stopId)
+                    }
+                } label: {
+                    Label("Last stop on map", systemImage: "map.fill")
                 }
-            } label: {
-                Label("Map", systemImage: "map.fill")
+                .tint(.red)
+                .labelStyle(.iconOnly)
             }
-            .tint(.red)
-            .labelStyle(.iconOnly)
-            Button {
-                GlobalController.appState.pendingNavigation = .timetable(line: connection.line)
-            } label: {
-                Label("Timetable", systemImage: "calendar")
+            // "►" isn't a line with a timetable to open.
+            if connection.line != "►" {
+                Button {
+                    GlobalController.appState.pendingNavigation = .timetable(line: connection.line)
+                } label: {
+                    Label("Timetable", systemImage: "calendar")
+                }
+                .tint(.green)
+                .labelStyle(.iconOnly)
             }
-            .tint(.green)
-            .labelStyle(.iconOnly)
         }
         .alignmentGuide(.listRowSeparatorLeading) { _ in
             55
