@@ -127,12 +127,15 @@ class VirtualTableController: ObservableObject {
     }
 
     private func fetchRegionalLiveDepartures() async {
-        guard let stationId = currentStop.stationId else {
+        let stop = currentStop
+        guard let stationId = stop.stationId else {
             #if DEBUG
             print("Current stop has no stationId. Cannot fetch regional departures.")
             #endif
             connectionsProcessingQueue.async { [weak self] in
                 self?.loadedStatus += 1
+                // Publishing settles whether the board is empty, or it would load forever.
+                self?.sortAndPublishConnections()
             }
             return
         }
@@ -148,17 +151,18 @@ class VirtualTableController: ObservableObject {
             endpoint: "/mobile/v1/station/\(stationId)/timetable/\(dateString)/\(minutes)/1",
             type: RegionalConnectionsResponse.self
         ) { [weak self] result in
-            guard let self = self else { return }
+            // A reply for the stop shown before a switch would land on the new stop's board.
+            guard let self = self, self.currentStop.id == stop.id else { return }
 
             switch result {
             case .success(let response):
                 var newRegionalConnections = response.current.map {
-                    Connection(from: $0, for: self.currentStop)
+                    Connection(from: $0, for: stop)
                 }
                 newRegionalConnections.removeAll { connection in
                     connection.departureTimeRaw < (Date().timeIntervalSince1970 + 15)
                         || connection.type != "online"
-                        || terminates(connection, at: self.currentStop.name)
+                        || terminates(connection, at: stop.name)
                 }
 
                 self.connectionsProcessingQueue.async { [weak self] in
@@ -173,6 +177,7 @@ class VirtualTableController: ObservableObject {
                 #endif
                 self.connectionsProcessingQueue.async { [weak self] in
                     self?.loadedStatus += 1
+                    self?.sortAndPublishConnections()
                 }
             }
         }
@@ -225,6 +230,14 @@ class VirtualTableController: ObservableObject {
                 self.internalTrains.departures, at: self.internalTrains.stopId, into: connectionsForPublish,
                 now: Date().timeIntervalSince1970
             )
+            // The texts date from when each departure was parsed; republishing them would roll back what
+            // `updateConnections()` has counted down since.
+            for index in connectionsForPublish.indices {
+                let connection = connectionsForPublish[index]
+                connectionsForPublish[index].departureTimeRemaining = getDepartureTimeRemainingText(
+                    connection.departureTime, connection.departureTimeRaw, connection.type
+                )
+            }
 
             connectionsForPublish.sort { a, b in
                 if a.departureTimeRaw == b.departureTimeRaw {
