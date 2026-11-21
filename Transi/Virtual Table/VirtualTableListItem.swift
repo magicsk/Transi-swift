@@ -84,24 +84,18 @@ struct VirtualTableListItem: View {
             .accessibilityLabel(accessibilityText)
             .accessibilityHint(expanded ? "Hides vehicle details" : "Shows vehicle details")
             .accessibilityAddTraits(.isButton)
-            .accessibilityAction {
-                withAnimation {
-                    expanded.toggle()
-                }
-            }
+            .accessibilityAction { expanded.toggle() }
             // Details live in this row, not a row of their own, so a live reorder moves them together.
             if expanded {
                 VirtualTableConnectionDetail(connection, vehicleInfo, true)
+                    .transition(.asymmetric(insertion: .opacity.animation(.default), removal: .identity))
             }
         }
-        // Keeps the header in place while the row's height animates instead of centering it.
+        // Keeps the header at the top if a live reorder animates the row's height.
         .frame(maxHeight: .infinity, alignment: .top)
         .contentShape(Rectangle())
-        .onTapGesture {
-            withAnimation {
-                expanded.toggle()
-            }
-        }
+        // No withAnimation: the List snaps the row's height, so an animated toggle makes the header jump.
+        .onTapGesture { expanded.toggle() }
         .onAppear {
             expanded = expanded ? true : connection.expanded
         }
