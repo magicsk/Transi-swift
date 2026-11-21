@@ -18,7 +18,7 @@ Public transit app for Bratislava. The main product is the iOS app; the reposito
 - Heavy parsing, routing, database, and network work stays off the main thread. Publish UI-observed state on the main thread and preserve existing queue/locking invariants.
 - Reuse existing models, extensions, views, icons, and installed Swift packages before adding code or dependencies. Ask before adding a production dependency.
 - Preserve the callback/event flows for Socket.IO (`cack`, `tabs`, `vInfo`), regional departures, session tokens, offline timetable data, deep links, and Live Activities when touching adjacent code.
-- Departure board rows (`VirtualTableListItem`) keep expanded details inside the row, since a separate row drifts during live reorders. They also toggle without `withAnimation`, since the List snaps row heights and an animated toggle makes the header jump. After changing that row, check expand, collapse and a live reorder in a 30 fps frame capture.
+- Departure board details are their own List row under the departure (`VirtualTableList`), inserted with `withAnimation`. Don't move them into the departure's row: on iOS 27 a row that grows in place snaps its height, so the header jumps or the expansion loses its animation. Reorders aren't animated while any departure is expanded, since iOS 27 animates the two rows apart. After changing the board, check expand, collapse and a live reorder in a 30 fps frame capture.
 
 ## Platform policy
 
