@@ -11,6 +11,7 @@ import SwiftUI
 struct VirtualTableList: View {
     @StateObject var virtualTableController = GlobalController.virtualTable
     @AppStorage(Stored.displaySocketStatus) var displaySocketStatus = true
+    @State private var expandedIds: Set<Connection.ID> = []
 
     private var vehicleInfoByIssi: [String: VehicleInfo] {
         Dictionary(uniqueKeysWithValues: virtualTableController.vehicleInfo.map { ($0.issi, $0) })
@@ -24,12 +25,23 @@ struct VirtualTableList: View {
                         ForEach(virtualTableController.connections) { connection in
                             let vehicleInfo = vehicleInfoByIssi[connection.busID]
                             let isLast = virtualTableController.connections.last?.id == connection.id
+                            let expanded = Binding(
+                                get: { expandedIds.contains(connection.id) },
+                                set: { if $0 { expandedIds.insert(connection.id) } else { expandedIds.remove(connection.id) } }
+                            )
                             VirtualTableListItem(
                                 connection,
                                 virtualTableController.currentStop.platformLabels,
                                 vehicleInfo,
-                                isLast: isLast
+                                isLast: isLast,
+                                expanded: expanded
                             ).id(connection.id)
+                            // A row of its own: inserting a row animates, but on iOS 27 a row growing in place jumps.
+                            if expanded.wrappedValue {
+                                VirtualTableConnectionDetail(connection, vehicleInfo, true)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture { withAnimation { expanded.wrappedValue = false } }
+                            }
                         }
                     } header: {
                         // In the list's content: behind the opaque list it can't be seen, and as a safe area inset
@@ -41,7 +53,11 @@ struct VirtualTableList: View {
                     }
                 }
                 .listStyle(.insetGrouped)
-                .animation(.default, value: virtualTableController.connections.map(\.id))
+                // Reorders snap while details are open, since iOS 27 animates a departure and its details apart.
+                .animation(
+                    virtualTableController.connections.contains { expandedIds.contains($0.id) } ? nil : .default,
+                    value: virtualTableController.connections.map(\.id)
+                )
                 .refreshable {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         virtualTableController.disconnect(reconnect: true)
@@ -66,6 +82,8 @@ struct VirtualTableList: View {
         }
         .background(Color.systemGroupedBackground.ignoresSafeArea())
         .animation(.easeInOut, value: virtualTableController.connections.isEmpty)
+        // Another stop starts collapsed, as it did when each row kept its own state.
+        .onChange(of: virtualTableController.currentStop.id) { _ in expandedIds = [] }
     }
 }
 

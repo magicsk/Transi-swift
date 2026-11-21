@@ -15,16 +15,17 @@ struct VirtualTableListItem: View {
     var vehicleInfo: VehicleInfo?
     var isLast: Bool
     @State var date = Date()
-    @State var expanded: Bool = false
+    @Binding var expanded: Bool
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(_ connection: Connection, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?, isLast: Bool)
+    init(_ connection: Connection, _ platformLabels: [PlatformLabel]?, _ vehicleInfo: VehicleInfo?, isLast: Bool, expanded: Binding<Bool>)
     {
         self.connection = connection
         self.platformLabels = platformLabels
         self.vehicleInfo = vehicleInfo
         self.isLast = isLast
+        _expanded = expanded
     }
 
     var body: some View {
@@ -84,20 +85,12 @@ struct VirtualTableListItem: View {
             .accessibilityLabel(accessibilityText)
             .accessibilityHint(expanded ? "Hides vehicle details" : "Shows vehicle details")
             .accessibilityAddTraits(.isButton)
-            .accessibilityAction { expanded.toggle() }
-            // Details live in this row, not a row of their own, so a live reorder moves them together.
-            if expanded {
-                VirtualTableConnectionDetail(connection, vehicleInfo, true)
-                    .transition(.asymmetric(insertion: .opacity.animation(.default), removal: .identity))
-            }
+            .accessibilityAction { withAnimation { expanded.toggle() } }
         }
-        // Keeps the header at the top if a live reorder animates the row's height.
-        .frame(maxHeight: .infinity, alignment: .top)
         .contentShape(Rectangle())
-        // No withAnimation: the List snaps the row's height, so an animated toggle makes the header jump.
-        .onTapGesture { expanded.toggle() }
+        .onTapGesture { withAnimation { expanded.toggle() } }
         .onAppear {
-            expanded = expanded ? true : connection.expanded
+            if connection.expanded { expanded = true }
         }
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
             // Requesting an activity throws while Live Activities are off for the app.
@@ -159,6 +152,8 @@ struct VirtualTableListItem: View {
         .alignmentGuide(.listRowSeparatorLeading) { _ in
             55
         }
+        // Joins the header to its details, which the list shows as the next row.
+        .listRowSeparator(expanded ? .hidden : .automatic, edges: .bottom)
         .onChange(of: expanded) { expanded in
             if expanded == true {
                 GlobalController.virtualTable.lastExpandedConnection = connection
@@ -212,7 +207,7 @@ struct VirtualTableListItem: View {
         List([Connection.example2, Connection.example, Connection.example3], id: \.self) {
             connection in
             VirtualTableListItem(
-                connection, [PlatformLabel.example], VehicleInfo.example, isLast: false)
+                connection, [PlatformLabel.example], VehicleInfo.example, isLast: false, expanded: .constant(false))
         }
         .listStyle(.insetGrouped)
         .navigationTitle(Text("Preview"))
